@@ -1,0 +1,2 @@
+class LaserLibException(Exception):
+    pass
