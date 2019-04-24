@@ -32,12 +32,15 @@ class Laser(object):
 
     def get(
         self,
-        name: str,
+        name: str = None,
         calibrate: bool = False,
         extent: Tuple[float, float, float, float] = None,
     ) -> np.ndarray:
         # Calibration
-        data = self.data[name]
+        if name is None:
+            data = self.data
+        else:
+            data = self.data[name]
 
         if extent is not None:
             px, py = self.config.pixel_size()
@@ -48,7 +51,11 @@ class Laser(object):
             data = data[yshape - y2 : yshape - y1, x1:x2]
 
         if calibrate:
-            data = self.calibration[name].calibrate(data)
+            if name is None:
+                for name in data.dtype.names:
+                    data[name] = self.calibration[name].calibrate(data[name])
+            else:
+                data = self.calibration[name].calibrate(data)
 
         return data
 
@@ -64,6 +71,24 @@ class Laser(object):
         elif unit_to in ["um", "μm", "micro meters"]:
             x = x * self.config.pixel_width()
         return x
+
+    def add_isotope(
+        self, name: str, data: np.ndarray, calibration: LaserCalibration = None
+    ) -> bool:
+        if name in self.data.dtype.names:
+            return False
+        np.lib.recfunctions.append_fields(self.data, name, data)
+        self.calibration[name] = (
+            calibration if calibration is not None else LaserCalibration()
+        )
+        return True
+
+    def remove_isotope(self, name: str) -> bool:
+        if name not in self.data.data.names:
+            return False
+        np.lib.recfunctions.drop_fields(self.data, name)
+        self.calibration.pop(name)
+        return True
 
     # def extent(self) -> Tuple[float, float, float, float]:
     #     # Image data is stored [rows][cols]
