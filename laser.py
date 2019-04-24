@@ -28,7 +28,7 @@ class Laser(object):
         self.filepath = filepath
 
     def isotopes(self) -> List[str]:
-        return self.data.dtype.names()
+        return self.data.dtype.names
 
     def get(
         self,
