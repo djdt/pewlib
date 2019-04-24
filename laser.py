@@ -10,13 +10,13 @@ from typing import Dict, List, Tuple
 class Laser(object):
     def __init__(
         self,
-        data: np.ndarray = np.array([], dtype=float),
+        data: np.ndarray = None,
         calibration: Dict[str, LaserCalibration] = None,
         config: LaserConfig = None,
         name: str = "",
         filepath: str = "",
     ):
-        self.data = data
+        self.data = data if data is not None else np.zeros((1, 1), dtype=float)
 
         self.config = copy.copy(config) if config is not None else LaserConfig()
         if calibration is not None:
@@ -38,7 +38,7 @@ class Laser(object):
     ) -> np.ndarray:
         # Calibration
         if name is None:
-            data = self.data
+            data = self.data.copy()
         else:
             data = self.data[name]
 
