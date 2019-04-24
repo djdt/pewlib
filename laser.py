@@ -36,12 +36,13 @@ class Laser(object):
         calibrate: bool = False,
         extent: Tuple[float, float, float, float] = None,
     ) -> np.ndarray:
-        # Calibration
+        # Load required data
         if name is None:
-            data = self.data.copy()
+            data = self.data.copy()  # copy if needed
         else:
             data = self.data[name]
 
+        # Trim to extent
         if extent is not None:
             px, py = self.config.pixel_size()
             x1, x2 = int(extent[0] / px), int(extent[1] / px)
@@ -50,6 +51,7 @@ class Laser(object):
             yshape = data.shape[0]
             data = data[yshape - y2 : yshape - y1, x1:x2]
 
+        # Calibration
         if calibrate:
             if name is None:
                 for name in data.dtype.names:
@@ -72,7 +74,7 @@ class Laser(object):
             x = x * self.config.pixel_width()
         return x
 
-    def add_isotope(
+    def add_data(
         self, name: str, data: np.ndarray, calibration: LaserCalibration = None
     ) -> bool:
         if name in self.data.dtype.names:
@@ -83,7 +85,7 @@ class Laser(object):
         )
         return True
 
-    def remove_isotope(self, name: str) -> bool:
+    def remove_data(self, name: str) -> bool:
         if name not in self.data.data.names:
             return False
         np.lib.recfunctions.drop_fields(self.data, name)

@@ -10,4 +10,6 @@ class LaserCalibration(object):
         self.unit = unit if unit is not None else LaserCalibration.DEFAULT_UNIT
 
     def calibrate(self, data: np.ndarray) -> np.ndarray:
+        if self.intercept == 0.0 and self.gradient == 1.0:
+            return data
         return (data - self.intercept) / self.gradient
