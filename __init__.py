@@ -1,4 +1,4 @@
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 
 from .laser import Laser
 from .calibration import LaserCalibration
