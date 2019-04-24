@@ -64,7 +64,7 @@ class KrissKross(Laser):
 
     def get(
         self,
-        name: str,
+        name: str = None,
         calibrate: bool = False,
         extent: Tuple[float, float, float, float] = None,
         flat: bool = True,
