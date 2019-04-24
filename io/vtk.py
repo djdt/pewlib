@@ -10,7 +10,7 @@ from typing import Tuple
 def save(path: str, data: np.ndarray, spacing: Tuple[float, float, float]) -> None:
     """Save data as a VTK ImageData XML."""
 
-    if data.ndims < 3:
+    if data.ndim < 3:
         data = np.reshape(data, (*data.shape, 1))
 
     nx, ny, nz = data.shape
