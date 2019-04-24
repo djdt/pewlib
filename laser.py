@@ -20,7 +20,7 @@ class Laser(object):
 
         self.config = copy.copy(config) if config is not None else LaserConfig()
         if calibration is not None:
-            self.calibration = calibration
+            self.calibration = copy.deepcopy(calibration)
         else:
             self.calibration = {n: LaserCalibration() for n in self.data.dtype.names}
 
