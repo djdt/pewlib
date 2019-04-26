@@ -38,22 +38,23 @@ def load(path: str) -> List[Laser]:
         if f == "version":
             continue
         data = {}
-        if npz[f]["type"] == "Laser":
-            config = LaserConfig(npz[f]["config"])
-            for k, v in npz[f]["data"].items():
-                calibration = LaserCalibration(npz[f]["calibration"][k])
+        laserdict = npz[f].item()
+        if laserdict["type"] == "Laser":
+            config = LaserConfig(laserdict["config"])
+            for k, v in laserdict["data"].items():
+                calibration = LaserCalibration(laserdict["calibration"][k])
                 data[k] = LaserData(v, calibration)
-            laser = Laser(data=data, config=config, name=npz[f]["name"], filepath=path)
-        elif npz[f]["type"] == "KrissKross":
-            config = KrissKrossConfig(npz[f]["config"])
-            for k, v in npz[f]["data"].items():
-                calibration = LaserCalibration(npz[f]["calibration"][k])
+            laser = Laser(data=data, config=config, name=laserdict["name"], filepath=path)
+        elif laserdict["type"] == "KrissKross":
+            config = KrissKrossConfig(laserdict["config"])
+            for k, v in laserdict["data"].items():
+                calibration = LaserCalibration(laserdict["calibration"][k])
                 data[k] = KrissKrossData(v, calibration)
             laser = KrissKross(  # type: ignore
-                data=data, config=config, name=npz[f]["name"], filepath=path
+                data=data, config=config, name=laserdict["name"], filepath=path
             )
         else:
-            raise LaserLibException(f"Unknown laser type {npz[f]['type']}!")
+            raise LaserLibException(f"Unknown laser type {laserdict['type']}!")
 
         lasers.append(laser)
 
