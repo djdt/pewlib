@@ -4,7 +4,7 @@ import copy
 from .config import LaserConfig
 from .data import LaserData
 
-from typing import Dict, List
+from typing import Any, Dict, List
 
 
 class Laser(object):
@@ -24,14 +24,14 @@ class Laser(object):
     def isotopes(self) -> List[str]:
         return list(self.data.keys())
 
-    def get(self, isotope: str, **kwargs) -> np.ndarray:
+    def get(self, isotope: str, **kwargs: Any) -> np.ndarray:
         """Valid kwargs are calibrate, extent."""
         if isotope not in self.data:
             return np.zeros((1, 1), dtype=float)
 
         return self.data[isotope].get(self.config, **kwargs)
 
-    def get_structured(self, **kwargs) -> np.ndarray:
+    def get_structured(self, **kwargs: Any) -> np.ndarray:
         data = []
         for isotope in self.isotopes():
             data.append(self.data[isotope].get(self.config, **kwargs))
