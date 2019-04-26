@@ -40,15 +40,15 @@ def load(path: str) -> List[Laser]:
         data = {}
         laserdict = npz[f].item()
         if laserdict["type"] == "Laser":
-            config = LaserConfig(laserdict["config"])
+            config = LaserConfig(**laserdict["config"])
             for k, v in laserdict["data"].items():
-                calibration = LaserCalibration(laserdict["calibration"][k])
+                calibration = LaserCalibration(**laserdict["calibration"][k])
                 data[k] = LaserData(v, calibration)
             laser = Laser(data=data, config=config, name=laserdict["name"], filepath=path)
         elif laserdict["type"] == "KrissKross":
-            config = KrissKrossConfig(laserdict["config"])
+            config = KrissKrossConfig(**laserdict["config"])
             for k, v in laserdict["data"].items():
-                calibration = LaserCalibration(laserdict["calibration"][k])
+                calibration = LaserCalibration(**laserdict["calibration"][k])
                 data[k] = KrissKrossData(v, calibration)
             laser = KrissKross(  # type: ignore
                 data=data, config=config, name=laserdict["name"], filepath=path
