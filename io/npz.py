@@ -1,12 +1,12 @@
 import numpy as np
 
-from laserlibnew import __version__
+from .. import __version__
 
 from .error import LaserLibException
 
 from typing import Any, Dict, List
-from laserlibnew import Laser, LaserCalibration, LaserConfig, LaserData
-from laserlibnew.krisskross import KrissKross, KrissKrossConfig, KrissKrossData
+from .. import Laser, LaserCalibration, LaserConfig, LaserData
+from ..krisskross import KrissKross, KrissKrossConfig, KrissKrossData
 
 
 def load(path: str) -> List[Laser]:
