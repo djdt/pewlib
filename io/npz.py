@@ -61,7 +61,6 @@ def load(path: str) -> List[Laser]:
 
 
 def save(path: str, laser_list: List[Laser]) -> None:
-    print(__version__)
     savedict: Dict[str, Any] = {"version": __version__}
     for laser in laser_list:
         laserdict = {
