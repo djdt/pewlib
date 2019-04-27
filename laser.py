@@ -42,6 +42,17 @@ class Laser(object):
             structured[isotope] = d
         return structured
 
+    @classmethod
+    def from_structured(
+        cls,
+        data: np.ndarray,
+        config: LaserConfig = None,
+        name: str = "",
+        filepath: str = "",
+    ):  # type: ignore
+        data = {k: LaserData(data[k]) for k in data.dtype.names}
+        return cls(data=data, config=config, name=name, filepath=filepath)
+
     def convert(self, x: float, unit_from: str, unit_to: str) -> float:
         # Convert into rows
         if unit_from in ["s", "seconds"]:
