@@ -97,8 +97,5 @@ def make_header(laser: Laser, isotope: str) -> str:
     )
 
 
-def save(path: str, laser: Laser, isotope: str, write_header: bool = False) -> None:
-    header = make_header(laser, isotope) if write_header else ""
-    np.savetxt(
-        path, laser.data[isotope], fmt="%g", delimiter=",", comments="#", header=header
-    )
+def save(path: str, data: np.ndarray, header: str = "") -> None:
+    np.savetxt(path, data, fmt="%g", delimiter=",", comments="#", header=header)
