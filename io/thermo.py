@@ -27,14 +27,16 @@ def load(path: str) -> np.ndarray:
     with open(path, "r") as fp:
         # Find delimiter
         line = fp.readline().strip()
-        delimiter = line[-1]
+        delimiter = line[0]
         # Skip row
         line = fp.readline()
         # First real row
         line = fp.readline()
         while line:
             try:
-                _, _, isotope, data_type, line_data = line.split(delimiter, 4)
+                _, _, isotope, data_type, line_data = (
+                    line.strip().rstrip(delimiter).split(delimiter, 4)
+                )
                 if data_type == "Counter":
                     data.setdefault(isotope, []).append(
                         np.genfromtxt(
@@ -53,7 +55,6 @@ def load(path: str) -> np.ndarray:
     dtype = [(k, float) for k in keys]
     structured = np.empty((data[keys[0]][0].shape[0], len(data[keys[0]])), dtype)
     for k in keys:
-        # Last line is junk
         stack = np.vstack(data[k]).transpose()
         if stack.ndim != 2:
             raise LaserLibException(f"Invalid data dimensions '{stack.ndim}'.")
