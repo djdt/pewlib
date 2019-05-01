@@ -76,7 +76,7 @@ def save(path: str, data: np.ndarray, header: str = "") -> None:
     np.savetxt(path, data, fmt="%g", delimiter=",", comments="#", header=header)
 
 
-def make_header(path: str, laser: Laser, isotope: str) -> str:
+def make_header(laser: Laser, isotope: str) -> str:
     return (
         f"Laserlib {__version__}\nisotope={isotope}\n"
         f"spotsize={laser.config.spotsize};speed={laser.config.speed};"
