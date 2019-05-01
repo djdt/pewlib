@@ -27,7 +27,7 @@ def load(path: str) -> List[Laser]:
 
     """
     lasers: List[Laser] = []
-    npz = np.load(path)
+    npz = np.load(path, allow_pickle=True)
 
     if "version" not in npz.files:
         raise LaserLibException("Archive version mismatch.")
