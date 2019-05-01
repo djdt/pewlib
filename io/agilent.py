@@ -12,30 +12,30 @@ def load(path: str) -> np.ndarray:
 
     Args:
        path: Path to the .b directory
-       config: Config to be applied
-       calibration: Calibration to be applied
 
     Returns:
-        The LaserData object.
+        The structured numpy array.
 
     Raises:
-        PewPewFileError: Missing or malformed files.
-        PewPewDataError: Invalid data.
+        LaserLibException
 
     """
-    data_files = []
+    ddirs = []
     with os.scandir(path) as it:
         for entry in it:
             if entry.name.lower().endswith(".d") and entry.is_dir():
-                csv = entry.name[: entry.name.rfind(".")] + ".csv"
-                csv = os.path.join(entry.path, csv)
-                if not os.path.exists(csv):
-                    raise LaserLibException(f"Missing csv '{csv}'.")
-                data_files.append(csv)
-    # Sort by name
-    data_files.sort()
+                ddirs.append(entry.path)
 
-    with open(data_files[0], "r") as fp:
+    csvs = []
+    # Sort by name
+    for d in sorted(ddirs):
+        csv = os.path.splitext(os.path.basename(d))[0] + ".csv"
+        csv = os.path.join(d, csv)
+        if not os.path.exists(csv):
+            raise LaserLibException(f"Missing csv '{csv}'.")
+        csvs.append(csv)
+
+    with open(csvs[0], "r") as fp:
         line = fp.readline()
         skip_header = 0
         while line and not line.startswith("Time [Sec]"):
@@ -59,7 +59,7 @@ def load(path: str) -> np.ndarray:
                 skip_footer=skip_footer,
                 dtype=np.float64,
             )
-            for f in data_files
+            for f in csvs
         ]
     except ValueError as e:
         raise LaserLibException("Could not parse batch.") from e
