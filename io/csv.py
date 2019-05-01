@@ -9,18 +9,21 @@ from typing import Dict, TextIO, Union
 
 def load_raw(fp: Union[str, TextIO]) -> np.ndarray:
     if isinstance(fp, str):
+        close = True
         fp = open(fp, "rb")
+    else:
+        close = False
 
     try:
         cleaned = (line.replace(b";", b",").replace(b"\t", b",") for line in fp)
         data = np.genfromtxt(cleaned, delimiter=b",", comments=b"#", dtype=float)
     except ValueError as e:
         raise LaserLibException("Could not parse file.") from e
-
     if data.ndim != 2:
         raise LaserLibException(f"Invalid data dimensions '{data.ndim}'.")
 
-    fp.close()
+    if close:
+        fp.close()
     return data
 
 
