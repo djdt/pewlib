@@ -5,7 +5,7 @@ from ..laser import Laser
 from .config import KrissKrossConfig
 from .data import KrissKrossData
 
-from typing import Dict
+from typing import Dict, List
 
 
 class KrissKross(Laser):
@@ -22,3 +22,14 @@ class KrissKross(Laser):
 
         self.name = name
         self.filepath = filepath
+
+    @classmethod
+    def from_structured(
+        cls,
+        data: List[np.ndarray],
+        config: KrissKrossConfig = None,
+        name: str = "",
+        filepath: str = "",
+    ):  # type: ignore
+        data = {k: KrissKrossData([d[k] for d in data]) for k in data[0].dtype.names}
+        return cls(data=data, config=config, name=name, filepath=filepath)
