@@ -25,30 +25,25 @@ def load(path: str) -> np.ndarray:
     """
     data: Dict[str, List[np.ndarray]] = {}
     with open(path, "r") as fp:
-        # Find delimiter
-        line = fp.readline().strip()
-        delimiter = line[0]
-        # Skip row
-        line = fp.readline()
-        # First real row
-        line = fp.readline()
-        while line:
+        cleaned = (
+            line.replace(",", ";").replace("\t", ";").strip().rstrip(";")
+            for line in fp
+            if "Counter" in line
+        )
+
+        for cline in cleaned:
             try:
-                _, _, isotope, data_type, line_data = (
-                    line.strip().rstrip(delimiter).split(delimiter, 4)
-                )
-                if data_type == "Counter":
-                    data.setdefault(isotope, []).append(
-                        np.genfromtxt(
-                            [line_data],
-                            delimiter=delimiter,
-                            dtype=float,
-                            filling_values=0.0,
-                        )
+                _, _, isotope, _, line_data = cline.split(";", 4)
+                data.setdefault(isotope, []).append(
+                    np.genfromtxt(
+                        [line_data],
+                        delimiter=";",
+                        dtype=float,
+                        filling_values=0.0,
                     )
+                )
             except ValueError as e:
                 raise LaserLibException("Could not parse file.") from e
-            line = fp.readline()
 
     keys = list(data.keys())
     # Stack lines to form 2d
