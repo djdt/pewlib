@@ -33,3 +33,17 @@ class KrissKross(Laser):
     ):  # type: ignore
         data = {k: KrissKrossData([d[k] for d in data]) for k in data[0].dtype.names}
         return cls(data=data, config=config, name=name, filepath=filepath)
+
+    def check_config_valid(self, config: KrissKrossConfig) -> bool:
+        mfactor = config.magnification_factor()
+        warmup = config.warmup_lines()
+        data = self.data[self.isotopes()[0]].data
+
+        if mfactor * data[0].shape[0] > data[1].shape[1]:
+            return False
+        if mfactor * data[1].shape[0] > data[1].shape[0]:
+            return False
+        if warmup > data[0].shape[1] or warmup > data[1].shape[1]:
+            return False
+
+        return True
