@@ -21,9 +21,6 @@ class KrissKrossData(LaserData):
         warmup = config.warmup_lines()
         mfactor = config.magnification_factor()
 
-        print(config.__dict__)
-        print(self.data[1].shape, self.data[0].shape)
-
         # Calculate the line lengths
         length = (self.data[1].shape[0] * mfactor, self.data[0].shape[0] * mfactor)
         # Reshape the layers and stack into matrix
@@ -51,8 +48,6 @@ class KrissKrossData(LaserData):
             data = self.data[kwargs["layer"]].copy()
         else:
             data = self._krisskross(config)
-
-        print(data)
 
         if "extent" in kwargs:
             x0, x1, y0, y1 = kwargs.get("extent", (0.0, 0.0, 0.0, 0.0))
