@@ -52,7 +52,6 @@ def load(path: str) -> List[Laser]:
             for k, v in laserdict["data"].items():
                 calibration = LaserCalibration(**laserdict["calibration"][k])
                 data[k] = KrissKrossData(v, calibration)
-            print(data)
             laser = KrissKross(  # type: ignore
                 data=data, config=config, name=laserdict["name"], filepath=path
             )
