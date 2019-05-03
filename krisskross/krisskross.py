@@ -11,12 +11,12 @@ from typing import Dict
 class KrissKross(Laser):
     def __init__(
         self,
-        data: Dict[str, KrissKrossData],
+        data: Dict[str, KrissKrossData] = None,
         config: KrissKrossConfig = None,
         name: str = "",
         filepath: str = "",
     ):
-        self.data = data  # type: ignore
+        self.data: Dict[str, KrissKrossData] = data if data is not None else {}
 
         self.config = config if config is not None else KrissKrossConfig()
 
