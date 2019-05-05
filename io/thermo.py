@@ -36,10 +36,7 @@ def load(path: str) -> np.ndarray:
                 _, _, isotope, _, line_data = cline.split(";", 4)
                 data.setdefault(isotope, []).append(
                     np.genfromtxt(
-                        [line_data],
-                        delimiter=";",
-                        dtype=float,
-                        filling_values=0.0,
+                        [line_data], delimiter=";", dtype=float, filling_values=0.0
                     )
                 )
             except ValueError as e:
@@ -50,7 +47,7 @@ def load(path: str) -> np.ndarray:
     dtype = [(k, float) for k in keys]
     structured = np.empty((data[keys[0]][0].shape[0], len(data[keys[0]])), dtype)
     for k in keys:
-        stack = np.vstack(data[k]).transpose()
+        stack = np.vstack(data[k][:]).transpose()
         if stack.ndim != 2:
             raise LaserLibException(f"Invalid data dimensions '{stack.ndim}'.")
         structured[k] = stack
