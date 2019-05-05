@@ -26,13 +26,16 @@ def load(path: str) -> np.ndarray:
     data: Dict[str, List[np.ndarray]] = {}
     with open(path, "r") as fp:
         cleaned = (
-            line.replace(",", ";").replace("\t", ";").strip().rstrip(";")
+            line.replace(",", ";").replace("\t", ";").strip()
             for line in fp
             if "Counter" in line
         )
 
         for cline in cleaned:
             try:
+                # Trim off last delimiter
+                if cline.endswith(";"):
+                    cline = cline[:-1]
                 _, _, isotope, _, line_data = cline.split(";", 4)
                 data.setdefault(isotope, []).append(
                     np.genfromtxt(
