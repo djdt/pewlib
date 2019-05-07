@@ -37,26 +37,35 @@ def load(path: str) -> List[Laser]:
     for f in npz.files:
         if f == "version":
             continue
-        data = {}
+        data: Dict[str, LaserData] = {}
         laserdict: Dict[str, Any] = npz[f].item()
-        if laserdict["type"] == "Laser":
-            config = LaserConfig()
-            config.__dict__ = laserdict["config"]
-            for k, v in laserdict["data"].items():
-                calibration = LaserCalibration(**laserdict["calibration"][k])
-                data[k] = LaserData(v, calibration)
-            laser = Laser(data=data, config=config, name=laserdict["name"], filepath=path)
-        elif laserdict["type"] == "KrissKross":
+        # Config
+        if laserdict["type"] == "KrissKross":
             config = KrissKrossConfig()
-            config.__dict__ = laserdict["config"]
-            for k, v in laserdict["data"].items():
-                calibration = LaserCalibration(**laserdict["calibration"][k])
-                data[k] = KrissKrossData(v, calibration)
-            laser = KrissKross(  # type: ignore
+        else:
+            config = LaserConfig()
+        for k, v in laserdict["config"].items():
+            setattr(config, k, v)
+
+        # Calibration and data
+        for isotope in laserdict["data"].keys():
+            calibration = LaserCalibration()
+            for k, v in laserdict["calibration"][isotope].items():
+                setattr(calibration, k, v)
+
+            if laserdict["type"] == "KrissKross":
+                data[isotope] = KrissKrossData(laserdict["data"][isotope], calibration)
+            else:
+                data[isotope] = LaserData(laserdict["data"][isotope], calibration)
+
+        if laserdict["type"] == "KrissKross":
+            laser = KrissKross(
                 data=data, config=config, name=laserdict["name"], filepath=path
             )
         else:
-            raise LaserLibException(f"Unknown laser type {laserdict['type']}!")
+            laser = Laser(
+                data=data, config=config, name=laserdict["name"], filepath=path
+            )
 
         lasers.append(laser)
 
