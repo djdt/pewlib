@@ -4,7 +4,11 @@ import numpy as np
 from typing import Tuple
 
 
-# TODO implement extent export
+def escape_xml(string: str) -> str:
+    char_map = {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;"}
+    for key in char_map:
+        string = string.replace(key, char_map[key])
+    return string
 
 
 def save(path: str, data: np.ndarray, spacing: Tuple[float, float, float]) -> None:
@@ -35,11 +39,11 @@ def save(path: str, data: np.ndarray, spacing: Tuple[float, float, float]) -> No
             ).encode()
         )
 
-        fp.write(f'<CellData Scalars="{data.dtype.names[0]}">\n'.encode())
+        fp.write(f'<CellData Scalars="{escape_xml(data.dtype.names[0])}">\n'.encode())
         for name in data.dtype.names:
             fp.write(
                 (
-                    f'<DataArray Name="{name}" type="Float64" '
+                    f'<DataArray Name="{escape_xml(name)}" type="Float64" '
                     f'format="appended" offset="{offset}"/>\n'
                 ).encode()
             )
