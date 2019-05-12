@@ -28,7 +28,8 @@ def load(path: str) -> np.ndarray:
 
     csvs = []
     # Sort by name
-    for d in sorted(ddirs):
+    ddirs.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
+    for d in ddirs:
         csv = os.path.splitext(os.path.basename(d))[0] + ".csv"
         csv = os.path.join(d, csv)
         if not os.path.exists(csv):
