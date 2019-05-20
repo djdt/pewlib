@@ -1,5 +1,7 @@
 import os
 import numpy as np
+import numpy.lib
+import numpy.lib.recfunctions
 
 from .error import LaserLibException
 
@@ -36,37 +38,35 @@ def load(path: str) -> np.ndarray:
             raise LaserLibException(f"Missing csv '{csv}'.")
         csvs.append(csv)
 
-    with open(csvs[0], "r") as fp:
-        line = fp.readline()
-        skip_header = 0
-        while line and not line.startswith("Time [Sec]"):
-            line = fp.readline()
-            skip_header += 1
+    def get_clean_lines(csv: str):
+        past_header = False
+        with open(csv, "rb") as fp:
+            for line in fp:
+                if past_header and b"," in line:
+                    yield line
+                if line.startswith(b"Time"):
+                    past_header = True
+                    yield line
 
-        skip_footer = 0
-        if "Print" in fp.read().splitlines()[-1]:
-            skip_footer = 1
-
-    cols = np.arange(1, line.count(",") + 1)
-
-    try:
-        lines = [
-            np.genfromtxt(
-                f,
-                delimiter=",",
+    datas = []
+    for csv in csvs:
+        try:
+            datas.append(np.genfromtxt(
+                get_clean_lines(csv),
+                delimiter=b",",
                 names=True,
-                usecols=cols,
-                skip_header=skip_header,
-                skip_footer=skip_footer,
-                dtype=np.float64,
-            )
-            for f in csvs
-        ]
-    except ValueError as e:
-        raise LaserLibException("Could not parse batch.") from e
+                dtype=np.float64
+            ))
+        except ValueError:
+            try:
+                datas.append(np.zeros_like(datas[0]))
+            except ValueError as e:
+                raise LaserLibException("Could not parse batch.") from e
 
     try:
-        data = np.vstack(lines)
+        data = np.vstack(datas)
+        # We don't care about the time field currently
+        data = np.lib.recfunctions.drop_fields(data, "Time_Sec")
 
     except ValueError as e:
         raise LaserLibException("Mismatched data.") from e
