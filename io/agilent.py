@@ -57,11 +57,8 @@ def load(path: str) -> np.ndarray:
                 names=True,
                 dtype=np.float64
             ))
-        except ValueError:
-            try:
-                datas.append(np.zeros_like(datas[0]))
-            except ValueError as e:
-                raise LaserLibException("Could not parse batch.") from e
+        except ValueError as e:
+            raise LaserLibException("Could not parse batch.") from e
 
     try:
         data = np.vstack(datas)
