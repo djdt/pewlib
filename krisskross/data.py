@@ -62,6 +62,6 @@ class KrissKrossData(LaserData):
             data = self.calibration.calibrate(data)
 
         if kwargs.get("flat", False):
-            data = np.mean(data, axis=2)
+            data = np.add(data, axis=2)
 
         return data
