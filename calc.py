@@ -3,7 +3,11 @@ import numpy as np
 from typing import Tuple
 
 
-def get_weights(x: np.ndarray, weighting: str) -> np.ndarray:
+def get_weights(x: np.ndarray, weighting: str, safe: bool = True) -> np.ndarray:
+    if safe:  # Avoid div 0 problems
+        x = x.copy()
+        x[x == 0] = np.min(np.nonzero(x))
+
     if weighting == "x":
         return x
     if weighting == "1/x":
@@ -34,3 +38,11 @@ def weighted_linreg(
     m, b = np.polyfit(x, y, 1, w=w)
     r2 = weighted_rsq(x, y, w)
     return m, b, r2
+
+
+if __name__ == "__main__":
+    x = np.arange(0, 10)
+    y = np.random.random(10)
+
+    w = get_weights(x, "1/x")
+    print(x, w)
