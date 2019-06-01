@@ -28,9 +28,13 @@ class LaserCalibration(object):
         return s
 
     def concentrations(self) -> np.ndarray:
+        if self.points.size() == 0:
+            return np.array([], dtype=float)
         return self.points[:, 0]
 
     def counts(self) -> np.ndarray:
+        if self.points.size() == 0:
+            return np.array([], dtype=float)
         return self.points[:, 1]
 
     def update_linreg(self) -> None:
