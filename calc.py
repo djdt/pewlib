@@ -38,11 +38,3 @@ def weighted_linreg(
     m, b = np.polyfit(x, y, 1, w=w)
     r2 = weighted_rsq(x, y, w)
     return m, b, r2
-
-
-if __name__ == "__main__":
-    x = np.arange(0, 10)
-    y = np.random.random(10)
-
-    w = get_weights(x, "1/x")
-    print(x, w)
