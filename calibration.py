@@ -9,7 +9,7 @@ class LaserCalibration(object):
         intercept: float = 0.0,
         gradient: float = 1.0,
         rsq: float = None,
-        points: np.ndarray = None,
+        points: np.ndarray = [[], []],
         weighting: str = None,
         unit: str = "",
     ):
@@ -18,7 +18,7 @@ class LaserCalibration(object):
         self.unit = unit
 
         self.rsq = rsq
-        self.points = points
+        self.points = np.array(points, dtype=float)
         self.weighting = weighting
 
     def __str__(self) -> str:
@@ -28,13 +28,9 @@ class LaserCalibration(object):
         return s
 
     def concentrations(self) -> np.ndarray:
-        if self.points is None:
-            return np.array([], dtype=float)
         return self.points[:, 0]
 
     def counts(self) -> np.ndarray:
-        if self.points is None:
-            return np.array([], dtype=float)
         return self.points[:, 1]
 
     def update_linreg(self) -> None:
