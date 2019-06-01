@@ -26,6 +26,16 @@ class LaserCalibration(object):
     def __str__(self) -> str:
         return f"{self.gradient:.4g}*x{self.intercept:+.4g}"
 
+    def concentrations(self) -> np.ndarray:
+        if self.points is None:
+            return np.array([], dtype=float)
+        return self.points[:, 0]
+
+    def counts(self) -> np.ndarray:
+        if self.points is None:
+            return np.array([], dtype=float)
+        return self.points[:, 1]
+
     def update_from_points(self) -> None:
         x = self.points[:, 0]
         y = self.points[:, 1]
