@@ -10,18 +10,21 @@ class LaserCalibration(object):
         self,
         intercept: float = 0.0,
         gradient: float = 1.0,
+        unit: str = None,
         rsq: float = None,
         points: np.ndarray = None,
         weighting: str = None,
-        unit: str = None,
     ):
         self.intercept = intercept
         self.gradient = gradient
-        self.rsq = rsq
+        self.unit = unit if unit is not None else LaserCalibration.DEFAULT_UNIT
 
+        self.rsq = rsq
         self.points = points
         self.weighting = weighting
-        self.unit = unit if unit is not None else LaserCalibration.DEFAULT_UNIT
+
+    def __str__(self) -> str:
+        return f"{self.gradient:.4g}*x{self.intercept:+.4g}"
 
     def update_from_points(self) -> None:
         x = self.points[:, 0]
