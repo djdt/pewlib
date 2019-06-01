@@ -24,7 +24,7 @@ class LaserCalibration(object):
     def __str__(self) -> str:
         s = f"y = {self.gradient:.4g} · x - {self.intercept:.4g}"
         if self.rsq is not None:
-            s += "\nr² = {self.rsq:.4f}"
+            s += f"\nr² = {self.rsq:.4f}"
         return s
 
     def concentrations(self) -> np.ndarray:
