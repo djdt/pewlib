@@ -53,4 +53,6 @@ class LaserCalibration(object):
     def from_points(
         cls, points: np.ndarray, weighting: str = None, unit: str = ""
     ):  # type: ignore
-        return cls(points=points, weighting=weighting, unit=unit).update_linreg()
+        calibration = cls(points=points, weighting=weighting, unit=unit)
+        calibration.update_linreg()
+        return calibration
