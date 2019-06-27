@@ -38,7 +38,7 @@ class LaserCalibration(object):
         return self.points[:, 1]
 
     def update_linreg(self) -> None:
-        if self.points == 0:
+        if self.points.size == 0:
             self.gradient, self.intercept, self.rsq = 1.0, 0.0, None
 
         no_nans = self.points[~np.isnan(self.points).any(axis=1)]
