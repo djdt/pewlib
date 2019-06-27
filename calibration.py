@@ -40,10 +40,10 @@ class LaserCalibration(object):
     def update_linreg(self) -> None:
         no_nans = self.points[~np.isnan(self.points).any(axis=1)]
         if no_nans.size == 0:
-            self.intercept, self.gradient, self.rsq = 0.0, 1.0, None
+            self.gradient, self.intercept, self.rsq = 1.0, 0.0, None
         else:
             x, y = no_nans[:, 0], no_nans[:, 1]
-            self.intercept, self.gradient, self.rsq = weighted_linreg(
+            self.gradient, self.intercept, self.rsq = weighted_linreg(
                 x, y, get_weights(x, self.weighting)
             )
 
@@ -56,4 +56,6 @@ class LaserCalibration(object):
     def from_points(
         cls, points: np.ndarray, weighting: str = None, unit: str = ""
     ):  # type: ignore
-        return cls(points=points, weighting=weighting, unit=unit).update_linreg()
+        calibration = cls(points=points, weighting=weighting, unit=unit)
+        calibration.update_linreg()
+        return calibration
