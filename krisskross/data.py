@@ -67,7 +67,7 @@ class KrissKrossData(LaserData):
         if kwargs.get("calibrate", False):
             data = self.calibration.calibrate(data)
 
-        if kwargs.get("flat", False):
+        if kwargs.get("flat", False) and data.ndim > 2:
             data = np.mean(data, axis=2)
 
         return data
