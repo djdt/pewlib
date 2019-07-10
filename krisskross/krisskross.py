@@ -23,6 +23,9 @@ class KrissKross(Laser):
         self.name = name
         self.filepath = filepath
 
+    def layers(self) -> int:
+        return len(self.data[self.isotopes()[0]].data)
+
     @classmethod
     def from_structured(
         cls,
