@@ -48,3 +48,21 @@ class KrissKrossConfig(LaserConfig):
         )
         self.subpixel_gcd: Fraction = gcd
         self.subpixel_per_pixel: Tuple[int, int] = (denom, denom)
+
+    # Access to the layer parameters
+    def layer_pixel_width(self) -> float:
+        return super().pixel_width()
+
+    def layer_pixel_height(self) -> float:
+        return super().pixel_height()
+
+    def layer_aspect(self) -> float:
+        return super().pixel_height() / super().pixel_width()
+
+    def layer_data_extent(self, data: np.ndarray) -> Tuple[float, float, float, float]:
+        return (
+            0.0,
+            super().pixel_width() * data.shape[1],
+            0.0,
+            super().pixel_height() * data.shape[0],
+        )
