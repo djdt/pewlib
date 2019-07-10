@@ -44,20 +44,21 @@ class KrissKrossData(LaserData):
     def get(self, config: LaserConfig, **kwargs) -> np.ndarray:
         assert isinstance(config, KrissKrossConfig)
 
-        if "layer" in kwargs:
-            data = self.data[kwargs["layer"]].copy()
+        layer = kwargs.get("layer", None)
+        if layer is not None:
+            data = self.data[layer].copy()
         else:
             data = self._krisskross(config)
 
         if "extent" in kwargs:
             x0, x1, y0, y1 = kwargs.get("extent", (0.0, 0.0, 0.0, 0.0))
-            if "layer" in kwargs:
+            if layer is not None:  # Use normal laser width and height
                 px, py = (
                     super(type(config), config).pixel_width(),
                     super(type(config), config).pixel_height(),
                 )
             else:
-                px, py = config.pixel_size()
+                px, py = config.pixel_width(), config.pixel_height()
             x0, x1 = int(x0 / px), int(x1 / px)
             y0, y1 = int(y0 / py), int(y1 / py)
             # We have to invert the extent, as mpl use bottom left y coords

@@ -19,9 +19,6 @@ class LaserConfig(object):
     def aspect(self) -> float:
         return self.pixel_height() / self.pixel_width()
 
-    def pixel_size(self) -> Tuple[float, float]:
-        return (self.pixel_width(), self.pixel_height())
-
     def data_extent(self, data: np.ndarray) -> Tuple[float, float, float, float]:
         return (
             0.0,
