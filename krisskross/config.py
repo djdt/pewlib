@@ -56,13 +56,10 @@ class KrissKrossConfig(LaserConfig):
     def layer_pixel_height(self) -> float:
         return super().pixel_height()
 
-    def layer_aspect(self) -> float:
-        return super().pixel_height() / super().pixel_width()
-
     def layer_data_extent(self, data: np.ndarray) -> Tuple[float, float, float, float]:
         return (
             0.0,
-            super().pixel_width() * data.shape[1],
+            self.layer_pixel_width() * data.shape[1],
             0.0,
-            super().pixel_height() * data.shape[0],
+            self.layer_pixel_height() * data.shape[0],
         )
