@@ -53,10 +53,7 @@ class KrissKrossData(LaserData):
         if "extent" in kwargs:
             x0, x1, y0, y1 = kwargs.get("extent", (0.0, 0.0, 0.0, 0.0))
             if layer is not None:  # Use normal laser width and height
-                px, py = (
-                    super(type(config), config).pixel_width(),
-                    super(type(config), config).pixel_height(),
-                )
+                px, py = (config.layer_pixel_width(), config.layer_pixel_height())
             else:
                 px, py = config.pixel_width(), config.pixel_height()
             x0, x1 = int(x0 / px), int(x1 / px)
