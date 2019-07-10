@@ -26,6 +26,15 @@ class KrissKrossConfig(LaserConfig):
     def pixel_height(self) -> float:
         return (self.speed * self.scantime) / self.subpixel_per_pixel[1]
 
+    # Return without the washout included
+    def data_extent(self, data: np.ndarray) -> Tuple[float, float, float, float]:
+        return (
+            self.pixel_width() * self.warmup_lines(),
+            self.pixel_width() * data.shape[1],
+            self.pixel_height() * self.warmup_lines(),
+            self.pixel_height() * data.shape[0],
+        )
+
     def warmup_lines(self) -> int:
         return np.round(self.warmup / self.scantime).astype(int)
 
