@@ -30,9 +30,9 @@ class KrissKrossConfig(LaserConfig):
     def data_extent(self, data: np.ndarray) -> Tuple[float, float, float, float]:
         return (
             self.pixel_width() * self.warmup_lines(),
-            self.pixel_width() * data.shape[1],
+            self.pixel_width() * (self.warmup_lines() + data.shape[1]),
             self.pixel_height() * self.warmup_lines(),
-            self.pixel_height() * data.shape[0],
+            self.pixel_height() * (self.warmup_lines() + data.shape[0]),
         )
 
     def warmup_lines(self) -> int:
