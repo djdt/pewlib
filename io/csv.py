@@ -7,7 +7,9 @@ def load(path: str, isotope: str = "CSV") -> np.ndarray:
     with open(path, "rb") as fp:
         cleaned = (line.replace(b";", b",").replace(b"\t", b",") for line in fp)
         try:
-            data = np.genfromtxt(cleaned, delimiter=b",", comments=b"#", dtype=float, loose=False)
+            data = np.genfromtxt(
+                cleaned, delimiter=b",", comments=b"#", dtype=float, loose=False
+            )
         except ValueError as e:
             raise LaserLibException("Could not parse file.") from e
     if data.ndim != 2:
