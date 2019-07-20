@@ -18,4 +18,4 @@ def load(path: str, isotope: str = "CSV") -> np.ndarray:
 
 
 def save(path: str, data: np.ndarray, header: str = "") -> None:
-    np.savetxt(path, data, fmt="%g", delimiter=",", comments="#", header=header)
+    np.savetxt(path, data, delimiter=",", comments="#", header=header)
