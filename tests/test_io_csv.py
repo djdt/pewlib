@@ -17,10 +17,15 @@ class CSVIOTest(unittest.TestCase):
 
     def test_load(self):
         data = csv.load(os.path.join(data_path, "csv.csv"))
-
         self.assertEqual(data.dtype.names, ("CSV",))
-        self.assertEqual(data.shape, (3, 3))
-        self.assertEqual(np.sum(data["CSV"]), 12.0)
+        self.assertEqual(data.shape, (20, 5))
+        self.assertAlmostEqual(np.sum(data["CSV"]), 100.0)
+
+    def test_load_delimiters(self):
+        data = csv.load(os.path.join(data_path, "delimiters.csv"))
+        self.assertEqual(data.dtype.names, ("CSV",))
+        self.assertEqual(data.shape, (10, 5))
+        self.assertAlmostEqual(np.sum(data["CSV"]), 100.0)
 
     def test_save(self):
         data = csv.load(os.path.join(data_path, "csv.csv"))
