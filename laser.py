@@ -24,7 +24,7 @@ class Laser(object):
 
     @property
     def isotopes(self) -> List[str]:
-        return self.data.keys()
+        return list(self.data.keys())
 
     def get(self, isotope: str, **kwargs: Any) -> np.ndarray:
         """Valid kwargs are calibrate, extent."""
