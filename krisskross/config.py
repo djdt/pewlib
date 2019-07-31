@@ -9,9 +9,9 @@ from typing import List, Tuple
 class KrissKrossConfig(LaserConfig):
     def __init__(
         self,
-        spotsize: float = 10.0,
-        speed: float = 10.0,
-        scantime: float = 0.1,
+        spotsize: float = 35.0,
+        speed: float = 140.0,
+        scantime: float = 0.25,
         warmup: float = 12.5,
         pixel_offsets: List[Fraction] = [Fraction(0, 2), Fraction(1, 2)],
     ):

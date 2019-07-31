@@ -4,7 +4,7 @@ import numpy as np
 
 class LaserConfig(object):
     def __init__(
-        self, spotsize: float = 30.0, speed: float = 120.0, scantime: float = 0.25
+        self, spotsize: float = 35.0, speed: float = 140.0, scantime: float = 0.25
     ):
         self.spotsize = spotsize
         self.speed = speed
