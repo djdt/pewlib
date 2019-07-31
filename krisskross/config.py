@@ -29,7 +29,7 @@ class KrissKrossConfig(LaserConfig):
 
     @warmup.setter
     def warmup(self, seconds: float) -> None:
-        self._warmup = np.round(self.warmup / self.scantime).astype(int)
+        self._warmup = np.round(seconds / self.scantime).astype(int)
 
     @property
     def magnification(self) -> float:
