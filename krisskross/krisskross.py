@@ -23,8 +23,9 @@ class KrissKross(Laser):
         self.name = name
         self.filepath = filepath
 
+    @property
     def layers(self) -> int:
-        return len(self.data[self.isotopes()[0]].data)
+        return len(next(iter(self.data.values())).data)
 
     @classmethod
     def from_structured(
@@ -38,12 +39,10 @@ class KrissKross(Laser):
         return cls(data=data, config=config, name=name, filepath=filepath)
 
     def check_config_valid(self, config: KrissKrossConfig) -> bool:
-        mfactor = config.magnification_factor()
-        warmup = config.warmup_lines()
-        data = self.data[self.isotopes()[0]].data
-        if mfactor * data[1].shape[0] + warmup > data[0].shape[1]:
+        data = next(iter(self.data.values())).data
+        if config.magnification * data[1].shape[0] + config._warmup > data[0].shape[1]:
             return False
-        if mfactor * data[0].shape[0] + warmup > data[1].shape[1]:
+        if config.magnification * data[0].shape[0] + config._warmup > data[1].shape[1]:
             return False
 
         return True

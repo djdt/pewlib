@@ -16,12 +16,12 @@ class LaserData(object):
 
         if "extent" in kwargs:
             x0, x1, y0, y1 = kwargs.get("extent", (0.0, 0.0, 0.0, 0.0))
-            px, py = config.pixel_width(), config.pixel_height()
+            px, py = config.get_pixel_width(), config.get_pixel_height()
             x0, x1 = int(x0 / px), int(x1 / px)
             y0, y1 = int(y0 / py), int(y1 / py)
             # We have to invert the extent, as mpl use bottom left y coords
             ymax = data.shape[0]
-            data = data[ymax - y1:ymax - y0, x0:x1]
+            data = data[ymax - y1 : ymax - y0, x0:x1]
 
         if kwargs.get("calibrate", False):
             data = self.calibration.calibrate(data)

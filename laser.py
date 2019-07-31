@@ -16,13 +16,15 @@ class Laser(object):
         filepath: str = "",
     ):
         self.data = data if data is not None else {}
+        self.layers = 1
         self.config = copy.copy(config) if config is not None else LaserConfig()
 
         self.name = name
         self.filepath = filepath
 
+    @property
     def isotopes(self) -> List[str]:
-        return list(self.data.keys())
+        return self.data.keys()
 
     def get(self, isotope: str, **kwargs: Any) -> np.ndarray:
         """Valid kwargs are calibrate, extent."""
@@ -32,14 +34,10 @@ class Laser(object):
         return self.data[isotope].get(self.config, **kwargs)
 
     def get_structured(self, **kwargs: Any) -> np.ndarray:
-        data = []
-        for isotope in self.isotopes():
-            data.append(self.data[isotope].get(self.config, **kwargs))
-
-        dtype = [(isotope, float) for isotope in self.isotopes()]
-        structured = np.empty(data[0].shape, dtype)
-        for isotope, d in zip(self.isotopes(), data):
-            structured[isotope] = d
+        dtype = [(isotope, float) for isotope in self.data]
+        structured = np.empty(next(iter(self.data.values())).shape, dtype)
+        for isotope, _ in dtype:
+            structured[isotope] = self.data[isotope].get(self.config, **kwargs)
         return structured
 
     @classmethod
@@ -58,14 +56,10 @@ class Laser(object):
         if unit_from in ["s", "seconds"]:
             x = x / self.config.scantime
         elif unit_from in ["um", "μm", "micro meters"]:
-            x = x / self.config.pixel_width()
+            x = x / self.config.get_pixel_width()
         # Convert to desired unit
         if unit_to in ["s", "seconds"]:
             x = x * self.config.scantime
         elif unit_to in ["um", "μm", "micro meters"]:
-            x = x * self.config.pixel_width()
+            x = x * self.config.get_pixel_width()
         return x
-
-    @staticmethod
-    def formatName(name: str) -> str:
-        pass
