@@ -46,7 +46,7 @@ class KrissKrossData(LaserData):
         layer = kwargs.get("layer", None)
         if layer is not None:
             data = self.data[layer].copy()
-            if layer % 2 == 0:
+            if layer % 2 == 1:
                 data = data.T
         else:
             data = krisskross_layers(self.data, config)
