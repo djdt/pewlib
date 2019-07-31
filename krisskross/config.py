@@ -67,10 +67,10 @@ class KrissKrossConfig(LaserConfig):
     def get_pixel_height(self, layer: int = None) -> float:
         if layer is None:
             return super().get_pixel_width() / self.subpixels_per_pixel
-        elif layer % 2 == 1:
-            return super().get_pixel_width()
-        else:
+        elif layer % 2 == 0:
             return super().get_pixel_height()
+        else:
+            return super().get_pixel_width()
 
     # Return without the washout included
     def data_extent(
@@ -83,7 +83,7 @@ class KrissKrossConfig(LaserConfig):
                 self.get_pixel_height() * self._warmup,
                 self.get_pixel_height() * (self._warmup + data.shape[0]),
             )
-        else:
+        elif layer :
             return (
                 0.0,
                 self.get_pixel_width(layer) * data.shape[1],

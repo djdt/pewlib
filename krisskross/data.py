@@ -11,7 +11,6 @@ from .config import LaserConfig
 
 
 def krisskross_layers(data: List[np.ndarray], config: KrissKrossConfig) -> np.ndarray:
-
     # Calculate the line lengths
     length = (
         data[1].shape[0] * config.magnification,
@@ -47,6 +46,8 @@ class KrissKrossData(LaserData):
         layer = kwargs.get("layer", None)
         if layer is not None:
             data = self.data[layer].copy()
+            if layer % 2 == 0:
+                data = data.T
         else:
             data = krisskross_layers(self.data, config)
 
