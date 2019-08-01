@@ -12,7 +12,7 @@ class KrissKrossConfig(LaserConfig):
         speed: float = 140.0,
         scantime: float = 0.25,
         warmup: float = 12.5,
-        subpixel_offsets: np.ndarray = [[0, 2], [1, 2]],
+        subpixel_offsets: np.ndarray = ((0, 2), (1, 2)),
     ):
         super().__init__(spotsize=spotsize, speed=speed, scantime=scantime)
         self._warmup = np.round(warmup / self.scantime).astype(int)
