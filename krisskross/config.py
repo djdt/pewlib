@@ -83,7 +83,7 @@ class KrissKrossConfig(LaserConfig):
                 self.get_pixel_height() * self._warmup,
                 self.get_pixel_height() * (self._warmup + data.shape[0]),
             )
-        elif layer :
+        else:
             return (
                 0.0,
                 self.get_pixel_width(layer) * data.shape[1],
