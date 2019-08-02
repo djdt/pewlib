@@ -37,6 +37,8 @@ def test_io_csv():
     assert np.sum(data["CSV"]) == pytest.approx(100.0)
     # Test saving
     temp = tempfile.NamedTemporaryFile()
+    data = np.random.random([10, 10])
+    data.dtype = [("CSV", float)]
     io.csv.save(temp.name, data["CSV"])
     assert np.all(data["CSV"] == io.csv.load(temp.name)["CSV"])
     temp.close()
