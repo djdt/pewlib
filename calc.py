@@ -6,7 +6,7 @@ from typing import Tuple
 def get_weights(x: np.ndarray, weighting: str, safe: bool = True) -> np.ndarray:
     if safe:  # Avoid div 0 problems
         x = x.copy()
-        x[x == 0] = np.min(np.nonzero(x))
+        x[x == 0] = np.min(x[x != 0])
 
     if weighting == "x":
         return x
