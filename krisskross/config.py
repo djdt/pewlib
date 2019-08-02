@@ -44,7 +44,8 @@ class KrissKrossConfig(LaserConfig):
     @subpixel_offsets.setter
     def subpixel_offsets(self, offsets: np.ndarray) -> None:
         offsets = np.array(offsets, dtype=int)
-        assert offsets.ndim == 2
+        if offsets.ndim != 2:
+            raise ValueError("Offsets must have 2 dimensions.")
         self._subpixel_size = np.lcm.reduce(offsets[:, 1])
         self._subpixel_offsets = offsets[:, 0] * self._subpixel_size // offsets[:, 1]
 
