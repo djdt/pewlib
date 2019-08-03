@@ -61,3 +61,30 @@ def test_io_thermo():
     assert data.dtype.names == ("1A", "2B")
     assert np.sum(data["1A"]) == pytest.approx(9.0)
     assert np.sum(data["2B"]) == pytest.approx(0.9)
+
+
+def test_io_npz():
+    data_path = os.path.join(os.path.dirname(__file__), "data", "npz")
+    laser = io.npz.load(os.path.join(data_path, "test.npz"))[0]
+    assert laser.name == "Test"
+    assert laser.filepath == os.path.join(data_path, "test.npz")
+    # Config
+    assert laser.config.spotsize == 1
+    assert laser.config.speed == 2
+    assert laser.config.scantime == 3
+    # Data
+    assert laser.isotopes == ["A1", "B2"]
+    assert laser.get("A1").shape == (10, 10)
+    assert laser.get("A1").sum() == 100
+    # Calibration
+    calibration = laser.data["A1"].calibration
+    assert calibration.gradient == 1.0
+    assert calibration.intercept == 2.0
+    assert calibration.rsq == 0.0
+    assert calibration.weighting == "x"
+    assert np.all(calibration.points == np.array([[1, 1], [2, 2], [3, 3]]))
+    assert calibration.unit == "test"
+    # Saving
+    temp = tempfile.NamedTemporaryFile(suffix=".npz")
+    io.npz.save(temp.name, [laser])
+    assert temp.read() == open(os.path.join(data_path, "test.npz"), 'rb').read()
