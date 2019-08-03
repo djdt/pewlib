@@ -35,7 +35,7 @@ class Laser(object):
 
     def get_structured(self, **kwargs: Any) -> np.ndarray:
         dtype = [(isotope, float) for isotope in self.data]
-        structured = np.empty(next(iter(self.data.values())).shape, dtype)
+        structured = np.empty(next(iter(self.data.values())).data.shape, dtype)
         for isotope, _ in dtype:
             structured[isotope] = self.data[isotope].get(self.config, **kwargs)
         return structured

@@ -9,7 +9,7 @@ class LaserCalibration(object):
         intercept: float = 0.0,
         gradient: float = 1.0,
         rsq: float = None,
-        points: np.ndarray = [],
+        points: np.ndarray = None,
         weighting: str = None,
         unit: str = "",
     ):
@@ -18,8 +18,23 @@ class LaserCalibration(object):
         self.unit = unit
 
         self.rsq = rsq
-        self.points = np.array(points, dtype=np.float64)
+        self._points = None
+        if points is not None:
+            self.points = points
         self.weighting = weighting
+
+    @property
+    def points(self) -> np.ndarray:
+        return self._points
+
+    @points.setter
+    def points(self, points: np.ndarray) -> None:
+        points = np.array(points, dtype=float)
+        if points.ndim != 2:
+            raise ValueError("Points must have 2 dimensions.")
+        if points.shape[0] < 2 or points.shape[1] != 2:
+            raise ValueError("A minimum of 2 points required.")
+        self._points = points
 
     def __str__(self) -> str:
         s = f"y = {self.gradient:.4g} · x - {self.intercept:.4g}"
@@ -28,21 +43,21 @@ class LaserCalibration(object):
         return s
 
     def concentrations(self) -> np.ndarray:
-        if self.points.size == 0:
+        if self.points is None:
             return np.array([], dtype=np.float64)
         return self.points[:, 0]
 
     def counts(self) -> np.ndarray:
-        if self.points.size == 0:
+        if self.points is None:
             return np.array([], dtype=np.float64)
         return self.points[:, 1]
 
     def update_linreg(self) -> None:
-        if self.points.size == 0:
+        if self.points is None:
             self.gradient, self.intercept, self.rsq = 1.0, 0.0, None
         else:
             no_nans = self.points[~np.isnan(self.points).any(axis=1)]
-            if no_nans.size == 0:
+            if no_nans.size == 0 or no_nans.ndim != 2:
                 self.gradient, self.intercept, self.rsq = 1.0, 0.0, None
             else:
                 x, y = no_nans[:, 0], no_nans[:, 1]

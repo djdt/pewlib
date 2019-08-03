@@ -6,7 +6,7 @@ from typing import Tuple
 def get_weights(x: np.ndarray, weighting: str, safe: bool = True) -> np.ndarray:
     if safe:  # Avoid div 0 problems
         x = x.copy()
-        x[x == 0] = np.min(np.nonzero(x))
+        x[x == 0] = np.min(x[x != 0])
 
     if weighting == "x":
         return x
@@ -35,6 +35,6 @@ def weighted_rsq(x: np.ndarray, y: np.ndarray, w: np.ndarray = None) -> float:
 def weighted_linreg(
     x: np.ndarray, y: np.ndarray, w: np.ndarray = None
 ) -> Tuple[float, float, float]:
-    m, b = np.polyfit(x, y, 1, w=w)
+    m, b = np.polyfit(x, y, 1, w=w if w is None else np.sqrt(w))
     r2 = weighted_rsq(x, y, w)
     return m, b, r2

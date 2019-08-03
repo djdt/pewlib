@@ -51,6 +51,8 @@ def load(path: str) -> List[Laser]:
         for isotope in laserdict["data"].keys():
             calibration = LaserCalibration()
             for k, v in laserdict["calibration"][isotope].items():
+                if npz["version"] < "0.1.5" and k == "points":
+                    k = "_points"
                 setattr(calibration, k, v)
 
             if laserdict["type"] == "KrissKross":
