@@ -15,12 +15,12 @@ class KrissKrossConfig(LaserConfig):
         subpixel_offsets: np.ndarray = ((0, 2), (1, 2)),
     ):
         super().__init__(spotsize=spotsize, speed=speed, scantime=scantime)
-        self._warmup = np.round(warmup / self.scantime).astype(int)
+        self._warmup = 0
+        self.warmup = warmup
 
-        offsets = np.array(subpixel_offsets, dtype=int)
-        assert offsets.ndim == 2
-        self._subpixel_size = np.lcm.reduce(offsets[:, 1])
-        self._subpixel_offsets = offsets[:, 0] * self._subpixel_size // offsets[:, 1]
+        self._subpixel_size = 0
+        self._subpixel_offsets = np.array([], dtype=int)
+        self.subpixel_offsets = subpixel_offsets
 
     @property
     def warmup(self) -> float:

@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 
 from laserlib.calc import get_weights, weighted_rsq, weighted_linreg
+from laserlib.krisskross.calc import subpixel_offset, subpixel_offset_equal
 
 
 def test_get_weights():
@@ -34,3 +35,13 @@ def test_weighted_linreg():
     assert weighted_linreg(x, y, None) == pytest.approx((1.7, -1.9, 0.830459))
     # Weighted
     assert weighted_linreg(x, y, x) == pytest.approx((2.085714, -3.314286, 0.865097))
+
+
+def test_subpixel_offset():
+    x = np.ones((10, 10, 3))
+
+    y = subpixel_offset(x, [(0, 0), (1, 1), (2, 3)], (2, 3))
+    assert y.shape == (22, 33, 3)
+    assert np.all(y[0:20, 0:30, 0] == 1)
+    assert np.all(y[1:21, 1:31, 1] == 1)
+    assert np.all(y[2:22, 3:33, 2] == 1)
