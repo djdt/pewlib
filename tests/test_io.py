@@ -88,3 +88,4 @@ def test_io_npz():
     temp = tempfile.NamedTemporaryFile(suffix=".npz")
     io.npz.save(temp.name, [laser])
     assert temp.read() == open(os.path.join(data_path, "test.npz"), 'rb').read()
+    temp.close()
