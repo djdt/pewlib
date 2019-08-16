@@ -34,21 +34,39 @@ def test_config_krisskross():
 
 
 def test_data_krisskross():
-    config = KrissKrossConfig(5, 10, 0.5, warmup=2.5)
-    data = KrissKrossData([np.random.random((10, 20)), np.random.random((12, 30))])
+    config = KrissKrossConfig(5, 10, 0.5, warmup=0)
+    data = KrissKrossData([np.random.random((10, 20)), np.random.random((10, 20))])
 
-    assert data.get(config).shape == (21, 25, 2)
-    assert data.get(config, flat=True).shape == (21, 25)
+    assert data.get(config).shape == (21, 21, 2)
+    assert data.get(config, flat=True).shape == (21, 21)
+    assert data.get(config, layer=1).shape == (20, 10)
+    assert data.get(config, extent=(0, 10, 0, 10)).shape == (4, 4, 2)
+    assert data.get(config, layer=1).shape == (20, 10)
 
 
 def test_krisskross():
     kk = KrissKross(
-        config=KrissKrossConfig(5, 10, 0.5, warmup=2.5),
+        config=KrissKrossConfig(1, 1, 1, warmup=0),
         data={
             "A": KrissKrossData(
-                [np.random.random((10, 20)), np.random.random((12, 30))]
+                [np.random.random((10, 15)), np.random.random((10, 20))]
             )
-        }
+        },
     )
     assert kk.layers == 2
+    # Check config params
+    assert kk.check_config_valid(KrissKrossConfig(1, 1, 1, warmup=0))
+    assert not kk.check_config_valid(KrissKrossConfig(2, 1, 1, warmup=0))
+    assert not kk.check_config_valid(KrissKrossConfig(3, 1, 1, warmup=0))
     assert not kk.check_config_valid(KrissKrossConfig(warmup=100))
+    assert not kk.check_config_valid(KrissKrossConfig(warmup=-1))
+
+
+def test_krisskross_from_structured():
+    structured = np.empty((10, 20), dtype=[("A", float), ("B", float)])
+    structured["A"] = np.random.random([10, 20])
+    structured["B"] = np.random.random([10, 20])
+    kk = KrissKross.from_structured(
+        [structured, structured], config=KrissKrossConfig()
+    )
+    assert kk.layers == 2
