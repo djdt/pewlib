@@ -50,16 +50,3 @@ class Laser(object):
     ):  # type: ignore
         data = {k: LaserData(data[k]) for k in data.dtype.names}
         return cls(data=data, config=config, name=name, filepath=filepath)
-
-    def convert(self, x: float, unit_from: str, unit_to: str) -> float:
-        # Convert into rows
-        if unit_from in ["s", "seconds"]:
-            x = x / self.config.scantime
-        elif unit_from in ["um", "μm", "micro meters"]:
-            x = x / self.config.get_pixel_width()
-        # Convert to desired unit
-        if unit_to in ["s", "seconds"]:
-            x = x * self.config.scantime
-        elif unit_to in ["um", "μm", "micro meters"]:
-            x = x * self.config.get_pixel_width()
-        return x
