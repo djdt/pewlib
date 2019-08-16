@@ -1,6 +1,7 @@
 import pytest
 import os.path
 import tempfile
+import hashlib
 import numpy as np
 from laserlib import io
 
@@ -21,7 +22,7 @@ def test_io_agilent():
     assert np.sum(data["B2"]) == pytest.approx(0.9)
     # Make sure error raised on missing data
     with pytest.raises(io.error.LaserLibException):
-        io.agilent.load("laserlib/tests/data/agilent/missing_line.b")
+        io.agilent.load(os.path.join(data_path, "missing_line.b"))
 
 
 def test_io_csv():
@@ -63,6 +64,19 @@ def test_io_thermo():
     assert np.sum(data["2B"]) == pytest.approx(0.9)
 
 
+def test_io_vtk():
+    data_path = os.path.join(os.path.dirname(__file__), "data", "vtk")
+
+    np.random.seed(12718736)
+    data = np.random.random((10, 10, 3))
+    data.dtype = [("A1", float), ]
+
+    temp = tempfile.NamedTemporaryFile(suffix=".vti")
+    io.vtk.save(temp.name, data, (1, 1, 1))
+    assert temp.read() == open(os.path.join(data_path, "test.vti"), "rb").read()
+    temp.close()
+
+
 def test_io_npz():
     data_path = os.path.join(os.path.dirname(__file__), "data", "npz")
     laser = io.npz.load(os.path.join(data_path, "test.npz"))[0]
@@ -87,5 +101,5 @@ def test_io_npz():
     # Saving
     temp = tempfile.NamedTemporaryFile(suffix=".npz")
     io.npz.save(temp.name, [laser])
-    assert temp.read() == open(os.path.join(data_path, "test.npz"), 'rb').read()
+    assert temp.read() == open(os.path.join(data_path, "test.npz"), "rb").read()
     temp.close()
