@@ -1,7 +1,7 @@
 import pytest
 import os.path
 import tempfile
-import hashlib
+import filecmp
 import numpy as np
 from laserlib import io
 
@@ -73,7 +73,7 @@ def test_io_vtk():
 
     temp = tempfile.NamedTemporaryFile(suffix=".vti")
     io.vtk.save(temp.name, data, (1, 1, 1))
-    assert temp.read() == open(os.path.join(data_path, "test.vti"), "rb").read()
+    assert filecmp.cmp(temp.name, os.path.join(data_path, "test.vti"))
     temp.close()
 
 
@@ -101,5 +101,5 @@ def test_io_npz():
     # Saving
     temp = tempfile.NamedTemporaryFile(suffix=".npz")
     io.npz.save(temp.name, [laser])
-    assert temp.read() == open(os.path.join(data_path, "test.npz"), "rb").read()
+    assert filecmp.cmp(temp.name, os.path.join(data_path, "test.npz"))
     temp.close()
