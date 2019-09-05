@@ -26,6 +26,9 @@ class Laser(object):
     def isotopes(self) -> List[str]:
         return list(self.data.keys())
 
+    def add(self, isotope: str, data: np.ndarray) -> None:
+        self.data[isotope] = LaserData(data)
+
     def get(self, isotope: str, **kwargs: Any) -> np.ndarray:
         """Valid kwargs are calibrate, extent."""
         if isotope not in self.data:
