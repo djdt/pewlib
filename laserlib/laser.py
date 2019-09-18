@@ -31,9 +31,6 @@ class Laser(object):
 
     def get(self, isotope: str, **kwargs: Any) -> np.ndarray:
         """Valid kwargs are calibrate, extent."""
-        if isotope not in self.data:
-            return np.zeros((1, 1), dtype=float)
-
         return self.data[isotope].get(self.config, **kwargs)
 
     def get_structured(self, **kwargs: Any) -> np.ndarray:
