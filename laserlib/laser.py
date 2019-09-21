@@ -4,7 +4,7 @@ import copy
 from .config import LaserConfig
 from .data import LaserData
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 
 class Laser(object):
@@ -23,6 +23,12 @@ class Laser(object):
         self.filepath = filepath
 
     @property
+    def extent(self) -> Tuple[float, float, float, float]:
+        if len(self.data) == 0:
+            return (0, 0, 0, 0)
+        return self.config.data_extent(self.get(self.isotopes[0]))
+
+    @property
     def isotopes(self) -> List[str]:
         return list(self.data.keys())
 
@@ -30,7 +36,7 @@ class Laser(object):
         self.data[isotope] = LaserData(data)
 
     def get(self, isotope: str, **kwargs: Any) -> np.ndarray:
-        """Valid kwargs are calibrate, extent."""
+        """Valid kwargs are calibrate, extent, flat."""
         return self.data[isotope].get(self.config, **kwargs)
 
     def get_structured(self, **kwargs: Any) -> np.ndarray:
