@@ -9,5 +9,4 @@ def test_config():
     # Standard stuff
     assert config.get_pixel_width() == 5.0
     assert config.get_pixel_height() == 10.0
-    data = np.zeros([10, 10])
-    assert config.data_extent(data) == (0.0, 50.0, 0.0, 100.0)
+    assert config.data_extent((10, 10)) == (0.0, 50.0, 0.0, 100.0)

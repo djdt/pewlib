@@ -29,6 +29,8 @@ class Laser(object):
 
     @property
     def extent(self) -> Tuple[float, float, float, float]:
+        if self.shape is None:
+            return (0, 0, 0, 0)
         return self.config.data_extent(self.shape[:2])
 
     @property
@@ -68,7 +70,7 @@ class Laser(object):
         data: np.ndarray,
         config: LaserConfig = None,
         name: str = "",
-        filepath: str = "",
+        path: str = "",
     ):  # type: ignore
         data = {k: LaserData(data[k]) for k in data.dtype.names}
-        return cls(data=data, config=config, name=name, filepath=filepath)
+        return cls(data=data, config=config, name=name, path=path)

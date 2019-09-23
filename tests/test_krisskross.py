@@ -15,15 +15,14 @@ def test_config_krisskross():
     assert config.magnification == 2
     assert config.get_pixel_width() == 5.0
     assert config.get_pixel_height() == 5.0
-    data = np.zeros([10, 20])
-    assert config.data_extent(data) == (100.0, 200.0, 100.0, 150.0)
+    assert config.data_extent((10, 20)) == (100.0, 200.0, 100.0, 150.0)
     # Test layers
     assert config.get_pixel_width(0) == 5.0
     assert config.get_pixel_height(0) == 10.0
-    assert config.data_extent(data, 0) == (0.0, 100.0, 0.0, 100.0)
+    assert config.data_extent((10, 20), layer=0) == (0.0, 100.0, 0.0, 100.0)
     assert config.get_pixel_width(1) == 10.0
     assert config.get_pixel_height(1) == 5.0
-    assert config.data_extent(data, 1) == (0.0, 200.0, 0.0, 50.0)
+    assert config.data_extent((10, 20), layer=1) == (0.0, 200.0, 0.0, 50.0)
     # Tests for subpixel offsets
     with pytest.raises(ValueError):
         config.subpixel_offsets = [0, 1]
