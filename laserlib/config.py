@@ -1,5 +1,4 @@
 from typing import Tuple
-import numpy as np
 
 
 class LaserConfig(object):
@@ -16,10 +15,8 @@ class LaserConfig(object):
     def get_pixel_height(self) -> float:
         return self.spotsize
 
-    def data_extent(self, data: np.ndarray) -> Tuple[float, float, float, float]:
-        return (
-            0.0,
-            self.get_pixel_width() * data.shape[1],
-            0.0,
-            self.get_pixel_height() * data.shape[0],
-        )
+    def data_extent(
+        self, shape: Tuple[int, int], **kwargs
+    ) -> Tuple[float, float, float, float]:
+        px, py = self.get_pixel_width(), self.get_pixel_height()
+        return (0.0, px * shape[1], 0.0, py * shape[0])

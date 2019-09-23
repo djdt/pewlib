@@ -40,6 +40,10 @@ class KrissKrossData(LaserData):
             calibration if calibration is not None else LaserCalibration()
         )
 
+    @property
+    def shape(self) -> List[int]:
+        return (self.data[1].shape[0], self.data[0].shape[0], len(self.data))
+
     def get(self, config: LaserConfig, **kwargs) -> np.ndarray:
         assert isinstance(config, KrissKrossConfig)
 

@@ -15,8 +15,13 @@ class Laser(object):
         name: str = "",
         path: str = "",
     ):
-        self.data = data if data is not None else {}
-        self.layers = 1
+        self.shape = None
+        self.data = {}
+        if data is not None:
+            for v in data.values():
+                self.check_shape(v.shape)
+            self.data.update(data)
+
         self.config = copy.copy(config) if config is not None else LaserConfig()
 
         self.name = name
@@ -24,20 +29,31 @@ class Laser(object):
 
     @property
     def extent(self) -> Tuple[float, float, float, float]:
-        if len(self.data) == 0:
-            return (0, 0, 0, 0)
-        return self.config.data_extent(self.get(self.isotopes[0]))
+        return self.config.data_extent(self.shape[:2])
 
     @property
     def isotopes(self) -> List[str]:
         return list(self.data.keys())
 
+    @property
+    def layers(self) -> int:
+        return 1
+
     def add(self, isotope: str, data: np.ndarray) -> None:
+        self.check_shape(data.shape)
         self.data[isotope] = LaserData(data)
+
+    def check_shape(self, shape: List[int]) -> None:
+        if self.shape is None:
+            self.shape = shape
+        assert self.shape == shape
 
     def get(self, isotope: str, **kwargs: Any) -> np.ndarray:
         """Valid kwargs are calibrate, extent, flat."""
         return self.data[isotope].get(self.config, **kwargs)
+
+    def get_any(self, **kwargs: Any) -> np.ndarray:
+        return next(iter(self.data.values())).get(self.config, **kwargs)
 
     def get_structured(self, **kwargs: Any) -> np.ndarray:
         dtype = [(isotope, float) for isotope in self.data]

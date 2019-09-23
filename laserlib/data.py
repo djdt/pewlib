@@ -3,6 +3,8 @@ import numpy as np
 from .calibration import LaserCalibration
 from .config import LaserConfig
 
+from typing import List
+
 
 class LaserData(object):
     def __init__(self, data: np.ndarray, calibration: LaserCalibration = None):
@@ -10,6 +12,10 @@ class LaserData(object):
         self.calibration = (
             calibration if calibration is not None else LaserCalibration()
         )
+
+    @property
+    def shape(self) -> List[int]:
+        return self.data.shape
 
     def get(self, config: LaserConfig, **kwargs) -> np.ndarray:
         data = self.data

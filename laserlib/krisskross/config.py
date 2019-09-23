@@ -75,19 +75,18 @@ class KrissKrossConfig(LaserConfig):
 
     # Return without the washout included
     def data_extent(
-        self, data: np.ndarray, layer: int = None
+        self, shape: Tuple[int, int], **kwargs
     ) -> Tuple[float, float, float, float]:
+        layer = kwargs.get("layer", None)
+        px, py = self.get_pixel_width(layer), self.get_pixel_height(layer)
+
+        warmup = self._warmup if kwargs.get("warmup", True) else 0.0
         if layer is None:
             return (
-                self.get_pixel_width() * self._warmup,
-                self.get_pixel_width() * (self._warmup + data.shape[1]),
-                self.get_pixel_height() * self._warmup,
-                self.get_pixel_height() * (self._warmup + data.shape[0]),
+                px * warmup,
+                px * (warmup + shape[1]),
+                py * warmup,
+                py * (warmup + shape[0]),
             )
         else:
-            return (
-                0.0,
-                self.get_pixel_width(layer) * data.shape[1],
-                0.0,
-                self.get_pixel_height(layer) * data.shape[0],
-            )
+            return (0.0, px * shape[1], 0.0, py * shape[0])

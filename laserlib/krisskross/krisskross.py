@@ -5,7 +5,7 @@ from ..laser import Laser
 from .config import KrissKrossConfig
 from .data import KrissKrossData
 
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 
 class KrissKross(Laser):
@@ -19,7 +19,7 @@ class KrissKross(Laser):
         if config is None:
             config = KrissKrossConfig()
         else:
-            assert isinstance(KrissKrossConfig, config)
+            assert isinstance(config, KrissKrossConfig)
 
         super().__init__(data, config, name, path)
 
