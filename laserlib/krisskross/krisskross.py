@@ -14,29 +14,27 @@ class KrissKross(Laser):
         data: Dict[str, KrissKrossData] = None,
         config: KrissKrossConfig = None,
         name: str = "",
-        filepath: str = "",
+        path: str = "",
     ):
-        self.data: Dict[str, KrissKrossData] = data if data is not None else {}
+        if config is None:
+            config = KrissKrossConfig()
+        else:
+            assert isinstance(KrissKrossConfig, config)
 
-        self.config = config if config is not None else KrissKrossConfig()
-
-        self.name = name
-        self.filepath = filepath
+        super().__init__(data, config, name, path)
 
     @property
     def layers(self) -> int:
         return len(next(iter(self.data.values())).data)
 
-    @classmethod
-    def from_structured(
-        cls,
-        data: List[np.ndarray],
-        config: KrissKrossConfig = None,
-        name: str = "",
-        filepath: str = "",
-    ):  # type: ignore
-        data = {k: KrissKrossData([d[k] for d in data]) for k in data[0].dtype.names}
-        return cls(data=data, config=config, name=name, filepath=filepath)
+    @property
+    def extent(self) -> Tuple[float, float, float, float]:
+        """Calculates the extent of the array POST krisskross."""
+        pixelsize = self.config.subpixels_per_pixel
+        offset = np.max(self.config._subpixel_offsets)
+        new_shape = np.array(self.shape[:2]) * self.config.magnification
+        new_shape = new_shape * pixelsize + offset
+        return self.config.data_extent(new_shape)
 
     def check_config_valid(self, config: KrissKrossConfig) -> bool:
         if config.warmup < 0:
@@ -48,3 +46,14 @@ class KrissKross(Laser):
             return False
 
         return True
+
+    @classmethod
+    def from_structured(
+        cls,
+        data: List[np.ndarray],
+        config: KrissKrossConfig = None,
+        name: str = "",
+        path: str = "",
+    ):  # type: ignore
+        data = {k: KrissKrossData([d[k] for d in data]) for k in data[0].dtype.names}
+        return cls(data=data, config=config, name=name, path=path)

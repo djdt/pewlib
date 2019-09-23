@@ -62,11 +62,11 @@ def load(path: str) -> List[Laser]:
 
         if laserdict["type"] == "KrissKross":
             laser = KrissKross(
-                data=data, config=config, name=laserdict["name"], filepath=path
+                data=data, config=config, name=laserdict["name"], path=path
             )
         else:
             laser = Laser(
-                data=data, config=config, name=laserdict["name"], filepath=path
+                data=data, config=config, name=laserdict["name"], path=path
             )
 
         lasers.append(laser)

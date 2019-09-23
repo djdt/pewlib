@@ -13,14 +13,14 @@ class Laser(object):
         data: Dict[str, LaserData] = None,
         config: LaserConfig = None,
         name: str = "",
-        filepath: str = "",
+        path: str = "",
     ):
         self.data = data if data is not None else {}
         self.layers = 1
         self.config = copy.copy(config) if config is not None else LaserConfig()
 
         self.name = name
-        self.filepath = filepath
+        self.path = path
 
     @property
     def extent(self) -> Tuple[float, float, float, float]:
