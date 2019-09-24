@@ -1,6 +1,6 @@
 import numpy as np
 
-from .error import LaserLibException
+from .error import PewException
 
 
 def load(path: str, isotope: str = "CSV") -> np.ndarray:
@@ -11,9 +11,9 @@ def load(path: str, isotope: str = "CSV") -> np.ndarray:
                 cleaned, delimiter=b",", comments=b"#", dtype=float, loose=False
             )
         except ValueError as e:
-            raise LaserLibException("Could not parse file.") from e
+            raise PewException("Could not parse file.") from e
     if data.ndim != 2:
-        raise LaserLibException(f"Invalid data dimensions '{data.ndim}'.")
+        raise PewException(f"Invalid data dimensions '{data.ndim}'.")
 
     data.dtype = [(isotope, data.dtype)]
     return data

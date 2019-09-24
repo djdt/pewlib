@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
 
-from laserlib.calc import get_weights, weighted_rsq, weighted_linreg
-from laserlib.krisskross.calc import subpixel_offset, subpixel_offset_equal
+from pew.calc import get_weights, weighted_rsq, weighted_linreg
+from pew.srr.calc import subpixel_offset, subpixel_offset_equal
 
 
 def test_get_weights():

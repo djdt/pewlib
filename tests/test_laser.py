@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from laserlib.laser import Laser
-from laserlib.data import LaserData
+from pew.laser import Laser
+from pew.data import IsotopeData
 
 
 def test_default_laser():
@@ -19,9 +19,9 @@ def test_laser_bad_shape():
     with pytest.raises(AssertionError):
         Laser(
             data={
-                "A": LaserData(np.zeros([5, 5])),
-                "B": LaserData(np.zeros([5, 5])),
-                "C": LaserData(np.zeros([4, 5])),
+                "A": IsotopeData(np.zeros([5, 5])),
+                "B": IsotopeData(np.zeros([5, 5])),
+                "C": IsotopeData(np.zeros([4, 5])),
             }
         )
 
@@ -29,8 +29,8 @@ def test_laser_bad_shape():
 def test_laser():
     laser = Laser(
         data={
-            "A": LaserData(np.random.random([10, 10])),
-            "B": LaserData(np.random.random([10, 10])),
+            "A": IsotopeData(np.random.random([10, 10])),
+            "B": IsotopeData(np.random.random([10, 10])),
         }
     )
     assert laser.isotopes == ["A", "B"]

@@ -1,16 +1,16 @@
 import numpy as np
 
-from ..calibration import LaserCalibration
-from ..data import LaserData
+from ..calibration import Calibration
+from ..data import IsotopeData
 
 from .calc import subpixel_offset_equal
-from .config import KrissKrossConfig
+from .config import SRRConfig
 
 from typing import List
-from .config import LaserConfig
+from .config import Config
 
 
-def krisskross_layers(data: List[np.ndarray], config: KrissKrossConfig) -> np.ndarray:
+def krisskross_layers(data: List[np.ndarray], config: SRRConfig) -> np.ndarray:
     # Calculate the line lengths
     length = (
         data[1].shape[0] * config.magnification,
@@ -33,19 +33,19 @@ def krisskross_layers(data: List[np.ndarray], config: KrissKrossConfig) -> np.nd
     )
 
 
-class KrissKrossData(LaserData):
-    def __init__(self, data: List[np.ndarray], calibration: LaserCalibration = None):
+class SRRData(IsotopeData):
+    def __init__(self, data: List[np.ndarray], calibration: Calibration = None):
         self.data = data
         self.calibration = (
-            calibration if calibration is not None else LaserCalibration()
+            calibration if calibration is not None else Calibration()
         )
 
     @property
     def shape(self) -> List[int]:
         return (self.data[1].shape[0], self.data[0].shape[0], len(self.data))
 
-    def get(self, config: LaserConfig, **kwargs) -> np.ndarray:
-        assert isinstance(config, KrissKrossConfig)
+    def get(self, config: Config, **kwargs) -> np.ndarray:
+        assert isinstance(config, SRRConfig)
 
         layer = kwargs.get("layer", None)
         if layer is not None:

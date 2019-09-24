@@ -3,7 +3,7 @@ import numpy as np
 from .calc import get_weights, weighted_linreg
 
 
-class LaserCalibration(object):
+class Calibration(object):
     def __init__(
         self,
         intercept: float = 0.0,

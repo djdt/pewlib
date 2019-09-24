@@ -1,6 +1,6 @@
 import numpy as np
 
-from .error import LaserLibException
+from .error import PewException
 
 from typing import Dict, List
 
@@ -17,7 +17,7 @@ def load(path: str) -> np.ndarray:
         Structured numpy array.
 
     Raises:
-        LaserLibException
+        PewException
 
     """
     data: Dict[str, List[np.ndarray]] = {}
@@ -40,10 +40,10 @@ def load(path: str) -> np.ndarray:
                     )
                 )
             except ValueError as e:
-                raise LaserLibException("Could not parse file.") from e
+                raise PewException("Could not parse file.") from e
 
     if not data:  # Data is empty
-        raise LaserLibException("Empty data, nothing to import.")
+        raise PewException("Empty data, nothing to import.")
 
     # Stack lines to form 2d
     keys = list(data.keys())
@@ -52,7 +52,7 @@ def load(path: str) -> np.ndarray:
     for k in keys:
         stack = np.vstack(data[k][:]).transpose()
         if stack.ndim != 2:
-            raise LaserLibException(f"Invalid data dimensions '{stack.ndim}'.")
+            raise PewException(f"Invalid data dimensions '{stack.ndim}'.")
         structured[k] = stack
 
     return structured

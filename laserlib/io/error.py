@@ -1,2 +1,2 @@
-class LaserLibException(Exception):
+class PewException(Exception):
     pass

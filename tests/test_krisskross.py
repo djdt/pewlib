@@ -1,13 +1,13 @@
 import pytest
 import numpy as np
 
-from laserlib.krisskross.krisskross import KrissKross
-from laserlib.krisskross.config import KrissKrossConfig
-from laserlib.krisskross.data import KrissKrossData
+from pew.srr.krisskross import SRR
+from pew.srr.config import SRRConfig
+from pew.srr.data import SRRData
 
 
-def test_config_krisskross():
-    config = KrissKrossConfig(
+def test_config_srr():
+    config = SRRConfig(
         10.0, 10.0, 0.5, warmup=10.0, subpixel_offsets=[[0, 1], [0, 2]]
     )
     # Standard stuff
@@ -32,9 +32,9 @@ def test_config_krisskross():
     assert config.subpixels_per_pixel == 2
 
 
-def test_data_krisskross():
-    config = KrissKrossConfig(5, 10, 0.5, warmup=0)
-    data = KrissKrossData([np.random.random((10, 20)), np.random.random((10, 20))])
+def test_data_srr():
+    config = SRRConfig(5, 10, 0.5, warmup=0)
+    data = SRRData([np.random.random((10, 20)), np.random.random((10, 20))])
 
     assert data.get(config).shape == (21, 21, 2)
     assert data.get(config, flat=True).shape == (21, 21)
@@ -43,29 +43,29 @@ def test_data_krisskross():
     assert data.get(config, layer=1).shape == (20, 10)
 
 
-def test_krisskross():
-    kk = KrissKross(
-        config=KrissKrossConfig(1, 1, 1, warmup=0),
+def test_srr():
+    kk = SRR(
+        config=SRRConfig(1, 1, 1, warmup=0),
         data={
-            "A": KrissKrossData(
+            "A": SRRData(
                 [np.random.random((10, 15)), np.random.random((10, 20))]
             )
         },
     )
     assert kk.layers == 2
     # Check config params
-    assert kk.check_config_valid(KrissKrossConfig(1, 1, 1, warmup=0))
-    assert not kk.check_config_valid(KrissKrossConfig(2, 1, 1, warmup=0))
-    assert not kk.check_config_valid(KrissKrossConfig(3, 1, 1, warmup=0))
-    assert not kk.check_config_valid(KrissKrossConfig(warmup=100))
-    assert not kk.check_config_valid(KrissKrossConfig(warmup=-1))
+    assert kk.check_config_valid(SRRConfig(1, 1, 1, warmup=0))
+    assert not kk.check_config_valid(SRRConfig(2, 1, 1, warmup=0))
+    assert not kk.check_config_valid(SRRConfig(3, 1, 1, warmup=0))
+    assert not kk.check_config_valid(SRRConfig(warmup=100))
+    assert not kk.check_config_valid(SRRConfig(warmup=-1))
 
 
-def test_krisskross_from_structured():
+def test_srr_from_structured():
     structured = np.empty((10, 20), dtype=[("A", float), ("B", float)])
     structured["A"] = np.random.random([10, 20])
     structured["B"] = np.random.random([10, 20])
-    kk = KrissKross.from_structured(
-        [structured, structured], config=KrissKrossConfig()
+    kk = SRR.from_structured(
+        [structured, structured], config=SRRConfig()
     )
     assert kk.layers == 2

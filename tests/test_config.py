@@ -1,11 +1,11 @@
 import numpy as np
 
 
-from laserlib.config import LaserConfig
+from pew.config import Config
 
 
 def test_config():
-    config = LaserConfig(10.0, 10.0, 0.5)
+    config = Config(10.0, 10.0, 0.5)
     # Standard stuff
     assert config.get_pixel_width() == 5.0
     assert config.get_pixel_height() == 10.0

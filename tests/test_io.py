@@ -3,7 +3,7 @@ import os.path
 import tempfile
 import filecmp
 import numpy as np
-from laserlib import io
+from pew import io
 
 
 def test_io_agilent():
@@ -21,7 +21,7 @@ def test_io_agilent():
     assert np.sum(data["A1"]) == pytest.approx(9.0)
     assert np.sum(data["B2"]) == pytest.approx(0.9)
     # Make sure error raised on missing data
-    with pytest.raises(io.error.LaserLibException):
+    with pytest.raises(io.error.PewException):
         io.agilent.load(os.path.join(data_path, "missing_line.b"))
 
 
@@ -29,7 +29,7 @@ def test_io_csv():
     data_path = os.path.join(os.path.dirname(__file__), "data", "csv")
     data_path_thermo = os.path.join(os.path.dirname(__file__), "data", "thermo")
     # Make sure error raised on thermo data
-    with pytest.raises(io.error.LaserLibException):
+    with pytest.raises(io.error.PewException):
         io.csv.load(os.path.join(data_path_thermo, "icap.csv"))
     # Test loading
     data = io.csv.load(os.path.join(data_path, "csv.csv"))
@@ -54,7 +54,7 @@ def test_io_thermo():
     data_path = os.path.join(os.path.dirname(__file__), "data", "thermo")
     data_path_csv = os.path.join(os.path.dirname(__file__), "data", "csv")
     # Make sure csv data raises an error
-    with pytest.raises(io.error.LaserLibException):
+    with pytest.raises(io.error.PewException):
         io.thermo.load(os.path.join(data_path_csv, "csv.csv"))
     # Test loading
     data = io.thermo.load(os.path.join(data_path, "icap.csv"))

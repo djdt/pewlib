@@ -2,11 +2,11 @@ import numpy as np
 
 from .. import __version__
 
-from .error import LaserLibException
+from .error import PewException
 
 from typing import Any, Dict, List
-from .. import Laser, LaserCalibration, LaserConfig, LaserData
-from ..krisskross import KrissKross, KrissKrossConfig, KrissKrossData
+from .. import Laser, Calibration, Config, IsotopeData
+from ..srr import SRR, KrissKrossConfig, KrissKrossData
 
 
 def load(path: str) -> List[Laser]:
@@ -20,7 +20,7 @@ def load(path: str) -> List[Laser]:
         calibration_override: If not None will be applied to all imports
 
     Returns:
-        List of LaserData and KrissKrossData
+        List of IsotopeData and SRRData
 
     Raises:
         PewPewFileError: Version of archive missing or incompatable.
@@ -30,38 +30,38 @@ def load(path: str) -> List[Laser]:
     npz = np.load(path, allow_pickle=True)
 
     if "version" not in npz.files:
-        raise LaserLibException("Archive version mismatch.")
+        raise PewException("Archive version mismatch.")
     elif npz["version"] < "0.1.1":
-        raise LaserLibException(f"Archive version mismatch: {npz['version']}.")
+        raise PewException(f"Archive version mismatch: {npz['version']}.")
 
     for f in npz.files:
         if f == "version":
             continue
-        data: Dict[str, LaserData] = {}
+        data: Dict[str, IsotopeData] = {}
         laserdict: Dict[str, Any] = npz[f].item()
         # Config
-        if laserdict["type"] == "KrissKross":
-            config = KrissKrossConfig()
+        if laserdict["type"] == "SRR":
+            config = SRRConfig()
         else:
-            config = LaserConfig()
+            config = Config()
         for k, v in laserdict["config"].items():
             setattr(config, k, v)
 
         # Calibration and data
         for isotope in laserdict["data"].keys():
-            calibration = LaserCalibration()
+            calibration = Calibration()
             for k, v in laserdict["calibration"][isotope].items():
                 if npz["version"] < "0.1.5" and k == "points":
                     k = "_points"
                 setattr(calibration, k, v)
 
-            if laserdict["type"] == "KrissKross":
-                data[isotope] = KrissKrossData(laserdict["data"][isotope], calibration)
+            if laserdict["type"] == "SRR":
+                data[isotope] = SRRData(laserdict["data"][isotope], calibration)
             else:
-                data[isotope] = LaserData(laserdict["data"][isotope], calibration)
+                data[isotope] = IsotopeData(laserdict["data"][isotope], calibration)
 
-        if laserdict["type"] == "KrissKross":
-            laser = KrissKross(
+        if laserdict["type"] == "SRR":
+            laser = SRR(
                 data=data, config=config, name=laserdict["name"], path=path
             )
         else:

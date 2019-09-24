@@ -1,7 +1,7 @@
 from typing import Tuple
 
 
-class LaserConfig(object):
+class Config(object):
     def __init__(
         self, spotsize: float = 35.0, speed: float = 140.0, scantime: float = 0.25
     ):

@@ -3,11 +3,11 @@ import numpy as np
 import numpy.lib
 import numpy.lib.recfunctions
 
-from .error import LaserLibException
+from .error import PewException
 
 
 def load(path: str) -> np.ndarray:
-    """Imports an Agilent batch (.b) directory, returning LaserData object.
+    """Imports an Agilent batch (.b) directory, returning IsotopeData object.
 
    Scans the given path for .d directories containg a similarly named
    .csv file. These are imported as lines, sorted by their name.
@@ -19,7 +19,7 @@ def load(path: str) -> np.ndarray:
         The structured numpy array.
 
     Raises:
-        LaserLibException
+        PewException
 
     """
     ddirs = []
@@ -35,7 +35,7 @@ def load(path: str) -> np.ndarray:
         csv = os.path.splitext(os.path.basename(d))[0] + ".csv"
         csv = os.path.join(d, csv)
         if not os.path.exists(csv):
-            raise LaserLibException(f"Missing csv '{csv}'.")
+            raise PewException(f"Missing csv '{csv}'.")
         csvs.append(csv)
 
     def get_clean_lines(csv: str):
@@ -58,7 +58,7 @@ def load(path: str) -> np.ndarray:
                 dtype=np.float64
             ))
         except ValueError as e:
-            raise LaserLibException("Could not parse batch.") from e
+            raise PewException("Could not parse batch.") from e
 
     try:
         data = np.vstack(datas)
@@ -66,6 +66,6 @@ def load(path: str) -> np.ndarray:
         data = np.lib.recfunctions.drop_fields(data, "Time_Sec")
 
     except ValueError as e:
-        raise LaserLibException("Mismatched data.") from e
+        raise PewException("Mismatched data.") from e
 
     return data

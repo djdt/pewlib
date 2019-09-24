@@ -1,3 +1,3 @@
-from .krisskross import KrissKross
-from .config import KrissKrossConfig
-from .data import KrissKrossData
+from .srr import SRR
+from .config import SRRConfig
+from .data import SRRData

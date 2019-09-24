@@ -1,11 +1,11 @@
 import numpy as np
 
-from ..laser import LaserConfig
+from ..laser import Config
 
 from typing import Tuple
 
 
-class KrissKrossConfig(LaserConfig):
+class SRRConfig(Config):
     def __init__(
         self,
         spotsize: float = 35.0,
