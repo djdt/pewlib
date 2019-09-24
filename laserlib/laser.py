@@ -17,8 +17,6 @@ class Laser(object):
         name: str = "",
         path: str = "",
     ):
-        assert data.dtype.names is not None
-
         self.data = data
         self.calibration = {name: Calibration() for name in data.dtype.names}
         if calibration is not None:
@@ -31,7 +29,7 @@ class Laser(object):
 
     @property
     def extent(self) -> Tuple[float, float, float, float]:
-        return self.config.data_extent(self.array.shape[:2])
+        return self.config.data_extent(self.shape[:2])
 
     @property
     def isotopes(self) -> List[str]:
@@ -81,7 +79,12 @@ class Laser(object):
         config: Config = None,
         name: str = "",
         path: str = "",
-    ):  # type: ignore
+    ) -> "Laser":
+        assert len(isotopes) == len(datas)
         dtype = [(isotope, float) for isotope in isotopes]
-        data = np.empty(datas[0].shape, dtype=dtype)
-        return cls(data=data, config=config, name=name, path=path)
+
+        structured = np.empty(datas[0].shape, dtype=dtype)
+        for isotope, data in zip(isotopes, datas):
+            structured[isotope] = data
+
+        return cls(data=structured, config=config, name=name, path=path)
