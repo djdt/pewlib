@@ -5,11 +5,12 @@ from .. import __version__
 from .error import PewException
 
 from typing import Any, Dict, List
+from ..laser import _Laser
 from .. import Laser, Calibration, Config
 from ..srr import SRRLaser, SRRConfig
 
 
-def load(path: str) -> List[Laser]:
+def load(path: str) -> List[_Laser]:
     """Imports the given numpy archive given, returning a list of data.
 
     Both the config and calibration read from the archive may be overriden.
@@ -26,7 +27,7 @@ def load(path: str) -> List[Laser]:
         PewPewFileError: Version of archive missing or incompatable.
 
     """
-    lasers: List[Laser] = []
+    lasers: List[_Laser] = []
     npz = np.load(path, allow_pickle=True)
 
     if "version" not in npz.files:
@@ -40,7 +41,7 @@ def load(path: str) -> List[Laser]:
         laserdict: Dict[str, Any] = npz[f].item()
         # Config
         if laserdict["type"] == "SRRLaser":
-            config = SRRConfig()
+            config: Config = SRRConfig()
         else:
             config = Config()
         for k, v in laserdict["config"].items():
@@ -53,12 +54,27 @@ def load(path: str) -> List[Laser]:
             for k, v in cal.items():
                 setattr(calibration[name], k, v)
 
-        laser_type = SRRLaser if laserdict["type"] == "SRRLaser" else Laser
-        laser = laser_type(
-            data=laserdict["data"], calibration=calibration, config=config, name=laserdict["name"], path=path
-        )
-
-        lasers.append(laser)
+        if laserdict["type"] == "Laser":
+            lasers.append(
+                Laser(
+                    data=laserdict["data"],
+                    config=config,
+                    name=laserdict["name"],
+                    path=path,
+                )
+            )
+        elif laserdict["type"] == "SRRLaser":
+            assert isinstance(config, SRRConfig)
+            lasers.append(
+                SRRLaser(
+                    data=laserdict["data"],
+                    config=config,
+                    name=laserdict["name"],
+                    path=path,
+                )
+            )
+        else:
+            raise PewException("Unknown Laser type.")
 
     return lasers
 
