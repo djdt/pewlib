@@ -1,14 +1,46 @@
 import numpy as np
-import numpy.lib.recfunctions as rfn
 import copy
 
 from .calibration import Calibration
 from .config import Config
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 
-class Laser(object):
+class _Laser:
+    data: Union[np.ndarray, List[np.ndarray]] = None
+    calibration: Dict[str, Calibration] = None
+    config: Config = None
+    name = ""
+    path = ""
+
+    @property
+    def extent(self) -> Tuple[float, float, float, float]:
+        return (0.0, 0.0, 0.0, 0.0)
+
+    @property
+    def isotopes(self) -> Tuple[str, ...]:
+        return ()
+
+    @property
+    def layers(self) -> int:
+        return 1
+
+    @property
+    def shape(self) -> Tuple[int, ...]:
+        return (0, 0)
+
+    def add(self, isotope: str, data: Union[np.ndarray, List[np.ndarray]]) -> None:
+        raise NotImplementedError
+
+    def remove(self, isotope: str) -> None:
+        raise NotImplementedError
+
+    def get(self, isotope: str, **kwargs) -> np.ndarray:
+        raise NotImplementedError
+
+
+class Laser(_Laser):
     def __init__(
         self,
         data: np.ndarray,
@@ -17,8 +49,8 @@ class Laser(object):
         name: str = "",
         path: str = "",
     ):
-        self.data = data
-        self.calibration = {name: Calibration() for name in data.dtype.names}
+        self.data: np.ndarray = data
+        self.calibration = {name: Calibration() for name in self.isotopes}
         if calibration is not None:
             self.calibration.update(calibration)
 
@@ -32,23 +64,31 @@ class Laser(object):
         return self.config.data_extent(self.shape[:2])
 
     @property
-    def isotopes(self) -> List[str]:
+    def isotopes(self) -> Tuple[str, ...]:
         return self.data.dtype.names
 
     @property
-    def shape(self) -> List[int]:
+    def shape(self) -> Tuple[int, ...]:
         return self.data.shape
-
-    @property
-    def layers(self) -> int:
-        return 1
 
     def add(self, isotope: str, data: np.ndarray) -> None:
         assert data.shape == self.data.shape
-        rfn.append_fields(self.data, isotope, data, usemask=False)
+        new_dtype = self.data.dtype.descr + [(isotope, data.dtype.str)]
+
+        new_data = np.empty(self.data.shape, dtype=new_dtype)
+        for name in self.data.dtype.names:
+            new_data[name] = self.data[name]
+        new_data[isotope] = data
+        self.data = new_data
 
     def remove(self, isotope: str) -> None:
-        rfn.drop_fields(self.data, isotope, usemask=False)
+        new_dtype = [descr for descr in self.data.dtype.descr if descr[0] != isotope]
+
+        new_data = np.empty(self.data.shape, dtype=new_dtype)
+        for name in self.data.dtype.names:
+            if name != isotope:
+                new_data[name] = self.data[name]
+        self.data = new_data
 
     def get(self, isotope: str = None, **kwargs) -> np.ndarray:
         """Valid kwargs are calibrate, extent, flat."""
@@ -62,6 +102,7 @@ class Laser(object):
             px, py = self.config.get_pixel_width(), self.config.get_pixel_height()
             x0, x1 = int(x0 / px), int(x1 / px)
             y0, y1 = int(y0 / py), int(y1 / py)
+            print(x0, x1, y0, y1)
             # We have to invert the extent, as mpl use bottom left y coords
             ymax = data.shape[0]
             data = data[ymax - y1 : ymax - y0, x0:x1]

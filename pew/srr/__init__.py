@@ -1,3 +1,2 @@
-from .srr import SRR
+from .srr import SRRLaser
 from .config import SRRConfig
-from .data import SRRData

@@ -16,7 +16,7 @@ class Config(object):
         return self.spotsize
 
     def data_extent(
-        self, shape: Tuple[int, int], **kwargs
+        self, shape: Tuple[int, ...], **kwargs
     ) -> Tuple[float, float, float, float]:
         px, py = self.get_pixel_width(), self.get_pixel_height()
         return (0.0, px * shape[1], 0.0, py * shape[0])

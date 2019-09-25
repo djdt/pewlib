@@ -1,7 +1,7 @@
 import numpy as np
-import numpy.lib.recfunctions as rfn
+import copy
 
-from ..laser import Laser
+from ..laser import _Laser, Laser
 from ..calibration import Calibration
 
 from .calc import subpixel_offset_equal
@@ -10,7 +10,7 @@ from .config import SRRConfig
 from typing import Dict, List, Tuple
 
 
-class SRRLaser(Laser):
+class SRRLaser(_Laser):
     def __init__(
         self,
         data: List[np.ndarray],
@@ -20,13 +20,17 @@ class SRRLaser(Laser):
         path: str = "",
     ):
         assert len(data) > 1
+        self.data: List[np.ndarray] = data
+        self.calibration = {name: Calibration() for name in self.isotopes}
+        if calibration is not None:
+            self.calibration.update(calibration)
 
-        if config is None:
-            config = SRRConfig()
-        else:
-            assert isinstance(config, SRRConfig)
+        self.config: SRRConfig = copy.copy(
+            config
+        ) if config is not None else SRRConfig()
 
-        super().__init__(data, calibration, config, name, path)
+        self.name = name
+        self.path = path
 
     @property
     def extent(self) -> Tuple[float, float, float, float]:
@@ -38,22 +42,40 @@ class SRRLaser(Laser):
         return self.config.data_extent(new_shape)
 
     @property
+    def isotopes(self) -> Tuple[str, ...]:
+        return self.data[0].dtype.names
+
+    @property
     def layers(self) -> int:
         return len(self.data)
 
     @property
-    def shape(self) -> List[int]:
+    def shape(self) -> Tuple[int, ...]:
         return (self.data[1].shape[0], self.data[0].shape[0], len(self.data))
 
     def add(self, isotope: str, data: List[np.ndarray]) -> None:
         assert len(data) == len(self.data)
-        for i in range(0, len(data)):
+        for i in range(0, len(self.data)):
             assert data[i].shape == self.data[i].shape
-            rfn.append_fields(self.data[i], isotope, data[i], usemask=False)
+            dtype = self.data[i].dtype
+            new_dtype = dtype.descr + [(isotope, data[i].dtype.str)]
+
+            new_data = np.empty(self.data[i].shape, dtype=new_dtype)
+            for name in dtype.names:
+                new_data[name] = self.data[name]
+            new_data[isotope] = data
+            self.data[i] = new_data
 
     def remove(self, isotope: str) -> None:
-        for layer in self.data:
-            rfn.drop_fields(layer, isotope, usemask=False)
+        for i in range(0, len(self.data)):
+            dtype = self.data[i].dtype
+            new_dtype = [descr for descr in dtype.descr if descr[0] != isotope]
+
+            new_data = np.empty(self.data[i].shape, dtype=new_dtype)
+            for name in dtype.names:
+                if name != isotope:
+                    new_data[name] = self.data[name]
+            self.data[i] = new_data
 
     def get(self, isotope: str = None, **kwargs) -> np.ndarray:
         layer = kwargs.get("layer", None)
@@ -65,10 +87,8 @@ class SRRLaser(Laser):
         else:
             data = self.krisskross()
 
-        if isotope is None:
-            data = data
-        else:
-            data = self.data[isotope]
+        if isotope is not None:
+            data = data[isotope]
 
         if "extent" in kwargs:
             x0, x1, y0, y1 = kwargs["extent"]
@@ -134,11 +154,11 @@ class SRRLaser(Laser):
         name: str = "",
         path: str = "",
     ) -> "SRRLaser":
-        assert len(isotopes) == len(layers)
         dtype = [(isotope, float) for isotope in isotopes]
 
         structured_layers = []
         for datas in layers:
+            assert len(isotopes) == len(datas)
             structured = np.empty(datas[0].shape, dtype=dtype)
             for isotope, data in zip(isotopes, datas):
                 structured[isotope] = data

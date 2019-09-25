@@ -5,8 +5,8 @@ from .. import __version__
 from .error import PewException
 
 from typing import Any, Dict, List
-from .. import Laser, Calibration, Config, IsotopeData
-from ..srr import SRR, KrissKrossConfig, KrissKrossData
+from .. import Laser, Calibration, Config
+from ..srr import SRRLaser, SRRConfig
 
 
 def load(path: str) -> List[Laser]:
@@ -31,43 +31,32 @@ def load(path: str) -> List[Laser]:
 
     if "version" not in npz.files:
         raise PewException("Archive version mismatch.")
-    elif npz["version"] < "0.1.1":
+    elif npz["version"] < "0.2.0":
         raise PewException(f"Archive version mismatch: {npz['version']}.")
 
     for f in npz.files:
         if f == "version":
             continue
-        data: Dict[str, IsotopeData] = {}
         laserdict: Dict[str, Any] = npz[f].item()
         # Config
-        if laserdict["type"] == "SRR":
+        if laserdict["type"] == "SRRLaser":
             config = SRRConfig()
         else:
             config = Config()
         for k, v in laserdict["config"].items():
             setattr(config, k, v)
 
-        # Calibration and data
-        for isotope in laserdict["data"].keys():
-            calibration = Calibration()
-            for k, v in laserdict["calibration"][isotope].items():
-                if npz["version"] < "0.1.5" and k == "points":
-                    k = "_points"
-                setattr(calibration, k, v)
+        # Calibration
+        calibration = {}
+        for name, cal in laserdict["calibration"].items():
+            calibration[name] = Calibration()
+            for k, v in cal.items():
+                setattr(calibration[name], k, v)
 
-            if laserdict["type"] == "SRR":
-                data[isotope] = SRRData(laserdict["data"][isotope], calibration)
-            else:
-                data[isotope] = IsotopeData(laserdict["data"][isotope], calibration)
-
-        if laserdict["type"] == "SRR":
-            laser = SRR(
-                data=data, config=config, name=laserdict["name"], path=path
-            )
-        else:
-            laser = Laser(
-                data=data, config=config, name=laserdict["name"], path=path
-            )
+        laser_type = SRRLaser if laserdict["type"] == "SRRLaser" else Laser
+        laser = laser_type(
+            data=laserdict["data"], calibration=calibration, config=config, name=laserdict["name"], path=path
+        )
 
         lasers.append(laser)
 
@@ -81,8 +70,8 @@ def save(path: str, laser_list: List[Laser]) -> None:
             "type": laser.__class__.__name__,
             "name": laser.name,
             "config": laser.config.__dict__,
-            "data": {k: v.data for k, v in laser.data.items()},
-            "calibration": {k: v.calibration.__dict__ for k, v in laser.data.items()},
+            "calibration": {k: v.__dict__ for k, v in laser.calibration.items()},
+            "data": laser.data,
         }
         name = laser.name
         if name in savedict:

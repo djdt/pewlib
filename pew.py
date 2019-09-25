@@ -2,7 +2,7 @@ import argparse
 import os.path
 import sys
 
-from pew import Laser, Config
+from pew import Laser, Calibration, Config
 from pew import io
 
 
@@ -24,7 +24,7 @@ def import_any(path, config):
             data = io.agilent.load(path)
         else:
             raise io.error.PewException(f"Unknown extention '{ext}'.")
-        return Laser.from_structured(data=data, config=config, name=name, filepath=path)
+        return Laser(data=data, config=config, name=name, path=path)
 
 
 def parse_args():

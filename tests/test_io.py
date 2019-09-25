@@ -69,12 +69,28 @@ def test_io_vtk():
 
     np.random.seed(12718736)
     data = np.random.random((10, 10, 3))
-    data.dtype = [("A1", float), ]
+    data.dtype = [("A1", float)]
 
     temp = tempfile.NamedTemporaryFile(suffix=".vti")
     io.vtk.save(temp.name, data, (1, 1, 1))
     assert filecmp.cmp(temp.name, os.path.join(data_path, "test.vti"))
     temp.close()
+
+
+# def generate_test_laser():
+#     from pew import Laser, Config, Calibration
+
+#     data = np.empty((10, 10), dtype=[("A1", float), ("B2", float)])
+#     data["A1"] = np.random.random((10, 10))
+#     data["A1"] = data["A1"] / np.sum(data["A1"]) * 100
+#     data["B2"] = np.random.random((10, 10))
+
+#     cal_a = Calibration(
+#         2.0, 1.0, weighting="x", points=[[1, 1], [2, 2], [3, 3]], unit="test"
+#     )
+
+#     laser = Laser(data, calibration={"A1": cal_a}, config=Config(1, 2, 3), name="Test")
+#     return laser
 
 
 def test_io_npz():
@@ -87,14 +103,14 @@ def test_io_npz():
     assert laser.config.speed == 2
     assert laser.config.scantime == 3
     # Data
-    assert laser.isotopes == ["A1", "B2"]
+    assert laser.isotopes == ("A1", "B2")
     assert laser.get("A1").shape == (10, 10)
-    assert laser.get("A1").sum() == 100
+    pytest.approx(laser.get("A1").sum(), 100)
     # Calibration
-    calibration = laser.data["A1"].calibration
+    calibration = laser.calibration["A1"]
     assert calibration.gradient == 1.0
     assert calibration.intercept == 2.0
-    assert calibration.rsq == 0.0
+    assert calibration.rsq is None
     assert calibration.weighting == "x"
     assert np.all(calibration.points == np.array([[1, 1], [2, 2], [3, 3]]))
     assert calibration.unit == "test"
