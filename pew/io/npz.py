@@ -58,6 +58,7 @@ def load(path: str) -> List[_Laser]:
             lasers.append(
                 Laser(
                     data=laserdict["data"],
+                    calibration=calibration,
                     config=config,
                     name=laserdict["name"],
                     path=path,
@@ -68,6 +69,7 @@ def load(path: str) -> List[_Laser]:
             lasers.append(
                 SRRLaser(
                     data=laserdict["data"],
+                    calibration=calibration,
                     config=config,
                     name=laserdict["name"],
                     path=path,
