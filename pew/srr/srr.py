@@ -23,7 +23,7 @@ class SRRLaser(_Laser):
         self.data: List[np.ndarray] = data
         self.calibration = {name: Calibration() for name in self.isotopes}
         if calibration is not None:
-            self.calibration.update(calibration)
+            self.calibration.update(copy.deepcopy(calibration))
 
         self.config: SRRConfig = copy.copy(
             config
@@ -103,7 +103,11 @@ class SRRLaser(_Laser):
             data = data[ymax - y1 : ymax - y0, x0:x1]
 
         if kwargs.get("calibrate", False):
-            data = self.calibration[isotope].calibrate(data)
+            if isotope is None:  # Perform calibration on all data
+                for name in data.dtype.names:
+                    data[name] = self.calibration[name].calibrate(data[name])
+            else:
+                data = self.calibration[isotope].calibrate(data)
 
         if kwargs.get("flat", False) and data.ndim > 2:
             data = np.mean(data, axis=2)

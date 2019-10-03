@@ -52,7 +52,7 @@ class Laser(_Laser):
         self.data: np.ndarray = data
         self.calibration = {name: Calibration() for name in self.isotopes}
         if calibration is not None:
-            self.calibration.update(calibration)
+            self.calibration.update(copy.deepcopy(calibration))
 
         self.config = copy.copy(config) if config is not None else Config()
 
@@ -102,13 +102,16 @@ class Laser(_Laser):
             px, py = self.config.get_pixel_width(), self.config.get_pixel_height()
             x0, x1 = int(x0 / px), int(x1 / px)
             y0, y1 = int(y0 / py), int(y1 / py)
-            print(x0, x1, y0, y1)
             # We have to invert the extent, as mpl use bottom left y coords
             ymax = data.shape[0]
             data = data[ymax - y1 : ymax - y0, x0:x1]
 
         if kwargs.get("calibrate", False):
-            data = self.calibration[isotope].calibrate(data)
+            if isotope is None:  # Perform calibration on all data
+                for name in data.dtype.names:
+                    data[name] = self.calibration[name].calibrate(data[name])
+            else:
+                data = self.calibration[isotope].calibrate(data)
 
         return data
 
