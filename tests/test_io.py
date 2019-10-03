@@ -116,6 +116,18 @@ def test_io_npz():
     assert calibration.unit == "test"
     # Saving
     temp = tempfile.NamedTemporaryFile(suffix=".npz")
-    io.npz.save(temp.name, [laser])
-    assert filecmp.cmp(temp.name, os.path.join(data_path, "test.npz"))
+    io.npz.save(temp.name, [laser])  # type: ignore
+    loaded = io.npz.load(temp.name)[0]
     temp.close()
+
+    assert np.all(loaded.data == laser.data)
+    assert loaded.config.spotsize == laser.config.spotsize
+    assert loaded.config.speed == laser.config.speed
+    assert loaded.config.scantime == laser.config.scantime
+
+    assert loaded.calibration["A1"].gradient == laser.calibration["A1"].gradient
+    assert loaded.calibration["A1"].intercept == laser.calibration["A1"].intercept
+    assert loaded.calibration["A1"].rsq == laser.calibration["A1"].rsq
+    assert loaded.calibration["A1"].weighting == laser.calibration["A1"].weighting
+    assert loaded.calibration["A1"].unit == laser.calibration["A1"].unit
+    assert np.all(loaded.calibration["A1"].points == laser.calibration["A1"].points)
