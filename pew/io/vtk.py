@@ -17,6 +17,9 @@ def save(path: str, data: np.ndarray, spacing: Tuple[float, float, float]) -> No
     if data.ndim < 3:
         data = np.reshape(data, (*data.shape, 1))
 
+    # Paraview is x,y and numpy is y,x with y order reversed
+    data = np.flip(data, axis=0).swapaxes(0, 1)
+
     nx, ny, nz = data.shape
     origin = 0.0, 0.0
 
