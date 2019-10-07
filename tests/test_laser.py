@@ -26,9 +26,11 @@ def test_laser():
 
     laser.add("C", np.random.random((10, 10)))
     assert laser.isotopes == ("A", "B", "C")
+    assert "C" in laser.calibration
 
     laser.remove("A")
     assert laser.isotopes == ("B", "C")
+    assert "A" not in laser.calibration
 
 
 def test_laser_get():

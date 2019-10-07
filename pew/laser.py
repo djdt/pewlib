@@ -71,7 +71,9 @@ class Laser(_Laser):
     def shape(self) -> Tuple[int, ...]:
         return self.data.shape
 
-    def add(self, isotope: str, data: np.ndarray) -> None:
+    def add(
+        self, isotope: str, data: np.ndarray, calibration: Calibration = None
+    ) -> None:
         assert data.shape == self.data.shape
         new_dtype = self.data.dtype.descr + [(isotope, data.dtype.str)]
 
@@ -81,6 +83,10 @@ class Laser(_Laser):
         new_data[isotope] = data
         self.data = new_data
 
+        if calibration is None:
+            calibration = Calibration()
+        self.calibration[isotope] = calibration
+
     def remove(self, isotope: str) -> None:
         new_dtype = [descr for descr in self.data.dtype.descr if descr[0] != isotope]
 
@@ -89,6 +95,8 @@ class Laser(_Laser):
             if name != isotope:
                 new_data[name] = self.data[name]
         self.data = new_data
+
+        self.calibration.pop(isotope)
 
     def get(self, isotope: str = None, **kwargs) -> np.ndarray:
         """Valid kwargs are calibrate, extent, flat."""

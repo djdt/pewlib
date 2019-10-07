@@ -53,7 +53,9 @@ class SRRLaser(_Laser):
     def shape(self) -> Tuple[int, ...]:
         return (self.data[1].shape[0], self.data[0].shape[0], len(self.data))
 
-    def add(self, isotope: str, data: List[np.ndarray]) -> None:
+    def add(
+        self, isotope: str, data: List[np.ndarray], calibration: Calibration = None
+    ) -> None:
         assert len(data) == len(self.data)
         for i in range(0, len(self.data)):
             assert data[i].shape == self.data[i].shape
@@ -66,6 +68,10 @@ class SRRLaser(_Laser):
             new_data[isotope] = data
             self.data[i] = new_data
 
+        if calibration is None:
+            calibration = Calibration()
+        self.calibration[isotope] = calibration
+
     def remove(self, isotope: str) -> None:
         for i in range(0, len(self.data)):
             dtype = self.data[i].dtype
@@ -76,6 +82,8 @@ class SRRLaser(_Laser):
                 if name != isotope:
                     new_data[name] = self.data[name]
             self.data[i] = new_data
+
+        self.calibration.pop(isotope)
 
     def get(self, isotope: str = None, **kwargs) -> np.ndarray:
         layer = kwargs.get("layer", None)
