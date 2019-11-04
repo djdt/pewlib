@@ -4,18 +4,23 @@ from typing import Tuple
 
 
 def get_weights(x: np.ndarray, weighting: str, safe: bool = True) -> np.ndarray:
+    if x.size == 0:
+        return []
+
     if safe:  # Avoid div 0 problems
         x = x.copy()
         x[x == 0] = np.min(x[x != 0])
 
-    if weighting == "x":
+    if weighting is None or weighting == "None":
+        return np.ones_linp.ones_like(x)
+    elif weighting == "x":
         return x
-    if weighting == "1/x":
+    elif weighting == "1/x":
         return 1.0 / x
-    elif weighting == "1/(x^2)":
+    elif weighting in ["1/(x^2)", "1/x²"]:
         return 1.0 / (x ** 2.0)
     else:  # Default is no weighting
-        return None
+        raise ValueError(f"Unknown weighting {weighting}.")
 
 
 def weighted_rsq(x: np.ndarray, y: np.ndarray, w: np.ndarray = None) -> float:
