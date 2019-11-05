@@ -12,7 +12,7 @@ def get_weights(x: np.ndarray, weighting: str, safe: bool = True) -> np.ndarray:
         x[x == 0] = np.min(x[x != 0])
 
     if weighting is None or weighting == "None":
-        return np.ones_linp.ones_like(x)
+        return None
     elif weighting == "x":
         return x
     elif weighting == "1/x":

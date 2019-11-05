@@ -67,11 +67,11 @@ class Calibration(object):
             self.gradient, self.intercept, self.rsq = 1.0, 0.0, None
         else:
             no_nans = ~np.isnan(self.points).any(axis=1)
-            if no_nans.size == 0 or no_nans.ndim != 2:
+            if no_nans.size == 0:
                 self.gradient, self.intercept, self.rsq = 1.0, 0.0, None
             else:
                 x, y = self.points[no_nans, 0], self.points[no_nans, 1]
-                w = self.weights[no_nans]
+                w = None if self.weights is None else self.weights[no_nans]
                 self.gradient, self.intercept, self.rsq = weighted_linreg(x, y, w)
 
     def calibrate(self, data: np.ndarray) -> np.ndarray:
