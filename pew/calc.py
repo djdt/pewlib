@@ -4,10 +4,7 @@ from typing import Tuple
 
 
 def get_weights(x: np.ndarray, weighting: str, safe: bool = True) -> np.ndarray:
-    if x.size == 0:
-        return []
-
-    if safe:  # Avoid div 0 problems
+    if safe and x.size > 0:  # Avoid div 0 problems
         x = x.copy()
         x[x == 0] = np.min(x[x != 0])
 
