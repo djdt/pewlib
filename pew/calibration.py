@@ -27,9 +27,8 @@ class Calibration(object):
         if points is not None:
             self.points = points
 
-        if isinstance(weights, str):
-            self.weights = get_weights(self.concentrations(), weights)
-        else:
+        self._weights = None
+        if weights is not None:
             self.weights = weights
         self.weighting = weighting
 
@@ -45,6 +44,22 @@ class Calibration(object):
         if points.shape[0] < 2 or points.shape[1] != 2:
             raise ValueError("A minimum of 2 points required.")
         self._points = points
+
+    @property
+    def weights(self) -> np.ndarray:
+        return self._weights
+
+    @weights.setter
+    def weights(self, weights: Union[np.ndarray, str]) -> None:
+        if self._points is None:
+            self._weights = None
+        elif isinstance(weights, str):
+            self._weights = get_weights(self._points[:, 0], weights)
+        else:
+            weights = np.array(weights, dtype=float)
+            if weights.ndim != 1 or weights.size != self.points[:, 0].size:
+                raise ValueError("Weights must have same length as points.")
+            self._weights = weights
 
     def __str__(self) -> str:
         s = f"y = {self.gradient:.4g} · x - {self.intercept:.4g}"
@@ -71,7 +86,9 @@ class Calibration(object):
                 self.gradient, self.intercept, self.rsq = 1.0, 0.0, None
             else:
                 x, y = self.points[no_nans, 0], self.points[no_nans, 1]
-                w = None if self.weights is None else self.weights[no_nans]
+                w = self._weights
+                if w is not None:
+                    w = w[no_nans]
                 self.gradient, self.intercept, self.rsq = weighted_linreg(x, y, w)
 
     def calibrate(self, data: np.ndarray) -> np.ndarray:

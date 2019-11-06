@@ -70,7 +70,6 @@ def test_io_vtk():
     np.random.seed(12718736)
     data = np.random.random((10, 10, 3))
     data.dtype = [("A1", float)]
-
     temp = tempfile.NamedTemporaryFile(suffix=".vti")
     io.vtk.save(temp.name, data, (1, 1, 1))
     assert filecmp.cmp(temp.name, os.path.join(data_path, "test.vti"))

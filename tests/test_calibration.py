@@ -41,3 +41,18 @@ def test_calibration_from_points():
     assert np.all(calibration.counts() == np.array([1.0, 2.0, 3.0, 4.0]))
     # With nans
     calibration = Calibration.from_points([[0, 1], [1, np.nan], [1, 3], [2, 4]])
+
+
+def test_calibration_from_points_weights():
+    points = np.vstack([[1.0, 2.0, 3.0, 4.0, 5.0], [1.0, 1.0, 2.0, 4.0, 8.0]]).T
+    calibration = Calibration.from_points(points=points, weights="x")
+    assert pytest.approx(calibration.gradient, 2.085814)
+    assert pytest.approx(calibration.intercept, -3.314286)
+    assert pytest.approx(calibration.rsq, 0.865097)
+
+    calibration = Calibration.from_points(
+        points=points, weights=[1.0, 2.0, 3.0, 4.0, 5.0]
+    )
+    assert pytest.approx(calibration.gradient, 2.085814)
+    assert pytest.approx(calibration.intercept, -3.314286)
+    assert pytest.approx(calibration.rsq, 0.865097)
