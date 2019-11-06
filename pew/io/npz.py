@@ -32,7 +32,7 @@ def load(path: str) -> List[_Laser]:
 
     if "version" not in npz.files:
         raise PewException("Archive version mismatch.")
-    elif npz["version"] < "0.2.0":
+    elif npz["version"] < "0.2.5":
         raise PewException(f"Archive version mismatch: {npz['version']}.")
 
     for f in npz.files:
