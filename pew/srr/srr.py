@@ -118,7 +118,13 @@ class SRRLaser(_Laser):
                 data = self.calibration[isotope].calibrate(data)
 
         if kwargs.get("flat", False) and data.ndim > 2:
-            data = np.mean(data, axis=2)
+            if isotope is not None:
+                data = np.mean(data, axis=2)
+            else:
+                structured = np.empty(data.shape[:2], data.dtype)
+                for name in data.dtype.names:
+                    structured[name] = np.mean(data[name], axis=2)
+                data = structured
 
         return data
 
