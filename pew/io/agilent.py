@@ -7,7 +7,7 @@ import numpy.lib.recfunctions
 
 from .error import PewException, PewWarning
 
-from typing import List, Generator
+from typing import Generator, List, Tuple
 
 
 def clean_lines(csv: str):
