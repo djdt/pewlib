@@ -10,6 +10,18 @@ from .error import PewException, PewWarning
 from typing import List, Generator
 
 
+# Read AcqMethod.xml
+#  CAN WE DETERMINE LINE LENGTH??
+#  Determine Elements and element order
+#   Order in csvs is different, (mz / mzmz)
+#  Determine the datafile order
+# Import each datafile (line?) in order
+#   IF MISSING THEN INSERT EMPTY LINE
+#  Import should known element order
+#  Can also calculate the scantime here
+# Vstack data files into 2d image
+
+
 def clean_lines(csv: str):
     delimiter_count = 0
     past_header = False
