@@ -36,7 +36,11 @@ def weighted_rsq(x: np.ndarray, y: np.ndarray, w: np.ndarray = None) -> float:
 
 def weighted_linreg(
     x: np.ndarray, y: np.ndarray, w: np.ndarray = None
-) -> Tuple[float, float, float]:
-    b, m = np.polynomial.polynomial.polyfit(x, y, 1, w=w if w is None else np.sqrt(w))
+) -> Tuple[float, float, float, float]:
+    coef, stats = np.polynomial.polynomial.polyfit(
+        x, y, 1, w=w if w is None else np.sqrt(w), full=True
+    )
     r2 = weighted_rsq(x, y, w)
-    return m, b, r2
+    yerr = np.sqrt(stats[0] / (x.size - 2))
+
+    return coef[1], coef[0], r2, yerr

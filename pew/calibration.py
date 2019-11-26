@@ -11,6 +11,7 @@ class Calibration(object):
         intercept: float = 0.0,
         gradient: float = 1.0,
         rsq: float = None,
+        yerr: float = None,
         points: np.ndarray = None,
         weights: Union[np.ndarray, str] = None,
         weighting: str = "None",
@@ -23,6 +24,8 @@ class Calibration(object):
         self.unit = unit
 
         self.rsq = rsq
+        self.yerr = yerr
+
         self._points = None
         if points is not None:
             self.points = points
@@ -89,7 +92,9 @@ class Calibration(object):
                 w = self._weights
                 if w is not None:
                     w = w[no_nans]
-                self.gradient, self.intercept, self.rsq = weighted_linreg(x, y, w)
+                self.gradient, self.intercept, self.rsq, self.yerr = weighted_linreg(
+                    x, y, w
+                )
 
     def calibrate(self, data: np.ndarray) -> np.ndarray:
         if self.intercept == 0.0 and self.gradient == 1.0:
