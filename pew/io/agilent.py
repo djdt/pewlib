@@ -36,7 +36,7 @@ def csv_read_params(path: str) -> Tuple[List[str], float, int]:
     )
     total_time = np.sum(data["Time_Sec"])
     names = [name for name in data.dtype.names if name != "Time_Sec"]
-    return names, total_time / data.shape[0], data.shape[0]
+    return names, np.round(total_time / data.shape[0], 4), data.shape[0]
 
 
 def find_datafiles(path: str) -> Generator[str, None, None]:
@@ -93,7 +93,7 @@ def msts_read_params(msts_path: str) -> Tuple[float, int]:
     return np.round((etime - stime) * 60 / scans, 4), scans
 
 
-def load(path: str) -> np.ndarray:
+def load(path: str, full: bool = False) -> np.ndarray:
     """Imports an Agilent batch (.b) directory, returning IsotopeData object.
 
    Scans the given path for .d directories containg a similarly named
@@ -101,6 +101,7 @@ def load(path: str) -> np.ndarray:
 
     Args:
        path: Path to the .b directory
+       full: return dict of available params
 
     Returns:
         The structured numpy array.
@@ -157,4 +158,7 @@ def load(path: str) -> np.ndarray:
             warnings.warn(f"Row {i} missing, set to zero.", PewWarning)
             data[:, i] = np.zeros(data.shape[0], dtype=data.dtype)
 
-    return data
+    if full:
+        return data, dict(scantime=scan_time)
+    else:
+        return data
