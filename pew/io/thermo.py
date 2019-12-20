@@ -1,14 +1,58 @@
 import numpy as np
 
-from .error import PewException
+from pew.io.error import PewException
 
-from typing import Dict, List
+from typing import Generator, List, Set, Tuple
 
 
-def load(path: str) -> np.ndarray:
+def clean_lines(csv: str) -> Generator[str, None, None]:
+    with open(csv, "r") as fp:
+        for line in fp:
+            yield line.replace(",", ";").replace("\t", ";")
+
+
+def get_name_data(path: str, name: str) -> Generator[str, None, None]:
+    for line in clean_lines(path):
+        run_type, _, _name, data_type, data = line.split(";", 4)
+        if run_type != "MainRuns":
+            continue
+        if _name == name and data_type == "Counter":
+            yield data
+
+
+def preprocess_file(path: str) -> Tuple[List[str], float, Tuple[int, int]]:
+    names: Set[str] = set()
+    time = 0.0
+    nscans = 0
+
+    lines = clean_lines(path)
+    line1 = next(lines)
+    if "Sample" not in line1:
+        raise PewException("Unknown iCap CSV formatting.")
+    nlines = line1.count(";") - 4
+
+    for line in lines:
+        run_type, n, name, data_type, data = line.split(";", 4)
+        if name:
+            names.add(name)
+        nscans = max(nscans, int(n or -1) + 1)
+        if run_type != "MainRuns":
+            continue
+        if data_type == "Time":
+            time = max(time, float(next(s for s in data.split(";") if s)))
+
+    return (
+        sorted(names, key=lambda f: int("".join(filter(str.isdigit, f)))),
+        np.round(time / nscans, 4),
+        (nlines, nscans),
+    )
+
+
+def load(path: str, full: bool = False) -> np.ndarray:
     """Imports iCap data exported using the CSV export function.
 
     Data is read from the "Counts" column.
+    If full and a "Time" column is available then the scan time is also returned.
 
     Args:
         path: Path to CSV
@@ -20,39 +64,23 @@ def load(path: str) -> np.ndarray:
         PewException
 
     """
-    data: Dict[str, List[np.ndarray]] = {}
-    with open(path, "r") as fp:
-        cleaned = (
-            line.replace(",", ";").replace("\t", ";").strip()
-            for line in fp
-            if "Counter" in line
-        )
+    names, scan_time, shape = preprocess_file(path)
+    data = np.empty(shape, dtype=[(name, np.float64) for name in names])
+    cols = np.arange(0, shape[0])
 
-        for cline in cleaned:
-            try:
-                # Trim off last delimiter
-                if cline.endswith(";"):
-                    cline = cline[:-1]
-                _, _, isotope, _, line_data = cline.split(";", 4)
-                data.setdefault(isotope, []).append(
-                    np.genfromtxt(
-                        [line_data], delimiter=";", dtype=float, filling_values=0.0
-                    )
-                )
-            except ValueError as e:
-                raise PewException("Could not parse file.") from e
+    for name in names:
+        try:
+            data[name] = np.genfromtxt(
+                get_name_data(path, name),
+                delimiter=";",
+                usecols=cols,
+                max_rows=shape[1],
+                filling_values=0.0,
+            ).T
+        except ValueError as e:
+            raise PewException("Could not parse file.") from e
 
-    if not data:  # Data is empty
-        raise PewException("Empty data, nothing to import.")
-
-    # Stack lines to form 2d
-    keys = list(data.keys())
-    dtype = [(k, float) for k in keys]
-    structured = np.empty((data[keys[0]][0].shape[0], len(data[keys[0]])), dtype=dtype)
-    for k in keys:
-        stack = np.vstack(data[k][:]).transpose()
-        if stack.ndim != 2:
-            raise PewException(f"Invalid data dimensions '{stack.ndim}'.")
-        structured[k] = stack
-
-    return structured
+    if full:
+        return data, dict(scantime=scan_time)
+    else:
+        return data
