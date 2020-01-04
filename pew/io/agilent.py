@@ -43,7 +43,7 @@ def find_datafiles(path: str) -> Generator[str, None, None]:
     with os.scandir(path) as it:
         for entry in it:
             if entry.name.lower().endswith(".d") and entry.is_dir():
-                yield entry.path
+                yield entry.name
 
 
 def acq_method_read_datafiles(method_path: str) -> Generator[str, None, None]:
@@ -124,11 +124,10 @@ def load(path: str, full: bool = False) -> np.ndarray:
     # Collect csvs
     csvs: List[str] = []
     for d in ddirs:
-        csv = os.path.splitext(d)[0] + ".csv"
-        csv = os.path.join(path, d, csv)
+        csv = os.path.join(path, d, os.path.splitext(d)[0] + ".csv")
         if not os.path.exists(csv):
-            warnings.warn(f"Missing csv '{os.path.basename(csv)}'.", PewWarning)
-            csvs.append("")
+            warnings.warn(f"Missing csv '{csv}'.", PewWarning)
+            csvs.append(None)
         else:
             csvs.append(csv)
 
@@ -139,24 +138,25 @@ def load(path: str, full: bool = False) -> np.ndarray:
         scan_time, nscans = msts_read_params(msts_xml)
     else:
         warnings.warn("AcqMethod.xml or MSTS.xml not found, reading params from csv.")
-        names, scan_time, nscans = csv_read_params(next(c for c in csvs if c != ""))
+        names, scan_time, nscans = csv_read_params(next(c for c in csvs if c is not None))
     nscans += 1
 
     data = np.empty((nscans, len(ddirs)), dtype=[(name, np.float64) for name in names])
     for i, csv in enumerate(csvs):
-        try:
-            data[:, i] = np.genfromtxt(
-                clean_lines(csv),
-                delimiter=b",",
-                names=names,
-                usecols=np.arange(1, len(names) + 1),
-                dtype=np.float64,
-            )
-        except FileNotFoundError:
+        if csv is None:
             data[:, i] = np.zeros(data.shape[0], dtype=data.dtype)
-        except ValueError:
-            warnings.warn(f"Row {i} missing, set to zero.", PewWarning)
-            data[:, i] = np.zeros(data.shape[0], dtype=data.dtype)
+        else:
+            try:
+                data[:, i] = np.genfromtxt(
+                    clean_lines(csv),
+                    delimiter=b",",
+                    names=names,
+                    usecols=np.arange(1, len(names) + 1),
+                    dtype=np.float64,
+                )
+            except ValueError:
+                warnings.warn(f"Row {i} missing, set to zero.", PewWarning)
+                data[:, i] = np.zeros(data.shape[0], dtype=data.dtype)
 
     if full:
         return data, dict(scantime=scan_time)
