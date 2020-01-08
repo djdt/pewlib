@@ -156,7 +156,7 @@ def load(path: str, full: bool = False) -> np.ndarray:
                 )
             except ValueError:
                 warnings.warn(f"Row {i} missing, set to zero.", PewWarning)
-                data[:, i] = np.zeros(data.shape[0], dtype=data.dtype)
+                data[i, :] = np.zeros(data.shape[0], dtype=data.dtype)
 
     if full:
         return data, dict(scantime=scan_time)
