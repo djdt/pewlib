@@ -25,7 +25,7 @@ def test_io_agilent():
         io.agilent.load(os.path.join(data_path, "missing_line.b"))
 
 
-def test_io_agilent_full():
+def test_io_agilent_acq_method():
     data_path = os.path.join(os.path.dirname(__file__), "data", "agilent")
     data, params = io.agilent.load(os.path.join(data_path, "acq_method.b"), full=True)
     assert data.shape == (3, 3)
@@ -68,11 +68,13 @@ def test_io_thermo():
     with pytest.raises(io.error.PewException):
         io.thermo.load(os.path.join(data_path_csv, "csv.csv"))
     # Test loading
-    data = io.thermo.load(os.path.join(data_path, "icap.csv"))
+    data, params = io.thermo.load(os.path.join(data_path, "icap.csv"), full=True)
     assert data.shape == (3, 3)
     assert data.dtype.names == ("1A", "2B")
     assert np.sum(data["1A"]) == pytest.approx(9.0)
     assert np.sum(data["2B"]) == pytest.approx(0.9)
+
+    assert params['scantime'] == 0.1
 
 
 def test_io_vtk():
