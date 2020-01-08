@@ -34,7 +34,7 @@ def csv_read_params(path: str) -> Tuple[List[str], float, int]:
     data = np.genfromtxt(
         clean_lines(path), delimiter=b",", names=True, dtype=np.float64
     )
-    total_time = np.sum(data["Time_Sec"])
+    total_time = np.max(data["Time_Sec"])
     names = [name for name in data.dtype.names if name != "Time_Sec"]
     return names, np.round(total_time / data.shape[0], 4), data.shape[0]
 
