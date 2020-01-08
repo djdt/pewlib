@@ -8,7 +8,9 @@ from typing import Generator, List, Set, Tuple
 def clean_lines(csv: str) -> Generator[str, None, None]:
     with open(csv, "r") as fp:
         for line in fp:
-            yield line.replace(",", ";").replace("\t", ";")
+            line = line.replace(",", ";").replace("\t", ";")
+            if ";" in line:
+                yield line
 
 
 def get_name_data(path: str, name: str) -> Generator[str, None, None]:
