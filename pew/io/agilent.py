@@ -139,7 +139,7 @@ def load(path: str, full: bool = False) -> np.ndarray:
     else:
         warnings.warn("AcqMethod.xml or MSTS.xml not found, reading params from csv.")
         names, scan_time, nscans = csv_read_params(next(c for c in csvs if c is not None))
-    nscans += 1
+    # nscans += 1
 
     data = np.empty((len(ddirs), nscans), dtype=[(name, np.float64) for name in names])
     for i, csv in enumerate(csvs):
@@ -150,13 +150,13 @@ def load(path: str, full: bool = False) -> np.ndarray:
                 data[i, :] = np.genfromtxt(
                     clean_lines(csv),
                     delimiter=b",",
-                    names=names,
+                    names=True,
                     usecols=np.arange(1, len(names) + 1),
                     dtype=np.float64,
                 )
             except ValueError:
                 warnings.warn(f"Row {i} missing, set to zero.", PewWarning)
-                data[i, :] = np.zeros(data.shape[0], dtype=data.dtype)
+                data[i, :] = np.zeros(data.shape[1], dtype=data.dtype)
 
     if full:
         return data, dict(scantime=scan_time)

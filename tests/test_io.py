@@ -21,8 +21,19 @@ def test_io_agilent():
     assert np.sum(data["A1"]) == pytest.approx(9.0)
     assert np.sum(data["B2"]) == pytest.approx(0.9)
     # Make sure error raised on missing data
-    with pytest.raises(io.error.PewException):
+    with pytest.warns(io.error.PewWarning):
         io.agilent.load(os.path.join(data_path, "missing_line.b"))
+
+
+def test_io_agilent_full():
+    data_path = os.path.join(os.path.dirname(__file__), "data", "agilent")
+    data, params = io.agilent.load(os.path.join(data_path, "acq_method.b"), full=True)
+    assert data.shape == (3, 3)
+    assert data.dtype.names == ("A1", "B2")
+    assert np.sum(data["A1"]) == pytest.approx(9.0)
+    assert np.sum(data["B2"]) == pytest.approx(0.9)
+
+    assert params["scantime"] == 0.1 * 60
 
 
 def test_io_csv():
