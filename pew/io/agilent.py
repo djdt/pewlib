@@ -141,13 +141,13 @@ def load(path: str, full: bool = False) -> np.ndarray:
         names, scan_time, nscans = csv_read_params(next(c for c in csvs if c is not None))
     nscans += 1
 
-    data = np.empty((nscans, len(ddirs)), dtype=[(name, np.float64) for name in names])
+    data = np.empty((len(ddirs), nscans), dtype=[(name, np.float64) for name in names])
     for i, csv in enumerate(csvs):
         if csv is None:
-            data[:, i] = np.zeros(data.shape[0], dtype=data.dtype)
+            data[i, :] = np.zeros(data.shape[1], dtype=data.dtype)
         else:
             try:
-                data[:, i] = np.genfromtxt(
+                data[i, :] = np.genfromtxt(
                     clean_lines(csv),
                     delimiter=b",",
                     names=names,
