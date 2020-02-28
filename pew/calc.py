@@ -20,6 +20,11 @@ def get_weights(x: np.ndarray, weighting: str, safe: bool = True) -> np.ndarray:
         raise ValueError(f"Unknown weighting {weighting}.")
 
 
+def moving_average_filter(x: np.ndarray, n: int = 3) -> np.ndarray:
+    x_pad = np.pad(x, (n // 2, n - 1 - n // 2), mode="edge")
+    return np.convolve(x_pad, np.ones((n,)) / n, mode="valid")
+
+
 def weighted_rsq(x: np.ndarray, y: np.ndarray, w: np.ndarray = None) -> float:
     c = np.cov(x, y, aweights=w)
     d = np.diag(c)
