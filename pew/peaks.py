@@ -77,12 +77,14 @@ def _peak_data_from_ridges(
     ridges: np.ndarray,
     maxima_coords: np.ndarray,
     cwt_windows: np.ndarray,
-    peak_height_method: str = "cwt",
+    peak_height_method: str = "maxima",
+    peak_integration_method: str = "base",
 ) -> np.ndarray:
     widths = np.take(cwt_windows, maxima_coords[0])
 
     lefts = maxima_coords[1] - widths
     rights = maxima_coords[1] + widths
+    bases = np.minimum(lefts, rights)
 
     if peak_height_method == "cwt":  # Height at maxima cwt ridge
         tops = maxima_coords[1]
@@ -93,17 +95,30 @@ def _peak_data_from_ridges(
     else:
         raise ValueError("Valid peak_height_method are 'cwt', 'maxima'.")
 
+    if peak_integration_method == "base":
+        area = np.array(
+            [np.trapz(x[r[0] : r[1]] - x[bases[i]]) for i, r in enumerate(ranges)]
+        )
+    elif peak_integration_method == "prominence":
+        prominences = np.maximum(x[lefts], x[rights])
+        area = np.array(
+            [np.trapz(x[r[0] : r[1]] - prominences[i]) for i, r in enumerate(ranges)]
+        )
+    else:
+        raise ValueError("Valid peak_integration_method are 'base', 'prominence'.")
+
     dtype = np.dtype(
         {
-            "names": ["height", "width", "top", "bottom", "left", "right"],
-            "formats": [float, float, int, int, int, int],
+            "names": ["height", "width", "area", "top", "base", "left", "right"],
+            "formats": [float, float, float, int, int, int, int],
         }
     )
     peaks = np.empty(tops.shape, dtype=dtype)
-    peaks["height"] = x[tops]
+    peaks["area"] = area
+    peaks["height"] = x[tops] - x[bases]
     peaks["width"] = widths
     peaks["top"] = tops
-    peaks["bottom"] = np.minimum(x[lefts], x[rights])
+    peaks["base"] = bases
     peaks["left"] = lefts
     peaks["right"] = rights
     return peaks
@@ -115,8 +130,11 @@ def find_peaks(
     max_width: int,
     ridge_gap_threshold: int = None,
     ridge_min_snr: float = 10.0,
+    peak_integration_method: str = "base",
+    peak_min_area: float = 0.0,
     peak_min_height: float = 0.0,
     peak_min_width: float = 0.0,
+    peak_min_prominence: float = 0.0,
 ) -> np.ndarray:
 
     windows = np.arange(min_midth, max_width + 1)
@@ -125,12 +143,24 @@ def find_peaks(
     ridges, ridge_maxima = _filter_ridges(ridges, cwt_coef, min_snr=ridge_min_snr)
 
     peaks = _peak_data_from_ridges(
-        x, ridges, ridge_maxima, windows, peak_height_method="maxima"
+        x,
+        ridges,
+        ridge_maxima,
+        windows,
+        peak_height_method="maxima",
+        peak_integration_method=peak_integration_method,
     )
 
     # Filter the peaks based on final criteria
+    bad_area = peaks["area"] < peak_min_area
     bad_heights = peaks["height"] < peak_min_height
     bad_widths = peaks["width"] < peak_min_width
-    bad_peaks = np.logical_or(bad_heights, bad_widths)
+    bad_prominences = (
+        peaks["height"] - np.maximum(x[peaks["left"]], x[peaks["right"]])
+        < peak_min_prominence
+    )
+    bad_peaks = np.logical_or.reduce(
+        (bad_area, bad_heights, bad_widths, bad_prominences)
+    )
 
     return peaks[~bad_peaks]
