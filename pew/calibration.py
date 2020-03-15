@@ -1,6 +1,6 @@
 import numpy as np
 
-from .calc import get_weights, weighted_linreg
+from .calc import weighting, weighted_linreg
 
 from typing import Union
 
@@ -57,7 +57,7 @@ class Calibration(object):
         if self._points is None:
             self._weights = None
         elif isinstance(weights, str):
-            self._weights = get_weights(self._points[:, 0], weights)
+            self._weights = weighting(self._points[:, 0], weights)
         else:
             weights = np.array(weights, dtype=float)
             if weights.ndim != 1 or weights.size != self.points[:, 0].size:

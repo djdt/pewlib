@@ -1,21 +1,21 @@
 import pytest
 import numpy as np
 
-from pew.calc import get_weights, weighted_rsq, weighted_linreg
+from pew.calc import weighting, weighted_rsq, weighted_linreg
 from pew.srr.calc import subpixel_offset
 
 
-def test_get_weights():
+def test_weighting():
     # Test all the weights, safe return
     x = np.array([1.0, 0.4, 0.2, 0.5, 0.8])
-    assert get_weights(x, None) is None
-    assert np.all(get_weights(x, "x") == x)
-    assert np.all(get_weights(x, "1/x") == 1 / x)
-    assert np.all(get_weights(x, "1/(x^2)") == 1 / (x * x))
+    assert weighting(x, None) is None
+    assert np.all(weighting(x, "x") == x)
+    assert np.all(weighting(x, "1/x") == 1 / x)
+    assert np.all(weighting(x, "1/(x^2)") == 1 / (x * x))
     # Test safe return
     x = np.array([0.0, 0.1, 0.2])
-    assert np.all(get_weights(x, "x", True) == np.array([0.1, 0.1, 0.2]))
-    assert np.all(get_weights(x, "x", False) == x)
+    assert np.all(weighting(x, "x", True) == np.array([0.1, 0.1, 0.2]))
+    assert np.all(weighting(x, "x", False) == x)
 
 
 def test_weighted_rsq():
