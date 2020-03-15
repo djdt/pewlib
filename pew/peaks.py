@@ -96,16 +96,12 @@ def _peak_data_from_ridges(
         raise ValueError("Valid peak_height_method are 'cwt', 'maxima'.")
 
     if peak_integration_method == "base":
-        area = np.array(
-            [np.trapz(x[r[0] : r[1]] - x[bases[i]]) for i, r in enumerate(ranges)]
-        )
+        ibases = x[bases]
     elif peak_integration_method == "prominence":
-        prominences = np.maximum(x[lefts], x[rights])
-        area = np.array(
-            [np.trapz(x[r[0] : r[1]] - prominences[i]) for i, r in enumerate(ranges)]
-        )
+        ibases = np.maximum(x[lefts], x[rights])
     else:
         raise ValueError("Valid peak_integration_method are 'base', 'prominence'.")
+    area = np.array([np.trapz(x[r[0] : r[1]] - ib) for r, ib in zip(ranges, ibases)])
 
     dtype = np.dtype(
         {
