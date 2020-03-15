@@ -49,3 +49,18 @@ def weighted_linreg(
     yerr = np.sqrt(stats[0] / (x.size - 2))
 
     return coef[1], coef[0], r2, yerr
+
+
+def sliding_window(x: np.ndarray, window: int, step: int = 1) -> np.ndarray:
+    shape = ((x.size - window) // step + 1, window)
+    strides = (step * x.strides[0], x.strides[0])
+    return np.lib.stride_tricks.as_strided(x, shape=shape, strides=strides)
+
+
+def centered_sliding_window(
+    x: np.ndarray, window: int, step: int = 1, pad_value: float = np.nan
+) -> np.ndarray:
+    x_pad = np.pad(
+        x, (window // 2, window - window // 2 - 1), constant_values=pad_value
+    )
+    return sliding_window(x_pad, window, step)
