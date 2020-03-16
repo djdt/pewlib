@@ -32,9 +32,9 @@ def test_weighted_linreg():
     x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
     y = np.array([1.0, 1.0, 2.0, 4.0, 8.0])
     # Normal
-    assert weighted_linreg(x, y, None) == pytest.approx((1.7, -1.9, 0.830459))
+    assert weighted_linreg(x, y, None) == pytest.approx((1.7, -1.9, 0.830459, 1.402379))
     # Weighted
-    assert weighted_linreg(x, y, x) == pytest.approx((2.085714, -3.314286, 0.865097))
+    assert weighted_linreg(x, y, x) == pytest.approx((2.085714, -3.314286, 0.865097, 2.296996))
 
 
 def test_subpixel_offset():

@@ -1,25 +1,20 @@
 import os
-from xml.etree import ElementTree
 import warnings
+from xml.etree import ElementTree
+
 import numpy as np
 import numpy.lib
 import numpy.lib.recfunctions
 
-from .error import PewException, PewWarning
+from pew.io.error import PewException, PewWarning
 
 from typing import Generator, List, Tuple
 
-
-# Read AcqMethod.xml
-#  CAN WE DETERMINE LINE LENGTH??
-#  Determine Elements and element order
-#   Order in csvs is different, (mz / mzmz)
-#  Determine the datafile order
-# Import each datafile (line?) in order
-#   IF MISSING THEN INSERT EMPTY LINE
-#  Import should known element order
-#  Can also calculate the scantime here
-# Vstack data files into 2d image
+# These files are not present in older software, must be able to be ignored safely
+# Important files:
+#   Method/AcqMethod.xml - Contains the datafile list <SampleParameter>
+#   {.d file}/AcqData/MSTS.xml - Contains run time in mins <StartTime>, <EndTime>; number of scans <NumOfScans>
+#   {.d file}/AcqData/MSTS_XSpecific.xml - Contains acc time for elements <AccumulationTime>
 
 
 def clean_lines(csv: str):
@@ -35,7 +30,37 @@ def clean_lines(csv: str):
                 yield line
 
 
-def acq_read_elements(method_path: str) -> List[str]:
+def csv_read_params(path: str) -> Tuple[List[str], float, int]:
+    data = np.genfromtxt(
+        clean_lines(path), delimiter=b",", names=True, dtype=np.float64
+    )
+    total_time = np.max(data["Time_Sec"])
+    names = [name for name in data.dtype.names if name != "Time_Sec"]
+    return names, np.round(total_time / data.shape[0], 4), data.shape[0]
+
+
+def find_datafiles(path: str) -> Generator[str, None, None]:
+    with os.scandir(path) as it:
+        for entry in it:
+            if entry.name.lower().endswith(".d") and entry.is_dir():
+                yield entry.name
+
+
+def acq_method_read_datafiles(method_path: str) -> Generator[str, None, None]:
+    xml = ElementTree.parse(method_path)
+    ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
+    samples = xml.findall("ns:SampleParameter", ns)
+    samples = sorted(
+        samples, key=lambda s: int(s.findtext("ns:SampleID", namespaces=ns) or -1)
+    )
+
+    for sample in samples:
+        data_file = sample.findtext("ns:DataFileName", namespaces=ns)
+        if data_file is not None:
+            yield data_file
+
+
+def acq_method_read_elements(method_path: str) -> List[str]:
     xml = ElementTree.parse(method_path)
     ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
 
@@ -50,26 +75,25 @@ def acq_read_elements(method_path: str) -> List[str]:
 
     elements = sorted(elements, key=lambda e: (e[1], e[2]))
     return [
-        f"{e[0]}{e[1]}{'->' if e[2] > 1 else ''}{e[2] if e[2] > -1 else ''}"
+        f"{e[0]}{e[1]}{'__' if e[2] > 1 else ''}{e[2] if e[2] > -1 else ''}"
         for e in elements
     ]
 
 
-def acq_read_datafiles(method_path: str) -> Generator[str, None, None]:
-    xml = ElementTree.parse(method_path)
-    ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
-    samples = xml.findall("ns:SampleParameter", ns)
-    samples = sorted(
-        samples, key=lambda s: int(s.findtext("ns:SampleID", namespaces=ns) or -1)
-    )
+def msts_read_params(msts_path: str) -> Tuple[float, int]:
+    xml = ElementTree.parse(msts_path)
+    segment = xml.find("TimeSegment")
+    if segment is None:
+        raise PewException("Malformed MSTS.xml")
 
-    for sample in samples:
-        data_file = sample.findtext("ns:DataFileName", namespaces=ns)
-        if data_file is not None:
-            yield data_file
+    stime = float(segment.findtext("StartTime") or 0)
+    etime = float(segment.findtext("EndTime") or 0)
+    scans = int(segment.findtext("NumOfScans") or 0)
+
+    return np.round((etime - stime) * 60 / scans, 4), scans
 
 
-def load(path: str) -> np.ndarray:
+def load(path: str, full: bool = False) -> np.ndarray:
     """Imports an Agilent batch (.b) directory, returning IsotopeData object.
 
    Scans the given path for .d directories containg a similarly named
@@ -77,6 +101,7 @@ def load(path: str) -> np.ndarray:
 
     Args:
        path: Path to the .b directory
+       full: return dict of available params
 
     Returns:
         The structured numpy array.
@@ -85,46 +110,55 @@ def load(path: str) -> np.ndarray:
         PewException
 
     """
-    names = acq_read_elements(os.path.join(path, "Method", "AcqMethod.xml"))
-    ddirs = acq_read_datafiles(os.path.join(path, "Method", "AcqMethod.xml"))
-    # ddirs = []
-    # with os.scandir(path) as it:
-    #     for entry in it:
-    #         if entry.name.lower().endswith(".d") and entry.is_dir():
-    #             ddirs.append(entry.path)
+    acq_xml = os.path.join(path, "Method", "AcqMethod.xml")
+    # Collect data files
+    if os.path.exists(acq_xml):
+        ddirs = list(acq_method_read_datafiles(acq_xml))
+    else:
+        warnings.warn(
+            "AcqMethod.xml not found, falling back to alphabetical order.", PewWarning
+        )
+        ddirs = list(find_datafiles(path))
+        ddirs.sort(key=lambda f: int("".join(filter(str.isdigit, f))))
 
-    csvs = []
-    # Sort by name
-    ddirs.sort(key=lambda f: int("".join(filter(str.isdigit, f))))
+    # Collect csvs
+    csvs: List[str] = []
     for d in ddirs:
-        csv = os.path.splitext(os.path.basename(d))[0] + ".csv"
-        csv = os.path.join(d, csv)
+        csv = os.path.join(path, d, os.path.splitext(d)[0] + ".csv")
         if not os.path.exists(csv):
-            warnings.warn(f"{path} missing csv {os.path.basename(csv)}", PewWarning)
-            continue
-        csvs.append(csv)
+            warnings.warn(f"Missing csv '{csv}'.", PewWarning)
+            csvs.append(None)
+        else:
+            csvs.append(csv)
 
-    datas = []
-    for csv in csvs:
-        try:
-            datas.append(
-                np.genfromtxt(
+    # Read elements, the scan time and number fo scans
+    msts_xml = os.path.join(path, ddirs[0], "AcqData", "MSTS.xml")
+    if os.path.exists(msts_xml) and os.path.exists(acq_xml):
+        names = acq_method_read_elements(acq_xml)
+        scan_time, nscans = msts_read_params(msts_xml)
+    else:
+        warnings.warn("AcqMethod.xml or MSTS.xml not found, reading params from csv.")
+        names, scan_time, nscans = csv_read_params(next(c for c in csvs if c is not None))
+    # nscans += 1
+
+    data = np.empty((len(ddirs), nscans), dtype=[(name, np.float64) for name in names])
+    for i, csv in enumerate(csvs):
+        if csv is None:
+            data[i, :] = np.zeros(data.shape[1], dtype=data.dtype)
+        else:
+            try:
+                data[i, :] = np.genfromtxt(
                     clean_lines(csv),
                     delimiter=b",",
                     names=True,
+                    usecols=np.arange(1, len(names) + 1),
                     dtype=np.float64,
                 )
-            )
-        except ValueError as e:
-            raise PewException(f"{e} Could not parse batch.") from e
+            except ValueError:
+                warnings.warn(f"Row {i} missing, set to zero.", PewWarning)
+                data[i, :] = np.zeros(data.shape[1], dtype=data.dtype)
 
-    try:
-        print([d.shape for d in datas])
-        data = np.vstack(datas)
-        # We don't care about the time field currently
-        data = np.lib.recfunctions.drop_fields(data, "Time_Sec")
-
-    except ValueError as e:
-        raise PewException("Mismatched data.") from e
-
-    return data
+    if full:
+        return data, dict(scantime=scan_time)
+    else:
+        return data
