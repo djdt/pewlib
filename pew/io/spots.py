@@ -2,20 +2,13 @@ import numpy as np
 
 from pew.calc import cwt, local_extrema, ricker_wavelet, sliding_window_centered
 
-import logging
 
-logger = logging.getLogger(__name__)
-
-
-def local_extrema_raw(
-    x: np.ndarray, window: int, step: int = 1, mode: str = "maxima"
-) -> np.ndarray:
-    windows = sliding_window_centered(x, window, step)
-    if mode == "minima":
-        extrema = np.argmin(windows, axis=1)
-    else:
-        extrema = np.argmax(windows, axis=1)
-    return extrema == (window // 2)
+PEAK_DTYPE = np.dtype(
+    {
+        "names": ["height", "width", "area", "top", "base", "left", "right"],
+        "formats": [float, float, float, int, int, int, int],
+    }
+)
 
 
 def _identify_ridges(
@@ -25,42 +18,27 @@ def _identify_ridges(
         gap_threshold = len(windows) // 4
 
     extrema = local_extrema(cwt_coef[-1], windows[-1] * 2, mode=mode)
-    ridges = np.array([], dtype=int).reshape(cwt_coef.shape[0], 0)
+    ridges = np.full((cwt_coef.shape[0], extrema.size), -1, dtype=int)
+    ridges[-1] = extrema
 
-    for i in np.arange(cwt_coef.shape[0] - 1, -1, -1):
+    for i in np.arange(cwt_coef.shape[0] - 2, -1, -1):  # Start from second last row
         extrema = local_extrema(cwt_coef[i], windows[i] * 2, mode=mode)
 
-        if ridges.size != 0:
-            idx = np.searchsorted(extrema, ridges[i + 1])
-            idx1 = np.clip(idx, 0, extrema.size - 1)
-            idx2 = np.clip(idx - 1, 0, extrema.size - 1)
+        idx = np.searchsorted(extrema, ridges[i + 1])
+        idx1 = np.clip(idx, 0, extrema.size - 1)
+        idx2 = np.clip(idx - 1, 0, extrema.size - 1)
 
-            diff1 = extrema[idx1] - ridges[i + 1]
-            diff2 = ridges[i + 1] - extrema[idx2]
+        diff1 = extrema[idx1] - ridges[i + 1]
+        diff2 = ridges[i + 1] - extrema[idx2]
 
-            min_diffs = np.where(diff1 <= diff2, idx, idx2)
+        min_diffs = np.where(diff1 <= diff2, idx, idx2)
 
-            ridges[i] = np.where(
-                np.abs(ridges[i + 1] - extrema[min_diffs]) <= windows[i] // 4,
-                extrema[min_diffs],
-                -1,
-            )
-            extrema[min_diffs] = -1
-
-        # for ridge in ridges:
-        #     # Skip already gapped ridges
-        #     if np.count_nonzero(ridge[i + 1 :] == -1) > gap_threshold:
-        #         continue
-
-        #     idx = np.amin((np.searchsorted(extrema, ridge[i + 1]), extrema.size - 1))
-        #     idx2 = np.amax((idx - 1, 0))
-        #     d1 = extrema[idx] - ridge[i + 1]
-        #     d2 = ridge[i + 1] - extrema[idx2]
-        #     # idx2 = np.amin((idx + 1, extrema.size - 1))
-        #     min_diff = np.where(d1 <= d2, idx, idx2)
-        #     if np.abs(extrema[min_diff] - ridge[i + 1]) <= windows[i] // 4:
-        #         ridge[i] = extrema[min_diff]
-        #         extrema[min_diff] = -1  # Skip later
+        ridges[i] = np.where(
+            np.abs(ridges[i + 1] - extrema[min_diffs]) <= windows[i] // 4,
+            extrema[min_diffs],
+            -1,
+        )
+        extrema[min_diffs] = -1
 
         remaining_extrema = extrema[extrema > -1]
         if remaining_extrema.size != 0:
@@ -71,39 +49,6 @@ def _identify_ridges(
             ridges = np.hstack((ridges, new_ridges))
 
     return ridges
-
-    # if gap_threshold is None:
-    #     gap_threshold = len(windows) // 4
-
-    # ridges = np.array([], dtype=int).reshape(0, cwt_coef.shape[0])
-
-    # for i in np.arange(cwt_coef.shape[0] - 1, -1, -1):
-    #     extrema = local_extrema(cwt_coef[i], windows[i] * 2, mode=mode)
-
-    #     for ridge in ridges:
-    #         # Skip already gapped ridges
-    #         if np.count_nonzero(ridge[i + 1 :] == -1) > gap_threshold:
-    #             continue
-
-    #         idx = np.amin((np.searchsorted(extrema, ridge[i + 1]), extrema.size - 1))
-    #         idx2 = np.amax((idx - 1, 0))
-    #         d1 = extrema[idx] - ridge[i + 1]
-    #         d2 = ridge[i + 1] - extrema[idx2]
-    #         # idx2 = np.amin((idx + 1, extrema.size - 1))
-    #         min_diff = np.where(d1 <= d2, idx, idx2)
-    #         if np.abs(extrema[min_diff] - ridge[i + 1]) <= windows[i] // 4:
-    #             ridge[i] = extrema[min_diff]
-    #             extrema[min_diff] = -1  # Skip later
-
-    #     remaining_extrema = extrema[extrema > -1]
-    #     if remaining_extrema.size != 0:
-    #         new_ridges = np.full(
-    #             (remaining_extrema.shape[0], cwt_coef.shape[0]), -1, dtype=int
-    #         )
-    #         new_ridges[:, i] = remaining_extrema
-    #         ridges = np.vstack((ridges, new_ridges))
-
-    # return ridges.T
 
 
 def _filter_ridges(
@@ -169,15 +114,11 @@ def _peak_data_from_ridges(
         ibases = np.maximum(x[lefts], x[rights])
     else:
         raise ValueError("Valid peak_integration_method are 'base', 'prominence'.")
+
+    # TODO possible improvement here
     area = np.array([np.trapz(x[r[0] : r[1]] - ib) for r, ib in zip(ranges, ibases)])
 
-    dtype = np.dtype(
-        {
-            "names": ["height", "width", "area", "top", "base", "left", "right"],
-            "formats": [float, float, float, int, int, int, int],
-        }
-    )
-    peaks = np.empty(tops.shape, dtype=dtype)
+    peaks = np.empty(tops.shape, dtype=PEAK_DTYPE)
     peaks["area"] = area
     peaks["height"] = x[tops] - x[bases]
     peaks["width"] = widths
@@ -192,14 +133,16 @@ def find_peaks(
     x: np.ndarray,
     min_midth: int,
     max_width: int,
-    ridge_gap_threshold: int = None,
-    ridge_min_snr: float = 10.0,
+    distance: int = None,
+    min_number: int = None,
+    max_number: int = None,
     peak_integration_method: str = "base",
     peak_min_area: float = 0.0,
     peak_min_height: float = 0.0,
-    peak_min_width: float = 0.0,
     peak_min_prominence: float = 0.0,
-    peak_max_number: int = None,
+    peak_min_width: float = 0.0,
+    ridge_gap_threshold: int = None,
+    ridge_min_snr: float = 9.0,
 ) -> np.ndarray:
 
     windows = np.arange(min_midth, max_width)
@@ -232,24 +175,53 @@ def find_peaks(
 
     peaks = peaks[~bad_peaks]
 
-    if peak_max_number is not None and peaks.size > peak_max_number:
-        peaks = peaks[np.argsort(peaks["area"])][-peak_max_number:]
+    if max_number is not None and peaks.size > max_number:
+        peaks = peaks[np.argsort(peaks["area"])][-max_number:]
+    elif min_number is not None and peaks.size < min_number:
+        if distance is None:
+            distance = np.median(np.diff(peaks["top"]))
+        peak_idx = (peaks["top"] // distance).astype(int) - 1
+        new_peaks = np.zeros(min_number, dtype=peaks.dtype)
+        new_peaks["top"] = np.arange(distance, distance * (min_number + 1), distance)
+
+        new_peaks[peak_idx] = peaks
+        peaks = new_peaks
 
     return peaks
 
 
-# def lines_to_spots(
-#     data: np.ndarray,
-#     shape: Tuple[int, ...],
+def find_peaks_structured(
+    x: np.ndarray,
+    min_width: int,
+    max_width: int,
+    size: int,
+    distance: int = None,
+    peak_integration_method: str = "base",
+    peak_min_area: float = 0.0,
+    peak_min_height: float = 0.0,
+    peak_min_prominence: float = 0.0,
+    peak_min_width: float = 0.0,
+    ridge_gap_threshold: int = None,
+    ridge_min_snr: float = 9.0,
+) -> np.ndarray:
+    dtype = [(name, PEAK_DTYPE) for name in x.dtype.names]
+    peaks = np.empty(size, dtype=dtype)
 
-# ) -> np.ndarray:
-#     spot_data = np.empty(np.prod(shape), dtype=data.dtype)
+    for name in peaks.dtype.names:
+        peaks[name] = find_peaks(
+            x[name],
+            min_width,
+            max_width,
+            distance=distance,
+            min_number=size,
+            max_number=size,
+            peak_integration_method=peak_integration_method,
+            peak_min_area=peak_min_area,
+            peak_min_height=peak_min_height,
+            peak_min_prominence=peak_min_prominence,
+            peak_min_width=peak_min_width,
+            ridge_gap_threshold=ridge_gap_threshold,
+            ridge_min_snr=ridge_min_snr,
+        )
 
-#     peak_kws = dict(areas_only=True, gradient=gradient, height=height)
-
-#     for name in data.dtype.names:
-#         spot_data[name] = np.apply_along_axis(
-#             find_peaks, 1, data[name], , peak_kws
-#         )
-
-#     return spot_data.reshape(shape)
+    return peaks
