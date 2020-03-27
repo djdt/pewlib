@@ -2,12 +2,14 @@ import numpy as np
 
 from typing import Callable, Tuple
 
-import logging
 
-logger = logging.getLogger(__name__)
+def local_maxima(x: np.ndarray) -> np.ndarray:
+    return np.nonzero(
+        np.logical_and(np.r_[True, x[1:] > x[:-1]], np.r_[x[:-1] > x[1:], True])
+    )[0]
 
 
-def local_extrema(
+def windowed_extrema(
     x: np.ndarray, window: int, step: int = 1, mode: str = "maxima"
 ) -> np.ndarray:
     windows = sliding_window_centered(x, window, step)
@@ -21,11 +23,14 @@ def local_extrema(
 def cwt(
     x: np.ndarray, windows: np.ndarray, wavelet: Callable[..., np.ndarray]
 ) -> np.ndarray:
-    cwt = np.empty((windows.shape[0], x.shape[0]), dtype=x.dtype)
-    logger.info(f"loop in cwt.shape: {cwt.shape[0]}")
+    cwt = np.empty((windows.shape[0], x.size), dtype=x.dtype)
     for i in range(cwt.shape[0]):
         n = np.amin((x.size, windows[i] * 10))
-        cwt[i] = np.convolve(x, wavelet(n, windows[i]), mode="same")
+        cwt[i] = np.convolve(
+            np.pad(x, (n // 2 - 1, n // 2), mode="edge"),
+            wavelet(n, windows[i]),
+            mode="valid",
+        )
     return cwt
 
 
