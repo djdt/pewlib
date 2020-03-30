@@ -1,6 +1,8 @@
 import numpy as np
 
-from pew.calc import cwt, local_extrema, ricker_wavelet, sliding_window_centered
+from pew.calc import cwt, local_maxima, ricker_wavelet, sliding_window_centered
+
+from typing import Tuple
 
 
 PEAK_DTYPE = np.dtype(
@@ -129,6 +131,7 @@ def _peak_data_from_ridges(
     return peaks
 
 
+# TODO Add a way of setting intergration to baseline
 def find_peaks(
     x: np.ndarray,
     min_midth: int,
@@ -173,55 +176,40 @@ def find_peaks(
         (bad_area, bad_heights, bad_widths, bad_prominences)
     )
 
-    peaks = peaks[~bad_peaks]
-
-    if max_number is not None and peaks.size > max_number:
-        peaks = peaks[np.argsort(peaks["area"])][-max_number:]
-    elif min_number is not None and peaks.size < min_number:
-        if distance is None:
-            distance = np.median(np.diff(peaks["top"]))
-        peak_idx = (peaks["top"] // distance).astype(int) - 1
-        new_peaks = np.zeros(min_number, dtype=peaks.dtype)
-        new_peaks["top"] = np.arange(distance, distance * (min_number + 1), distance)
-
-        new_peaks[peak_idx] = peaks
-        peaks = new_peaks
-
-    return peaks
+    return peaks[~bad_peaks]
 
 
-def find_peaks_structured(
-    x: np.ndarray,
+def bin_and_bound_peaks(
+    peaks: np.ndarray, data_size: int, bin_size: int, offset: int = 0,
+) -> np.ndarray:
+    """Bins peaks and ensures that there is 1 peak per bin. If less a zero
+     area peak is added, if more the largest peak in the bin is used."""
+    bins = np.arange(0, data_size, bin_size)
+    idx = np.searchsorted(bins, peaks["top"]) - 1
+
+    bound_peaks = np.zeros(data_size // bin_size, dtype=peaks.dtype)
+    bound_peaks["top"] = np.arange(offset, data_size + offset, bin_size)
+    for i in np.arange(data_size // bin_size):
+        n = np.count_nonzero(idx == i)
+        if n != 0:
+            bin_peaks = peaks[idx == i]
+            bound_peaks[i] = bin_peaks[np.argmax(bin_peaks["area"])]
+
+    return bound_peaks
+
+
+def _lines_to_spots(
+    lines: np.ndarray,
+    shape: Tuple[int, ...],
     min_width: int,
     max_width: int,
-    size: int,
-    distance: int = None,
-    peak_integration_method: str = "base",
-    peak_min_area: float = 0.0,
-    peak_min_height: float = 0.0,
-    peak_min_prominence: float = 0.0,
-    peak_min_width: float = 0.0,
-    ridge_gap_threshold: int = None,
-    ridge_min_snr: float = 9.0,
+    find_peak_kws: dict = None,
+    bin_offset: int = 0,
 ) -> np.ndarray:
-    dtype = [(name, PEAK_DTYPE) for name in x.dtype.names]
-    peaks = np.empty(size, dtype=dtype)
+    assert np.prod(shape) == lines.shape[0]
 
-    for name in peaks.dtype.names:
-        peaks[name] = find_peaks(
-            x[name],
-            min_width,
-            max_width,
-            distance=distance,
-            min_number=size,
-            max_number=size,
-            peak_integration_method=peak_integration_method,
-            peak_min_area=peak_min_area,
-            peak_min_height=peak_min_height,
-            peak_min_prominence=peak_min_prominence,
-            peak_min_width=peak_min_width,
-            ridge_gap_threshold=ridge_gap_threshold,
-            ridge_min_snr=ridge_min_snr,
-        )
-
-    return peaks
+    if find_peak_kws is None:
+        find_peak_kws = {}
+    peaks = find_peaks(lines.ravel(), min_width, max_width, **find_peak_kws)
+    peaks = bin_and_bound_peaks(peaks, lines.size, lines.shape[1], offset=bin_offset)
+    return peaks.reshape(shape)
