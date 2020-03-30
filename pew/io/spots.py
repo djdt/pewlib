@@ -131,7 +131,7 @@ def _peak_data_from_ridges(
     return peaks
 
 
-# TODO Add a way of setting intergration to baseline
+# TODO Add a way of setting intergration to baseline, probably looking a a large region low percentile around each peak
 def find_peaks(
     x: np.ndarray,
     min_midth: int,
