@@ -204,12 +204,31 @@ def _lines_to_spots(
     min_width: int,
     max_width: int,
     find_peak_kws: dict = None,
-    bin_offset: int = 0,
 ) -> np.ndarray:
     assert np.prod(shape) == lines.shape[0]
 
     if find_peak_kws is None:
         find_peak_kws = {}
     peaks = find_peaks(lines.ravel(), min_width, max_width, **find_peak_kws)
-    peaks = bin_and_bound_peaks(peaks, lines.size, lines.shape[1], offset=bin_offset)
-    return peaks.reshape(shape)
+    peaks = bin_and_bound_peaks(
+        peaks, lines.size, lines.shape[1], offset=lines.shape[1] // 2
+    )
+    return peaks["area"].reshape(shape)
+
+
+def lines_to_spots(
+    lines: np.ndarray,
+    shape: Tuple[int, ...],
+    min_width: int,
+    max_width: int,
+    find_peak_kws: dict = None,
+) -> np.ndarray:
+    if lines.dtype.names is None:
+        return _lines_to_spots(lines, shape, min_width, max_width, find_peak_kws)
+
+    spots = np.empty(shape, lines.dtype)
+    for name in lines.dtype.names:
+        spots[name] = _lines_to_spots(
+            lines[name], shape, min_width, max_width, find_peak_kws
+        )
+    return spots
