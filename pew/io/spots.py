@@ -7,8 +7,8 @@ from typing import Tuple
 
 PEAK_DTYPE = np.dtype(
     {
-        "names": ["height", "width", "area", "top", "base", "left", "right"],
-        "formats": [float, float, float, int, int, int, int],
+        "names": ["height", "width", "area", "base", "top", "bottom", "left", "right"],
+        "formats": [float, float, float, float, int, int, int, int],
     }
 )
 
@@ -87,13 +87,14 @@ def _filter_ridges(
     return ridges[:, snrs > min_snr], max_coords[:, snrs > min_snr]
 
 
+# TODO Change integ method to peak_base_method
 def _peak_data_from_ridges(
     x: np.ndarray,
     ridges: np.ndarray,
     maxima_coords: np.ndarray,
     cwt_windows: np.ndarray,
+    peak_base_method: str = "baseline",
     peak_height_method: str = "maxima",
-    peak_integration_method: str = "base",
 ) -> np.ndarray:
     widths = np.take(cwt_windows, maxima_coords[0])
 
@@ -110,6 +111,26 @@ def _peak_data_from_ridges(
     else:
         raise ValueError("Valid peak_height_method are 'cwt', 'maxima'.")
 
+    if peak_base_method == "minima":
+        bottoms = ()
+    elif peak_base_method == "lowest_edge":
+        bottoms = np.minimum(lefts, rights)
+        bases = x[bottoms]
+    elif peak_base_method == "zero":
+        bottoms = np.zeros(tops.shape, dtype=int)  # Uninitialised
+        bases = np.zeros(bottoms.shape, dtype=float)
+    elif peak_base_method == "prominence":
+        bottoms = np.maximum(lefts, rights)
+        bases = x[bottoms]
+    elif peak_base_method == "baseline":
+        # TODO Percentile method here
+        pass
+    else:
+        raise ValueError(
+            "Valid values for peak_base_method are 'baseline', "
+            "'edge', 'prominence', 'minima', 'zero'."
+        )
+
     if peak_integration_method == "base":
         ibases = x[bases]
     elif peak_integration_method == "prominence":
@@ -122,10 +143,11 @@ def _peak_data_from_ridges(
 
     peaks = np.empty(tops.shape, dtype=PEAK_DTYPE)
     peaks["area"] = area
-    peaks["height"] = x[tops] - x[bases]
+    peaks["height"] = x[tops] - bases
     peaks["width"] = widths
-    peaks["top"] = tops
     peaks["base"] = bases
+    peaks["top"] = tops
+    peaks["bottom"] = bottoms
     peaks["left"] = lefts
     peaks["right"] = rights
     return peaks
@@ -179,6 +201,7 @@ def find_peaks(
     return peaks[~bad_peaks]
 
 
+# TODO Generalise this function so that it can take multiple peaks per bin, etc
 def bin_and_bound_peaks(
     peaks: np.ndarray, data_size: int, bin_size: int, offset: int = 0,
 ) -> np.ndarray:
