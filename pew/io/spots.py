@@ -72,7 +72,10 @@ def _filter_ridges(
     values = np.take_along_axis(cwt_coef, ridges, axis=1)
     max_rows = np.argmax(np.where(ridges > -1, values, 0), axis=0)
     max_cols = np.take_along_axis(ridges, max_rows[np.newaxis, :], axis=0)[0]
-    max_coords = np.vstack((max_rows, max_cols))
+
+    col_order = np.argsort(max_cols)
+
+    max_coords = np.vstack((max_rows[col_order], max_cols[col_order]))
 
     # Reducing number of windows here improves performance
     windows = sliding_window_centered(cwt_coef[0], noise_window, 1)[max_coords[1]]
@@ -82,7 +85,10 @@ def _filter_ridges(
 
     snrs = signals / noises
 
-    return ridges[:, snrs > min_snr], max_coords[:, snrs > min_snr]
+    ridges = ridges[:, col_order][:, snrs > min_snr]
+    max_coords = max_coords[:, snrs > min_snr]
+
+    return ridges, max_coords
 
 
 def _peak_data_from_ridges(
