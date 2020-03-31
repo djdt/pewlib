@@ -149,6 +149,7 @@ def find_peaks(
     distance: int = None,
     min_number: int = None,
     max_number: int = None,
+    peak_height_method: str = "maxima",
     peak_integration_method: str = "base",
     peak_min_area: float = 0.0,
     peak_min_height: float = 0.0,
@@ -170,7 +171,7 @@ def find_peaks(
         ridges,
         ridge_maxima,
         windows,
-        peak_height_method="maxima",
+        peak_height_method=peak_height_method,
         peak_integration_method=peak_integration_method,
     )
 
