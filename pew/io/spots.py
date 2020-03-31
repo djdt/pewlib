@@ -157,16 +157,12 @@ def _filter_peaks(
     peaks: np.ndarray,
     min_area: float = 0.0,
     min_height: float = 0.0,
-    min_prominence: float = 0.0,
     min_width: float = 0.0,
 ) -> np.ndarray:
     bad_area = peaks["area"] < min_area
     bad_heights = peaks["height"] < min_height
     bad_widths = peaks["width"] < min_width
-    bad_prominences = peaks["prominence"] < min_prominence
-    bad_peaks = np.logical_or.reduce(
-        (bad_area, bad_heights, bad_widths, bad_prominences)
-    )
+    bad_peaks = np.logical_or.reduce((bad_area, bad_heights, bad_widths))
 
     return peaks[~bad_peaks]
 
@@ -180,7 +176,6 @@ def find_peaks(
     peak_width_factor: float = 2.5,
     peak_min_area: float = 0.0,
     peak_min_height: float = 0.0,
-    peak_min_prominence: float = 0.0,
     peak_min_width: float = 0.0,
     ridge_gap_threshold: int = None,
     ridge_min_snr: float = 9.0,
@@ -198,16 +193,15 @@ def find_peaks(
         ridges,
         ridge_maxima,
         windows,
-        width_factor=peak_width_factor,
         base_method=peak_base_method,
         height_method=peak_height_method,
+        width_factor=peak_width_factor,
     )
 
     peaks = _filter_peaks(
         peaks,
         min_area=peak_min_area,
         min_height=peak_min_height,
-        min_prominence=peak_min_prominence,
         min_width=peak_min_width,
     )
 
