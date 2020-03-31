@@ -14,40 +14,40 @@ PEAK_DTYPE = np.dtype(
 
 
 def _identify_ridges(
-    cwt_coef: np.ndarray, windows: np.ndarray, gap_threshold: int = None, mode="maxima",
+    cwt_coef: np.ndarray, windows: np.ndarray, gap_threshold: int = None
 ) -> np.ndarray:
     if gap_threshold is None:
         gap_threshold = len(windows) // 4
 
-    extrema = local_extrema(cwt_coef[-1], windows[-1] * 2, mode=mode)
-    ridges = np.full((cwt_coef.shape[0], extrema.size), -1, dtype=int)
-    ridges[-1] = extrema
+    maxima = local_maxima(cwt_coef[-1])
+    ridges = np.full((cwt_coef.shape[0], maxima.size), -1, dtype=int)
+    ridges[-1] = maxima
 
     for i in np.arange(cwt_coef.shape[0] - 2, -1, -1):  # Start from second last row
-        extrema = local_extrema(cwt_coef[i], windows[i] * 2, mode=mode)
+        maxima = local_maxima(cwt_coef[i])
 
-        idx = np.searchsorted(extrema, ridges[i + 1])
-        idx1 = np.clip(idx, 0, extrema.size - 1)
-        idx2 = np.clip(idx - 1, 0, extrema.size - 1)
+        idx = np.searchsorted(maxima, ridges[i + 1])
+        idx1 = np.clip(idx, 0, maxima.size - 1)
+        idx2 = np.clip(idx - 1, 0, maxima.size - 1)
 
-        diff1 = extrema[idx1] - ridges[i + 1]
-        diff2 = ridges[i + 1] - extrema[idx2]
+        diff1 = maxima[idx1] - ridges[i + 1]
+        diff2 = ridges[i + 1] - maxima[idx2]
 
-        min_diffs = np.where(diff1 <= diff2, idx, idx2)
+        min_diffs = np.where(diff1 <= diff2, idx1, idx2)
 
         ridges[i] = np.where(
-            np.abs(ridges[i + 1] - extrema[min_diffs]) <= windows[i] // 4,
-            extrema[min_diffs],
+            np.abs(ridges[i + 1] - maxima[min_diffs]) <= windows[i] // 4,
+            maxima[min_diffs],
             -1,
         )
-        extrema[min_diffs] = -1
+        maxima[min_diffs] = -1
 
-        remaining_extrema = extrema[extrema > -1]
-        if remaining_extrema.size != 0:
+        remaining_maxima = maxima[maxima > -1]
+        if remaining_maxima.size != 0:
             new_ridges = np.full(
-                (cwt_coef.shape[0], remaining_extrema.shape[0]), -1, dtype=int
+                (cwt_coef.shape[0], remaining_maxima.shape[0]), -1, dtype=int
             )
-            new_ridges[i] = remaining_extrema
+            new_ridges[i] = remaining_maxima
             ridges = np.hstack((ridges, new_ridges))
 
     return ridges
@@ -100,7 +100,7 @@ def _peak_data_from_ridges(
 
     lefts = np.clip(maxima_coords[1] - widths, 0, x.size - 1)
     rights = np.clip(maxima_coords[1] + widths, 0, x.size - 1)
-    bases = np.minimum(lefts, rights)
+    bottoms = np.minimum(lefts, rights)
 
     if peak_height_method == "cwt":  # Height at maxima cwt ridge
         tops = maxima_coords[1]
@@ -132,7 +132,7 @@ def _peak_data_from_ridges(
         )
 
     if peak_integration_method == "base":
-        ibases = x[bases]
+        ibases = x[bottoms]
     elif peak_integration_method == "prominence":
         ibases = np.maximum(x[lefts], x[rights])
     else:
@@ -153,14 +153,31 @@ def _peak_data_from_ridges(
     return peaks
 
 
+def _filter_peaks(
+    peaks: np.ndarray,
+    min_area: float = 0.0,
+    min_height: float = 0.0,
+    min_prominence: float = 0.0,
+    min_width: float = 0.0,
+) -> np.ndarray:
+    bad_area = peaks["area"] < min_area
+    bad_heights = peaks["height"] < min_height
+    bad_widths = peaks["width"] < min_width
+    bad_prominences = (
+        peaks["height"] - np.maximum(x[peaks["left"]], x[peaks["right"]])
+        < min_prominence
+    )
+    bad_peaks = np.logical_or.reduce(
+        (bad_area, bad_heights, bad_widths, bad_prominences)
+    )
+
+
 # TODO Add a way of setting intergration to baseline, probably looking a a large region low percentile around each peak
 def find_peaks(
     x: np.ndarray,
     min_midth: int,
     max_width: int,
-    distance: int = None,
-    min_number: int = None,
-    max_number: int = None,
+    peak_height_method: str = "maxima",
     peak_integration_method: str = "base",
     peak_min_area: float = 0.0,
     peak_min_height: float = 0.0,
