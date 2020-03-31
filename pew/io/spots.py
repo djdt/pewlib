@@ -208,22 +208,31 @@ def find_peaks(
     return peaks
 
 
-# TODO Generalise this function so that it can take multiple peaks per bin, etc
 def bin_and_bound_peaks(
-    peaks: np.ndarray, data_size: int, bin_size: int, offset: int = 0,
+    peaks: np.ndarray,
+    data_size: int,
+    bin_size: int,
+    peaks_per_bin: int = 1,
+    offset: int = 0,
 ) -> np.ndarray:
     """Bins peaks and ensures that there is 1 peak per bin. If less a zero
      area peak is added, if more the largest peak in the bin is used."""
     bins = np.arange(0, data_size, bin_size)
     idx = np.searchsorted(bins, peaks["top"]) - 1
 
-    bound_peaks = np.zeros(data_size // bin_size, dtype=peaks.dtype)
-    bound_peaks["top"] = np.arange(offset, data_size + offset, bin_size)
+    bound_peaks = np.zeros((data_size // bin_size) * peaks_per_bin, dtype=peaks.dtype)
+    bound_peaks["top"] = np.arange(
+        offset, data_size + offset, bin_size // peaks_per_bin
+    )
     for i in np.arange(data_size // bin_size):
-        n = np.count_nonzero(idx == i)
-        if n != 0:
-            bin_peaks = peaks[idx == i]
-            bound_peaks[i] = bin_peaks[np.argmax(bin_peaks["area"])]
+        bin_peaks = peaks[idx == i]
+        if bin_peaks.size > peaks_per_bin:
+            bin_peaks = bin_peaks[np.argpartition(bin_peaks["area"], -peaks_per_bin)][
+                -peaks_per_bin:
+            ]
+
+        n = i * peaks_per_bin
+        bound_peaks[n : n + bin_peaks.size] = bin_peaks
 
     return bound_peaks
 
