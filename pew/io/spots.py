@@ -1,6 +1,6 @@
 import numpy as np
 
-from pew.calc import cwt, local_extrema, ricker_wavelet, sliding_window_centered
+from pew.calc import cwt, local_maxima, ricker_wavelet, sliding_window_centered
 
 
 PEAK_DTYPE = np.dtype(
