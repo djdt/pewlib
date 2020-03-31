@@ -230,6 +230,7 @@ def bin_and_bound_peaks(
             bin_peaks = bin_peaks[np.argpartition(bin_peaks["area"], -peaks_per_bin)][
                 -peaks_per_bin:
             ]
+            bin_peaks.sort(order="top")
 
         n = i * peaks_per_bin
         bound_peaks[n : n + bin_peaks.size] = bin_peaks
