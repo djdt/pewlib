@@ -112,7 +112,7 @@ def _peak_data_from_ridges(
 
     if height_method == "cwt":  # Height at maxima cwt ridge
         tops = maxima_coords[1]
-    elif height_method == "maxima":  # Max data height inside peak width
+    elif height_method == "maxima":
         tops = np.argmax(x[indicies], axis=0) + lefts
     else:
         raise ValueError("Valid values for height_method are 'cwt', 'maxima'.")
@@ -237,24 +237,6 @@ def bin_and_bound_peaks(
     return bound_peaks
 
 
-def _lines_to_spots(
-    lines: np.ndarray,
-    shape: Tuple[int, ...],
-    min_width: int,
-    max_width: int,
-    find_peak_kws: dict = None,
-) -> np.ndarray:
-    assert np.prod(shape) == lines.shape[0]
-
-    if find_peak_kws is None:
-        find_peak_kws = {}
-    peaks = find_peaks(lines.ravel(), min_width, max_width, **find_peak_kws)
-    peaks = bin_and_bound_peaks(
-        peaks, lines.size, lines.shape[1], offset=lines.shape[1] // 2
-    )
-    return peaks["area"].reshape(shape)
-
-
 def lines_to_spots(
     lines: np.ndarray,
     shape: Tuple[int, ...],
@@ -262,12 +244,23 @@ def lines_to_spots(
     max_width: int,
     find_peak_kws: dict = None,
 ) -> np.ndarray:
-    if lines.dtype.names is None:
-        return _lines_to_spots(lines, shape, min_width, max_width, find_peak_kws)
+    """Convert lines with x 'peaks_per_line'to a 2d array with 'shape'."""
+    assert np.prod(shape) == lines.shape[0]
 
+    # Unstructured
+    if lines.dtype.names is None:
+        peaks = find_peaks(lines.ravel(), min_width, max_width, **find_peak_kws)
+        peaks = bin_and_bound_peaks(
+            peaks, lines.size, lines.shape[1], offset=lines.shape[1] // 2
+        )
+        return peaks["area"].reshape(shape)
+
+    # Structured
     spots = np.empty(shape, lines.dtype)
     for name in lines.dtype.names:
-        spots[name] = _lines_to_spots(
-            lines[name], shape, min_width, max_width, find_peak_kws
+        peaks = find_peaks(lines[name].ravel(), min_width, max_width, **find_peak_kws)
+        peaks = bin_and_bound_peaks(
+            peaks, lines.size, lines.shape[1], offset=lines.shape[1] // 2
         )
+        spots[name] = peaks["area"].reshape(shape)
     return spots
