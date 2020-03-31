@@ -74,7 +74,10 @@ def _filter_ridges(
     values = np.take_along_axis(cwt_coef, ridges, axis=1)
     max_rows = np.argmax(np.where(ridges > -1, values, 0), axis=0)
     max_cols = np.take_along_axis(ridges, max_rows[np.newaxis, :], axis=0)[0]
-    max_coords = np.vstack((max_rows, max_cols))
+
+    col_order = np.argsort(max_cols)
+
+    max_coords = np.vstack((max_rows[col_order], max_cols[col_order]))
 
     # Reducing number of windows here improves performance
     windows = sliding_window_centered(cwt_coef[0], noise_window, 1)[max_coords[1]]
@@ -84,62 +87,59 @@ def _filter_ridges(
 
     snrs = signals / noises
 
-    return ridges[:, snrs > min_snr], max_coords[:, snrs > min_snr]
+    ridges = ridges[:, col_order][:, snrs > min_snr]
+    max_coords = max_coords[:, snrs > min_snr]
+
+    return ridges, max_coords
 
 
-# TODO Change integ method to peak_base_method
 def _peak_data_from_ridges(
     x: np.ndarray,
     ridges: np.ndarray,
     maxima_coords: np.ndarray,
     cwt_windows: np.ndarray,
-    peak_base_method: str = "baseline",
-    peak_height_method: str = "maxima",
+    base_method: str = "baseline",
+    height_method: str = "cwt",
+    width_factor: float = 2.5,
 ) -> np.ndarray:
-    widths = np.take(cwt_windows, maxima_coords[0])
+    widths = (np.take(cwt_windows, maxima_coords[0]) * width_factor).astype(int)
 
-    lefts = np.clip(maxima_coords[1] - widths, 0, x.size - 1)
-    rights = np.clip(maxima_coords[1] + widths, 0, x.size - 1)
-    bottoms = np.minimum(lefts, rights)
+    lefts = np.clip(maxima_coords[1] - widths // 2, 0, x.size - 1)
+    rights = np.clip(maxima_coords[1] + widths // 2, 0, x.size - 1)
 
-    if peak_height_method == "cwt":  # Height at maxima cwt ridge
+    indicies = lefts + np.arange(np.amax(widths) + 1)[:, None]
+    indicies = np.where(indicies - lefts < widths, indicies, rights)
+
+    if height_method == "cwt":  # Height at maxima cwt ridge
         tops = maxima_coords[1]
-    elif peak_height_method == "maxima":  # Max data height inside peak width
-        ranges = np.vstack((lefts, rights)).T
-        # PYTHON LOOP HERE
-        tops = np.array([np.argmax(x[r[0] : r[1]]) + r[0] for r in ranges], dtype=int)
+    elif height_method == "maxima":  # Max data height inside peak width
+        tops = np.argmax(x[indicies], axis=0) + lefts
     else:
-        raise ValueError("Valid peak_height_method are 'cwt', 'maxima'.")
+        raise ValueError("Valid values for height_method are 'cwt', 'maxima'.")
 
-    if peak_base_method == "minima":
-        bottoms = ()
-    elif peak_base_method == "lowest_edge":
+    if base_method == "baseline":
+        bottoms = tops  # Default to tops
+        windows = sliding_window_centered(x, np.amax(widths) * 4)
+        bases = np.percentile(windows[bottoms], 25, axis=1)
+    elif base_method == "edge":
         bottoms = np.minimum(lefts, rights)
         bases = x[bottoms]
-    elif peak_base_method == "zero":
-        bottoms = np.zeros(tops.shape, dtype=int)  # Uninitialised
-        bases = np.zeros(bottoms.shape, dtype=float)
-    elif peak_base_method == "prominence":
+    elif base_method == "minima":
+        bottoms = np.argmin(x[indicies], axis=0) + lefts
+        bases = x[bottoms]
+    elif base_method == "prominence":
         bottoms = np.maximum(lefts, rights)
         bases = x[bottoms]
-    elif peak_base_method == "baseline":
-        # TODO Percentile method here
-        pass
+    elif base_method == "zero":
+        bottoms = tops  # Default to tops
+        bases = 0.0
     else:
         raise ValueError(
-            "Valid values for peak_base_method are 'baseline', "
+            "Valid values for base_method are 'baseline', "
             "'edge', 'prominence', 'minima', 'zero'."
         )
 
-    if peak_integration_method == "base":
-        ibases = x[bottoms]
-    elif peak_integration_method == "prominence":
-        ibases = np.maximum(x[lefts], x[rights])
-    else:
-        raise ValueError("Valid peak_integration_method are 'base', 'prominence'.")
-
-    # TODO possible improvement here
-    area = np.array([np.trapz(x[r[0] : r[1]] - ib) for r, ib in zip(ranges, ibases)])
+    area = np.trapz(x[indicies] - bases, indicies, axis=0)
 
     peaks = np.empty(tops.shape, dtype=PEAK_DTYPE)
     peaks["area"] = area
@@ -163,22 +163,21 @@ def _filter_peaks(
     bad_area = peaks["area"] < min_area
     bad_heights = peaks["height"] < min_height
     bad_widths = peaks["width"] < min_width
-    bad_prominences = (
-        peaks["height"] - np.maximum(x[peaks["left"]], x[peaks["right"]])
-        < min_prominence
-    )
+    bad_prominences = peaks["prominence"] < min_prominence
     bad_peaks = np.logical_or.reduce(
         (bad_area, bad_heights, bad_widths, bad_prominences)
     )
 
+    return peaks[~bad_peaks]
 
-# TODO Add a way of setting intergration to baseline, probably looking a a large region low percentile around each peak
+
 def find_peaks(
     x: np.ndarray,
     min_midth: int,
     max_width: int,
-    peak_height_method: str = "maxima",
-    peak_integration_method: str = "base",
+    peak_base_method: str = "baseline",
+    peak_height_method: str = "cwt",
+    peak_width_factor: float = 2.5,
     peak_min_area: float = 0.0,
     peak_min_height: float = 0.0,
     peak_min_prominence: float = 0.0,
@@ -199,23 +198,20 @@ def find_peaks(
         ridges,
         ridge_maxima,
         windows,
-        peak_height_method="maxima",
-        peak_integration_method=peak_integration_method,
+        width_factor=peak_width_factor,
+        base_method=peak_base_method,
+        height_method=peak_height_method,
     )
 
-    # Filter the peaks based on final criteria
-    bad_area = peaks["area"] < peak_min_area
-    bad_heights = peaks["height"] < peak_min_height
-    bad_widths = peaks["width"] < peak_min_width
-    bad_prominences = (
-        peaks["height"] - np.maximum(x[peaks["left"]], x[peaks["right"]])
-        < peak_min_prominence
-    )
-    bad_peaks = np.logical_or.reduce(
-        (bad_area, bad_heights, bad_widths, bad_prominences)
+    peaks = _filter_peaks(
+        peaks,
+        min_area=peak_min_area,
+        min_height=peak_min_height,
+        min_prominence=peak_min_prominence,
+        min_width=peak_min_width,
     )
 
-    return peaks[~bad_peaks]
+    return peaks
 
 
 # TODO Generalise this function so that it can take multiple peaks per bin, etc
