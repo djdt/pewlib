@@ -111,9 +111,9 @@ def _peak_data_from_ridges(
     if peak_height_method == "cwt":  # Height at maxima cwt ridge
         tops = maxima_coords[1]
     elif peak_height_method == "maxima":  # Max data height inside peak width
-        ranges = np.vstack((lefts, rights)).T
-        # PYTHON LOOP HERE
-        tops = np.array([np.argmax(x[r[0] : r[1]]) + r[0] for r in ranges], dtype=int)
+        tops = np.argmax(x[indicies], axis=0) + lefts
+        # ranges = np.vstack((lefts, rights)).T
+        # tops = np.array([np.argmax(x[r[0] : r[1]]) + r[0] for r in ranges], dtype=int)
     else:
         raise ValueError("Valid peak_height_method are 'cwt', 'maxima'.")
 
@@ -121,11 +121,15 @@ def _peak_data_from_ridges(
         ibases = x[bases]
     elif peak_integration_method == "prominence":
         ibases = np.maximum(x[lefts], x[rights])
+    elif peak_integration_method == "zero":
+        ibases = 0
     else:
-        raise ValueError("Valid peak_integration_method are 'base', 'prominence'.")
+        raise ValueError(
+            "Valid peak_integration_method are 'base', 'prominence', 'zero'."
+        )
 
-    # TODO possible improvement here
-    area = np.array([np.trapz(x[r[0] : r[1]] - ib) for r, ib in zip(ranges, ibases)])
+    # area = np.array([np.trapz(x[r[0] : r[1] + 1] - ib) for r, ib in zip(ranges, ibases)])
+    area = np.trapz(x[indicies] - ibases, indicies, axis=0)
 
     peaks = np.empty(tops.shape, dtype=PEAK_DTYPE)
     peaks["area"] = area
