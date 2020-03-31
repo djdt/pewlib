@@ -99,11 +99,14 @@ def _peak_data_from_ridges(
     peak_height_method: str = "maxima",
     peak_integration_method: str = "base",
 ) -> np.ndarray:
-    widths = np.take(cwt_windows, maxima_coords[0])
+    widths = np.take(cwt_windows, maxima_coords[0]) * 2
 
-    lefts = np.clip(maxima_coords[1] - widths, 0, x.size - 1)
-    rights = np.clip(maxima_coords[1] + widths, 0, x.size - 1)
-    bases = np.minimum(lefts, rights)
+    lefts = np.clip(maxima_coords[1] - widths // 2, 0, x.size - 1)
+    rights = np.clip(maxima_coords[1] + widths // 2, 0, x.size - 1)
+
+    indicies = lefts + np.arange(np.amax(widths) + 1)[:, None]
+    indicies = np.where(indicies - lefts < widths, indicies, rights)
+    bases = np.argmin(x[indicies], axis=0) + lefts
 
     if peak_height_method == "cwt":  # Height at maxima cwt ridge
         tops = maxima_coords[1]
