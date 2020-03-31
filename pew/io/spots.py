@@ -2,11 +2,13 @@ import numpy as np
 
 from pew.calc import cwt, local_maxima, ricker_wavelet, sliding_window_centered
 
+from typing import Tuple
+
 
 PEAK_DTYPE = np.dtype(
     {
-        "names": ["height", "width", "area", "top", "base", "left", "right"],
-        "formats": [float, float, float, int, int, int, int],
+        "names": ["height", "width", "area", "base", "top", "bottom", "left", "right"],
+        "formats": [float, float, float, float, int, int, int, int],
     }
 )
 
@@ -91,52 +93,62 @@ def _filter_ridges(
     return ridges, max_coords
 
 
+# TODO Change integ method to peak_base_method
 def _peak_data_from_ridges(
     x: np.ndarray,
     ridges: np.ndarray,
     maxima_coords: np.ndarray,
     cwt_windows: np.ndarray,
-    peak_height_method: str = "maxima",
-    peak_integration_method: str = "base",
+    peak_base_method: str = "baseline",
+    peak_height_method: str = "cwt",
+    peak_width_factor: float = 2.5,
 ) -> np.ndarray:
-    widths = np.take(cwt_windows, maxima_coords[0]) * 2
+    widths = (np.take(cwt_windows, maxima_coords[0]) * peak_width_factor).astype(int)
 
     lefts = np.clip(maxima_coords[1] - widths // 2, 0, x.size - 1)
     rights = np.clip(maxima_coords[1] + widths // 2, 0, x.size - 1)
 
     indicies = lefts + np.arange(np.amax(widths) + 1)[:, None]
     indicies = np.where(indicies - lefts < widths, indicies, rights)
-    bases = np.argmin(x[indicies], axis=0) + lefts
 
     if peak_height_method == "cwt":  # Height at maxima cwt ridge
         tops = maxima_coords[1]
     elif peak_height_method == "maxima":  # Max data height inside peak width
         tops = np.argmax(x[indicies], axis=0) + lefts
-        # ranges = np.vstack((lefts, rights)).T
-        # tops = np.array([np.argmax(x[r[0] : r[1]]) + r[0] for r in ranges], dtype=int)
     else:
         raise ValueError("Valid peak_height_method are 'cwt', 'maxima'.")
 
-    if peak_integration_method == "base":
-        ibases = x[bases]
-    elif peak_integration_method == "prominence":
-        ibases = np.maximum(x[lefts], x[rights])
-    elif peak_integration_method == "zero":
-        ibases = 0
+    if peak_base_method == "baseline":
+        bottoms = tops  # Default to tops
+        windows = sliding_window_centered(x, np.amax(widths) * 4)
+        bases = np.percentile(windows[bottoms], 25, axis=1)
+    elif peak_base_method == "edge":
+        bottoms = np.minimum(lefts, rights)
+        bases = x[bottoms]
+    elif peak_base_method == "minima":
+        bottoms = np.argmin(x[indicies], axis=0) + lefts
+        bases = x[bottoms]
+    elif peak_base_method == "prominence":
+        bottoms = np.maximum(lefts, rights)
+        bases = x[bottoms]
+    elif peak_base_method == "zero":
+        bottoms = tops  # Default to tops
+        bases = 0.0
     else:
         raise ValueError(
-            "Valid peak_integration_method are 'base', 'prominence', 'zero'."
+            "Valid values for peak_base_method are 'baseline', "
+            "'edge', 'prominence', 'minima', 'zero'."
         )
 
-    # area = np.array([np.trapz(x[r[0] : r[1] + 1] - ib) for r, ib in zip(ranges, ibases)])
-    area = np.trapz(x[indicies] - ibases, indicies, axis=0)
+    area = np.trapz(x[indicies] - bases, indicies, axis=0)
 
     peaks = np.empty(tops.shape, dtype=PEAK_DTYPE)
     peaks["area"] = area
-    peaks["height"] = x[tops] - x[bases]
+    peaks["height"] = x[tops] - bases
     peaks["width"] = widths
-    peaks["top"] = tops
     peaks["base"] = bases
+    peaks["top"] = tops
+    peaks["bottom"] = bottoms
     peaks["left"] = lefts
     peaks["right"] = rights
     return peaks
@@ -149,8 +161,9 @@ def find_peaks(
     distance: int = None,
     min_number: int = None,
     max_number: int = None,
-    peak_height_method: str = "maxima",
-    peak_integration_method: str = "base",
+    peak_base_method: str = "baseline",
+    peak_height_method: str = "cwt",
+    peak_width_factor: float = 2.5,
     peak_min_area: float = 0.0,
     peak_min_height: float = 0.0,
     peak_min_prominence: float = 0.0,
@@ -171,8 +184,9 @@ def find_peaks(
         ridges,
         ridge_maxima,
         windows,
+        peak_width_factor=peak_width_factor,
+        peak_base_method=peak_base_method,
         peak_height_method=peak_height_method,
-        peak_integration_method=peak_integration_method,
     )
 
     # Filter the peaks based on final criteria
@@ -187,55 +201,60 @@ def find_peaks(
         (bad_area, bad_heights, bad_widths, bad_prominences)
     )
 
-    peaks = peaks[~bad_peaks]
-
-    if max_number is not None and peaks.size > max_number:
-        peaks = peaks[np.argsort(peaks["area"])][-max_number:]
-    elif min_number is not None and peaks.size < min_number:
-        if distance is None:
-            distance = np.median(np.diff(peaks["top"]))
-        peak_idx = (peaks["top"] // distance).astype(int) - 1
-        new_peaks = np.zeros(min_number, dtype=peaks.dtype)
-        new_peaks["top"] = np.arange(distance, distance * (min_number + 1), distance)
-
-        new_peaks[peak_idx] = peaks
-        peaks = new_peaks
-
-    return peaks
+    return peaks[~bad_peaks]
 
 
-def find_peaks_structured(
-    x: np.ndarray,
+# TODO Generalise this function so that it can take multiple peaks per bin, etc
+def bin_and_bound_peaks(
+    peaks: np.ndarray, data_size: int, bin_size: int, offset: int = 0,
+) -> np.ndarray:
+    """Bins peaks and ensures that there is 1 peak per bin. If less a zero
+     area peak is added, if more the largest peak in the bin is used."""
+    bins = np.arange(0, data_size, bin_size)
+    idx = np.searchsorted(bins, peaks["top"]) - 1
+
+    bound_peaks = np.zeros(data_size // bin_size, dtype=peaks.dtype)
+    bound_peaks["top"] = np.arange(offset, data_size + offset, bin_size)
+    for i in np.arange(data_size // bin_size):
+        n = np.count_nonzero(idx == i)
+        if n != 0:
+            bin_peaks = peaks[idx == i]
+            bound_peaks[i] = bin_peaks[np.argmax(bin_peaks["area"])]
+
+    return bound_peaks
+
+
+def _lines_to_spots(
+    lines: np.ndarray,
+    shape: Tuple[int, ...],
     min_width: int,
     max_width: int,
-    size: int,
-    distance: int = None,
-    peak_integration_method: str = "base",
-    peak_min_area: float = 0.0,
-    peak_min_height: float = 0.0,
-    peak_min_prominence: float = 0.0,
-    peak_min_width: float = 0.0,
-    ridge_gap_threshold: int = None,
-    ridge_min_snr: float = 9.0,
+    find_peak_kws: dict = None,
 ) -> np.ndarray:
-    dtype = [(name, PEAK_DTYPE) for name in x.dtype.names]
-    peaks = np.empty(size, dtype=dtype)
+    assert np.prod(shape) == lines.shape[0]
 
-    for name in peaks.dtype.names:
-        peaks[name] = find_peaks(
-            x[name],
-            min_width,
-            max_width,
-            distance=distance,
-            min_number=size,
-            max_number=size,
-            peak_integration_method=peak_integration_method,
-            peak_min_area=peak_min_area,
-            peak_min_height=peak_min_height,
-            peak_min_prominence=peak_min_prominence,
-            peak_min_width=peak_min_width,
-            ridge_gap_threshold=ridge_gap_threshold,
-            ridge_min_snr=ridge_min_snr,
+    if find_peak_kws is None:
+        find_peak_kws = {}
+    peaks = find_peaks(lines.ravel(), min_width, max_width, **find_peak_kws)
+    peaks = bin_and_bound_peaks(
+        peaks, lines.size, lines.shape[1], offset=lines.shape[1] // 2
+    )
+    return peaks["area"].reshape(shape)
+
+
+def lines_to_spots(
+    lines: np.ndarray,
+    shape: Tuple[int, ...],
+    min_width: int,
+    max_width: int,
+    find_peak_kws: dict = None,
+) -> np.ndarray:
+    if lines.dtype.names is None:
+        return _lines_to_spots(lines, shape, min_width, max_width, find_peak_kws)
+
+    spots = np.empty(shape, lines.dtype)
+    for name in lines.dtype.names:
+        spots[name] = _lines_to_spots(
+            lines[name], shape, min_width, max_width, find_peak_kws
         )
-
-    return peaks
+    return spots
