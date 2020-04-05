@@ -1,11 +1,12 @@
 import numpy as np
 import copy
 
-from ..laser import _Laser, Laser
-from ..calibration import Calibration
+from pew.laser import _Laser, Laser
+from pew.calibration import Calibration
 
-from .calc import subpixel_offset_equal
-from .config import SRRConfig
+from pew.lib.calc import subpixel_offset_equal
+
+from pew.srr.config import SRRConfig
 
 from typing import Dict, List, Tuple
 
