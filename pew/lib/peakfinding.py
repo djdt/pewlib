@@ -106,6 +106,7 @@ def _peak_data_from_ridges(
     rights = np.clip(maxima_coords[1] + widths // 2, 0, x.size - 1)
 
     indicies = lefts + np.arange(np.amax(widths) + 1)[:, None]
+    indicies = np.clip(indicies, 0, x.size - 1)
     indicies = np.where(indicies - lefts < widths, indicies, rights)
 
     if height_method == "cwt":  # Height at maxima cwt ridge
@@ -185,6 +186,9 @@ def find_peaks(
     ridges, ridge_maxima = _filter_ridges(
         ridges, cwt_coef, noise_window=windows[-1] * 4, min_snr=ridge_min_snr
     )
+
+    if ridges.size == 0:
+        return np.array([], dtype=PEAK_DTYPE)
 
     peaks = _peak_data_from_ridges(
         x,
