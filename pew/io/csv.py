@@ -3,7 +3,7 @@ import numpy as np
 from .error import PewException
 
 
-def load(path: str, isotope: str = "CSV") -> np.ndarray:
+def load(path: str, isotope: str = None) -> np.ndarray:
     with open(path, "rb") as fp:
         cleaned = (line.replace(b";", b",").replace(b"\t", b",") for line in fp)
         try:
@@ -15,7 +15,8 @@ def load(path: str, isotope: str = "CSV") -> np.ndarray:
     if data.ndim != 2:
         raise PewException(f"Invalid data dimensions '{data.ndim}'.")
 
-    data.dtype = [(isotope, data.dtype)]
+    if isotope is not None:
+        data.dtype = [(isotope, data.dtype)]
     return data
 
 
