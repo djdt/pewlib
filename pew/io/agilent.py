@@ -137,8 +137,12 @@ def load(path: str, full: bool = False) -> np.ndarray:
         names = acq_method_read_elements(acq_xml)
         scan_time, nscans = msts_read_params(msts_xml)
     else:
-        warnings.warn("AcqMethod.xml or MSTS.xml not found, reading params from csv.")
-        names, scan_time, nscans = csv_read_params(next(c for c in csvs if c is not None))
+        warnings.warn(
+            "AcqMethod.xml or MSTS.xml not found, reading params from csv.", PewWarning
+        )
+        names, scan_time, nscans = csv_read_params(
+            next(c for c in csvs if c is not None)
+        )
     # nscans += 1
 
     data = np.empty((len(ddirs), nscans), dtype=[(name, np.float64) for name in names])
