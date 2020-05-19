@@ -7,14 +7,14 @@ from pew.calibration import Calibration
 
 def test_weighting():
     # Test all the weights, safe return
-    x = np.array([1.0, 0.4, 0.2, 0.5, 0.8])
+    x = np.random.normal(loc=2, size=10)
     assert weighting(x, None) is None
     assert np.all(weighting(x, "x") == x)
     assert np.all(weighting(x, "1/x") == 1 / x)
     assert np.all(weighting(x, "1/(x^2)") == 1 / (x * x))
     # Test safe return
-    x = np.array([0.0, 0.1, 0.2])
-    assert np.all(weighting(x, "x", True) == np.array([0.1, 0.1, 0.2]))
+    x[0] = 0.0
+    assert weighting(x, "x", True)[0] == np.amin(x[1:])
     assert np.all(weighting(x, "x", False) == x)
 
 
