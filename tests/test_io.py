@@ -1,25 +1,30 @@
-import pytest
-import os.path
-import tempfile
 import filecmp
 import numpy as np
+import os.path
+import pytest
+import tempfile
+import warnings
+
 from pew import io
+from pew.io.error import PewWarning
 
 
 def test_io_agilent():
-    data_path = os.path.join(os.path.dirname(__file__), "data", "agilent")
-    # Test loading 7700
-    data = io.agilent.load(os.path.join(data_path, "7700.b"))
-    assert data.shape == (3, 3)
-    assert data.dtype.names == ("A1", "B2")
-    assert np.sum(data["A1"]) == pytest.approx(9.0)
-    assert np.sum(data["B2"]) == pytest.approx(0.9)
-    # Test loading from 7500
-    data = io.agilent.load(os.path.join(data_path, "7500.b"))
-    assert data.shape == (3, 3)
-    assert data.dtype.names == ("A1", "B2")
-    assert np.sum(data["A1"]) == pytest.approx(9.0)
-    assert np.sum(data["B2"]) == pytest.approx(0.9)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", PewWarning)
+        data_path = os.path.join(os.path.dirname(__file__), "data", "agilent")
+        # Test loading 7700
+        data = io.agilent.load(os.path.join(data_path, "7700.b"))
+        assert data.shape == (3, 3)
+        assert data.dtype.names == ("A1", "B2")
+        assert np.sum(data["A1"]) == pytest.approx(9.0)
+        assert np.sum(data["B2"]) == pytest.approx(0.9)
+        # Test loading from 7500
+        data = io.agilent.load(os.path.join(data_path, "7500.b"))
+        assert data.shape == (3, 3)
+        assert data.dtype.names == ("A1", "B2")
+        assert np.sum(data["A1"]) == pytest.approx(9.0)
+        assert np.sum(data["B2"]) == pytest.approx(0.9)
     # Make sure error raised on missing data
     with pytest.warns(io.error.PewWarning):
         io.agilent.load(os.path.join(data_path, "missing_line.b"))
@@ -43,22 +48,20 @@ def test_io_csv():
     with pytest.raises(io.error.PewException):
         io.csv.load(os.path.join(data_path_thermo, "icap.csv"))
     # Test loading
-    data = io.csv.load(os.path.join(data_path, "csv.csv"))
+    data = io.csv.load(os.path.join(data_path, "csv.csv"), "CSV")
     assert data.dtype.names == ("CSV",)
     assert data.shape == (20, 5)
     assert np.sum(data["CSV"]) == pytest.approx(100.0)
     # Test saving
     temp = tempfile.NamedTemporaryFile()
     data = np.random.random([10, 10])
-    data.dtype = [("CSV", float)]
-    io.csv.save(temp.name, data["CSV"])
-    assert np.all(data["CSV"] == io.csv.load(temp.name)["CSV"])
+    io.csv.save(temp.name, data)
+    assert np.all(data == io.csv.load(temp.name))
     temp.close()
     # Delimiter loading
     data = io.csv.load(os.path.join(data_path, "delimiters.csv"))
-    assert data.dtype.names == ("CSV",)
     assert data.shape == (10, 5)
-    assert np.sum(data["CSV"]) == pytest.approx(100.0)
+    assert np.sum(data) == pytest.approx(100.0)
 
 
 def test_io_thermo():
