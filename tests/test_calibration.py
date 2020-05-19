@@ -16,6 +16,8 @@ def test_weighting():
     x[0] = 0.0
     assert weighting(x, "x", True)[0] == np.amin(x[1:])
     assert np.all(weighting(x, "x", False) == x)
+    with pytest.raises(ValueError):
+        weighting(x, "invalid")
 
 
 def test_weighted_rsq():
@@ -34,7 +36,9 @@ def test_weighted_linreg():
     # Normal
     assert weighted_linreg(x, y, None) == pytest.approx((1.7, -1.9, 0.830459, 1.402379))
     # Weighted
-    assert weighted_linreg(x, y, x) == pytest.approx((2.085714, -3.314286, 0.865097, 2.296996))
+    assert weighted_linreg(x, y, x) == pytest.approx(
+        (2.085714, -3.314286, 0.865097, 2.296996)
+    )
 
 
 def test_default_calibration():
@@ -45,6 +49,7 @@ def test_default_calibration():
     # Default should just return data
     data = np.random.random([10, 10])
     assert np.all(calibration.calibrate(data) == data)
+    assert "r²" not in str(calibration)
 
 
 def test_calibration_calibrate():
@@ -64,6 +69,9 @@ def test_calibration_from_points():
     # Test one dimnesion
     with pytest.raises(ValueError):
         calibration = Calibration.from_points([0, 1])
+    # If all nan should return to default
+    calibration = Calibration.from_points([[1.0, np.nan], [1.0, np.nan]])
+    assert calibration.gradient == 1.0
 
     calibration = Calibration.from_points([[0, 1], [1, 2], [1, 3], [2, 4]])
     assert calibration.gradient == pytest.approx(1.5)
@@ -74,6 +82,7 @@ def test_calibration_from_points():
     assert np.all(calibration.counts() == np.array([1.0, 2.0, 3.0, 4.0]))
     # With nans
     calibration = Calibration.from_points([[0, 1], [1, np.nan], [1, 3], [2, 4]])
+    assert "r²" in str(calibration)
 
 
 def test_calibration_from_points_weights():
@@ -89,3 +98,6 @@ def test_calibration_from_points_weights():
     assert pytest.approx(calibration.gradient, 2.085814)
     assert pytest.approx(calibration.intercept, -3.314286)
     assert pytest.approx(calibration.rsq, 0.865097)
+
+    with pytest.raises(ValueError):
+        calibration = Calibration.from_points(points=points, weights=[1.0])

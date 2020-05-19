@@ -26,20 +26,14 @@ def cwt(
     cwt = np.empty((windows.shape[0], x.size), dtype=x.dtype)
     for i in range(cwt.shape[0]):
         n = np.amin((x.size, windows[i] * 10))
-        cwt[i] = np.convolve(
-            np.pad(x, (n // 2 - 1, n // 2), mode="edge"),
-            wavelet(n, windows[i]),
-            mode="valid",
-        )
+        cwt[i] = np.convolve(x, wavelet(n, windows[i]), mode="same")
     return cwt
 
 
 def ricker_wavelet(size: int, sigma: float) -> np.ndarray:
     x = np.linspace(-size / 2.0, size / 2.0, size)
-    a = 2.0 / (np.sqrt(3.0 * sigma) * np.power(np.pi, 0.25))
-    kernel = np.exp(-((0.5 * np.square(x) / np.square(sigma))))
-    kernel = a * (1.0 - np.square(x) / np.square(sigma)) * kernel
-    return kernel
+    a = 2.0 / (np.sqrt(3.0 * sigma) * np.pi ** 0.25)
+    return a * (1.0 - (x / sigma) ** 2) * np.exp(-(x ** 2 / (2.0 * sigma ** 2)))
 
 
 def sliding_window(x: np.ndarray, window: int, step: int = 1) -> np.ndarray:
