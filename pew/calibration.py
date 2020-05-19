@@ -41,9 +41,9 @@ def weighted_linreg(
         x, y, 1, w=w if w is None else np.sqrt(w), full=True
     )
     r2 = weighted_rsq(x, y, w)
-    err = np.sqrt(np.sum(stats[0]) / (x.size - 2))
+    error = np.sqrt(np.sum(stats[0]) / (x.size - 2))
 
-    return coef[1], coef[0], r2, err
+    return coef[1], coef[0], r2, error
 
 
 class Calibration(object):
@@ -52,7 +52,7 @@ class Calibration(object):
         intercept: float = 0.0,
         gradient: float = 1.0,
         rsq: float = None,
-        err: float = None,
+        error: float = None,
         points: np.ndarray = None,
         weights: Union[np.ndarray, str] = None,
         weighting: str = "None",
@@ -65,7 +65,7 @@ class Calibration(object):
         self.unit = unit
 
         self.rsq = rsq
-        self.err = err
+        self.error = error
 
         self._points = None
         if points is not None:
@@ -133,7 +133,7 @@ class Calibration(object):
                 w = self._weights
                 if w is not None:
                     w = w[no_nans]
-                self.gradient, self.intercept, self.rsq, self.err = weighted_linreg(
+                self.gradient, self.intercept, self.rsq, self.error = weighted_linreg(
                     x, y, w
                 )
 
