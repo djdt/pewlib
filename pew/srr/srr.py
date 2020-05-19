@@ -65,8 +65,8 @@ class SRRLaser(_Laser):
 
             new_data = np.empty(self.data[i].shape, dtype=new_dtype)
             for name in dtype.names:
-                new_data[name] = self.data[name]
-            new_data[isotope] = data
+                new_data[name] = self.data[i][name]
+            new_data[isotope] = data[i]
             self.data[i] = new_data
 
         if calibration is None:
@@ -81,7 +81,7 @@ class SRRLaser(_Laser):
             new_data = np.empty(self.data[i].shape, dtype=new_dtype)
             for name in dtype.names:
                 if name != isotope:
-                    new_data[name] = self.data[name]
+                    new_data[name] = self.data[i][name]
             self.data[i] = new_data
 
         self.calibration.pop(isotope)

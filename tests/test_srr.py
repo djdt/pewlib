@@ -16,18 +16,27 @@ def rand_data(names: List[str], shape: Tuple[int, int]) -> np.ndarray:
 
 
 def test_srr():
-    laser = SRRLaser(
-        config=SRRConfig(1, 1, 1, warmup=0),
-        data=[rand_data(["A", "B"], (10, 20)), rand_data(["A", "B"], (10, 20))],
-    )
+    data = [rand_data(["A", "B"], (10, 20)), rand_data(["A", "B"], (10, 20))]
+    laser = SRRLaser(config=SRRConfig(1, 1, 1, warmup=0), data=data)
     assert laser.layers == 2
     assert laser.shape == (10, 10, 2)
+    assert laser.extent == (0, 10.5, 0, 10.5)
     # Check config params
     assert laser.check_config_valid(SRRConfig(1, 1, 1, warmup=0))
     assert not laser.check_config_valid(SRRConfig(2, 1, 1, warmup=0))
     assert not laser.check_config_valid(SRRConfig(3, 1, 1, warmup=0))
     assert not laser.check_config_valid(SRRConfig(warmup=100))
     assert not laser.check_config_valid(SRRConfig(warmup=-1))
+
+    # Get layer
+    assert np.all(laser.get("A", layer=1) == data[1]["A"].T)
+
+    # Test adding and removing datas
+    new_data = [np.random.random((10, 20)), np.random.random((10, 20))]
+    laser.add("C", new_data)
+    assert laser.isotopes == ("A", "B", "C")
+    laser.remove("B")
+    assert laser.isotopes == ("A", "C")
 
 
 def test_srr_from_list():
@@ -45,3 +54,15 @@ def test_srr_from_lasers():
     laser = SRRLaser.from_lasers(lasers)
     assert laser.layers == 2
     assert laser.shape == (10, 10, 2)
+
+
+def test_srr_krisskross():
+    data = np.empty((3, 3), dtype=[('a', float)])
+    data['a'] = [[3, 2, 1], [2, 1, 0], [1, 0, 0]]
+
+    laser = SRRLaser(config=SRRConfig(1, 1, 1, warmup=0), data=[data, data.copy()])
+
+    kk = laser.get(flat=True)
+    assert np.all(kk["a"][1] == np.array([1.5, 3, 2.5, 2, 1.5, 1, 0.5]))
+    kk = laser.get(extent=(0, 1, 2, 3.5), flat=True)
+    assert np.all(kk["a"][1] == np.array([1.5, 3]))

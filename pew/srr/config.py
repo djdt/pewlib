@@ -75,7 +75,7 @@ class SRRConfig(Config):
 
     # Return without the washout included
     def data_extent(
-        self, shape: Tuple[int, int], **kwargs
+        self, shape: Tuple[int, ...], **kwargs
     ) -> Tuple[float, float, float, float]:
         layer = kwargs.get("layer", None)
         px, py = self.get_pixel_width(layer), self.get_pixel_height(layer)
