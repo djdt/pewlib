@@ -7,6 +7,7 @@ import warnings
 
 from pew import io
 from pew.io.error import PewWarning
+from pew.srr import SRRLaser, SRRConfig
 
 
 def test_io_agilent():
@@ -146,3 +147,10 @@ def test_io_npz():
     assert loaded.calibration["A1"].weighting == laser.calibration["A1"].weighting
     assert loaded.calibration["A1"].unit == laser.calibration["A1"].unit
     assert np.all(loaded.calibration["A1"].points == laser.calibration["A1"].points)
+
+
+def test_io_npz_srr():
+    data_path = os.path.join(os.path.dirname(__file__), "data", "npz")
+    laser = io.npz.load(os.path.join(data_path, "test_srr.npz"))[0]
+    assert isinstance(laser, SRRLaser)
+    assert isinstance(laser.config, SRRConfig)
