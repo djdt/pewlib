@@ -41,7 +41,7 @@ def weighted_linreg(
         x, y, 1, w=w if w is None else np.sqrt(w), full=True
     )
     r2 = weighted_rsq(x, y, w)
-    error = np.sqrt(np.sum(stats[0]) / (x.size - 2))
+    error = np.sqrt(np.sum(stats[0]) / (x.size - 2)) if x.size > 2 else 0.0
 
     return coef[1], coef[0], r2, error
 
