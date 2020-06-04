@@ -1,13 +1,13 @@
 import numpy as np
 
-from .. import __version__
+from pew import __version__
 
-from .error import PewException
+from pew.io.error import PewException
 
 from typing import Any, Dict, List
-from ..laser import _Laser
-from .. import Laser, Calibration, Config
-from ..srr import SRRLaser, SRRConfig
+from pew.laser import _Laser
+from pew import Laser, Calibration, Config
+from pew.srr import SRRLaser, SRRConfig
 
 
 def load(path: str) -> List[_Laser]:

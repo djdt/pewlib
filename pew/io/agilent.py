@@ -1,14 +1,16 @@
 import os
-import warnings
+import logging
 from xml.etree import ElementTree
 
 import numpy as np
 import numpy.lib
 import numpy.lib.recfunctions
 
-from pew.io.error import PewException, PewWarning
+from pew.io.error import PewException
 
 from typing import Generator, List, Tuple
+
+logger = logging.getLogger(__name__)
 
 # These files are not present in older software, must be able to be ignored safely
 # Important files:
@@ -111,12 +113,16 @@ def load(path: str, full: bool = False) -> np.ndarray:
 
     """
     acq_xml = os.path.join(path, "Method", "AcqMethod.xml")
+
     # Collect data files
+    ddirs = []
     if os.path.exists(acq_xml):
         ddirs = list(acq_method_read_datafiles(acq_xml))
-    else:
-        warnings.warn(
-            "AcqMethod.xml not found, falling back to alphabetical order.", PewWarning
+
+    if len(ddirs) == 0:
+        logger.warn(
+            "Unable to import files from AcqMethod.xml,"
+            " falling back to alphabetical order."
         )
         ddirs = list(find_datafiles(path))
         ddirs.sort(key=lambda f: int("".join(filter(str.isdigit, f))))
@@ -126,7 +132,7 @@ def load(path: str, full: bool = False) -> np.ndarray:
     for d in ddirs:
         csv = os.path.join(path, d, os.path.splitext(d)[0] + ".csv")
         if not os.path.exists(csv):
-            warnings.warn(f"Missing csv '{csv}'.", PewWarning)
+            logger.warn(f"Missing csv '{csv}', line blanked.")
             csvs.append(None)
         else:
             csvs.append(csv)
@@ -137,13 +143,10 @@ def load(path: str, full: bool = False) -> np.ndarray:
         names = acq_method_read_elements(acq_xml)
         scan_time, nscans = msts_read_params(msts_xml)
     else:
-        warnings.warn(
-            "AcqMethod.xml or MSTS.xml not found, reading params from csv.", PewWarning
-        )
+        logger.info("AcqMethod.xml and MSTS.xml not found, reading params from csv.")
         names, scan_time, nscans = csv_read_params(
             next(c for c in csvs if c is not None)
         )
-    # nscans += 1
 
     data = np.empty((len(ddirs), nscans), dtype=[(name, np.float64) for name in names])
     for i, csv in enumerate(csvs):
@@ -159,7 +162,7 @@ def load(path: str, full: bool = False) -> np.ndarray:
                     dtype=np.float64,
                 )
             except ValueError:
-                warnings.warn(f"Row {i} missing, set to zero.", PewWarning)
+                logger.warn(f"'{csv}' row {i} missing, line blanked.")
                 data[i, :] = np.zeros(data.shape[1], dtype=data.dtype)
 
     if full:
