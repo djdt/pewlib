@@ -112,11 +112,14 @@ def load(path: str, full: bool = False) -> np.ndarray:
     """
     acq_xml = os.path.join(path, "Method", "AcqMethod.xml")
     # Collect data files
+    ddirs = []
     if os.path.exists(acq_xml):
         ddirs = list(acq_method_read_datafiles(acq_xml))
-    else:
+
+    if len(ddirs) == 0:
         warnings.warn(
-            "AcqMethod.xml not found, falling back to alphabetical order.", PewWarning
+            "Unable to import files from AcqMethod.xml, falling back to alphabetical order.",
+            PewWarning,
         )
         ddirs = list(find_datafiles(path))
         ddirs.sort(key=lambda f: int("".join(filter(str.isdigit, f))))
@@ -126,7 +129,7 @@ def load(path: str, full: bool = False) -> np.ndarray:
     for d in ddirs:
         csv = os.path.join(path, d, os.path.splitext(d)[0] + ".csv")
         if not os.path.exists(csv):
-            warnings.warn(f"Missing csv '{csv}'.", PewWarning)
+            warnings.warn(f"Missing csv '{csv}', line blanked.", PewWarning)
             csvs.append(None)
         else:
             csvs.append(csv)
