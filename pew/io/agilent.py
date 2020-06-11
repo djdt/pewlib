@@ -115,6 +115,7 @@ def batch_xml_read_datafiles(root: str, batch_xml: str) -> Generator[str, None, 
             data_file = os.path.join(
                 root, data_file[max(map(data_file.rfind, "\\/")) + 1 :]
             )
+            logger.debug(f"Looking for datafile '{data_file}'.")
             if os.path.exists(data_file):
                 yield data_file
 
@@ -180,7 +181,8 @@ def load(path: str, full: bool = False) -> np.ndarray:
     # Collect csvs
     csvs: List[str] = []
     for d in ddirs:
-        csv = os.path.join(d, os.path.splitext(d)[0] + ".csv")
+        csv = os.path.join(d, os.path.splitext(os.path.basename(d))[0] + ".csv")
+        logger.debug(f"Looking for csv '{csv}'.")
         if not os.path.exists(csv):
             logger.warn(f"Missing csv '{csv}', line blanked.")
             csvs.append(None)
