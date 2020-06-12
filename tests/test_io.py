@@ -11,24 +11,21 @@ from pew.srr import SRRLaser, SRRConfig
 
 
 def test_io_agilent():
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", PewWarning)
-        data_path = os.path.join(os.path.dirname(__file__), "data", "agilent")
-        # Test loading 7700
-        data = io.agilent.load(os.path.join(data_path, "7700.b"))
-        assert data.shape == (3, 3)
-        assert data.dtype.names == ("A1", "B2")
-        assert np.sum(data["A1"]) == pytest.approx(9.0)
-        assert np.sum(data["B2"]) == pytest.approx(0.9)
-        # Test loading from 7500
-        data = io.agilent.load(os.path.join(data_path, "7500.b"))
-        assert data.shape == (3, 3)
-        assert data.dtype.names == ("A1", "B2")
-        assert np.sum(data["A1"]) == pytest.approx(9.0)
-        assert np.sum(data["B2"]) == pytest.approx(0.9)
+    data_path = os.path.join(os.path.dirname(__file__), "data", "agilent")
+    # Test loading 7700
+    data = io.agilent.load(os.path.join(data_path, "7700.b"))
+    assert data.shape == (3, 3)
+    assert data.dtype.names == ("A1", "B2")
+    assert np.sum(data["A1"]) == pytest.approx(9.0)
+    assert np.sum(data["B2"]) == pytest.approx(0.9)
+    # Test loading from 7500
+    data = io.agilent.load(os.path.join(data_path, "7500.b"))
+    assert data.shape == (3, 3)
+    assert data.dtype.names == ("A1", "B2")
+    assert np.sum(data["A1"]) == pytest.approx(9.0)
+    assert np.sum(data["B2"]) == pytest.approx(0.9)
     # Make sure error raised on missing data
-    with pytest.warns(io.error.PewWarning):
-        io.agilent.load(os.path.join(data_path, "missing_line.b"))
+    io.agilent.load(os.path.join(data_path, "missing_line.b"))
 
 
 def test_io_agilent_acq_method():

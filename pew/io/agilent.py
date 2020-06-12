@@ -169,7 +169,7 @@ def load(path: str, full: bool = False) -> np.ndarray:
 
     # Fall back to csv name order
     if len(ddirs) == 0:
-        logger.warn(
+        logger.warning(
             "Unable to import files from BatchLog or AcqMethod.xml,"
             " falling back to alphabetical order."
         )
@@ -184,7 +184,7 @@ def load(path: str, full: bool = False) -> np.ndarray:
         csv = os.path.join(d, os.path.splitext(os.path.basename(d))[0] + ".csv")
         logger.debug(f"Looking for csv '{csv}'.")
         if not os.path.exists(csv):
-            logger.warn(f"Missing csv '{csv}', line blanked.")
+            logger.warning(f"Missing csv '{csv}', line blanked.")
             csvs.append(None)
         else:
             csvs.append(csv)
@@ -213,7 +213,7 @@ def load(path: str, full: bool = False) -> np.ndarray:
                     dtype=np.float64,
                 )
             except ValueError:
-                logger.warn(f"'{csv}' row {i} missing, line blanked.")
+                logger.warning(f"'{csv}' row {i} missing, line blanked.")
                 data[i, :] = np.zeros(data.shape[1], dtype=data.dtype)
 
     if full:

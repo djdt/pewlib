@@ -1,6 +1,6 @@
 import numpy as np
 
-from pew.lob.calc import normalise, shuffle_blocks
+from pew.lib.calc import normalise, shuffle_blocks
 
 from typing import Tuple
 
