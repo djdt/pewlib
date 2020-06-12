@@ -1,6 +1,8 @@
 import numpy as np
 
-from pew.lib.calc import cwt, local_maxima, ricker_wavelet, sliding_window_centered
+from pew.lib.calc import local_maxima, sliding_window_centered
+
+from typing import Callable
 
 
 PEAK_DTYPE = np.dtype(
@@ -9,6 +11,22 @@ PEAK_DTYPE = np.dtype(
         "formats": [float, float, float, float, int, int, int, int],
     }
 )
+
+
+def cwt(
+    x: np.ndarray, windows: np.ndarray, wavelet: Callable[..., np.ndarray]
+) -> np.ndarray:
+    cwt = np.empty((windows.shape[0], x.size), dtype=x.dtype)
+    for i in range(cwt.shape[0]):
+        n = np.amin((x.size, windows[i] * 10))
+        cwt[i] = np.convolve(x, wavelet(n, windows[i]), mode="same")
+    return cwt
+
+
+def ricker_wavelet(size: int, sigma: float) -> np.ndarray:
+    x = np.linspace(-size / 2.0, size / 2.0, size)
+    a = 2.0 / (np.sqrt(3.0 * sigma) * np.pi ** 0.25)
+    return a * (1.0 - (x / sigma) ** 2) * np.exp(-(x ** 2 / (2.0 * sigma ** 2)))
 
 
 def _identify_ridges(
