@@ -3,10 +3,8 @@ import numpy as np
 import os.path
 import pytest
 import tempfile
-import warnings
 
 from pew import io
-from pew.io.error import PewWarning
 from pew.srr import SRRLaser, SRRConfig
 
 
