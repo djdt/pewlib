@@ -1,8 +1,8 @@
 import numpy as np
 import copy
 
-from .calibration import Calibration
-from .config import Config
+from pew.calibration import Calibration
+from pew.config import Config
 
 from typing import Dict, List, Tuple, Union
 

@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..laser import Config
+from pew.config import Config
 
 from typing import Tuple
 
