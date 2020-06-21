@@ -12,12 +12,19 @@ def test_weighting():
     assert np.all(weighting(x, "x") == x)
     assert np.all(weighting(x, "1/x") == 1 / x)
     assert np.all(weighting(x, "1/(x^2)") == 1 / (x * x))
+
     # Test safe return
     x[0] = 0.0
     assert weighting(x, "x", True)[0] == np.amin(x[1:])
     assert np.all(weighting(x, "x", False) == x)
     with pytest.raises(ValueError):
         weighting(x, "invalid")
+
+    # Nan ignored when looking for min value in safe
+    assert np.all(
+        weighting(np.array([0.0, 1.0, np.nan, 2.0]), "1/x", True)[[0, 1, 3]]
+        == [1.0, 1.0, 0.5]
+    )
 
 
 def test_weighted_rsq():
@@ -46,10 +53,11 @@ def test_default_calibration():
     assert calibration.concentrations().size == 0
     assert calibration.counts().size == 0
     calibration.update_linreg()
+
     # Default should just return data
     data = np.random.random([10, 10])
     assert np.all(calibration.calibrate(data) == data)
-    assert "r²" not in str(calibration)
+    assert calibration.rsq is None
 
 
 def test_calibration_calibrate():
@@ -60,29 +68,35 @@ def test_calibration_calibrate():
 
 
 def test_calibration_from_points():
-    # Test shape[0] = 1
-    with pytest.raises(ValueError):
-        calibration = Calibration.from_points([[0, 1]])
-    # Test shape[1] = 3
-    with pytest.raises(ValueError):
-        calibration = Calibration.from_points([[0, 1, 1]])
-    # Test one dimnesion
-    with pytest.raises(ValueError):
-        calibration = Calibration.from_points([0, 1])
-    # If all nan should return to default
-    calibration = Calibration.from_points([[1.0, np.nan], [1.0, np.nan]])
-    assert calibration.gradient == 1.0
-
     calibration = Calibration.from_points([[0, 1], [1, 2], [1, 3], [2, 4]])
     assert calibration.gradient == pytest.approx(1.5)
     assert calibration.intercept == pytest.approx(1.0)
     assert calibration.rsq == pytest.approx(0.9000)
+
     # Test returns
     assert np.all(calibration.concentrations() == np.array([0.0, 1.0, 1.0, 2.0]))
     assert np.all(calibration.counts() == np.array([1.0, 2.0, 3.0, 4.0]))
+
     # With nans
     calibration = Calibration.from_points([[0, 1], [1, np.nan], [1, 3], [2, 4]])
-    assert "r²" in str(calibration)
+    assert calibration.rsq is not None
+    calibration = Calibration.from_points([[0, 1], [np.nan, 2], [1, 3], [2, 4]])
+    assert calibration.rsq is not None
+    # If all nan should return to default
+    calibration = Calibration.from_points([[1.0, np.nan], [1.0, np.nan]])
+    assert calibration.gradient == 1.0
+
+
+def test_calibration_from_points_invalid():
+    # Test shape[0] = 1
+    with pytest.raises(ValueError):
+        Calibration.from_points([[0, 1]])
+    # Test shape[1] = 3
+    with pytest.raises(ValueError):
+        Calibration.from_points([[0, 1, 1]])
+    # Test one dimnesion
+    with pytest.raises(ValueError):
+        Calibration.from_points([0, 1])
 
 
 def test_calibration_from_points_weights():
@@ -101,3 +115,14 @@ def test_calibration_from_points_weights():
 
     with pytest.raises(ValueError):
         calibration = Calibration.from_points(points=points, weights=[1.0])
+
+
+def test_calibration_update_linreg():
+    points = np.vstack([[1.0, 2.0, 3.0, 4.0, 5.0], [1.0, 2.0, 3.0, 4.0, 5.0]]).T
+    calibration = Calibration.from_points(points, weighting="1/x")
+    calibration.points[0, 0] = 0
+    calibration.update_linreg()
+    calibration.points[1, 0] = np.nan
+    calibration.update_linreg()
+    calibration.points[2, 1] = np.nan
+    calibration.update_linreg()

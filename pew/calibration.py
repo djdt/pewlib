@@ -6,7 +6,7 @@ from typing import Tuple, Union
 def weighting(x: np.ndarray, weighting: str, safe: bool = True) -> np.ndarray:
     if safe and x.size > 0:  # Avoid div 0 problems
         x = x.copy()
-        x[x == 0] = np.amin(x[x != 0])
+        x[x == 0] = np.nanmin(x[x != 0])
 
     if weighting is None or weighting == "None":
         return None
