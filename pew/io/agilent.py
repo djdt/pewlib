@@ -75,13 +75,13 @@ def acq_method_read_elements(method_path: str) -> List[str]:
         name = element.findtext("ns:ElementName", namespaces=ns)
         if name is None:
             continue
-        mz = int(element.findtext("ns:MZ", namespaces=ns) or -1)
-        mzmz = int(element.findtext("ns:SelectedMZ", namespaces=ns) or -1)
-        elements.append((name, mz, mzmz))
+        mz = int(element.findtext("ns:SelectedMZ", namespaces=ns) or -1)
+        mz2 = int(element.findtext("ns:MZ", namespaces=ns) or -1)
+        elements.append((name, mz, mz2))
 
     elements = sorted(elements, key=lambda e: (e[1], e[2]))
     return [
-        f"{e[0]}{e[1]}{'__' if e[2] > 1 else ''}{e[2] if e[2] > -1 else ''}"
+        f"{e[0]}{e[1]}{'__' if e[2] > -1 else ''}{e[2] if e[2] > -1 else ''}"
         for e in elements
     ]
 
@@ -133,14 +133,15 @@ def msts_read_params(msts_path: str) -> Tuple[float, int]:
     return np.round((etime - stime) * 60 / scans, 4), scans
 
 
-def load(path: str, full: bool = False) -> np.ndarray:
-    """Imports an Agilent batch (.b) directory, returning IsotopeData object.
+def load(path: str, raw: bool = False, full: bool = False) -> np.ndarray:
+    """Imports an Agilent batch (.b) directory, returning structured array.
 
-   Scans the given path for .d directories containg a similarly named
-   .csv file. These are imported as lines, sorted by their name.
+    Finds lines using (in order of preference): BatchLog.xml, BatchLog.csv,
+     AcqMethod.xml, .d files sorted by name.
 
     Args:
        path: Path to the .b directory
+       raw: Only use .d and .csv files.
        full: return dict of available params
 
     Returns:
@@ -155,11 +156,18 @@ def load(path: str, full: bool = False) -> np.ndarray:
     batch_csv = os.path.join(path, "BatchLog.csv")
     batch_xml = os.path.join(path, "Method", "BatchLog.xml")
 
+    if raw:
+        acq_xml = batch_xml = batch_csv = ""
+
     # Collect data files
     ddirs = []
     for file, function in zip(
         [batch_xml, batch_csv, acq_xml],
-        [batch_xml_read_datafiles, batch_csv_read_datafiles, acq_method_read_datafiles],
+        [
+            batch_xml_read_datafiles,
+            batch_csv_read_datafiles,
+            acq_method_read_datafiles,
+        ],
     ):
         if os.path.exists(file):
             ddirs = list(function(path, file))
@@ -170,7 +178,7 @@ def load(path: str, full: bool = False) -> np.ndarray:
     # Fall back to csv name order
     if len(ddirs) == 0:
         logger.warning(
-            "Unable to import files from BatchLog or AcqMethod.xml,"
+            "Unable to import files from BatchLogs or AcqMethod.xml,"
             " falling back to alphabetical order."
         )
         ddirs = list(find_datafiles(path))
