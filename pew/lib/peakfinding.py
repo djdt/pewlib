@@ -1,6 +1,6 @@
 import numpy as np
 
-from pew.lib.calc import local_maxima, sliding_window_centered
+from pew.lib.calc import local_maxima, reset_cumsum, sliding_window_centered
 
 from typing import Callable
 
@@ -243,7 +243,7 @@ def bin_and_bound_peaks(
     bound_peaks = np.zeros((data_size // bin_size) * peaks_per_bin, dtype=peaks.dtype)
     bound_peaks["top"] = np.arange(
         offset, data_size + offset, bin_size // peaks_per_bin
-    )
+    )[: bound_peaks.size]
     for i in np.arange(data_size // bin_size):
         bin_peaks = peaks[idx == i]
         if bin_peaks.size > peaks_per_bin:
@@ -256,3 +256,38 @@ def bin_and_bound_peaks(
         bound_peaks[n : n + bin_peaks.size] = bin_peaks
 
     return bound_peaks
+
+
+def insert_missing_peaks(
+    peaks: np.ndarray,
+    distance: float = None,
+    param: str = "top",
+    missing_peak_area: float = 0.0,
+) -> np.ndarray:
+    """Looks for gaps greater than 'distance' in peaks using the given parameter.
+    If a gap is found then enough peaks are insert to ensure no gap remains.
+    These peaks will have area 'missing_peak_area' and their 'param' set to
+    the previous peak + 'distance'.
+    If 'distance' is None then the median distance * 1.1 is used.
+    """
+    assert peaks.ndim == 1
+
+    if distance is None:
+        distance = np.median(np.diff(peaks[param])) * 1.1
+
+    diffs = np.diff(peaks[param])
+    idx = np.flatnonzero(diffs > distance)
+    missing_peak_counts = (diffs[idx] // distance).astype(int)
+
+    # Insert more peaks were required
+    idx = np.repeat(idx, missing_peak_counts)
+
+    # Get the distance new peaks are offset
+    distances = np.concatenate((np.diff(idx) == 0, [0]))
+    distances = (reset_cumsum(distances, 0) + 1) * distance
+
+    missing_peaks = np.zeros(np.sum(missing_peak_counts), dtype=peaks.dtype)
+    missing_peaks["area"] = missing_peak_area
+    missing_peaks[param] = peaks[param][idx] + distances
+
+    return np.insert(peaks, idx + 1, missing_peaks)
