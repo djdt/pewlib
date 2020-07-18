@@ -18,6 +18,10 @@ logger = logging.getLogger(__name__)
 #   {.d file}/AcqData/MSTS.xml - Contains run time in mins <StartTime>, <EndTime>; number of scans <NumOfScans>
 #   {.d file}/AcqData/MSTS_XSpecific.xml - Contains acc time for elements <AccumulationTime>
 
+acq_method_path = os.path.join("Method", "AcqMethod.xml")
+batch_csv_path = "BatchLog.csv"
+batch_xml_path = os.path.join("Method", "BatchLog.xml")
+
 
 def clean_lines(csv: str):
     delimiter_count = 0
@@ -51,7 +55,7 @@ def find_datafiles(path: str) -> Generator[str, None, None]:
 def acq_method_read_datafiles(
     root: str, method_path: str
 ) -> Generator[str, None, None]:
-    xml = ElementTree.parse(method_path)
+    xml = ElementTree.parse(os.path.join(root, method_path))
     ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
     samples = xml.findall("ns:SampleParameter", ns)
     samples = sorted(
@@ -66,8 +70,8 @@ def acq_method_read_datafiles(
                 yield data_file
 
 
-def acq_method_read_elements(method_path: str) -> List[str]:
-    xml = ElementTree.parse(method_path)
+def acq_method_read_elements(root: str, method_path: str) -> List[str]:
+    xml = ElementTree.parse(os.path.join(root, method_path))
     ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
 
     elements: List[Tuple[str, int, int]] = []
@@ -88,7 +92,7 @@ def acq_method_read_elements(method_path: str) -> List[str]:
 
 def batch_csv_read_datafiles(root: str, batch_csv: str) -> Generator[str, None, None]:
     batch_log = np.genfromtxt(
-        batch_csv,
+        os.path.join(root, batch_csv),
         delimiter=",",
         comments=None,
         names=True,
@@ -106,7 +110,7 @@ def batch_csv_read_datafiles(root: str, batch_csv: str) -> Generator[str, None, 
 
 
 def batch_xml_read_datafiles(root: str, batch_xml: str) -> Generator[str, None, None]:
-    xml = ElementTree.parse(batch_xml)
+    xml = ElementTree.parse(os.path.join(root, batch_xml))
     ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
 
     for log in xml.findall("ns:BatchLogInfo", ns):
@@ -151,17 +155,24 @@ def load(path: str, full: bool = False) -> np.ndarray:
 
     """
     # Batch files
-    acq_xml = os.path.join(path, "Method", "AcqMethod.xml")
-    batch_csv = os.path.join(path, "BatchLog.csv")
-    batch_xml = os.path.join(path, "Method", "BatchLog.xml")
+    # acq_xml = os.path.join(path, "Method", "AcqMethod.xml")
+    # batch_csv = os.path.join(path, "BatchLog.csv")
+    # batch_xml = os.path.join(path, "Method", "BatchLog.xml")
+
+    # if raw:
+    #     acq_xml = batch_xml = batch_csv = ""
 
     # Collect data files
     ddirs = []
     for file, function in zip(
-        [batch_xml, batch_csv, acq_xml],
-        [batch_xml_read_datafiles, batch_csv_read_datafiles, acq_method_read_datafiles],
+        [batch_xml_path, batch_csv_path, acq_method_path],
+        [
+            batch_xml_read_datafiles,
+            batch_csv_read_datafiles,
+            acq_method_read_datafiles,
+        ],
     ):
-        if os.path.exists(file):
+        if os.path.exists(os.path.join(path, file)):
             ddirs = list(function(path, file))
             if len(ddirs) > 0:
                 logger.info(f"Imported files using {os.path.basename(file)}")
@@ -190,8 +201,8 @@ def load(path: str, full: bool = False) -> np.ndarray:
             csvs.append(csv)
 
     # Read elements, the scan time and number fo scans
-    if os.path.exists(msts_xml) and os.path.exists(acq_xml):
-        names = acq_method_read_elements(acq_xml)
+    if os.path.exists(msts_xml) and os.path.exists(os.path.join(path, acq_method_path)):
+        names = acq_method_read_elements(path, acq_method_path)
         scan_time, nscans = msts_read_params(msts_xml)
     else:
         logger.info("AcqMethod.xml and MSTS.xml not found, reading params from csv.")
