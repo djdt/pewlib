@@ -118,6 +118,20 @@ def normalise(x: np.ndarray, vmin: float = 0.0, vmax: float = 1.0) -> np.ndarray
     return x
 
 
+def reset_cumsum(x: np.ndarray, reset_value: float = 0.0) -> np.ndarray:
+    """Cumulative sum that resets at the given value.
+
+    Args:
+        x: Input array.
+        reset_value: Value where the cumsum resets to 0.
+"""
+    n = x == reset_value
+    c = np.cumsum(~n)
+    d = np.diff(np.concatenate(([0.0], c[n])))
+    x[n] = -d
+    return np.cumsum(x)
+
+
 def shuffle_blocks(
     x: np.ndarray,
     block: Tuple[int, int],

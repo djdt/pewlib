@@ -79,13 +79,13 @@ def acq_method_xml_read_elements(acq_xml: str) -> List[str]:
         name = element.findtext("ns:ElementName", namespaces=ns)
         if name is None:
             continue
-        mz = int(element.findtext("ns:MZ", namespaces=ns) or -1)
-        mzmz = int(element.findtext("ns:SelectedMZ", namespaces=ns) or -1)
-        elements.append((name, mz, mzmz))
+        mz = int(element.findtext("ns:SelectedMZ", namespaces=ns) or -1)
+        mz2 = int(element.findtext("ns:MZ", namespaces=ns) or -1)
+        elements.append((name, mz, mz2))
 
     elements = sorted(elements, key=lambda e: (e[1], e[2]))
     return [
-        f"{e[0]}{e[1]}{'__' if e[2] > 1 else ''}{e[2] if e[2] > -1 else ''}"
+        f"{e[0]}{e[1]}{'__' if e[2] > -1 else ''}{e[2] if e[2] > -1 else ''}"
         for e in elements
     ]
 
@@ -173,13 +173,13 @@ def collect_datafiles(batch_root: str, methods: List[str]) -> List[str]:
 def load(
     path: str, collection_methods: List[str] = None, full: bool = False
 ) -> np.ndarray:
-    """Imports an Agilent batch (.b) directory, returning IsotopeData object.
-
-   Scans the given path for .d directories containg a similarly named
-   .csv file. These are imported as lines, sorted by their name.
+    """Imports an Agilent batch (.b) directory, returning structured array.
+    Finds lines using (in order of preference): BatchLog.xml, BatchLog.csv,
+     AcqMethod.xml, .d files sorted by name.
 
     Args:
        path: Path to the .b directory
+       raw: Only use .d and .csv files.
        full: return dict of available params
 
     Returns:
