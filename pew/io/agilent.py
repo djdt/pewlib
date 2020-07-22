@@ -74,8 +74,14 @@ def acq_method_xml_read_elements(acq_xml: str) -> List[str]:
     xml = ElementTree.parse(acq_xml)
     ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
 
+    msms = False
+    for tune in xml.findall("ns:TuneStep", namespaces=ns):
+        if tune.findtext("ns:ScanType_Acq", namespaces=ns) == "MS_MS":
+            msms = True
+            break
+
     elements: List[Tuple[str, int, int]] = []
-    for element in xml.findall("ns:IcpmsElement", ns):
+    for element in xml.findall("ns:IcpmsElement", namespaces=ns):
         name = element.findtext("ns:ElementName", namespaces=ns)
         if name is None:
             continue
@@ -84,10 +90,10 @@ def acq_method_xml_read_elements(acq_xml: str) -> List[str]:
         elements.append((name, mz, mz2))
 
     elements = sorted(elements, key=lambda e: (e[1], e[2]))
-    return [
-        f"{e[0]}{e[1]}{'__' if e[2] > -1 else ''}{e[2] if e[2] > -1 else ''}"
-        for e in elements
-    ]
+    names = []
+    for e in elements:
+        names.append(f"{e[0]}{e[1]}->{e[2]}" if msms else f"{e[0]}{e[1]}")
+    return names
 
 
 def batch_csv_read_datafiles(batch_root: str, batch_csv: str) -> List[str]:
