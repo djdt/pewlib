@@ -99,6 +99,8 @@ def batch_csv_read_datafiles(batch_root: str, batch_csv: str) -> List[str]:
         usecols=(0, 5, 6),
         dtype=[np.uint32, object, "S4"],
     )
+    if batch_log.size == 1:  # Ensure iterable even if one line
+        batch_log = batch_log.reshape(1)
     data_files = []
     for _id, data_file, result in batch_log:
         if result.decode() == "Pass":
