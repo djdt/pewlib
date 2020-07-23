@@ -2,7 +2,7 @@ import numpy as np
 
 from pew.io.error import PewException
 
-from typing import Generator, List, Set, Tuple, TextIO
+from typing import Generator, TextIO
 
 
 def _icap_csv_columns_read(
@@ -73,7 +73,7 @@ def icap_csv_columns_read_params(
     data = _icap_csv_columns_read(
         path, line_type="Time", delimiter=delimiter, comma_decimal=comma_decimal
     )
-    data = data[data["isotope"] == data["isotope"][0]]
+    data = data[data["isotope"] == data["isotope"][0]]["data"]
     scantime = np.round(np.nanmean(np.diff(data, axis=0)), 4)
 
     return dict(scantime=scantime)
@@ -224,10 +224,12 @@ if __name__ == "__main__":
     p = icap_csv_rows_read_params(
         "/home/tom/Desktop/20200721_GelatineStdsLaserJacob.csv"
     )
-    print(p)
     t1 = time.time()
     d = icap_csv_columns_read_data(
         "/home/tom/Desktop/20200721_GelatineStdsLaserJacobTest.csv", use_analog=True,
+    )
+    p = icap_csv_columns_read_params(
+        "/home/tom/Desktop/20200721_GelatineStdsLaserJacobTest.csv"
     )
     t2 = time.time()
     print(t1 - t0, t2 - t1)
