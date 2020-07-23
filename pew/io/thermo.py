@@ -2,7 +2,7 @@ import numpy as np
 
 from pew.io.error import PewException
 
-from typing import Generator, TextIO
+from typing import Generator, List, TextIO
 
 
 def _icap_csv_columns_read(
@@ -172,6 +172,10 @@ def icap_csv_rows_read_params(
     scantime = np.round(np.nanmean(np.diff(data, axis=0)), 4)
 
     return dict(scantime=scantime)
+
+
+def icap_laser_reduction_data_load(paths: List[str], full: bool = False) -> np.ndarray:
+    pass
 
 
 def load(path: str, samples_in_rows: bool = None, full: bool = False) -> np.ndarray:
