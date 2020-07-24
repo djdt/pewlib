@@ -174,6 +174,17 @@ def icap_csv_rows_read_params(
     return dict(scantime=scantime)
 
 
+def icap_csv_sample_format(path: str) -> str:
+    with open(path, "r") as fp:
+        lines = [next(fp) for i in range(3)]
+    if "MainRuns" in lines[0]:
+        return "rows"
+    elif "MainRuns" in lines[2]:
+        return "columns"
+    else:
+        return "unknown"
+
+
 def load(path: str, samples_in_rows: bool = None, full: bool = False) -> np.ndarray:
     """Imports iCap data exported using the CSV export function.
 
@@ -190,23 +201,17 @@ def load(path: str, samples_in_rows: bool = None, full: bool = False) -> np.ndar
         PewException
 
     """
-    if samples_in_rows is None:
-        with open(path, "r") as fp:
-            lines = [next(fp) for i in range(3)]
-        if "MainRuns" in lines[0]:
-            samples_in_rows = True
-        elif "MainRuns" in lines[2]:
-            samples_in_rows = False
-        else:
-            raise PewException("Unknown iCap CSV format.")
-    if samples_in_rows:
+    sample_format = icap_csv_sample_format(path)
+    if sample_format == "rows":
         data = icap_csv_rows_read_data(path)
         if full:
             params = icap_csv_rows_read_params(path)
-    else:
+    elif sample_format == "columns":
         data = icap_csv_columns_read_data(path)
         if full:
             params = icap_csv_columns_read_params(path)
+    else:
+        raise PewException("Unknown iCap CSV format.")
 
     if full:
         return data, dict(scantime=params["scantime"])
