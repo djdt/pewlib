@@ -2,7 +2,7 @@ import numpy as np
 
 from pew.io.error import PewException
 
-from typing import Generator, List, TextIO
+from typing import Generator, TextIO
 
 
 def _icap_csv_columns_read(
@@ -174,10 +174,6 @@ def icap_csv_rows_read_params(
     return dict(scantime=scantime)
 
 
-def icap_laser_reduction_data_load(paths: List[str], full: bool = False) -> np.ndarray:
-    pass
-
-
 def load(path: str, samples_in_rows: bool = None, full: bool = False) -> np.ndarray:
     """Imports iCap data exported using the CSV export function.
 
@@ -216,26 +212,3 @@ def load(path: str, samples_in_rows: bool = None, full: bool = False) -> np.ndar
         return data, dict(scantime=params["scantime"])
     else:
         return data
-
-
-if __name__ == "__main__":
-    import time
-
-    t0 = time.time()
-    d = icap_csv_rows_read_data(
-        "/home/tom/Desktop/20200721_GelatineStdsLaserJacob.csv",
-    )
-    p = icap_csv_rows_read_params(
-        "/home/tom/Desktop/20200721_GelatineStdsLaserJacob.csv"
-    )
-    t1 = time.time()
-    d = icap_csv_columns_read_data(
-        "/home/tom/Desktop/20200721_GelatineStdsLaserJacobTest.csv", use_analog=True,
-    )
-    p = icap_csv_columns_read_params(
-        "/home/tom/Desktop/20200721_GelatineStdsLaserJacobTest.csv"
-    )
-    t2 = time.time()
-    print(t1 - t0, t2 - t1)
-    print(d.shape)
-    np.savetxt("/home/tom/Downloads/out.csv", d["172Yb"], delimiter=",")
