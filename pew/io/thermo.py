@@ -175,7 +175,7 @@ def icap_csv_rows_read_params(
 
 
 def icap_csv_sample_format(path: str) -> str:
-    with open(path, "r") as fp:
+    with open(path, "r", encoding="utf-8-sig") as fp:
         lines = [next(fp) for i in range(3)]
     if "MainRuns" in lines[0]:
         return "rows"
