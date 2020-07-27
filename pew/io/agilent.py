@@ -85,14 +85,14 @@ def acq_method_xml_read_elements(acq_xml: str) -> List[str]:
         name = element.findtext("ns:ElementName", namespaces=ns)
         if name is None:
             continue
-        mz = int(element.findtext("ns:SelectedMZ", namespaces=ns) or -1)
-        mz2 = int(element.findtext("ns:MZ", namespaces=ns) or -1)
+        mz = int(element.findtext("ns:MZ", namespaces=ns) or -1)
+        mz2 = int(element.findtext("ns:SelectedMZ", namespaces=ns) or -1)
         elements.append((name, mz, mz2))
 
     elements = sorted(elements, key=lambda e: (e[1], e[2]))
     names = []
     for e in elements:
-        names.append(f"{e[0]}{e[1]}->{e[2]}" if msms else f"{e[0]}{e[1]}")
+        names.append(f"{e[0]}{e[2]}->{e[1]}" if msms else f"{e[0]}{e[1]}")
     return names
 
 
