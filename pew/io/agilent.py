@@ -135,17 +135,17 @@ def batch_xml_read_datafiles(batch_root: str, batch_xml: str) -> List[str]:
     return data_files
 
 
-def msts_xml_read_params(msts_xml: str) -> Tuple[float, int]:
-    xml = ElementTree.parse(msts_xml)
-    segment = xml.find("TimeSegment")
-    if segment is None:
-        raise PewException("Malformed MSTS.xml")
+# def msts_xml_read_params(msts_xml: str) -> Tuple[float, int]:
+#     xml = ElementTree.parse(msts_xml)
+#     segment = xml.find("TimeSegment")
+#     if segment is None:
+#         raise PewException("Malformed MSTS.xml")
 
-    stime = float(segment.findtext("StartTime") or 0)
-    etime = float(segment.findtext("EndTime") or 0)
-    scans = int(segment.findtext("NumOfScans") or 0)
+#     stime = float(segment.findtext("StartTime") or 0)
+#     etime = float(segment.findtext("EndTime") or 0)
+#     scans = int(segment.findtext("NumOfScans") or 0)
 
-    return np.round((etime - stime) * 60 / scans, 4), scans
+#     return np.round((etime - stime) * 60 / scans, 4), scans
 
 
 def collect_datafiles(batch_root: str, methods: List[str]) -> List[str]:
@@ -179,7 +179,10 @@ def collect_datafiles(batch_root: str, methods: List[str]) -> List[str]:
 
 
 def load(
-    path: str, collection_methods: List[str] = None, full: bool = False
+    path: str,
+    collection_methods: List[str] = None,
+    use_acq_for_names: bool = True,
+    full: bool = False,
 ) -> np.ndarray:
     """Imports an Agilent batch (.b) directory, returning structured array.
     Finds lines using (in order of preference): BatchLog.xml, BatchLog.csv,
@@ -216,19 +219,14 @@ def load(
         else:
             csvs.append(csv)
 
-    msts_xml = os.path.join(path, data_files[0], "AcqData", "MSTS.xml")
-
-    # Read elements, the scan time and number fo scans
-    if os.path.exists(msts_xml) and os.path.exists(
-        os.path.join(path, acq_method_xml_path)
-    ):
-        names = acq_method_xml_read_elements(os.path.join(path, acq_method_xml_path))
-        scan_time, nscans = msts_xml_read_params(msts_xml)
-    else:
-        logger.info("AcqMethod.xml and MSTS.xml not found, reading params from csv.")
-        names, scan_time, nscans = csv_read_params(
-            next(c for c in csvs if c is not None)
-        )
+    names, scan_time, nscans = csv_read_params(next(c for c in csvs if c is not None))
+    if use_acq_for_names:
+        if not os.path.exists(os.path.join(path, acq_method_xml_path)):
+            logger.warning("AcqMethod.xml not found, cannot read names.")
+        else:
+            names = acq_method_xml_read_elements(
+                os.path.join(path, acq_method_xml_path)
+            )
 
     data = np.empty(
         (len(data_files), nscans), dtype=[(name, np.float64) for name in names]
