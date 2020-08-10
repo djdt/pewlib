@@ -2,7 +2,7 @@ import numpy as np
 
 from pew.io.error import PewException
 
-from typing import Generator, List, TextIO
+from typing import Generator, TextIO
 
 
 def _icap_csv_columns_read(
@@ -174,8 +174,15 @@ def icap_csv_rows_read_params(
     return dict(scantime=scantime)
 
 
-def icap_laser_reduction_data_load(paths: List[str], full: bool = False) -> np.ndarray:
-    pass
+def icap_csv_sample_format(path: str) -> str:
+    with open(path, "r", encoding="utf-8-sig") as fp:
+        lines = [next(fp) for i in range(3)]
+    if "MainRuns" in lines[0]:
+        return "rows"
+    elif "MainRuns" in lines[2]:
+        return "columns"
+    else:
+        return "unknown"
 
 
 def load(path: str, samples_in_rows: bool = None, full: bool = False) -> np.ndarray:
@@ -194,48 +201,19 @@ def load(path: str, samples_in_rows: bool = None, full: bool = False) -> np.ndar
         PewException
 
     """
-    if samples_in_rows is None:
-        with open(path, "r") as fp:
-            lines = [next(fp) for i in range(3)]
-        if "MainRuns" in lines[0]:
-            samples_in_rows = True
-        elif "MainRuns" in lines[2]:
-            samples_in_rows = False
-        else:
-            raise PewException("Unknown iCap CSV format.")
-    if samples_in_rows:
+    sample_format = icap_csv_sample_format(path)
+    if sample_format == "rows":
         data = icap_csv_rows_read_data(path)
         if full:
             params = icap_csv_rows_read_params(path)
-    else:
+    elif sample_format == "columns":
         data = icap_csv_columns_read_data(path)
         if full:
             params = icap_csv_columns_read_params(path)
+    else:
+        raise PewException("Unknown iCap CSV format.")
 
     if full:
         return data, dict(scantime=params["scantime"])
     else:
         return data
-
-
-if __name__ == "__main__":
-    import time
-
-    t0 = time.time()
-    d = icap_csv_rows_read_data(
-        "/home/tom/Desktop/20200721_GelatineStdsLaserJacob.csv",
-    )
-    p = icap_csv_rows_read_params(
-        "/home/tom/Desktop/20200721_GelatineStdsLaserJacob.csv"
-    )
-    t1 = time.time()
-    d = icap_csv_columns_read_data(
-        "/home/tom/Desktop/20200721_GelatineStdsLaserJacobTest.csv", use_analog=True,
-    )
-    p = icap_csv_columns_read_params(
-        "/home/tom/Desktop/20200721_GelatineStdsLaserJacobTest.csv"
-    )
-    t2 = time.time()
-    print(t1 - t0, t2 - t1)
-    print(d.shape)
-    np.savetxt("/home/tom/Downloads/out.csv", d["172Yb"], delimiter=",")
