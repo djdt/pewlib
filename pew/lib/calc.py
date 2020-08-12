@@ -16,6 +16,26 @@ def greyscale_to_rgb(array: np.ndarray, rgb: np.ndarray) -> np.ndarray:
     return array[..., None] * np.array(rgb, dtype=float)
 
 
+def ida(
+    a: np.ndarray,
+    b: np.ndarray,
+    Ct: float,
+    ms: float,
+    mt: float,
+    Ms: float,
+    Mt: float,
+    Aas: float,
+    Abs: float,
+    Aat: float,
+    Abt: float,
+) -> np.ndarray:
+    Rm = a / b
+    Rs = Abs / Aas
+    Rt = Aat / Abt
+    Cs = Ct * (mt / ms) * (Ms / Mt) * (Abt / Aas) * ((Rm - Rt) / (1.0 - Rm * Rs))
+    return Cs
+
+
 def kmeans(
     x: np.ndarray, k: int, init: str = "kmeans++", max_iterations: int = 1000,
 ) -> np.ndarray:

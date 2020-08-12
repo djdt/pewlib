@@ -8,7 +8,7 @@ import numpy.lib.recfunctions
 
 from pew.io.error import PewException
 
-from typing import Generator, List, Tuple
+from typing import Callable, List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +17,10 @@ logger = logging.getLogger(__name__)
 #   Method/AcqMethod.xml - Contains the datafile list <SampleParameter>
 #   {.d file}/AcqData/MSTS.xml - Contains run time in mins <StartTime>, <EndTime>; number of scans <NumOfScans>
 #   {.d file}/AcqData/MSTS_XSpecific.xml - Contains acc time for elements <AccumulationTime>
+
+acq_method_xml_path = os.path.join("Method", "AcqMethod.xml")
+batch_csv_path = "BatchLog.csv"
+batch_xml_path = os.path.join("Method", "BatchLog.xml")
 
 
 def clean_lines(csv: str):
@@ -41,37 +45,43 @@ def csv_read_params(path: str) -> Tuple[List[str], float, int]:
     return names, np.round(total_time / data.shape[0], 4), data.shape[0]
 
 
-def find_datafiles(path: str) -> Generator[str, None, None]:
+def find_datafiles_alphabetical(path: str) -> List[str]:
+    data_files = []
     with os.scandir(path) as it:
         for entry in it:
             if entry.name.lower().endswith(".d") and entry.is_dir():
-                yield os.path.join(path, entry.name)
+                data_files.append(os.path.join(path, entry.name))
+    return data_files
 
 
-def acq_method_read_datafiles(
-    root: str, method_path: str
-) -> Generator[str, None, None]:
-    xml = ElementTree.parse(method_path)
+def acq_method_xml_read_datafiles(batch_root: str, acq_xml: str) -> List[str]:
+    xml = ElementTree.parse(acq_xml)
     ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
     samples = xml.findall("ns:SampleParameter", ns)
     samples = sorted(
         samples, key=lambda s: int(s.findtext("ns:SampleID", namespaces=ns) or -1)
     )
 
+    data_files = []
     for sample in samples:
         data_file = sample.findtext("ns:DataFileName", namespaces=ns)
         if data_file is not None:
-            data_file = os.path.join(root, data_file)
-            if os.path.exists(data_file):
-                yield data_file
+            data_files.append(os.path.join(batch_root, data_file))
+    return data_files
 
 
-def acq_method_read_elements(method_path: str) -> List[str]:
-    xml = ElementTree.parse(method_path)
+def acq_method_xml_read_elements(acq_xml: str) -> List[str]:
+    xml = ElementTree.parse(acq_xml)
     ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
 
+    msms = False
+    for tune in xml.findall("ns:TuneStep", namespaces=ns):
+        if tune.findtext("ns:ScanType_Acq", namespaces=ns) == "MS_MS":
+            msms = True
+            break
+
     elements: List[Tuple[str, int, int]] = []
-    for element in xml.findall("ns:IcpmsElement", ns):
+    for element in xml.findall("ns:IcpmsElement", namespaces=ns):
         name = element.findtext("ns:ElementName", namespaces=ns)
         if name is None:
             continue
@@ -80,13 +90,13 @@ def acq_method_read_elements(method_path: str) -> List[str]:
         elements.append((name, mz, mz2))
 
     elements = sorted(elements, key=lambda e: (e[1], e[2]))
-    return [
-        f"{e[0]}{e[1]}{'__' if e[2] > -1 else ''}{e[2] if e[2] > -1 else ''}"
-        for e in elements
-    ]
+    names = []
+    for e in elements:
+        names.append(f"{e[0]}{e[1]}->{e[2]}" if msms else f"{e[0]}{e[1]}")
+    return names
 
 
-def batch_csv_read_datafiles(root: str, batch_csv: str) -> Generator[str, None, None]:
+def batch_csv_read_datafiles(batch_root: str, batch_csv: str) -> List[str]:
     batch_log = np.genfromtxt(
         batch_csv,
         delimiter=",",
@@ -95,47 +105,86 @@ def batch_csv_read_datafiles(root: str, batch_csv: str) -> Generator[str, None, 
         usecols=(0, 5, 6),
         dtype=[np.uint32, object, "S4"],
     )
+    if batch_log.size == 1:  # Ensure iterable even if one line
+        batch_log = batch_log.reshape(1)
+    data_files = []
     for _id, data_file, result in batch_log:
         if result.decode() == "Pass":
             data_file = data_file.decode()
-            data_file = os.path.join(
-                root, data_file[max(map(data_file.rfind, "\\/")) + 1 :]
+            data_files.append(
+                os.path.join(
+                    batch_root, data_file[max(map(data_file.rfind, "\\/")) + 1 :]
+                )
             )
-            if os.path.exists(data_file):
-                yield data_file
+    return data_files
 
 
-def batch_xml_read_datafiles(root: str, batch_xml: str) -> Generator[str, None, None]:
+def batch_xml_read_datafiles(batch_root: str, batch_xml: str) -> List[str]:
     xml = ElementTree.parse(batch_xml)
     ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
 
+    data_files = []
     for log in xml.findall("ns:BatchLogInfo", ns):
         if log.findtext("ns:AcqResult", namespaces=ns) == "Pass":
             data_file = log.findtext("ns:DataFileName", namespaces=ns)
-            data_file = os.path.join(
-                root, data_file[max(map(data_file.rfind, "\\/")) + 1 :]
+            data_files.append(
+                os.path.join(
+                    batch_root, data_file[max(map(data_file.rfind, "\\/")) + 1 :]
+                )
             )
-            logger.debug(f"Looking for datafile '{data_file}'.")
-            if os.path.exists(data_file):
-                yield data_file
+    return data_files
 
 
-def msts_read_params(msts_path: str) -> Tuple[float, int]:
-    xml = ElementTree.parse(msts_path)
-    segment = xml.find("TimeSegment")
-    if segment is None:
-        raise PewException("Malformed MSTS.xml")
+# def msts_xml_read_params(msts_xml: str) -> Tuple[float, int]:
+#     xml = ElementTree.parse(msts_xml)
+#     segment = xml.find("TimeSegment")
+#     if segment is None:
+#         raise PewException("Malformed MSTS.xml")
 
-    stime = float(segment.findtext("StartTime") or 0)
-    etime = float(segment.findtext("EndTime") or 0)
-    scans = int(segment.findtext("NumOfScans") or 0)
+#     stime = float(segment.findtext("StartTime") or 0)
+#     etime = float(segment.findtext("EndTime") or 0)
+#     scans = int(segment.findtext("NumOfScans") or 0)
 
-    return np.round((etime - stime) * 60 / scans, 4), scans
+#     return np.round((etime - stime) * 60 / scans, 4), scans
 
 
-def load(path: str, raw: bool = False, full: bool = False) -> np.ndarray:
+def collect_datafiles(batch_root: str, methods: List[str]) -> List[str]:
+    for method in methods:
+        if method == "batch_xml":
+            method_path = os.path.join(batch_root, batch_xml_path)
+            method_func: Callable[[str, str], List[str]] = batch_xml_read_datafiles
+        elif method == "batch_csv":
+            method_path = os.path.join(batch_root, batch_csv_path)
+            method_func = batch_csv_read_datafiles
+        elif method == "acq_method_xml":
+            method_path = os.path.join(batch_root, acq_method_xml_path)
+            method_func = acq_method_xml_read_datafiles
+
+        if os.path.exists(method_path):
+            data_files = method_func(batch_root, method_path)
+            missing = len(data_files) - sum([os.path.exists(df) for df in data_files])
+            if missing == 0:
+                logger.info(f"Datafiles collected using '{method}'.")
+                return data_files
+            else:
+                logger.info(f"Missing {missing} datafiles using '{method}'.")
+        else:
+            logger.warning(f"Unable to collect datafiles using '{method}'.")
+
+    # Fall back to alphabetical
+    logger.info("Falling back to alphabetical order for datafile collection.")
+    data_files = find_datafiles_alphabetical(batch_root)
+    data_files.sort(key=lambda f: int("".join(filter(str.isdigit, f))))
+    return data_files
+
+
+def load(
+    path: str,
+    collection_methods: List[str] = None,
+    use_acq_for_names: bool = True,
+    full: bool = False,
+) -> np.ndarray:
     """Imports an Agilent batch (.b) directory, returning structured array.
-
     Finds lines using (in order of preference): BatchLog.xml, BatchLog.csv,
      AcqMethod.xml, .d files sorted by name.
 
@@ -151,44 +200,17 @@ def load(path: str, raw: bool = False, full: bool = False) -> np.ndarray:
         PewException
 
     """
-    # Batch files
-    acq_xml = os.path.join(path, "Method", "AcqMethod.xml")
-    batch_csv = os.path.join(path, "BatchLog.csv")
-    batch_xml = os.path.join(path, "Method", "BatchLog.xml")
-
-    if raw:
-        acq_xml = batch_xml = batch_csv = ""
+    if collection_methods is None:
+        collection_methods = ["batch_xml", "batch_csv", "acq_method_xml"]
 
     # Collect data files
-    ddirs = []
-    for file, function in zip(
-        [batch_xml, batch_csv, acq_xml],
-        [
-            batch_xml_read_datafiles,
-            batch_csv_read_datafiles,
-            acq_method_read_datafiles,
-        ],
-    ):
-        if os.path.exists(file):
-            ddirs = list(function(path, file))
-            if len(ddirs) > 0:
-                logger.info(f"Imported files using {os.path.basename(file)}")
-                break
-
-    # Fall back to csv name order
-    if len(ddirs) == 0:
-        logger.warning(
-            "Unable to import files from BatchLogs or AcqMethod.xml,"
-            " falling back to alphabetical order."
-        )
-        ddirs = list(find_datafiles(path))
-        ddirs.sort(key=lambda f: int("".join(filter(str.isdigit, f))))
-
-    msts_xml = os.path.join(path, ddirs[0], "AcqData", "MSTS.xml")
+    data_files = collect_datafiles(path, collection_methods)
+    if len(data_files) == 0:
+        raise PewException(f"No data files found in {path}!")
 
     # Collect csvs
     csvs: List[str] = []
-    for d in ddirs:
+    for d in data_files:
         csv = os.path.join(d, os.path.splitext(os.path.basename(d))[0] + ".csv")
         logger.debug(f"Looking for csv '{csv}'.")
         if not os.path.exists(csv):
@@ -197,17 +219,18 @@ def load(path: str, raw: bool = False, full: bool = False) -> np.ndarray:
         else:
             csvs.append(csv)
 
-    # Read elements, the scan time and number fo scans
-    if os.path.exists(msts_xml) and os.path.exists(acq_xml):
-        names = acq_method_read_elements(acq_xml)
-        scan_time, nscans = msts_read_params(msts_xml)
-    else:
-        logger.info("AcqMethod.xml and MSTS.xml not found, reading params from csv.")
-        names, scan_time, nscans = csv_read_params(
-            next(c for c in csvs if c is not None)
-        )
+    names, scan_time, nscans = csv_read_params(next(c for c in csvs if c is not None))
+    if use_acq_for_names:
+        if not os.path.exists(os.path.join(path, acq_method_xml_path)):
+            logger.warning("AcqMethod.xml not found, cannot read names.")
+        else:
+            names = acq_method_xml_read_elements(
+                os.path.join(path, acq_method_xml_path)
+            )
 
-    data = np.empty((len(ddirs), nscans), dtype=[(name, np.float64) for name in names])
+    data = np.empty(
+        (len(data_files), nscans), dtype=[(name, np.float64) for name in names]
+    )
     for i, csv in enumerate(csvs):
         if csv is None:
             data[i, :] = np.zeros(data.shape[1], dtype=data.dtype)
