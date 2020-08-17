@@ -43,6 +43,13 @@ def test_normalise():
     assert x.max() == 2.33
 
 
+def test_reset_cumsum():
+    x = np.array([1, 2, 3, 0, 4, 5, 0, 6, 7, 0, 8, 0, 0, 9, 0])
+    assert np.all(
+        calc.reset_cumsum(x) == [1, 3, 6, 0, 4, 9, 0, 6, 13, 0, 8, 0, 0, 9, 0]
+    )
+
+
 def test_shuffle_blocks():
     x = np.random.random((100, 100))
     m = np.zeros((100, 100))

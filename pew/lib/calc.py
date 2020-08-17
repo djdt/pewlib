@@ -16,24 +16,24 @@ def greyscale_to_rgb(array: np.ndarray, rgb: np.ndarray) -> np.ndarray:
     return array[..., None] * np.array(rgb, dtype=float)
 
 
-def ida(
-    a: np.ndarray,
-    b: np.ndarray,
-    Ct: float,
-    ms: float,
-    mt: float,
-    Ms: float,
-    Mt: float,
-    Aas: float,
-    Abs: float,
-    Aat: float,
-    Abt: float,
-) -> np.ndarray:
-    Rm = a / b
-    Rs = Abs / Aas
-    Rt = Aat / Abt
-    Cs = Ct * (mt / ms) * (Ms / Mt) * (Abt / Aas) * ((Rm - Rt) / (1.0 - Rm * Rs))
-    return Cs
+# def ida(
+#     a: np.ndarray,
+#     b: np.ndarray,
+#     Ct: float,
+#     ms: float,
+#     mt: float,
+#     Ms: float,
+#     Mt: float,
+#     Aas: float,
+#     Abs: float,
+#     Aat: float,
+#     Abt: float,
+# ) -> np.ndarray:
+#     Rm = a / b
+#     Rs = Abs / Aas
+#     Rt = Aat / Abt
+#     Cs = Ct * (mt / ms) * (Ms / Mt) * (Abt / Aas) * ((Rm - Rt) / (1.0 - Rm * Rs))
+#     return Cs
 
 
 def kmeans(
@@ -125,11 +125,10 @@ def reset_cumsum(x: np.ndarray, reset_value: float = 0.0) -> np.ndarray:
         x: Input array.
         reset_value: Value where the cumsum resets to 0.
 """
+    c = np.cumsum(x)
     n = x == reset_value
-    c = np.cumsum(~n)
-    d = np.diff(np.concatenate(([0.0], c[n])))
-    x[n] = -d
-    return np.cumsum(x)
+    oc = np.maximum.accumulate(c * n)
+    return c - oc
 
 
 def shuffle_blocks(
@@ -202,10 +201,10 @@ def subpixel_offset(
     """
     # Offset for first layer must be zero
     if offsets[0] != (0, 0):
-        offsets.insert(0, (0, 0))
+        offsets.insert(0, (0, 0))  # pragma: no cover
     overlap = np.max(offsets, axis=0)
 
-    if x.ndim != 3:
+    if x.ndim != 3:  # pragma: no cover
         raise ValueError("Data must be three dimensional!")
 
     # Calculate new shape
