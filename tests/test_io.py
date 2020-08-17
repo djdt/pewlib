@@ -65,6 +65,14 @@ def test_io_agilent_acq_method_elements():
     assert elements == ["A1", "B2"]
 
 
+def test_io_agilent_acq_method_elements_msms():
+    data_path = os.path.join(
+        os.path.dirname(__file__), "data", "agilent", "acq_method_msms.xml"
+    )
+    elements = io.agilent.acq_method_xml_read_elements(data_path)
+    assert elements == ["A1->2", "B3->4"]
+
+
 def test_io_csv():
     data_path = os.path.join(os.path.dirname(__file__), "data", "csv")
     data_path_thermo = os.path.join(os.path.dirname(__file__), "data", "thermo")
