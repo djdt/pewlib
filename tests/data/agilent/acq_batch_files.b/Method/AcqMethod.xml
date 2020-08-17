@@ -46,7 +46,7 @@
     <SampleListDisplayOrder>0</SampleListDisplayOrder>
     <SampleType>Sample</SampleType>
     <SampleName>1</SampleName>
-    <DataFileName>a.d</DataFileName>
+    <DataFileName>c.d</DataFileName>
     <FunctionUsedFlag>false</FunctionUsedFlag>
   </SampleParameter>
   <SampleParameter>
@@ -68,7 +68,7 @@
     <SampleListDisplayOrder>2</SampleListDisplayOrder>
     <SampleType>Sample</SampleType>
     <SampleName>3</SampleName>
-    <DataFileName>c.d</DataFileName>
+    <DataFileName>a.d</DataFileName>
     <FunctionUsedFlag>false</FunctionUsedFlag>
   </SampleParameter>
 </AcquisitionDataSet>

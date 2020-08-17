@@ -23,7 +23,9 @@ def _icap_csv_columns_read(
             np.genfromtxt([line], dtype="S1", delimiter=delimiter)
         )
         if nlines == 0:
-            raise PewException("Invalid iCap export, expected samples in columns.")
+            raise PewException(
+                "Invalid iCap export, expected samples in columns."
+            )  # pragma: no cover
 
         dtype = [
             ("run", "S8"),
@@ -38,7 +40,7 @@ def _icap_csv_columns_read(
                 dtype=dtype,
                 delimiter=delimiter,
             )
-        except ValueError as e:
+        except ValueError as e:  # pragma: no cover
             raise PewException("Could not read iCap CSV (samples in columns).") from e
 
 
@@ -97,7 +99,7 @@ def icap_csv_rows_read_data(
             delimiter = line[0]  # Should be delimiter
 
         run_mask = np.genfromtxt([line], dtype="S8", delimiter=delimiter) == b"MainRuns"
-        if np.count_nonzero(run_mask) == 0:
+        if np.count_nonzero(run_mask) == 0:  # pragma: no cover
             raise PewException("Invalid iCap export, expected samples in rows.")
 
         scans = np.genfromtxt([fp.readline()], dtype=int, delimiter=delimiter)
@@ -118,7 +120,7 @@ def icap_csv_rows_read_data(
                 delimiter=delimiter,
                 usecols=cols,
             )
-        except ValueError as e:
+        except ValueError as e:  # pragma: no cover
             raise PewException("Could not read iCap CSV (samples in rows).") from e
 
     structured = np.empty(
@@ -145,7 +147,7 @@ def icap_csv_rows_read_params(
             delimiter = line[0]  # Should be delimiter
 
         run_mask = np.genfromtxt([line], dtype="S8", delimiter=delimiter) == b"MainRuns"
-        if np.count_nonzero(run_mask) == 0:
+        if np.count_nonzero(run_mask) == 0:  # pragma: no cover
             raise PewException("Invalid iCap export, expected samples in rows.")
 
         fp.readline()  # scans
@@ -166,7 +168,7 @@ def icap_csv_rows_read_params(
                 usecols=cols,
                 max_rows=1,
             )
-        except ValueError as e:
+        except ValueError as e:  # pragma: no cover
             raise PewException("Could not read iCap CSV (samples in rows).") from e
 
     scantime = np.round(np.nanmean(np.diff(data, axis=0)), 4)
@@ -185,7 +187,7 @@ def icap_csv_sample_format(path: str) -> str:
         return "unknown"
 
 
-def load(path: str, samples_in_rows: bool = None, full: bool = False) -> np.ndarray:
+def load(path: str, full: bool = False) -> np.ndarray:
     """Imports iCap data exported using the CSV export function.
 
     Data is read from the "Counts" column.
@@ -210,10 +212,10 @@ def load(path: str, samples_in_rows: bool = None, full: bool = False) -> np.ndar
         data = icap_csv_columns_read_data(path)
         if full:
             params = icap_csv_columns_read_params(path)
-    else:
+    else:  # pragma: no cover
         raise PewException("Unknown iCap CSV format.")
 
     if full:
         return data, dict(scantime=params["scantime"])
-    else:
+    else:  # pragma: no cover
         return data

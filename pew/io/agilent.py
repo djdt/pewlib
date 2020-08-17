@@ -83,7 +83,7 @@ def acq_method_xml_read_elements(acq_xml: str) -> List[str]:
     elements: List[Tuple[str, int, int]] = []
     for element in xml.findall("ns:IcpmsElement", namespaces=ns):
         name = element.findtext("ns:ElementName", namespaces=ns)
-        if name is None:
+        if name is None:  # pragma: no cover
             continue
         mz = int(element.findtext("ns:MZ", namespaces=ns) or -1)
         mz2 = int(element.findtext("ns:SelectedMZ", namespaces=ns) or -1)
@@ -106,7 +106,7 @@ def batch_csv_read_datafiles(batch_root: str, batch_csv: str) -> List[str]:
         dtype=[np.uint32, "U264", "U4"],
     )
     if batch_log.size == 1:  # Ensure iterable even if one line
-        batch_log = batch_log.reshape(1)
+        batch_log = batch_log.reshape(1)  # pragma: no cover
     data_files = []
     for _id, data_file, result in batch_log:
         if result == "Pass":
@@ -132,19 +132,6 @@ def batch_xml_read_datafiles(batch_root: str, batch_xml: str) -> List[str]:
                 )
             )
     return data_files
-
-
-# def msts_xml_read_params(msts_xml: str) -> Tuple[float, int]:
-#     xml = ElementTree.parse(msts_xml)
-#     segment = xml.find("TimeSegment")
-#     if segment is None:
-#         raise PewException("Malformed MSTS.xml")
-
-#     stime = float(segment.findtext("StartTime") or 0)
-#     etime = float(segment.findtext("EndTime") or 0)
-#     scans = int(segment.findtext("NumOfScans") or 0)
-
-#     return np.round((etime - stime) * 60 / scans, 4), scans
 
 
 def collect_datafiles(batch_root: str, methods: List[str]) -> List[str]:
@@ -205,7 +192,7 @@ def load(
     # Collect data files
     data_files = collect_datafiles(path, collection_methods)
     if len(data_files) == 0:
-        raise PewException(f"No data files found in {path}!")
+        raise PewException(f"No data files found in {path}!")  # pragma: no cover
 
     # Collect csvs
     csvs: List[str] = []
