@@ -66,6 +66,8 @@ def test_calibration_calibrate():
     data = np.random.random([10, 10])
     assert np.all(calibration.calibrate(data) == ((data - 2.0) / 2.0))
 
+    assert calibration.weights is None
+
 
 def test_calibration_from_points():
     calibration = Calibration.from_points([[0, 1], [1, 2], [1, 3], [2, 4]])
@@ -102,6 +104,7 @@ def test_calibration_from_points_invalid():
 def test_calibration_from_points_weights():
     points = np.vstack([[1.0, 2.0, 3.0, 4.0, 5.0], [1.0, 1.0, 2.0, 4.0, 8.0]]).T
     calibration = Calibration.from_points(points=points, weights="x")
+    assert np.all(calibration.weights == [1.0, 2.0, 3.0, 4.0, 5.0])
     assert pytest.approx(calibration.gradient, 2.085814)
     assert pytest.approx(calibration.intercept, -3.314286)
     assert pytest.approx(calibration.rsq, 0.865097)
@@ -126,3 +129,8 @@ def test_calibration_update_linreg():
     calibration.update_linreg()
     calibration.points[2, 1] = np.nan
     calibration.update_linreg()
+
+
+def test_calibration_str():
+    calibration = Calibration(1.0, 2.0, rsq=0.999)
+    assert str(calibration) == "y = 2 · x - 1\nr² = 0.9990"
