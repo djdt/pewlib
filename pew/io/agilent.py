@@ -152,7 +152,7 @@ def collect_datafiles(batch_root: str, methods: List[str]) -> List[str]:
             if missing == 0:
                 logger.info(f"Datafiles collected using '{method}'.")
                 return data_files
-            else:
+            else:  # pragma: no cover
                 logger.info(f"Missing {missing} datafiles using '{method}'.")
         else:
             logger.warning(f"Unable to collect datafiles using '{method}'.")
@@ -207,12 +207,12 @@ def load(
 
     names, scan_time, nscans = csv_read_params(next(c for c in csvs if c is not None))
     if use_acq_for_names:
-        if not os.path.exists(os.path.join(path, acq_method_xml_path)):
-            logger.warning("AcqMethod.xml not found, cannot read names.")
-        else:
+        if os.path.exists(os.path.join(path, acq_method_xml_path)):
             names = acq_method_xml_read_elements(
                 os.path.join(path, acq_method_xml_path)
             )
+        else:  # pragma: no cover
+            logger.warning("AcqMethod.xml not found, cannot read names.")
 
     data = np.empty(
         (len(data_files), nscans), dtype=[(name, np.float64) for name in names]
