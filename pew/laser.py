@@ -4,7 +4,7 @@ import copy
 from pew.calibration import Calibration
 from pew.config import Config
 
-from typing import Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 
 class _Laser:
@@ -30,13 +30,18 @@ class _Laser:
     def shape(self) -> Tuple[int, ...]:
         return (0, 0)
 
-    def add(self, isotope: str, data: Union[np.ndarray, List[np.ndarray]]) -> None:
+    def add(
+        self, isotope: str, data: Any, calibration: Calibration = None
+    ) -> None:  # pragma: no cover
         raise NotImplementedError
 
-    def remove(self, isotope: str) -> None:
+    def remove(self, names: Union[str, List[str]]) -> None:  # pragma: no cover
         raise NotImplementedError
 
-    def get(self, isotope: str, **kwargs) -> np.ndarray:
+    def rename(self, names: Dict[str, str]) -> None:  # pragma: no cover
+        raise NotImplementedError
+
+    def get(self, isotope: str, **kwargs) -> np.ndarray:  # pragma: no cover
         raise NotImplementedError
 
 
