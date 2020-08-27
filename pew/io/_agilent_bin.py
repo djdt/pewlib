@@ -1,6 +1,7 @@
 import numpy as np
+from xml.etree import ElementTree
 
-from typing import BinaryIO
+from typing import BinaryIO, Generator, Tuple
 
 msscan_magic_number = 257
 msprofile_magic_number = 258
@@ -88,11 +89,52 @@ def read_ms_profile(path: str, n: int) -> np.ndarray:
         return np.frombuffer(fp.read(), dtype=dtype)
 
 
-def parse_msts_xaddition_xml(path: str) -> None:
-    pass
+def parse_msts_xml(msts_xml: str) -> Tuple[float, float, int]:
+    xml = ElementTree.parse(msts_xml)
+    time_segment = xml.find("TimeSegment")
+    start = float(time_segment.findtext("StartTime") or 0.0)
+    end = float(time_segment.findtext("EndTime") or 0.0)
+    scans = int(time_segment.findtext("NumOfScans") or 0)
+    return start, end, scans
 
 
-print(read_ms_scan("/home/tom/Downloads/20200630_agar_test_1.b/001.d/AcqData/MSScan.bin")["XSpecificParamType"])
+def parse_msts_xspecific_xml(
+    msts_xspecific_xml: str,
+) -> Generator[Tuple[int, str, float], None, None]:
+    xml = ElementTree.parse(msts_xspecific_xml)
+    for record in xml.iter("IonRecord"):
+        for masses in record.iter("Masses"):
+            mass = int(masses.findtext("Mass") or 0)
+            name = masses.findtext("Name") or ""
+            acctime = float(masses.findtext("AccumulationTime") or 0.0)
+            yield mass, name, acctime
+
+
+def parse_msts_xaddition_xml(
+    msts_xaddition_xml: str,
+) -> Generator[Tuple[int, int, int], bool, None]:
+    xml = ElementTree.parse(msts_xaddition_xml)
+    for xaddition in xml.iter("MSTS_XAddition"):
+        indexed_masses = xaddition.find("IndexedMasses")
+        for msts_index in indexed_masses.iter("MSTS_XAddition_IndexedMasses"):
+            index = int(msts_index.findtext("Index") or 0)
+            precursor = int(msts_index.findtext("PrecursorIonMZ") or 0)
+            product = int(msts_index.findtext("ProductIonMZ") or 0)
+            yield index, precursor, product
+
+
+print(
+    list(
+        parse_msts_xspecific_xml(
+            "/home/tom/Downloads/20200630_agar_test_1.b/001.d/AcqData/MSTS_XSpecific.xml"
+        )
+    )
+)
+print(
+    read_ms_scan("/home/tom/Downloads/20200630_agar_test_1.b/001.d/AcqData/MSScan.bin")[
+        "XSpecificParamType"
+    ]
+)
 # Size = 100 scan records
 print(
     read_ms_profile(
