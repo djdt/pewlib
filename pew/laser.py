@@ -4,7 +4,7 @@ import copy
 from pew.calibration import Calibration
 from pew.config import Config
 
-from typing import Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 
 class _Laser:
@@ -30,13 +30,18 @@ class _Laser:
     def shape(self) -> Tuple[int, ...]:
         return (0, 0)
 
-    def add(self, isotope: str, data: Union[np.ndarray, List[np.ndarray]]) -> None:
+    def add(
+        self, isotope: str, data: Any, calibration: Calibration = None
+    ) -> None:  # pragma: no cover
         raise NotImplementedError
 
-    def remove(self, isotope: str) -> None:
+    def remove(self, names: Union[str, List[str]]) -> None:  # pragma: no cover
         raise NotImplementedError
 
-    def get(self, isotope: str, **kwargs) -> np.ndarray:
+    def rename(self, names: Dict[str, str]) -> None:  # pragma: no cover
+        raise NotImplementedError
+
+    def get(self, isotope: str, **kwargs) -> np.ndarray:  # pragma: no cover
         raise NotImplementedError
 
 
@@ -87,16 +92,28 @@ class Laser(_Laser):
             calibration = Calibration()
         self.calibration[isotope] = calibration
 
-    def remove(self, isotope: str) -> None:
-        new_dtype = [descr for descr in self.data.dtype.descr if descr[0] != isotope]
+    def remove(self, names: Union[str, List[str]]) -> None:
+        if isinstance(names, str):
+            names = [names]
+
+        new_dtype = [descr for descr in self.data.dtype.descr if descr[0] not in names]
 
         new_data = np.empty(self.data.shape, dtype=new_dtype)
         for name in self.data.dtype.names:
-            if name != isotope:
+            if name not in names:
                 new_data[name] = self.data[name]
+            else:
+                self.calibration.pop(name)
+
         self.data = new_data
 
-        self.calibration.pop(isotope)
+    def rename(self, names: Dict[str, str]) -> None:
+        old = self.data.dtype.names
+        new = list(map(names.get, old, old))
+        names = {o: n for o, n in zip(old, new)}  # type: ignore
+
+        self.data.dtype.names = new
+        self.calibration = {names[o]: self.calibration[o] for o in old}
 
     def get(self, isotope: str = None, **kwargs) -> np.ndarray:
         """Valid kwargs are calibrate, extent, flat."""

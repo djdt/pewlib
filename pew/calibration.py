@@ -28,7 +28,7 @@ def weighted_rsq(x: np.ndarray, y: np.ndarray, w: np.ndarray = None) -> float:
     c /= stddev[None, :]
 
     np.clip(c.real, -1, 1, out=c.real)
-    if np.iscomplexobj(c):
+    if np.iscomplexobj(c):  # pragma: no cover
         np.clip(c.imag, -1, 1, out=c.imag)
 
     return c[0, 1] ** 2.0
@@ -95,7 +95,7 @@ class Calibration(object):
 
     @weights.setter
     def weights(self, weights: Union[np.ndarray, str]) -> None:
-        if self._points is None:
+        if self._points is None:  # pragma: no cover
             self._weights = None
         elif isinstance(weights, str):
             self._weights = weighting(self._points[:, 0], weights)

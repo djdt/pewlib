@@ -1,7 +1,8 @@
 import numpy as np
 import pytest
 
-from pew.laser import Laser, Calibration, Config
+from pew.laser import _Laser, Laser
+from pew import Calibration, Config
 
 from typing import List
 
@@ -12,6 +13,14 @@ def rand_data(names: List[str]) -> np.ndarray:
     for name in names:
         data[name] = np.random.random((10, 10))
     return data
+
+
+def test_laser_base():
+    laser = _Laser()
+    assert laser.extent == (0.0, 0.0, 0.0, 0.0)
+    assert laser.isotopes == ()
+    assert laser.layers == 1
+    assert laser.shape == (0, 0)
 
 
 def test_laser():
@@ -32,12 +41,19 @@ def test_laser():
     assert laser.isotopes == ("B", "C")
     assert "A" not in laser.calibration
 
+    laser.rename({"B": "D"})
+    assert laser.isotopes == ("D", "C")
+    assert "D" in laser.calibration
+
 
 def test_laser_get():
     data = rand_data(["A", "B"])
     laser = Laser(
         data, calibration=dict(A=Calibration(1.0, 2.0)), config=Config(10, 10, 0.5)
     )
+
+    assert np.all(laser.get() == data)
+    assert np.all(laser.get(calibrate=True)["A"] == (data["A"] - 1.0) / 2.0)
 
     assert np.all(laser.get("A") == data["A"])
     assert np.all(laser.get("A", calibrate=True) == (data["A"] - 1.0) / 2.0)

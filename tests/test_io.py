@@ -41,9 +41,7 @@ def test_io_agilent_data_files_collection():
     data_path = os.path.join(
         os.path.dirname(__file__), "data", "agilent", "acq_batch_files.b"
     )
-    dfiles = io.agilent.acq_method_xml_read_datafiles(
-        data_path, os.path.join(data_path, io.agilent.acq_method_xml_path)
-    )
+    dfiles = io.agilent.collect_datafiles(data_path, ["acq_method_xml"])
     assert dfiles == [os.path.join(data_path, df) for df in acq_method_dfiles]
     dfiles = io.agilent.batch_csv_read_datafiles(
         data_path, os.path.join(data_path, io.agilent.batch_csv_path)
