@@ -175,19 +175,19 @@ def load(
      AcqMethod.xml, .d files sorted by name.
 
     Args:
-       path: Path to the .b directory
-       raw: Only use .d and .csv files.
-       full: return dict of available params
+       path: Path to the .b directory.
+       collection_methods: List of data file collection methods to try.
+       full: If True then also return a dict of available params.
 
     Returns:
-        The structured numpy array.
+        The structured numpy array, and optionally params.
 
     Raises:
         PewException
 
     """
     if collection_methods is None:
-        collection_methods = ["batch_xml", "batch_csv", "acq_method_xml"]
+        collection_methods = ["batch_xml", "batch_csv"]
 
     # Collect data files
     data_files = collect_datafiles(path, collection_methods)
