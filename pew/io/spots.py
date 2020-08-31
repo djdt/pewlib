@@ -1,6 +1,6 @@
 import numpy as np
 
-from pew.lib.peakfinding import find_peaks, bin_and_bound_peaks
+from pew.lib.peakfinding import find_peaks_cwt, bin_and_bound_peaks
 
 from typing import Tuple
 
@@ -17,7 +17,7 @@ def lines_to_spots(
 
     # Unstructured
     if lines.dtype.names is None:
-        peaks = find_peaks(lines.ravel(), min_width, max_width, **find_peak_kws)
+        peaks = find_peaks_cwt(lines.ravel(), min_width, max_width, **find_peak_kws)
         peaks = bin_and_bound_peaks(
             peaks, lines.size, lines.shape[1], offset=lines.shape[1] // 2
         )
@@ -26,7 +26,7 @@ def lines_to_spots(
     # Structured
     spots = np.empty(shape, lines.dtype)
     for name in lines.dtype.names:
-        peaks = find_peaks(lines[name].ravel(), min_width, max_width, **find_peak_kws)
+        peaks = find_peaks_cwt(lines[name].ravel(), min_width, max_width, **find_peak_kws)
         peaks = bin_and_bound_peaks(
             peaks, lines.size, lines.shape[1], offset=lines.shape[1] // 2
         )
