@@ -7,96 +7,57 @@ from pew.io import agilent
 from typing import Dict, Tuple
 
 
-scan_record_dtype = np.dtype(
-    [
-        ("ScanID", np.int32),
-        ("ScanMethodID", np.int32),
-        ("TimeSegmentID", np.int32),
-        ("ScanTime", np.float64),
-        ("MSLevel", np.int32),
-        ("ScanType", np.int32),
-        ("TIC", np.float64),
-        ("BasePeakMZ", np.float64),
-        ("BasePeakValue", np.float64),
-        ("Status", np.int32),
-        ("IonMode", np.int32),
-        ("IonPolarity", np.int32),
-        ("SamplingPeriod", np.float64),
-        (
-            "SpectrumParamValues",
-            np.dtype(
-                [
-                    ("SpectrumFormatID", np.int32),
-                    ("SpectrumOffset", np.int64),
-                    ("ByteCount", np.int32),
-                    ("PointCount", np.int32),
-                    ("MinX", np.float64),
-                    ("MaxX", np.float64),
-                    ("MinY", np.float64),
-                    ("MaxY", np.float64),
-                ]
-            ),
-        ),
-        (
-            "XSpecificParamType",
-            np.dtype([("Offset", np.int64), ("ByteCount", np.int32)]),
-        ),
-    ]
-)
-
-msprofile_record_dtype = np.dtype(
-    [
-        ("ID", np.float32),
-        ("Analog", np.float64),
-        ("Analog2", np.float64),
-        ("Digital", np.float64),
-    ]
-)
-
-
-def get_ms_profile_dtype(n: int):
-    # sub_dtype = np.dtype(
-    #     {
-    #         "names": ["ID", "Analog", "_Analog", "Digital"],
-    #         "formats": [np.float32, np.float64, np.float64, np.float64],
-    #         "offsets": [0, 4 * n, 12 * n, 20 * n, 28 * n],
-    #         # "itemsize": 36 * n,
-    #     }
-    # )
-    # return np.dtype(
-    #     {
-    #         "names": [str(i) for i in np.arange(n)],
-    #         "formats": [sub_dtype for i in np.arange(n)],
-    #         "offsets": np.arange(0, 4 * n, 4),
-    #         "itemsize": 28 * n * n,
-    #     }
-    # )
-    # return np.dtype({}sub_dtype, n)
-    # return sub_dtype
-    return np.dtype(
-        [
-            ("ID", np.float32, n),
-            ("Analog", np.float64, n),
-            ("Analog2", np.float64, n),
-            ("Digital", np.float64, n),
-        ]
-    )
-
-
-def read_ms_scan_xspecific(path: str) -> np.ndarray:
+def read_msscan_xspecific(path: str) -> np.ndarray:
     msscan_xspecific_magic_number = 275
     msscan_xspecific_header_size = 68
+    msscan_xspecific_dtype = np.dtype([("_", np.int32), ("MZ", np.float64)])
 
     with open(path, "rb") as fp:
         if int.from_bytes(fp.read(4), "little") != msscan_xspecific_magic_number:
             raise IOError("Invalid header for MSScan.")
         fp.seek(msscan_xspecific_header_size)
-        return np.frombuffer(fp.read(), dtype=[(("_", np.int32), ("MZ", np.float64))])
+        return np.frombuffer(fp.read(), dtype=msscan_xspecific_dtype)
 
 
-def read_ms_scan(path: str):
+def read_msscan(path: str):
     msscan_magic_number = 257
     msscan_header_size = 68
+    msscan_dtype = np.dtype(
+        [
+            ("ScanID", np.int32),
+            ("ScanMethodID", np.int32),
+            ("TimeSegmentID", np.int32),
+            ("ScanTime", np.float64),
+            ("MSLevel", np.int32),
+            ("ScanType", np.int32),
+            ("TIC", np.float64),
+            ("BasePeakMZ", np.float64),
+            ("BasePeakValue", np.float64),
+            ("Status", np.int32),
+            ("IonMode", np.int32),
+            ("IonPolarity", np.int32),
+            ("SamplingPeriod", np.float64),
+            (
+                "SpectrumParamValues",
+                np.dtype(
+                    [
+                        ("SpectrumFormatID", np.int32),
+                        ("SpectrumOffset", np.int64),
+                        ("ByteCount", np.int32),
+                        ("PointCount", np.int32),
+                        ("MinX", np.float64),
+                        ("MaxX", np.float64),
+                        ("MinY", np.float64),
+                        ("MaxY", np.float64),
+                    ]
+                ),
+            ),
+            (
+                "XSpecificParamType",
+                np.dtype([("Offset", np.int64), ("ByteCount", np.int32)]),
+            ),
+        ]
+    )
 
     with open(path, "rb") as fp:
         if int.from_bytes(fp.read(4), "little") != msscan_magic_number:
@@ -104,10 +65,10 @@ def read_ms_scan(path: str):
         fp.seek(msscan_header_size + 20)
         offset = int.from_bytes(fp.read(4), "little")
         fp.seek(offset)
-        return np.frombuffer(fp.read(), dtype=scan_record_dtype)
+        return np.frombuffer(fp.read(), dtype=msscan_dtype)
 
 
-def read_ms_profile(path: str, n: int) -> np.ndarray:
+def read_msprofile(path: str, n: int) -> np.ndarray:
     msprofile_magic_number = 258
     msprofile_header_size = 68
     msprofile_flat_dtype = np.dtype(
@@ -119,11 +80,21 @@ def read_ms_profile(path: str, n: int) -> np.ndarray:
         ]
     )
 
+    def get_msprofile_dtype(n: int):
+        return np.dtype(
+            [
+                ("ID", np.float32, n),
+                ("Analog", np.float64, n),
+                ("Analog2", np.float64, n),
+                ("Digital", np.float64, n),
+            ]
+        )
+
     with open(path, "rb") as fp:
         if int.from_bytes(fp.read(4), "little") != msprofile_magic_number:
             raise IOError("Invalid header for MSProfile.")
         fp.seek(msprofile_header_size)
-        data = np.frombuffer(fp.read(), dtype=get_ms_profile_dtype(n))
+        data = np.frombuffer(fp.read(), dtype=get_msprofile_dtype(n))
 
     flattened = np.empty(np.prod(data.size * n), dtype=msprofile_flat_dtype)
     for name in data.dtype.names:
@@ -203,6 +174,16 @@ def datafile_msts_mass_info(datafile: str) -> Dict[int, XSpecificMass]:
                 masses[k].mz2 = v[1]
 
     return masses
+
+
+def read_datafile(datafile: str) -> np.ndarray:
+    masses = datafile_msts_mass_info(datafile)
+    msscan = read_msscan(os.path.join(datafile, "AcqData", "MSScan.bin"))
+    msprofile = read_msprofile(
+        os.path.join(datafile, "AcqData", "MSProfile.bin"), len(masses)
+    )
+
+
 
 
 def load(batch: str) -> np.ndarray:
