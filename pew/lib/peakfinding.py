@@ -109,7 +109,7 @@ def _cwt_filter_ridges(
     return ridges, max_coords
 
 
-def _zscore_identify_peaks(
+def _zscore_peaks(
     x: np.ndarray, lag: int, threshold: float = 3.3, influence: float = 0.5
 ) -> Tuple[np.ndarray, np.ndarray]:
 
@@ -179,9 +179,14 @@ def find_peaks_zscore(
     peak_min_area: float = 0.0,
     peak_min_height: float = 0.0,
     peak_min_width: float = 0.0,
+    use_cython: bool = False,
 ) -> np.ndarray:
 
-    signal, _filtered = _zscore_identify_peaks(x, lag, threshold, influence)
+    if use_cython:
+        from pew.lib.zscore import zscore_peaks
+        signal, _ = zscore_peaks(x, lag, threshold, influence)
+    else:
+        signal, _ = _zscore_peaks(x, lag, threshold, influence)
     signal[signal < 0] = 0  # Only look at positive peaks
 
     lefts = np.nonzero(np.logical_and(signal[:-1] == 0, signal[1:] == 1))[0]
