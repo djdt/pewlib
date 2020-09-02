@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.lib.recfunctions as rfn
 import copy
 
 from pew.calibration import Calibration
@@ -95,25 +96,14 @@ class Laser(_Laser):
     def remove(self, names: Union[str, List[str]]) -> None:
         if isinstance(names, str):
             names = [names]
-
-        new_dtype = [descr for descr in self.data.dtype.descr if descr[0] not in names]
-
-        new_data = np.empty(self.data.shape, dtype=new_dtype)
-        for name in self.data.dtype.names:
-            if name not in names:
-                new_data[name] = self.data[name]
-            else:
-                self.calibration.pop(name)
-
-        self.data = new_data
+        self.data = rfn.drop_fields(self.data, names, usemask=False)
+        for name in names:
+            self.calibration.pop(name)
 
     def rename(self, names: Dict[str, str]) -> None:
-        old = self.data.dtype.names
-        new = list(map(names.get, old, old))
-        names = {o: n for o, n in zip(old, new)}  # type: ignore
-
-        self.data.dtype.names = new
-        self.calibration = {names[o]: self.calibration[o] for o in old}
+        self.data = rfn.rename_fields(self.data, names)
+        for old, new in names.items():
+            self.calibration[(new)] = self.calibration.pop(old)
 
     def get(self, isotope: str = None, **kwargs) -> np.ndarray:
         """Valid kwargs are calibrate, extent, flat."""

@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.lib.recfunctions as rfn
 import copy
 
 from pew.laser import _Laser, Laser
@@ -8,7 +9,7 @@ from pew.lib.calc import subpixel_offset_equal
 
 from pew.srr.config import SRRConfig
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 
 class SRRLaser(_Laser):
@@ -73,18 +74,19 @@ class SRRLaser(_Laser):
             calibration = Calibration()
         self.calibration[isotope] = calibration
 
-    def remove(self, isotope: str) -> None:
-        for i in range(0, len(self.data)):
-            dtype = self.data[i].dtype
-            new_dtype = [descr for descr in dtype.descr if descr[0] != isotope]
+    def remove(self, names: Union[str, List[str]]) -> None:
+        if isinstance(names, str):
+            names = [names]
+        for i in range(len(self.data)):
+            self.data[i] = rfn.drop_fields(self.data[i], names, usemask=False)
+        for name in names:
+            self.calibration.pop(name)
 
-            new_data = np.empty(self.data[i].shape, dtype=new_dtype)
-            for name in dtype.names:
-                if name != isotope:
-                    new_data[name] = self.data[i][name]
-            self.data[i] = new_data
-
-        self.calibration.pop(isotope)
+    def rename(self, names: Dict[str, str]) -> None:
+        for i in range(len(self.data)):
+            self.data[i] = rfn.rename_fields(self.data[i], names)
+        for old, new in names.items():
+            self.calibration[(new)] = self.calibration.pop(old)
 
     def get(self, isotope: str = None, **kwargs) -> np.ndarray:
         layer = kwargs.get("layer", None)
