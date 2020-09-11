@@ -117,9 +117,7 @@ class Laser(_Laser):
             px, py = self.config.get_pixel_width(), self.config.get_pixel_height()
             x0, x1 = int(x0 / px), int(x1 / px)
             y0, y1 = int(y0 / py), int(y1 / py)
-            # We have to invert the extent, as mpl use bottom left y coords
-            ymax = data.shape[0]
-            data = data[ymax - y1 : ymax - y0, x0:x1]
+            data = data[y0:y1, x0:x1]
 
         if kwargs.get("calibrate", False):
             if isotope is None:  # Perform calibration on all data
