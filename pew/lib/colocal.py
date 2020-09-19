@@ -18,7 +18,12 @@ def pearsonr(x: np.ndarray, y: np.ndarray) -> float:
 
 
 def pearsonr_probablity(
-    x: np.ndarray, y: np.ndarray, block: int = 3, mask: np.ndarray = None, n: int = 500
+    x: np.ndarray,
+    y: np.ndarray,
+    block: int = 3,
+    mask: np.ndarray = None,
+    mask_all: bool = True,
+    n: int = 500,
 ) -> Tuple[float, float]:
     """Returns Pearson's colocalisation coefficient and the relevant probabilty.
     If a mask is passsed then masked shuffle_blocks is used.
@@ -28,7 +33,7 @@ def pearsonr_probablity(
 
     rs = np.empty(n, dtype=float)
     for i in range(n):
-        shuffled = shuffle_blocks(y, (block, block), mask, mask_all=True)
+        shuffled = shuffle_blocks(y, (block, block), mask, mask_all=mask_all)
         rs[i] = pearsonr(x[mask], shuffled[mask])
 
     r = pearsonr(x[mask], y[mask])
