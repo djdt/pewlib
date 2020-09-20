@@ -41,14 +41,16 @@ def pearsonr_probablity(
 
 
 def manders(
-    x: np.ndarray, y: np.ndarray, tx: float, ty: float = None
+    x: np.ndarray, y: np.ndarray, tx: float = None, ty: float = None
 ) -> Tuple[float, float]:
     """Returns Manders' correlation coefficients m1, m2.
     tx and ty are the thresholds for x and y respectively.
     If ty is None then tx is used.
 """
+    if tx is None:
+        tx = np.amin(x)
     if ty is None:
-        ty = tx
+        ty = np.amin(y)
 
     return np.sum(x, where=y > ty) / x.sum(), np.sum(y, where=x > tx) / y.sum()
 
@@ -87,8 +89,11 @@ def costes(
     x: np.ndarray, y: np.ndarray, n_scrambles: int = 200
 ) -> Tuple[float, float, float, float]:  # pragma: no cover, covered in other funcs
     x, y = normalise(x), normalise(y)
-    pearson_r, r_prob = pearsonr_probablity(x, y, n=n_scrambles)
     t, a, b = costes_threshold(x, y)
-    m1, m2 = manders(x, y, t, a * t + b)
+    tx, ty = t, t * a + b
+    pearson_r, r_prob = pearsonr_probablity(
+        x, y, mask=np.logical_and(x > tx, y > ty), n=n_scrambles
+    )
+    m1, m2 = manders(x, y, tx, ty)
 
     return pearson_r, r_prob, m1, m2
