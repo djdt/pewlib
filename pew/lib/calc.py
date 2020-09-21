@@ -151,29 +151,23 @@ def shuffle_blocks(
     # Pad the array to fit the blocksize
     pads = [(0, (b - (shape % b)) % b) for b, shape in zip(block, x.shape)]
     xpad = np.pad(x, pads, mode="edge")
+    if mask is None:
+        mask = np.ones(xpad.shape, dtype=bool)
+
     blocks = view_as_blocks(xpad, block)
-    blocks_shape = blocks.shape
-    blocks = blocks.reshape(-1, *block)
+    mask = view_as_blocks(np.pad(mask, pads, mode="edge"), block)
+    # Mask only in blocks with all (mask_all) or some mask
+    axis = tuple(np.arange(x.ndim, x.ndim + len(block)))
+    mask = np.all(mask, axis=axis) if mask_all else np.any(mask, axis=axis)
 
-    if mask is not None:
-        mask = view_as_blocks(np.pad(mask, pads, mode="edge"), block).reshape(
-            -1, *block
-        )
-        # Shuffle blocks with all or some masked pixels
-        axis = tuple(np.arange(1, len(blocks.shape)))
-        mask = np.all(mask, axis=axis) if mask_all else np.any(mask, axis=axis)
+    # Create flat index then shuffle
+    idx = np.nonzero(mask)
+    nidx = np.random.permutation(np.ravel_multi_index(idx, mask.shape))
+    nidx = np.unravel_index(nidx, mask.shape)
+    blocks[idx] = blocks[nidx]
 
-        blocks[mask] = np.random.permutation(blocks[mask])
-    else:  # pragma: no cover, simple inplace shuffle
-        np.random.shuffle(blocks)
-
-    # Reform the image and then trim off excess
-    transpose = np.arange(x.ndim).repeat(2)
-    transpose[1::2] += x.ndim
-    blocks = np.reshape(blocks, blocks_shape)
-    blocks = np.reshape(blocks.transpose(*transpose), xpad.shape)
     slices = [slice(0, s) for s in x.shape]
-    return blocks[tuple(slices)]
+    return xpad[tuple(slices)]
 
 
 def sliding_window(x: np.ndarray, window: int, step: int = 1) -> np.ndarray:
