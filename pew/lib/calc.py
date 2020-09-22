@@ -135,7 +135,8 @@ def shuffle_blocks(
     x: np.ndarray,
     block: Tuple[int, ...],
     mask: np.ndarray = None,
-    mask_all: bool = True,
+    mode: str = "pad",
+    shuffle_partial: bool = False,
 ) -> np.ndarray:
     """Shuffle an ndim array as tiles of a certain size.
     If a mask is passed then only the region within the mask is shuffled.
@@ -146,19 +147,31 @@ def shuffle_blocks(
         x: Input array.
         block: Shape of blocks, ndim must be the same as x.
         mask: Optional mask data, shape must be the same as x.
-        mask_all: Only shuffle entirely masked blocks.
+        mode: Method for matching block size, 'pad' or 'inplace'.
+        shuffle_partial: Shuffle partially masked blocks.
 """
-    # Pad the array to fit the blocksize
-    pads = [(0, (b - (shape % b)) % b) for b, shape in zip(block, x.shape)]
-    xpad = np.pad(x, pads, mode="edge")
+    shape = x.shape
     if mask is None:
-        mask = np.ones(xpad.shape, dtype=bool)
+        mask = np.ones(x.shape, dtype=bool)
+    # Pad the array to fit the blocksize
+    if mode == "pad":
+        pads = [(0, p) for p in (block - (np.array(x.shape) % block)) % block]
+        x = np.pad(x, pads, mode="edge")
+        mask = np.pad(mask, pads, mode="edge")
+    elif mode == "inplace":
+        # Use mask to prevent shuffleing of blocks out of bounds
+        trim = x.shape - (np.array(x.shape) % block)
+        for axis, t in enumerate(trim):
+            np.swapaxes(mask, 0, axis)[slice(t, None)] = False
+    else:
+        raise ValueError("Mode must be 'pad' or 'inplace'.")
 
-    blocks = view_as_blocks(xpad, block)
-    mask = view_as_blocks(np.pad(mask, pads, mode="edge"), block)
+    blocks = view_as_blocks(x, block)
+    mask = view_as_blocks(mask, block)
+
     # Mask only in blocks with all (mask_all) or some mask
-    axis = tuple(np.arange(x.ndim, x.ndim + len(block)))
-    mask = np.all(mask, axis=axis) if mask_all else np.any(mask, axis=axis)
+    axes = tuple(np.arange(x.ndim, x.ndim + len(block)))
+    mask = np.any(mask, axis=axes) if shuffle_partial else np.all(mask, axis=axes)
 
     # Create flat index then shuffle
     idx = np.nonzero(mask)
@@ -166,8 +179,10 @@ def shuffle_blocks(
     nidx = np.unravel_index(nidx, mask.shape)
     blocks[idx] = blocks[nidx]
 
-    slices = [slice(0, s) for s in x.shape]
-    return xpad[tuple(slices)]
+    if mode == "pad":
+        unpads = tuple([slice(0, s) for s in shape])
+        x = x[unpads]
+    return x
 
 
 def sliding_window(x: np.ndarray, window: int, step: int = 1) -> np.ndarray:
