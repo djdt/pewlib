@@ -105,21 +105,27 @@ class Laser(_Laser):
         for old, new in names.items():
             self.calibration[(new)] = self.calibration.pop(old)
 
-    def get(self, isotope: str = None, **kwargs) -> np.ndarray:
+    def get(
+        self,
+        isotope: str = None,
+        calibrate: bool = False,
+        extent: Tuple[float, float, float, float] = None,
+        **kwargs,
+    ) -> np.ndarray:
         """Valid kwargs are calibrate, extent, flat."""
         if isotope is None:
             data = self.data.copy()
         else:
             data = self.data[isotope]
 
-        if "extent" in kwargs:
-            x0, x1, y0, y1 = kwargs["extent"]
+        if extent is not None:
+            x0, x1, y0, y1 = extent
             px, py = self.config.get_pixel_width(), self.config.get_pixel_height()
             x0, x1 = int(x0 / px), int(x1 / px)
             y0, y1 = int(y0 / py), int(y1 / py)
             data = data[y0:y1, x0:x1]
 
-        if kwargs.get("calibrate", False):
+        if calibrate:
             if isotope is None:  # Perform calibration on all data
                 for name in data.dtype.names:
                     data[name] = self.calibration[name].calibrate(data[name])

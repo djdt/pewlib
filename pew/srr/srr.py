@@ -88,8 +88,15 @@ class SRRLaser(_Laser):
         for old, new in names.items():
             self.calibration[(new)] = self.calibration.pop(old)
 
-    def get(self, isotope: str = None, **kwargs) -> np.ndarray:
-        layer = kwargs.get("layer", None)
+    def get(
+        self,
+        isotope: str = None,
+        calibrate: bool = False,
+        extent: Tuple[float, float, float, float] = None,
+        flat: bool = False,
+        layer: int = None,
+        **kwargs,
+    ) -> np.ndarray:
         if layer is not None:
             data = self.data[layer].copy()
             # Flip alternate layers
@@ -101,8 +108,8 @@ class SRRLaser(_Laser):
         if isotope is not None:
             data = data[isotope]
 
-        if "extent" in kwargs:
-            x0, x1, y0, y1 = kwargs["extent"]
+        if extent is not None:
+            x0, x1, y0, y1 = extent
             px, py = (
                 self.config.get_pixel_width(layer),
                 self.config.get_pixel_height(layer),
@@ -113,14 +120,14 @@ class SRRLaser(_Laser):
             ymax = data.shape[0]
             data = data[ymax - y1 : ymax - y0, x0:x1]
 
-        if kwargs.get("calibrate", False):
+        if calibrate:
             if isotope is None:  # Perform calibration on all data
                 for name in data.dtype.names:
                     data[name] = self.calibration[name].calibrate(data[name])
             else:
                 data = self.calibration[isotope].calibrate(data)
 
-        if kwargs.get("flat", False) and data.ndim > 2:
+        if flat and data.ndim > 2:
             if isotope is not None:
                 data = np.mean(data, axis=2)
             else:
