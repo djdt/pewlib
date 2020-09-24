@@ -22,7 +22,7 @@ def pearsonr_probablity(
     y: np.ndarray,
     block: int = 3,
     mask: np.ndarray = None,
-    mask_all: bool = True,
+    shuffle_partial: bool = False,
     n: int = 500,
 ) -> Tuple[float, float]:
     """Returns Pearson's colocalisation coefficient and the relevant probabilty.
@@ -33,7 +33,7 @@ def pearsonr_probablity(
 
     rs = np.empty(n, dtype=float)
     for i in range(n):
-        shuffled = shuffle_blocks(y, (block, block), mask, mask_all=mask_all)
+        shuffled = shuffle_blocks(y, (block, block), mask, shuffle_partial=shuffle_partial)
         rs[i] = pearsonr(x[mask], shuffled[mask])
 
     r = pearsonr(x[mask], y[mask])
