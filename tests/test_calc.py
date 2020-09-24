@@ -55,7 +55,7 @@ def test_shuffle_blocks():
     m = np.zeros((100, 100))
     m[:52] = 1.0
 
-    y = calc.shuffle_blocks(x, (5, 20), mask=m, mask_all=True)
+    y = calc.shuffle_blocks(x, (5, 20), mask=m, shuffle_partial=False)
 
     assert np.allclose(y[50:], x[50:])
     assert not np.allclose(y[:50], x[:50])

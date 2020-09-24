@@ -57,7 +57,7 @@ def test_laser_get():
 
     assert np.all(laser.get("A") == data["A"])
     assert np.all(laser.get("A", calibrate=True) == (data["A"] - 1.0) / 2.0)
-    assert np.all(laser.get("A", extent=(0.0, 20.0, 10.0, 30)) == data["A"][7:9, 0:4])
+    assert np.all(laser.get("A", extent=(0.0, 20.0, 10.0, 30)) == data["A"][1:3, 0:4])
 
 
 def test_laser_from_list():
