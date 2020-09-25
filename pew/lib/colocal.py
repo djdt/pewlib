@@ -31,15 +31,19 @@ def pearsonr_probablity(
     if mask is None:
         mask = np.ones(x.shape, dtype=bool)
 
+    r = pearsonr(x[mask], y[mask])
     rs = np.empty(n, dtype=float)
     shuffled = y.copy()
     for i in range(n):
         shuffled = shuffle_blocks(
-            shuffled, (block, block), mask, mode="inplace", shuffle_partial=shuffle_partial
+            shuffled,
+            (block, block),
+            mask,
+            mode="inplace",
+            shuffle_partial=shuffle_partial,
         )
         rs[i] = pearsonr(x[mask], shuffled[mask])
 
-    r = pearsonr(x[mask], y[mask])
     return r, (rs < r).sum() / n
 
 
