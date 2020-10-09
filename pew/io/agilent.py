@@ -149,7 +149,9 @@ def collect_datafiles(batch_root: str, methods: List[str]) -> List[str]:
         if os.path.exists(method_path):
             data_files = method_func(batch_root, method_path)
             missing = len(data_files) - sum([os.path.exists(df) for df in data_files])
-            if missing == 0:
+            if len(data_files) == 0:
+                logger.info(f"No datafiles found using {method}.")
+            elif missing == 0:
                 logger.info(f"Datafiles collected using '{method}'.")
                 return data_files
             else:  # pragma: no cover
