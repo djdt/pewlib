@@ -111,20 +111,23 @@ def _cwt_filter_ridges(
 
 def _zscore_peaks(
     x: np.ndarray, lag: int, threshold: float = 3.3, influence: float = 0.5
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
     signal = np.zeros(x.size, dtype=np.int8)
     filtered = x.copy()
+    means = np.empty_like(x)
+    means[:lag] = x[:lag]
+    stds = np.zeros_like(x)
 
     for i in range(lag, x.shape[0]):
-        mean = np.mean(filtered[i - lag : i])
-        std = np.std(filtered[i - lag : i])
+        means[i] = np.mean(filtered[i - lag : i])
+        stds[i] = np.std(filtered[i - lag : i])
 
-        if np.abs(x[i] - mean) > std * threshold:
-            signal[i] = 1 if x[i] > mean else -1
+        if np.abs(x[i] - means[i]) > stds[i] * threshold:
+            signal[i] = 1 if x[i] > means[i] else -1
             filtered[i] = influence * x[i] + (1.0 - influence) * filtered[i - 1]
 
-    return signal, filtered
+    return signal, filtered, means, stds
 
 
 def find_peaks_cwt(
