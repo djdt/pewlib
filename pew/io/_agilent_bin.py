@@ -4,7 +4,7 @@ import os.path
 
 from pew.io import agilent
 
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 
 def read_msscan_xspecific(path: str) -> np.ndarray:
@@ -111,7 +111,9 @@ def parse_msts_xml(msts_xml: str) -> Tuple[float, float, int]:
     return start, end, scans
 
 
-def parse_msts_xspecific_xml(msts_xspecific_xml: str,) -> Dict[int, Tuple[str, float]]:
+def parse_msts_xspecific_xml(
+    msts_xspecific_xml: str,
+) -> Dict[int, Tuple[str, float]]:
     xml = ElementTree.parse(msts_xspecific_xml)
     xdict = {}
     for record in xml.iter("IonRecord"):
@@ -151,11 +153,10 @@ class XSpecificMass(object):
         if self.mz2 is None:
             return f"{self.name}{self.mz}"
         else:
-            print(self.mz2)
             return f"{self.name}{self.mz}->{self.mz2}"
 
 
-def datafile_msts_mass_info(datafile: str) -> Dict[int, XSpecificMass]:
+def datafile_msts_mass_info(datafile: str) -> List[XSpecificMass]:
     msts_xspecific_path = os.path.join(datafile, "AcqData", "MSTS_XSpecific.xml")
     msts_xaddition_path = os.path.join(datafile, "MSTS_XAddition.xml")
 
@@ -173,47 +174,55 @@ def datafile_msts_mass_info(datafile: str) -> Dict[int, XSpecificMass]:
                 masses[k].mz = v[0]
                 masses[k].mz2 = v[1]
 
-    return masses
+    return sorted(masses.values(), key=lambda x: x.id)
 
 
-def read_datafile(datafile: str) -> np.ndarray:
+def read_datafile(datafile: str, counts_per_second: bool = False) -> np.ndarray:
     masses = datafile_msts_mass_info(datafile)
     msscan = read_msscan(os.path.join(datafile, "AcqData", "MSScan.bin"))
     msprofile = read_msprofile(
         os.path.join(datafile, "AcqData", "MSProfile.bin"), len(masses)
     )
+    offsets = (
+        msscan["SpectrumParamValues"]["SpectrumOffset"]
+        // msscan["SpectrumParamValues"]["ByteCount"]
+    )
+    dtype = [(str(mass), np.float64) for mass in masses]
+    data = np.empty(offsets.size, dtype=dtype)
+    for mass in masses:
+        data[str(mass)] = msprofile[(offsets * len(masses)) + (mass.id - 1)]["Analog"]
+        if counts_per_second:
+            data[str(mass)] /= mass.acctime
 
-
+    return data
 
 
 def load(batch: str) -> np.ndarray:
     import matplotlib.pyplot as plt
 
     data_files = agilent.collect_datafiles(batch, ["batch_xml", "batch_csv"])
-    masses = datafile_msts_mass_info(data_files[0])
-    ids = np.array([k for k in masses.keys()], dtype=int)
-    dtype = [(str(masses[k]), np.float64) for k in masses.keys()]
+    datas = np.stack([read_datafile(df) for df in data_files], axis=0)
+    # masses = datafile_msts_mass_info(data_files[0])
+    # ids = np.array([k for k in masses.keys()], dtype=int)
+    # dtype = [(str(masses[k]), np.float64) for k in masses.keys()]
 
-    # msprofile_data = np.stack(
-    #     [
-    #         read_ms_profile(os.path.join(df, "AcqData", "MSProfile.bin"), len(masses))
-    #         for df in data_files
-    #     ],
-    #     axis=0,
-    # )
     # idx = np.argmax(msprofile_data["ID"] == ids[:, None, None], axis=0)
 
     # data = msprofile_data[""]
 
-    # plt.imshow(data["C1"])
-    # plt.show()
+    fig, ax = plt.subplots(3)
+
+    ax[0].imshow(datas["P31->31"])
+    ax[1].imshow(datas["Mn55->55"])
+    ax[2].imshow(datas["Fe56->56"])
+    plt.show()
 
 
-# load("/home/tom/Downloads/20200630_agar_test_1.b")
-profile = read_ms_profile(
-    "/home/tom/Downloads/20200630_agar_test_1.b/001.d/AcqData/MSProfile.bin", 4
-)
-print(profile[:3], profile.dtype)
+load("/home/tom/Downloads/20200923_std_pre.b")
+# profile = read_ms_profile(
+#     "/home/tom/Downloads/20200630_agar_test_1.b/001.d/AcqData/MSProfile.bin", 4
+# )
+# print(profile[:3], profile.dtype)
 # # idx = np.where(profile["ID"][:3] == np.array([4, 2, 3, 1])[:, None])
 # # idx = np.argmax(profile["ID"][:3] == np.array([4, 2, 3, 1])[:, None, None], axis=0)
 # idx = np.argmax(profile["ID"][:3] == np.array([4, 2, 3, 1])[:, None, None], axis=0)
