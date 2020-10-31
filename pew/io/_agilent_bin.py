@@ -1,8 +1,9 @@
 import numpy as np
+import numpy.lib.recfunctions as rfn
 from xml.etree import ElementTree
 import os.path
 
-from pew.io import agilent
+from pew.io import agilent, error
 
 from typing import Dict, List, Tuple
 
@@ -177,8 +178,7 @@ def datafile_msts_mass_info(datafile: str) -> List[XSpecificMass]:
     return sorted(masses.values(), key=lambda x: x.id)
 
 
-def read_datafile(datafile: str, counts_per_second: bool = False) -> np.ndarray:
-    masses = datafile_msts_mass_info(datafile)
+def read_datafile(datafile: str, masses: List[XSpecificMass]) -> np.ndarray:
     msscan = read_msscan(os.path.join(datafile, "AcqData", "MSScan.bin"))
     msprofile = read_msprofile(
         os.path.join(datafile, "AcqData", "MSProfile.bin"), len(masses)
@@ -187,43 +187,39 @@ def read_datafile(datafile: str, counts_per_second: bool = False) -> np.ndarray:
         msscan["SpectrumParamValues"]["SpectrumOffset"]
         // msscan["SpectrumParamValues"]["ByteCount"]
     )
-    dtype = [(str(mass), np.float64) for mass in masses]
+    dtype = [(str(mass), np.float64) for mass in masses] + [("Time", np.float64)]
     data = np.empty(offsets.size, dtype=dtype)
     for mass in masses:
         data[str(mass)] = msprofile[(offsets * len(masses)) + (mass.id - 1)]["Analog"]
-        if counts_per_second:
-            data[str(mass)] /= mass.acctime
 
+    data["Time"] = msscan["ScanTime"] * 60.0  # ScanTime in minutes
     return data
 
 
-def load(batch: str) -> np.ndarray:
-    import matplotlib.pyplot as plt
+def load(
+    batch: str,
+    collection_methods: List[str] = None,
+    counts_per_second: bool = False,
+    full: bool = False,
+) -> np.ndarray:
+    if collection_methods is None:
+        collection_methods = ["batch_xml", "batch_csv"]
 
-    data_files = agilent.collect_datafiles(batch, ["batch_xml", "batch_csv"])
-    datas = np.stack([read_datafile(df) for df in data_files], axis=0)
-    # masses = datafile_msts_mass_info(data_files[0])
-    # ids = np.array([k for k in masses.keys()], dtype=int)
-    # dtype = [(str(masses[k]), np.float64) for k in masses.keys()]
+    datafiles = agilent.collect_datafiles(batch, collection_methods)
+    if len(datafiles) == 0:
+        raise error.PewException(f"No data files found in {batch}!")  # pragma: no cover
 
-    # idx = np.argmax(msprofile_data["ID"] == ids[:, None, None], axis=0)
+    masses = datafile_msts_mass_info(datafiles[0])
+    data = np.stack([read_datafile(df, masses) for df in datafiles], axis=0)
 
-    # data = msprofile_data[""]
+    scantime = np.round(np.mean(np.diff(data["Time"], axis=1)), 4)
+    data = rfn.drop_fields(data, "Time")
 
-    fig, ax = plt.subplots(3)
+    if counts_per_second:
+        for mass in masses:
+            data[str(mass)] /= mass.acctime
 
-    ax[0].imshow(datas["P31->31"])
-    ax[1].imshow(datas["Mn55->55"])
-    ax[2].imshow(datas["Fe56->56"])
-    plt.show()
-
-
-load("/home/tom/Downloads/20200923_std_pre.b")
-# profile = read_ms_profile(
-#     "/home/tom/Downloads/20200630_agar_test_1.b/001.d/AcqData/MSProfile.bin", 4
-# )
-# print(profile[:3], profile.dtype)
-# # idx = np.where(profile["ID"][:3] == np.array([4, 2, 3, 1])[:, None])
-# # idx = np.argmax(profile["ID"][:3] == np.array([4, 2, 3, 1])[:, None, None], axis=0)
-# idx = np.argmax(profile["ID"][:3] == np.array([4, 2, 3, 1])[:, None, None], axis=0)
-# print(np.take_along_axis(profile["Digital"][:3], idx, 1), profile.dtype)
+    if full:
+        return data, dict(scantime=scantime)
+    else:
+        return data
