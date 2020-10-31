@@ -196,12 +196,29 @@ def read_datafile(datafile: str, masses: List[XSpecificMass]) -> np.ndarray:
     return data
 
 
-def load(
+def load_binary(
     batch: str,
     collection_methods: List[str] = None,
     counts_per_second: bool = False,
     full: bool = False,
 ) -> np.ndarray:
+    """Imports an Agilent batch (.b) directory, using the MSScan and MSProfile binaries.
+    Finds lines using (in order of preference): BatchLog.xml, BatchLog.csv,
+     AcqMethod.xml, .d files sorted by name.
+
+    Args:
+       path: Path to the .b directory.
+       collection_methods: List of data file collection methods to try.
+       counts_per_second: Return data in CPS instead of raw counts.
+       full: If True then also return a dict of available params.
+
+    Returns:
+        The structured numpy array and optionally, params.
+
+    Raises:
+        PewException
+
+    """
     if collection_methods is None:
         collection_methods = ["batch_xml", "batch_csv"]
 
