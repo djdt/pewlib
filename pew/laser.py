@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.lib.recfunctions as rfn
 import copy
 
 from pew.calibration import Calibration
@@ -95,43 +96,36 @@ class Laser(_Laser):
     def remove(self, names: Union[str, List[str]]) -> None:
         if isinstance(names, str):
             names = [names]
-
-        new_dtype = [descr for descr in self.data.dtype.descr if descr[0] not in names]
-
-        new_data = np.empty(self.data.shape, dtype=new_dtype)
-        for name in self.data.dtype.names:
-            if name not in names:
-                new_data[name] = self.data[name]
-            else:
-                self.calibration.pop(name)
-
-        self.data = new_data
+        self.data = rfn.drop_fields(self.data, names, usemask=False)
+        for name in names:
+            self.calibration.pop(name)
 
     def rename(self, names: Dict[str, str]) -> None:
-        old = self.data.dtype.names
-        new = list(map(names.get, old, old))
-        names = {o: n for o, n in zip(old, new)}  # type: ignore
+        self.data = rfn.rename_fields(self.data, names)
+        for old, new in names.items():
+            self.calibration[(new)] = self.calibration.pop(old)
 
-        self.data.dtype.names = new
-        self.calibration = {names[o]: self.calibration[o] for o in old}
-
-    def get(self, isotope: str = None, **kwargs) -> np.ndarray:
+    def get(
+        self,
+        isotope: str = None,
+        calibrate: bool = False,
+        extent: Tuple[float, float, float, float] = None,
+        **kwargs,
+    ) -> np.ndarray:
         """Valid kwargs are calibrate, extent, flat."""
         if isotope is None:
             data = self.data.copy()
         else:
             data = self.data[isotope]
 
-        if "extent" in kwargs:
-            x0, x1, y0, y1 = kwargs["extent"]
+        if extent is not None:
+            x0, x1, y0, y1 = extent
             px, py = self.config.get_pixel_width(), self.config.get_pixel_height()
             x0, x1 = int(x0 / px), int(x1 / px)
             y0, y1 = int(y0 / py), int(y1 / py)
-            # We have to invert the extent, as mpl use bottom left y coords
-            ymax = data.shape[0]
-            data = data[ymax - y1 : ymax - y0, x0:x1]
+            data = data[y0:y1, x0:x1]
 
-        if kwargs.get("calibrate", False):
+        if calibrate:
             if isotope is None:  # Perform calibration on all data
                 for name in data.dtype.names:
                     data[name] = self.calibration[name].calibrate(data[name])

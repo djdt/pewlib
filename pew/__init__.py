@@ -1,5 +1,5 @@
-__version__ = "0.4.5"
+__version__ = "0.4.6"
 
-from .laser import Laser
 from .calibration import Calibration
 from .config import Config
+from .laser import Laser

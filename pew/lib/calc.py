@@ -36,64 +36,6 @@ def greyscale_to_rgb(array: np.ndarray, rgb: np.ndarray) -> np.ndarray:
 #     return Cs
 
 
-def kmeans(
-    x: np.ndarray, k: int, init: str = "kmeans++", max_iterations: int = 1000,
-) -> np.ndarray:
-    """K-means clustering. Returns an array mapping objects to their clusters.
-     Raises a ValueError if the loop exceeds max_iterations.
-
-     Args:
-        x: Data. Shape is (n, m) for n objects with m attributes.
-        k: Number of clusters.
-        init: Method to determine initial cluster centers. Can be 'kmeans++' or 'random'.
-"""
-    # Ensure at least 1 dim for variables
-    if x.ndim == 1:
-        x = x.reshape(-1, 1)
-
-    if init == "kmeans++":
-        centers = kmeans_plus_plus(x, k)
-    elif init == "random":
-        ix = np.random.choice(np.arange(x.shape[0]), k)
-        centers = x[ix].copy()
-    else:  # pragma: no cover
-        raise ValueError("'init' must be 'kmeans++' or 'random'.")
-
-    # Sort centers by the first attribute
-    centers = centers[np.argsort((centers[:, 0]))]
-
-    while max_iterations > 0:
-        max_iterations -= 1
-
-        distances = np.sqrt(np.sum((centers[:, None] - x) ** 2, axis=2))
-        idx = np.argmin(distances, axis=0)
-
-        new_centers = centers.copy()
-        for i in np.unique(idx):
-            new_centers[i] = np.mean(x[idx == i], axis=0)
-
-        if np.allclose(centers, new_centers):
-            return idx
-        centers = new_centers
-
-    raise ValueError("No convergance in allowed iterations.")  # pragma: no cover
-
-
-def kmeans_plus_plus(x: np.ndarray, k: int) -> np.ndarray:
-    """Selects inital cluster positions using K-means++ algorithm.
-"""
-    ix = np.arange(x.shape[0])
-    centers = np.empty((k, *x.shape[1:]))
-    centers[0] = x[np.random.choice(ix, 1)]
-
-    for i in range(1, k):
-        distances = np.sqrt(np.sum((centers[:i, None] - x) ** 2, axis=2))
-        distances = np.amin(distances, axis=0) ** 2
-        centers[i] = x[np.random.choice(ix, 1, p=distances / distances.sum())]
-
-    return centers.copy()
-
-
 def local_maxima(x: np.ndarray) -> np.ndarray:
     return np.nonzero(
         np.logical_and(np.r_[True, x[1:] > x[:-1]], np.r_[x[:-1] > x[1:], True])
@@ -133,41 +75,56 @@ def reset_cumsum(x: np.ndarray, reset_value: float = 0.0) -> np.ndarray:
 
 def shuffle_blocks(
     x: np.ndarray,
-    block: Tuple[int, int],
+    block: Tuple[int, ...],
     mask: np.ndarray = None,
-    mask_all: bool = True,
+    mode: str = "pad",
+    shuffle_partial: bool = False,
 ) -> np.ndarray:
-    """Shuffle a 2d array as tiles of a certain size.
+    """Shuffle an ndim array as tiles of a certain size.
     If a mask is passed then only the region within the mask is shuffled.
     If mask_all is True then only entirely masked blocks are shuffled otherwise
     even partially masked blocks will be shuffled.
 
     Args:
         x: Input array.
-        block: Size of the tiles.
-        mask: Optional mask data.
-        mask_all: Only shuffle entirely masked blocks.
+        block: Shape of blocks, ndim must be the same as x.
+        mask: Optional mask data, shape must be the same as x.
+        mode: Method for matching block size, 'pad' or 'inplace'.
+        shuffle_partial: Shuffle partially masked blocks.
 """
+    shape = x.shape
+    if mask is None:
+        mask = np.ones(x.shape, dtype=bool)
     # Pad the array to fit the blocksize
-    px = (block[0] - (x.shape[0] % block[0])) % block[0]
-    py = (block[1] - (x.shape[1] % block[1])) % block[1]
-    blocks = view_as_blocks(np.pad(x, ((0, px), (0, py)), mode="edge"), block)
-    shape = blocks.shape
-    blocks = blocks.reshape(-1, *block)
+    if mode == "pad":
+        pads = [(0, p) for p in (block - (np.array(x.shape) % block)) % block]
+        x = np.pad(x, pads, mode="edge")
+        mask = np.pad(mask, pads, mode="edge")
+    elif mode == "inplace":
+        # Use mask to prevent shuffleing of blocks out of bounds
+        trim = x.shape - (np.array(x.shape) % block)
+        for axis, t in enumerate(trim):
+            np.swapaxes(mask, 0, axis)[slice(t, None)] = False
+    else:
+        raise ValueError("Mode must be 'pad' or 'inplace'.")
 
-    if mask is not None:
-        mask = view_as_blocks(
-            np.pad(mask, ((0, px), (0, py)), mode="edge"), block
-        ).reshape(-1, *block)
-        # Shuffle blocks with all or some masked pixels
-        mask = np.all(mask, axis=(1, 2)) if mask_all else np.any(mask, axis=(1, 2))
+    blocks = view_as_blocks(x, block)
+    mask = view_as_blocks(mask, block)
 
-        blocks[mask] = np.random.permutation(blocks[mask])
-    else:  # pragma: no cover, simple inplace shuffle
-        np.random.shuffle(blocks)
+    # Mask only in blocks with all (mask_all) or some mask
+    axes = tuple(np.arange(x.ndim, x.ndim + len(block)))
+    mask = np.any(mask, axis=axes) if shuffle_partial else np.all(mask, axis=axes)
 
-    # Reform the image and then trim off excess
-    return np.hstack(np.hstack(blocks.reshape(shape)))[: x.shape[0], : x.shape[1]]
+    # Create flat index then shuffle
+    idx = np.nonzero(mask)
+    nidx = np.random.permutation(np.ravel_multi_index(idx, mask.shape))
+    nidx = np.unravel_index(nidx, mask.shape)
+    blocks[idx] = blocks[nidx]
+
+    if mode == "pad":
+        unpads = tuple([slice(0, s) for s in shape])
+        x = x[unpads]
+    return x
 
 
 def sliding_window(x: np.ndarray, window: int, step: int = 1) -> np.ndarray:
