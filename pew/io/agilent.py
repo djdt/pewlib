@@ -480,6 +480,22 @@ def load(
     counts_per_second: bool = False,
     full: bool = False,
 ) -> np.ndarray:
+    """Attempts to load using the binary method, falling back to csv import.
+    See also 'load_binary', 'load_csv'.
+
+    Args:
+        path: Path to batch folder.
+        collection_methods: Methods to use for datafile collection.
+        use_acq_for_names: Read aquistion method to find element names (CSV only).
+        counts_per_second: Import as CPS (Binary only).
+        full: Return data and a dict of params.
+
+    Returns:
+        The structured numpy array and optionally, params.
+
+    Raises:
+        PewException
+    """
     try:
         result = load_binary(
             path, collection_methods, counts_per_second=counts_per_second, full=full
