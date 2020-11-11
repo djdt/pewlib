@@ -1,9 +1,13 @@
+import logging
+
 import numpy as np
 import numpy.lib.recfunctions
 
 from pathlib import Path
 
 from typing import List, Union
+
+logger = logging.getLogger(__name__)
 
 
 def collect_datafiles(path: Path) -> List[Path]:
@@ -39,11 +43,14 @@ def load(path: Union[str, Path], full: bool = False) -> np.ndarray:
 
     parameters = path.joinpath("parameters.conf")
     if parameters.exists():
-        with parameters.open() as fp:
-            for line in fp:
-                if "=" in line:
-                    k, v = line.split("=")
-                    params[key_exchange[k.strip()]] = v.strip()
+        try:
+            with parameters.open() as fp:
+                for line in fp:
+                    if "=" in line:
+                        k, v = line.split("=")
+                        params[key_exchange[k.strip()]] = v.strip()
+        except ValueError:
+            logger.warning("Parameters could not be read from parameters.conf.")
 
     # positions = path.joinpath("positions.txt")
     # if positions.exists():
