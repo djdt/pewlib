@@ -9,7 +9,7 @@ def weighting(x: np.ndarray, weighting: str, safe: bool = True) -> np.ndarray:
         x[x == 0] = np.nanmin(x[x != 0])
 
     if weighting is None or weighting == "None":
-        return None
+        return np.ones_like(x)
     elif weighting == "x":
         return x
     elif weighting == "1/x":
@@ -73,8 +73,8 @@ class Calibration(object):
             self.points = points
 
         self._weights: np.ndarray = np.array([], dtype=np.float64)
-        if weights is not None:
-            self.weights = weights
+        if weights is None:
+            self.weights = "None"
         self.weighting = weighting
 
     @property
@@ -94,13 +94,16 @@ class Calibration(object):
 
     @weights.setter
     def weights(self, weights: Union[np.ndarray, str]) -> None:
-        if isinstance(weights, str):
-            self._weights = weighting(self._points[:, 0], weights)
+        if self._points.size == 0:
+            self._weights = np.array([], dtype=np.float64)
         else:
-            weights = np.array(weights, dtype=np.float64)
-            if weights.ndim != 1 or weights.size != self.points.size // 2:
-                raise ValueError("Weights must have same length as points.")
-            self._weights = weights
+            if isinstance(weights, str):
+                self._weights = weighting(self._points[:, 0], weights)
+            else:
+                weights = np.array(weights, dtype=np.float64)
+                if weights.ndim != 1 or weights.size != self.points.size // 2:
+                    raise ValueError("Weights must have same length as points.")
+                self._weights = weights
 
     def __str__(self) -> str:
         s = f"y = {self.gradient:.4g} · x - {self.intercept:.4g}"
@@ -115,7 +118,7 @@ class Calibration(object):
         return self.points[:, 1]
 
     def update_linreg(self) -> None:
-        if self.points.size > 0:
+        if self.points.size == 0:
             self.gradient, self.intercept, self.rsq = 1.0, 0.0, None
         else:
             no_nans = ~np.isnan(self.points).any(axis=1)
@@ -163,13 +166,16 @@ class Calibration(object):
 
     @classmethod
     def from_array(cls, array: np.ndarray) -> "Calibration":
-        cdict = {name: array[name] for name in array.dtype.names}
-        # Swap out nan for None
-        if cdict["rsq"] == np.nan:
-            cdict["rsq"] = None
-        if cdict["error"] == np.nan:
-            cdict["error"] = None
-        return cls(**cdict)
+        return cls(
+            intercept=float(array["intercept"]),
+            gradient=float(array["gradient"]),
+            unit=str(array["unit"]),
+            rsq=None if np.isnan(array["rsq"]) else float(array["rsq"]),
+            error=None if np.isnan(array["error"]) else float(array["error"]),
+            points=array["points"],
+            weights=array["weights"],
+            weighting=str(array["weighting"]),
+        )
 
     @classmethod
     def from_points(

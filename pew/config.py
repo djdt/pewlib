@@ -35,4 +35,8 @@ class Config(object):
 
     @classmethod
     def from_array(cls, array: np.ndarray) -> "Config":
-        return cls(**{name: array[name] for name in array.dtype.names})
+        return cls(
+            spotsize=float(array["spotsize"]),
+            speed=float(array["speed"]),
+            scantime=float(array["scantime"]),
+        )
