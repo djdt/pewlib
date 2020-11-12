@@ -1,3 +1,5 @@
+import numpy as np
+
 from typing import Tuple
 
 
@@ -20,3 +22,17 @@ class Config(object):
     ) -> Tuple[float, float, float, float]:
         px, py = self.get_pixel_width(), self.get_pixel_height()
         return (0.0, px * shape[1], 0.0, py * shape[0])
+
+    def to_array(self) -> np.ndarray:
+        return np.array(
+            (self.spotsize, self.speed, self.scantime),
+            dtype=[
+                ("spotsize", np.float64),
+                ("speed", np.float64),
+                ("scantime", np.float64),
+            ],
+        )
+
+    @classmethod
+    def from_array(cls, array: np.ndarray) -> "Config":
+        return cls(**{name: array[name] for name in array.dtype.names})

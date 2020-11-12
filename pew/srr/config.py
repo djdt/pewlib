@@ -19,7 +19,7 @@ class SRRConfig(Config):
         self.warmup = warmup
 
         self._subpixel_size = 0
-        self._subpixel_offsets = np.array([], dtype=int)
+        self._subpixel_offsets = np.array([], dtype=np.int32)
         self.subpixel_offsets = subpixel_offsets
 
     @property
@@ -90,3 +90,20 @@ class SRRConfig(Config):
             )
         else:
             return (0.0, px * shape[1], 0.0, py * shape[0])
+
+    def to_array(self) -> np.ndarray:
+        offsets = self.subpixel_offsets
+        return np.array(
+            (self.spotsize, self.speed, self.scantime, self._warmup, offsets),
+            dtype=[
+                ("spotsize", np.float64),
+                ("speed", np.float64),
+                ("scantime", np.float64),
+                ("warmup", np.float64),
+                ("subpixel_offsets", offsets.dtype, offsets.shape),
+            ],
+        )
+
+    @classmethod
+    def from_array(cls, array: np.ndarray) -> "SRRConfig":
+        return cls(**{name: array[name] for name in array.dtype.names})

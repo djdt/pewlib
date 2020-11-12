@@ -12,8 +12,8 @@ class _Laser:
     data: Union[np.ndarray, List[np.ndarray]] = None
     calibration: Dict[str, Calibration] = None
     config: Config = None
-    name = ""
-    path = ""
+    name: str = ""
+    path: str = ""
 
     @property
     def extent(self) -> Tuple[float, float, float, float]:
@@ -103,7 +103,7 @@ class Laser(_Laser):
     def rename(self, names: Dict[str, str]) -> None:
         self.data = rfn.rename_fields(self.data, names)
         for old, new in names.items():
-            self.calibration[(new)] = self.calibration.pop(old)
+            self.calibration[new] = self.calibration.pop(old)
 
     def get(
         self,
