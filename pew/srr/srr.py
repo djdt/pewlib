@@ -27,9 +27,9 @@ class SRRLaser(_Laser):
         if calibration is not None:
             self.calibration.update(copy.deepcopy(calibration))
 
-        self.config: SRRConfig = copy.copy(
-            config
-        ) if config is not None else SRRConfig()
+        self.config: SRRConfig = (
+            copy.copy(config) if config is not None else SRRConfig()
+        )
 
         self.name = name
         self.path = path
