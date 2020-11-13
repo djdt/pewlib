@@ -8,7 +8,7 @@ from pew.calibration import Calibration
 def test_weighting():
     # Test all the weights, safe return
     x = np.random.normal(loc=2, size=10)
-    assert weighting(x, None) is None
+    assert np.all(weighting(x, None) == 1.0)
     assert np.all(weighting(x, "x") == x)
     assert np.all(weighting(x, "1/x") == 1 / x)
     assert np.all(weighting(x, "1/(x^2)") == 1 / (x * x))
@@ -66,7 +66,7 @@ def test_calibration_calibrate():
     data = np.random.random([10, 10])
     assert np.all(calibration.calibrate(data) == ((data - 2.0) / 2.0))
 
-    assert calibration.weights is None
+    assert np.all(calibration.weights == 1.0)
 
 
 def test_calibration_from_points():
