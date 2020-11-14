@@ -3,25 +3,6 @@ import numpy as np
 from typing import Tuple, Union
 
 
-def weights_for_weighting(
-    x: np.ndarray, weighting: str, safe: bool = True
-) -> np.ndarray:
-    if safe and x.size > 0:  # Avoid div 0 problems
-        x = x.copy()
-        x[x == 0] = np.nanmin(x[x != 0])
-
-    if weighting is None or weighting.lower() in ["none", "equal"]:
-        return np.ones_like(x)
-    elif weighting == "x":
-        return x
-    elif weighting == "1/x":
-        return 1.0 / x
-    elif weighting in ["1/(x^2)", "1/x²"]:
-        return 1.0 / (x ** 2.0)
-    else:
-        raise ValueError(f"Unknown weighting {weighting}.")
-
-
 def weighted_rsq(x: np.ndarray, y: np.ndarray, w: np.ndarray = None) -> float:
     c = np.cov(x, y, aweights=w)
     d = np.diag(c)
@@ -69,11 +50,11 @@ class Calibration(object):
         self.rsq = rsq
         self.error = error
 
-        self._points: np.ndarray = np.empty((0, 2), dtype=np.float64)
+        self._points: np.ndarray = np.empty((0, 3), dtype=np.float64)
+        self._weights: Union[str, np.ndarray] = ""
         if points is not None:
             self.points = points
-        self._weights = weights
-        self._weighting = ""
+        self.weights = weights
 
     @property
     def x(self) -> np.ndarray:
@@ -89,27 +70,18 @@ class Calibration(object):
 
     @points.setter
     def points(self, points: np.ndarray) -> None:
-        self._points = np.array(points, dtype=np.float64)
-        if self._points.ndim != 2:
+        points = np.array(points, dtype=np.float64)
+        if points.ndim != 2:
             raise ValueError("Points must have 2 dimensions.")
-        # Fix any weights length issues
-        if isinstance(self._weights, np.ndarray):
-            wsize = self._weights.shape[0]
-            psize = self._points.shape[0]
-            if wsize > psize:
-                self._weights = self._weights[:psize]
-            elif psize > wsize:
-                self._weights = np.concatenate(
-                    (self._weights, np.ones(psize - wsize, dtype=self._weights.dtype))
-                )
+        self._points = points
 
     @property
     def weights(self) -> np.ndarray:
-        x = self.x.copy()
-        x[x == 0] = np.nanmin(x[x != 0])
         if isinstance(self._weights, np.ndarray):
             return self._weights
-        elif self._weights.lower() in ["none", "equal"]:
+        x = self.x.copy()
+        x[x == 0] = np.nanmin(x[x != 0])
+        if self._weights.lower() in ["none", "equal"]:
             return np.ones_like(x)
         elif self._weights == "x":
             return x
@@ -124,15 +96,9 @@ class Calibration(object):
     def weights(self, weights: Union[str, np.ndarray]) -> None:
         if not isinstance(weights, str):
             weights = np.array(weights, dtype=np.float64)
-            assert weights.shape[0] == self._points.shape[0]
+            if weights.size != self.x.size:
+                raise ValueError("Weights must be same length as points.")
         self._weights = weights
-        # if isinstance(weights, str):
-        #     self._weighting = weights
-        #     if self._points.size > 0:
-        #         self._points[:, 2] = weights_for_weighting(self._points[:, 0], weights)
-        # else:
-        #     self._points[:, 2] = weights[1]
-        #     self._weighting = weights[0]
 
     def __str__(self) -> str:
         s = f"y = {self.gradient:.4g} · x - {self.intercept:.4g}"
@@ -160,7 +126,7 @@ class Calibration(object):
 
     def to_array(self) -> np.ndarray:
         points = self.points
-        weights = self.weights
+        weights = np.array(self._weights)
         return np.array(
             (
                 self.intercept,
@@ -191,20 +157,18 @@ class Calibration(object):
             rsq=None if np.isnan(array["rsq"]) else float(array["rsq"]),
             error=None if np.isnan(array["error"]) else float(array["error"]),
             points=array["points"],
-            weights=array["weights"],
-            weighting=str(array["weighting"]),
+            weights=str(array["weights"])
+            if array["weights"].ndim == 0
+            else array["weights"],
         )
 
     @classmethod
     def from_points(
         cls,
         points: np.ndarray,
-        weights: Union[np.ndarray, str] = "None",
-        weighting: str = "None",
+        weights: Union[str, np.ndarray] = "Equal",
         unit: str = "",
     ) -> "Calibration":
-        calibration = cls(
-            points=points, weights=weights, weighting=weighting, unit=unit
-        )
+        calibration = cls(points=points, weights=weights, unit=unit)
         calibration.update_linreg()
         return calibration
