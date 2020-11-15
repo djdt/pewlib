@@ -1,28 +1,32 @@
 import numpy as np
 import pytest
 
-from pew.calibration import weighting, weighted_rsq, weighted_linreg
+from pew.calibration import weights_from_weighting, weighted_rsq, weighted_linreg
 from pew.calibration import Calibration
 
 
 def test_weighting():
+    # Zero length x should return zero length weights
+    assert weights_from_weighting(np.array([]), "x").size == 0
     # Test all the weights, safe return
     x = np.random.normal(loc=2, size=10)
-    assert np.all(weighting(x, None) == 1.0)
-    assert np.all(weighting(x, "x") == x)
-    assert np.all(weighting(x, "1/x") == 1 / x)
-    assert np.all(weighting(x, "1/(x^2)") == 1 / (x * x))
+    assert np.all(weights_from_weighting(x, "Equal") == 1.0)
+    assert np.all(weights_from_weighting(x, "x") == x)
+    assert np.all(weights_from_weighting(x, "1/x") == 1 / x)
+    assert np.all(weights_from_weighting(x, "1/(x^2)") == 1 / (x * x))
 
     # Test safe return
     x[0] = 0.0
-    assert weighting(x, "x", True)[0] == np.amin(x[1:])
-    assert np.all(weighting(x, "x", False) == x)
+    assert weights_from_weighting(x, "x", True)[0] == np.amin(x[1:])
+    assert np.all(weights_from_weighting(x, "x", False) == x)
     with pytest.raises(ValueError):
-        weighting(x, "invalid")
+        weights_from_weighting(x, "invalid")
 
     # Nan ignored when looking for min value in safe
     assert np.all(
-        weighting(np.array([0.0, 1.0, np.nan, 2.0]), "1/x", True)[[0, 1, 3]]
+        weights_from_weighting(np.array([0.0, 1.0, np.nan, 2.0]), "1/x", True)[
+            [0, 1, 3]
+        ]
         == [1.0, 1.0, 0.5]
     )
 
@@ -50,8 +54,8 @@ def test_weighted_linreg():
 
 def test_default_calibration():
     calibration = Calibration()
-    assert calibration.concentrations().size == 0
-    assert calibration.counts().size == 0
+    assert calibration.x.size == 0
+    assert calibration.y.size == 0
     calibration.update_linreg()
 
     # Default should just return data
@@ -76,8 +80,8 @@ def test_calibration_from_points():
     assert calibration.rsq == pytest.approx(0.9000)
 
     # Test returns
-    assert np.all(calibration.concentrations() == np.array([0.0, 1.0, 1.0, 2.0]))
-    assert np.all(calibration.counts() == np.array([1.0, 2.0, 3.0, 4.0]))
+    assert np.all(calibration.x == np.array([0.0, 1.0, 1.0, 2.0]))
+    assert np.all(calibration.y == np.array([1.0, 2.0, 3.0, 4.0]))
 
     # With nans
     calibration = Calibration.from_points([[0, 1], [1, np.nan], [1, 3], [2, 4]])
@@ -110,19 +114,19 @@ def test_calibration_from_points_weights():
     assert pytest.approx(calibration.rsq, 0.865097)
 
     calibration = Calibration.from_points(
-        points=points, weights=[1.0, 2.0, 3.0, 4.0, 5.0]
+        points=points, weights=("w", [1.0, 2.0, 3.0, 4.0, 5.0])
     )
     assert pytest.approx(calibration.gradient, 2.085814)
     assert pytest.approx(calibration.intercept, -3.314286)
     assert pytest.approx(calibration.rsq, 0.865097)
 
     with pytest.raises(ValueError):
-        calibration = Calibration.from_points(points=points, weights=[1.0])
+        calibration = Calibration.from_points(points=points, weights=("w", [1.0]))
 
 
 def test_calibration_update_linreg():
     points = np.vstack([[1.0, 2.0, 3.0, 4.0, 5.0], [1.0, 2.0, 3.0, 4.0, 5.0]]).T
-    calibration = Calibration.from_points(points, weighting="1/x")
+    calibration = Calibration.from_points(points, weights="1/x")
     calibration.points[0, 0] = 0
     calibration.update_linreg()
     calibration.points[1, 0] = np.nan

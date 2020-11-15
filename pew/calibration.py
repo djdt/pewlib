@@ -130,11 +130,16 @@ class Calibration(object):
 
     def update_linreg(self) -> None:
         if self.points.size == 0:
-            self.gradient, self.intercept, self.rsq = 1.0, 0.0, None
+            self.gradient, self.intercept, self.rsq, self.error = 1.0, 0.0, None, None
         else:
             no_nans = ~np.isnan(self.points).any(axis=1)
             if np.count_nonzero(no_nans) == 0:
-                self.gradient, self.intercept, self.rsq = 1.0, 0.0, None
+                self.gradient, self.intercept, self.rsq, self.error = (
+                    1.0,
+                    0.0,
+                    None,
+                    None,
+                )
             else:
                 x, y, w = self.x[no_nans], self.y[no_nans], self.weights[no_nans]
                 self.gradient, self.intercept, self.rsq, self.error = weighted_linreg(

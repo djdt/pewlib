@@ -71,25 +71,21 @@ def test_io_agilent_acq_method_elements_msms():
     assert elements == ["A1->2", "B3->4"]
 
 
-def test_io_csv():
+def test_io_textimage():
     data_path = os.path.join(os.path.dirname(__file__), "data", "csv")
-    data_path_thermo = os.path.join(os.path.dirname(__file__), "data", "thermo")
-    # Make sure error raised on thermo data
-    with pytest.raises(io.error.PewException):
-        io.csv.load(os.path.join(data_path_thermo, "icap_columns.csv"))
     # Test loading
-    data = io.csv.load(os.path.join(data_path, "csv.csv"), "CSV")
+    data = io.textimage.load(os.path.join(data_path, "csv.csv"), name="CSV")
     assert data.dtype.names == ("CSV",)
     assert data.shape == (20, 5)
     assert np.sum(data["CSV"]) == pytest.approx(100.0)
     # Test saving
     temp = tempfile.NamedTemporaryFile()
     data = np.random.random([10, 10])
-    io.csv.save(temp.name, data)
-    assert np.all(data == io.csv.load(temp.name))
+    io.textimage.save(temp.name, data)
+    assert np.all(data == io.textimage.load(temp.name))
     temp.close()
     # Delimiter loading
-    data = io.csv.load(os.path.join(data_path, "delimiters.csv"))
+    data = io.textimage.load(os.path.join(data_path, "delimiters.csv"))
     assert data.shape == (10, 5)
     assert np.sum(data) == pytest.approx(100.0)
 
@@ -189,7 +185,7 @@ def test_io_vtk():
 
 def test_io_npz():
     data_path = os.path.join(os.path.dirname(__file__), "data", "npz")
-    laser = io.npz.load(os.path.join(data_path, "test.npz"))[0]
+    laser = io.npz.load(os.path.join(data_path, "test.npz"))
     assert laser.name == "Test"
     assert laser.path == os.path.join(data_path, "test.npz")
     # Config
@@ -202,7 +198,7 @@ def test_io_npz():
     pytest.approx(laser.get("A1").sum(), 100)
     # Calibration
     calibration = laser.calibration["A1"]
-    assert calibration.gradient == 1.0
+    pytest.approx(calibration.gradient, 1.0)
     assert calibration.intercept == 2.0
     assert calibration.rsq is None
     assert calibration.weighting == "x"
@@ -210,8 +206,8 @@ def test_io_npz():
     assert calibration.unit == "test"
     # Saving
     temp = tempfile.NamedTemporaryFile(suffix=".npz")
-    io.npz.save(temp.name, [laser])  # type: ignore
-    loaded = io.npz.load(temp.name)[0]
+    io.npz.save(temp.name, laser)  # type: ignore
+    loaded = io.npz.load(temp.name)
     temp.close()
 
     assert np.all(loaded.data == laser.data)
@@ -229,6 +225,6 @@ def test_io_npz():
 
 def test_io_npz_srr():
     data_path = os.path.join(os.path.dirname(__file__), "data", "npz")
-    laser = io.npz.load(os.path.join(data_path, "test_srr.npz"))[0]
+    laser = io.npz.load(os.path.join(data_path, "test_srr.npz"))
     assert isinstance(laser, SRRLaser)
     assert isinstance(laser.config, SRRConfig)
