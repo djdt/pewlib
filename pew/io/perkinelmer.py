@@ -48,8 +48,11 @@ def load(path: Union[str, Path], full: bool = False) -> np.ndarray:
                 for line in fp:
                     if "=" in line:
                         k, v = line.split("=")
-                        params[key_exchange[k.strip()]] = v.strip()
-        except ValueError:
+                        if k in key_exchange:
+                            params[key_exchange[k.strip()]] = float(v.strip())
+                        else:
+                            params[k.strip()] = v.strip()
+        except ValueError:  # pragma: no cover
             logger.warning("Parameters could not be read from parameters.conf.")
 
     # positions = path.joinpath("positions.txt")
@@ -62,5 +65,5 @@ def load(path: Union[str, Path], full: bool = False) -> np.ndarray:
 
     if full:
         return data, params
-    else:
+    else:  # pragma: no cover
         return data
