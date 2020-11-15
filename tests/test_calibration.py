@@ -64,6 +64,40 @@ def test_default_calibration():
     assert calibration.rsq is None
 
 
+def test_coverage_array():
+    calibration = Calibration(1.0, 2.0, unit="ppm")
+    array = calibration.to_array()
+    assert array["intercept"] == 1.0
+    assert array["gradient"] == 2.0
+    assert array["unit"] == "ppm"
+    assert np.isnan(array["rsq"])
+    assert np.isnan(array["error"])
+    assert array["points"].size == 0
+    assert array["weights"].size == 0
+    assert array["weighting"] == "Equal"
+
+    calibration = Calibration.from_array(array)
+    assert calibration.intercept == 1.0
+    assert calibration.gradient == 2.0
+    assert calibration.unit == "ppm"
+    assert calibration.rsq is None
+    assert calibration.error is None
+    assert calibration.points.size == 0
+    assert calibration.weights.size == 0
+    assert calibration.weighting == "Equal"
+
+    calibration = Calibration.from_points([[1, 2], [3, 4]], weights=("w", [0.1, 0.9]))
+    array = calibration.to_array()
+    assert np.all(array["points"] == [[1, 2], [3, 4]])
+    assert np.all(array["weights"] == [0.1, 0.9])
+    assert array["weighting"] == "w"
+
+    calibration = Calibration.from_array(array)
+    assert np.all(calibration.points == [[1, 2], [3, 4]])
+    assert np.all(calibration.weights == [0.1, 0.9])
+    assert calibration.weighting == "w"
+
+
 def test_calibration_calibrate():
     calibration = Calibration(2.0, 2.0, unit="ppm")
     # Test data
