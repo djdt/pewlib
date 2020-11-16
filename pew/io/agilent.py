@@ -1,24 +1,19 @@
-import os
 import logging
 from xml.etree import ElementTree
+from pathlib import Path
 
 import numpy as np
 import numpy.lib.recfunctions
 
 from pew.io.error import PewException
 
-from typing import Callable, Dict, Generator, List, Tuple
+from typing import Callable, Dict, Generator, List, Tuple, Union
 
 logger = logging.getLogger(__name__)
 
-acq_method_xml_path = os.path.join("Method", "AcqMethod.xml")
-batch_csv_path = "BatchLog.csv"
-batch_xml_path = os.path.join("Method", "BatchLog.xml")
-
-# msprofile_path = os.path.join("AcqData", "MSProfile.bin")
-# msscan_path = os.path.join("AcqData", "MSScan.bin")
-# msts_xspecific_path = os.path.join("AcqData", "MSTS_XSpecific.xml")
-# msts_xaddition_path = "MSTS_XAddition.xml"
+acq_method_xml_path = Path("Method", "AcqMethod.xml")
+batch_csv_path = Path("BatchLog.csv")
+batch_xml_path = Path("Method", "BatchLog.xml")
 
 
 class XSpecificMass(object):
@@ -41,7 +36,7 @@ class XSpecificMass(object):
 # Datafile collection
 
 
-def acq_method_xml_read_datafiles(batch_root: str, acq_xml: str) -> List[str]:
+def acq_method_xml_read_datafiles(path: Path, acq_xml: Path) -> List[Path]:
     xml = ElementTree.parse(acq_xml)
     ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
     samples = xml.findall("ns:SampleParameter", ns)
@@ -49,15 +44,15 @@ def acq_method_xml_read_datafiles(batch_root: str, acq_xml: str) -> List[str]:
         samples, key=lambda s: int(s.findtext("ns:SampleID", namespaces=ns) or -1)
     )
 
-    data_files = []
+    datafiles = []
     for sample in samples:
-        data_file = sample.findtext("ns:DataFileName", namespaces=ns)
-        if data_file is not None:
-            data_files.append(os.path.join(batch_root, data_file))
-    return data_files
+        datafile = sample.findtext("ns:DataFileName", namespaces=ns)
+        if datafile is not None:
+            datafiles.append(path.joinpath(datafile))
+    return datafiles
 
 
-def batch_csv_read_datafiles(batch_root: str, batch_csv: str) -> List[str]:
+def batch_csv_read_datafiles(path: Path, batch_csv: Path) -> List[Path]:
     batch_log = np.genfromtxt(
         batch_csv,
         delimiter=",",
@@ -68,51 +63,51 @@ def batch_csv_read_datafiles(batch_root: str, batch_csv: str) -> List[str]:
     )
     if batch_log.size == 1:  # Ensure iterable even if one line
         batch_log = batch_log.reshape(1)  # pragma: no cover
-    data_files = []
-    for _id, data_file, result in batch_log:
+    datafiles = []
+    for _id, datafile, result in batch_log:
         if result == "Pass":
-            data_files.append(
-                os.path.join(
-                    batch_root, data_file[max(map(data_file.rfind, "\\/")) + 1 :]
-                )
+            datafiles.append(
+                path.joinpath(datafile[max(map(datafile.rfind, "\\/")) + 1 :])
             )
-    return data_files
+    return datafiles
 
 
-def batch_xml_read_datafiles(batch_root: str, batch_xml: str) -> List[str]:
+def batch_xml_read_datafiles(path: Path, batch_xml: Path) -> List[Path]:
     xml = ElementTree.parse(batch_xml)
     ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
 
-    data_files = []
+    datafiles = []
     for log in xml.findall("ns:BatchLogInfo", ns):
         if log.findtext("ns:AcqResult", namespaces=ns) == "Pass":
-            data_file = log.findtext("ns:DataFileName", namespaces=ns)
-            data_files.append(
-                os.path.join(
-                    batch_root, data_file[max(map(data_file.rfind, "\\/")) + 1 :]
-                )
+            datafile = log.findtext("ns:DataFileName", namespaces=ns)
+            datafiles.append(
+                path.joinpath(datafile[max(map(datafile.rfind, "\\/")) + 1 :])
             )
-    return data_files
+
+    return datafiles
 
 
-def collect_datafiles(batch_root: str, methods: List[str]) -> List[str]:
+def collect_datafiles(path: Union[str, Path], methods: List[str]) -> List[Path]:
+    if isinstance(path, str):
+        path = Path(path)
+
     for method in methods:
         if method == "batch_xml":
-            method_path = os.path.join(batch_root, batch_xml_path)
-            method_func: Callable[[str, str], List[str]] = batch_xml_read_datafiles
+            method_path = path.joinpath(batch_xml_path)
+            method_func: Callable[[Path, Path], List[Path]] = batch_xml_read_datafiles
         elif method == "batch_csv":
-            method_path = os.path.join(batch_root, batch_csv_path)
+            method_path = path.joinpath(batch_csv_path)
             method_func = batch_csv_read_datafiles
         elif method == "acq_method_xml":
-            method_path = os.path.join(batch_root, acq_method_xml_path)
+            method_path = path.joinpath(acq_method_xml_path)
             method_func = acq_method_xml_read_datafiles
 
-        if os.path.exists(method_path):
-            data_files = method_func(batch_root, method_path)
-            missing = len(data_files) - sum([os.path.exists(df) for df in data_files])
+        if method_path.exists():
+            datafiles = method_func(path, method_path)
+            missing = len(datafiles) - sum([df.exists() for df in datafiles])
             if missing == 0:
                 logger.info(f"Datafiles collected using '{method}'.")
-                return data_files
+                return datafiles
             else:  # pragma: no cover
                 logger.info(f"Missing {missing} datafiles using '{method}'.")
         else:
@@ -120,27 +115,30 @@ def collect_datafiles(batch_root: str, methods: List[str]) -> List[str]:
 
     # Fall back to alphabetical
     logger.info("Falling back to alphabetical order for datafile collection.")
-    data_files = find_datafiles_alphabetical(batch_root)
-    data_files.sort(key=lambda f: int("".join(filter(str.isdigit, f))))
-    return data_files
+    datafiles = find_datafiles_alphabetical(path)
+    return datafiles
 
 
-def find_datafiles_alphabetical(path: str) -> List[str]:
-    data_files = []
-    with os.scandir(path) as it:
-        for entry in it:
-            if entry.name.lower().endswith(".d") and entry.is_dir():
-                data_files.append(os.path.join(path, entry.name))
-    return data_files
+def find_datafiles_alphabetical(path: Union[str, Path]) -> List[Path]:
+    if isinstance(path, str):
+        path = Path(path)
+
+    datafiles = []
+    for entry in path.iterdir():
+        if entry.suffix.lower().endswith(".d") and entry.is_dir():
+            datafiles.append(entry)
+
+    datafiles.sort(key=lambda f: int("".join(filter(str.isdigit, f.name))))
+    return datafiles
 
 
 # Binary Import
 
 
-def binary_read_datafile(datafile: str, masses: List[XSpecificMass]) -> np.ndarray:
-    msscan = binary_read_msscan(os.path.join(datafile, "AcqData", "MSScan.bin"))
+def binary_read_datafile(path: Path, masses: List[XSpecificMass]) -> np.ndarray:
+    msscan = binary_read_msscan(path.joinpath("AcqData", "MSScan.bin"))
     msprofile = binary_read_msprofile(
-        os.path.join(datafile, "AcqData", "MSProfile.bin"), len(masses)
+        path.joinpath("AcqData", "MSProfile.bin"), len(masses)
     )
     offsets = (
         msscan["SpectrumParamValues"]["SpectrumOffset"]
@@ -155,7 +153,7 @@ def binary_read_datafile(datafile: str, masses: List[XSpecificMass]) -> np.ndarr
     return data
 
 
-def binary_read_msscan(path: str):
+def binary_read_msscan(path: Path):
     msscan_magic_number = 257
     msscan_header_size = 68
     msscan_dtype = np.dtype(
@@ -195,7 +193,7 @@ def binary_read_msscan(path: str):
         ]
     )
 
-    with open(path, "rb") as fp:
+    with path.open("rb") as fp:
         if int.from_bytes(fp.read(4), "little") != msscan_magic_number:
             raise IOError("Invalid header for MSScan.")
         fp.seek(msscan_header_size + 20)
@@ -204,19 +202,19 @@ def binary_read_msscan(path: str):
         return np.frombuffer(fp.read(), dtype=msscan_dtype)
 
 
-def binary_read_msscan_xspecific(path: str) -> np.ndarray:
+def binary_read_msscan_xspecific(path: Path) -> np.ndarray:
     msscan_xspecific_magic_number = 275
     msscan_xspecific_header_size = 68
     msscan_xspecific_dtype = np.dtype([("_", np.int32), ("MZ", np.float64)])
 
-    with open(path, "rb") as fp:
+    with path.open("rb") as fp:
         if int.from_bytes(fp.read(4), "little") != msscan_xspecific_magic_number:
             raise IOError("Invalid header for MSScan.")
         fp.seek(msscan_xspecific_header_size)
         return np.frombuffer(fp.read(), dtype=msscan_xspecific_dtype)
 
 
-def binary_read_msprofile(path: str, n: int) -> np.ndarray:
+def binary_read_msprofile(path: Path, n: int) -> np.ndarray:
     msprofile_magic_number = 258
     msprofile_header_size = 68
     msprofile_flat_dtype = np.dtype(
@@ -238,7 +236,7 @@ def binary_read_msprofile(path: str, n: int) -> np.ndarray:
             ]
         )
 
-    with open(path, "rb") as fp:
+    with path.open("rb") as fp:
         if int.from_bytes(fp.read(4), "little") != msprofile_magic_number:
             raise IOError("Invalid header for MSProfile.")
         fp.seek(msprofile_header_size)
@@ -250,10 +248,29 @@ def binary_read_msprofile(path: str, n: int) -> np.ndarray:
     return flattened
 
 
-def msts_xspecific_xml_read_info(
-    msts_xspecific_xml: str,
-) -> Dict[int, Tuple[str, float]]:
-    xml = ElementTree.parse(msts_xspecific_xml)
+def mass_info_datafile(path: Path) -> List[XSpecificMass]:
+    msts_xspecific_path = path.joinpath("AcqData", "MSTS_XSpecific.xml")
+    msts_xaddition_path = path.joinpath("MSTS_XAddition.xml")
+
+    if msts_xspecific_path.exists():
+        xspecific = msts_xspecific_xml_read_info(msts_xspecific_path)
+    else:
+        raise FileNotFoundError("MSTS_XSpecific.xml not found.")
+
+    masses = {k: XSpecificMass(k, v[0], v[1], k) for k, v in xspecific.items()}
+
+    if msts_xaddition_path.exists():
+        xaddition, scan_type = msts_xaddition_xml_read_info(msts_xaddition_path)
+        if scan_type == "MS_MS":
+            for k, v in xaddition.items():
+                masses[k].mz = v[0]
+                masses[k].mz2 = v[1]
+
+    return sorted(masses.values(), key=lambda x: x.id)
+
+
+def msts_xspecific_xml_read_info(path: Path) -> Dict[int, Tuple[str, float]]:
+    xml = ElementTree.parse(path)
     xdict = {}
     for record in xml.iter("IonRecord"):
         for masses in record.iter("Masses"):
@@ -264,10 +281,8 @@ def msts_xspecific_xml_read_info(
     return xdict
 
 
-def msts_xaddition_xml_read_info(
-    msts_xaddition_xml: str,
-) -> Tuple[Dict[int, Tuple[int, int]], str]:
-    xml = ElementTree.parse(msts_xaddition_xml)
+def msts_xaddition_xml_read_info(path: Path) -> Tuple[Dict[int, Tuple[int, int]], str]:
+    xml = ElementTree.parse(path)
     xdict = {}
     for xaddition in xml.iter("MSTS_XAddition"):
         scan_type = xaddition.findtext("ScanType")
@@ -280,29 +295,8 @@ def msts_xaddition_xml_read_info(
     return xdict, scan_type
 
 
-def msts_xml_mass_info(datafile: str) -> List[XSpecificMass]:
-    msts_xspecific_path = os.path.join(datafile, "AcqData", "MSTS_XSpecific.xml")
-    msts_xaddition_path = os.path.join(datafile, "MSTS_XAddition.xml")
-
-    if os.path.exists(msts_xspecific_path):
-        xspecific = msts_xspecific_xml_read_info(msts_xspecific_path)
-    else:
-        raise FileNotFoundError("MSTS_XSpecific.xml not found.")
-
-    masses = {k: XSpecificMass(k, v[0], v[1], k) for k, v in xspecific.items()}
-
-    if os.path.exists(msts_xaddition_path):
-        xaddition, scan_type = msts_xaddition_xml_read_info(msts_xaddition_path)
-        if scan_type == "MS_MS":
-            for k, v in xaddition.items():
-                masses[k].mz = v[0]
-                masses[k].mz2 = v[1]
-
-    return sorted(masses.values(), key=lambda x: x.id)
-
-
 def load_binary(
-    batch: str,
+    path: Union[str, Path],
     collection_methods: List[str] = None,
     counts_per_second: bool = False,
     full: bool = False,
@@ -324,6 +318,9 @@ def load_binary(
         PewException
 
     """
+    is isinstance(path, str):
+        path = Path(path)
+
     if collection_methods is None:
         collection_methods = ["batch_xml", "batch_csv"]
 
@@ -331,7 +328,7 @@ def load_binary(
     if len(datafiles) == 0:
         raise PewException(f"No data files found in {batch}!")  # pragma: no cover
 
-    masses = msts_xml_mass_info(datafiles[0])
+    masses = mass_info_datafile(datafiles[0])
     data = np.stack([binary_read_datafile(df, masses) for df in datafiles], axis=0)
 
     scantime = np.round(np.mean(np.diff(data["Time"], axis=1)), 4)
@@ -350,8 +347,8 @@ def load_binary(
 # CSV Import
 
 
-def acq_method_xml_read_elements(acq_xml: str) -> List[str]:
-    xml = ElementTree.parse(acq_xml)
+def acq_method_xml_read_elements(path: Path) -> List[str]:
+    xml = ElementTree.parse(path)
     ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
 
     msms = False
@@ -376,7 +373,7 @@ def acq_method_xml_read_elements(acq_xml: str) -> List[str]:
     return names
 
 
-def csv_read_params(path: str) -> Tuple[List[str], float, int]:
+def csv_read_params(path: Path) -> Tuple[List[str], float, int]:
     data = np.genfromtxt(
         csv_valid_lines(path), delimiter=b",", names=True, dtype=np.float64
     )
@@ -385,10 +382,10 @@ def csv_read_params(path: str) -> Tuple[List[str], float, int]:
     return names, np.round(total_time / data.shape[0], 4), data.shape[0]
 
 
-def csv_valid_lines(csv: str) -> Generator[bytes, None, None]:
+def csv_valid_lines(csv: Path) -> Generator[bytes, None, None]:
     delimiter_count = 0
     past_header = False
-    with open(csv, "rb") as fp:
+    with csv.open("rb") as fp:
         for line in fp:
             if past_header and line.count(b",") == delimiter_count:
                 yield line
@@ -399,7 +396,7 @@ def csv_valid_lines(csv: str) -> Generator[bytes, None, None]:
 
 
 def load_csv(
-    path: str,
+    path: Union[str, Path],
     collection_methods: List[str] = None,
     use_acq_for_names: bool = True,
     full: bool = False,
@@ -420,6 +417,9 @@ def load_csv(
         PewException
 
     """
+    if isinstance(path, str):
+        path = Path(path)
+
     if collection_methods is None:
         collection_methods = ["batch_xml", "batch_csv"]
 
@@ -429,11 +429,11 @@ def load_csv(
         raise PewException(f"No data files found in {path}!")  # pragma: no cover
 
     # Collect csvs
-    csvs: List[str] = []
-    for d in data_files:
-        csv = os.path.join(d, os.path.splitext(os.path.basename(d))[0] + ".csv")
+    csvs: List[Path] = []
+    for df in data_files:
+        csv = path.joinpath(df, df.stem + ".csv")
         logger.debug(f"Looking for csv '{csv}'.")
-        if not os.path.exists(csv):
+        if not csv.exists():
             logger.warning(f"Missing csv '{csv}', line blanked.")
             csvs.append(None)
         else:
@@ -441,10 +441,8 @@ def load_csv(
 
     names, scan_time, nscans = csv_read_params(next(c for c in csvs if c is not None))
     if use_acq_for_names:
-        if os.path.exists(os.path.join(path, acq_method_xml_path)):
-            names = acq_method_xml_read_elements(
-                os.path.join(path, acq_method_xml_path)
-            )
+        if path.joinpath(acq_method_xml_path).exists():
+            names = acq_method_xml_read_elements(path.joinpath(acq_method_xml_path))
         else:  # pragma: no cover
             logger.warning("AcqMethod.xml not found, cannot read names.")
 
@@ -474,7 +472,7 @@ def load_csv(
 
 
 def load(
-    path: str,
+    path: Union[str, Path],
     collection_methods: List[str] = None,
     use_acq_for_names: bool = True,
     counts_per_second: bool = False,
