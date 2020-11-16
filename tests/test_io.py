@@ -22,23 +22,26 @@ def test_io_perkinelmer():
 
 
 def test_io_textimage():
-    data_path = os.path.join(os.path.dirname(__file__), "data", "csv")
+    data_path = os.path.join(os.path.dirname(__file__), "data", "textimage")
     # Test loading
-    data = io.textimage.load(os.path.join(data_path, "csv.csv"), name="CSV")
+    data = io.textimage.load(
+        os.path.join(data_path, "csv.csv"), delimiter=",", name="CSV"
+    )
     assert data.dtype.names == ("CSV",)
-    assert data.shape == (20, 5)
-    assert np.sum(data["CSV"]) == pytest.approx(100.0)
+    assert data.shape == (5, 5)
+    assert np.sum(data["CSV"]) == 85.0
+
+    # Delimiter loading
+    data = io.textimage.load(os.path.join(data_path, "delimiter.csv"))
+    assert data.shape == (5, 5)
+    assert np.sum(data) == 85.0
+
     # Test saving
     temp = tempfile.NamedTemporaryFile()
     data = np.random.random([10, 10])
     io.textimage.save(temp.name, data)
     assert np.all(data == io.textimage.load(temp.name))
     temp.close()
-    # Delimiter loading
-    data = io.textimage.load(os.path.join(data_path, "delimiters.csv"))
-    assert data.shape == (10, 5)
-    assert np.sum(data) == pytest.approx(100.0)
-
 
 def test_io_thermo_load():
     data_path = os.path.join(os.path.dirname(__file__), "data", "thermo")
