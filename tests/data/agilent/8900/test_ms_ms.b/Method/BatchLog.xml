@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BatchLogDataSet SchemaVersion="65536" DataVersion="1" SIVersion="C.1.5.588.3" BatchName="test_ms_ms.b" BatchDataPath="D:\Agilent\ICPMH\1\DATA\Tom\Tests\test_ms_ms.b" UserDefineColumnsCaptions="" HashCode="7A6134BF57667D5A5767BF27AC1AB5851934029AA1F158E519E7EE5860C475CA2A0DAE9A34DE20458CB2F12B2BE41DF962030829AB9484155489E016B83877C9" xmlns="BatchLog">
+  <BatchLogInfo>
+    <BatchLogID>-1</BatchLogID>
+    <SampleLogID>0</SampleLogID>
+    <AcqDateTime>2020-11-16T13:05:17+11:00</AcqDateTime>
+    <AcqResult>Pass</AcqResult>
+    <DataFileName>D:\Agilent\ICPMH\1\DATA\Tom\Tests\test_ms_ms.b\001.d</DataFileName>
+    <DilutionResult>1</DilutionResult>
+    <OperatorName>ICPMS8900</OperatorName>
+    <SampleName>001</SampleName>
+    <SampleType>Sample</SampleType>
+    <ErrorMessage />
+  </BatchLogInfo>
+  <BatchLogInfo>
+    <BatchLogID>-1</BatchLogID>
+    <SampleLogID>1</SampleLogID>
+    <AcqDateTime>2020-11-16T13:05:58+11:00</AcqDateTime>
+    <AcqResult>Pass</AcqResult>
+    <DataFileName>D:\Agilent\ICPMH\1\DATA\Tom\Tests\test_ms_ms.b\002.d</DataFileName>
+    <DilutionResult>1</DilutionResult>
+    <OperatorName>ICPMS8900</OperatorName>
+    <SampleName>002</SampleName>
+    <SampleType>Sample</SampleType>
+    <ErrorMessage />
+  </BatchLogInfo>
+  <BatchLogInfo>
+    <BatchLogID>-1</BatchLogID>
+    <SampleLogID>2</SampleLogID>
+    <AcqDateTime>2020-11-16T13:06:46+11:00</AcqDateTime>
+    <AcqResult>Pass</AcqResult>
+    <DataFileName>D:\Agilent\ICPMH\1\DATA\Tom\Tests\test_ms_ms.b\003.d</DataFileName>
+    <DilutionResult>1</DilutionResult>
+    <OperatorName>ICPMS8900</OperatorName>
+    <SampleName>003</SampleName>
+    <SampleType>Sample</SampleType>
+    <ErrorMessage />
+  </BatchLogInfo>
+  <BatchLogInfo>
+    <BatchLogID>-1</BatchLogID>
+    <SampleLogID>3</SampleLogID>
+    <AcqDateTime>2020-11-16T13:06:55+11:00</AcqDateTime>
+    <AcqResult>Pass</AcqResult>
+    <DataFileName>D:\Agilent\ICPMH\1\DATA\Tom\Tests\test_ms_ms.b\004.d</DataFileName>
+    <DilutionResult>1</DilutionResult>
+    <OperatorName>ICPMS8900</OperatorName>
+    <SampleName>004</SampleName>
+    <SampleType>Sample</SampleType>
+    <ErrorMessage />
+  </BatchLogInfo>
+  <BatchLogInfo>
+    <BatchLogID>-1</BatchLogID>
+    <SampleLogID>4</SampleLogID>
+    <AcqDateTime>2020-11-16T13:07:04+11:00</AcqDateTime>
+    <AcqResult>Pass</AcqResult>
+    <DataFileName>D:\Agilent\ICPMH\1\DATA\Tom\Tests\test_ms_ms.b\005.d</DataFileName>
+    <DilutionResult>1</DilutionResult>
+    <OperatorName>ICPMS8900</OperatorName>
+    <SampleName>005</SampleName>
+    <SampleType>Sample</SampleType>
+    <ErrorMessage />
+  </BatchLogInfo>
+</BatchLogDataSet>

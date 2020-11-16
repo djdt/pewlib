@@ -1,69 +1,102 @@
 import numpy as np
-import os.path
+from pathlib import Path
 
 from pew.io import agilent
 
 
-def test_io_agilent_load():
-    data_path = os.path.join(os.path.dirname(__file__), "data", "agilent")
-    # Test loading 7700
-    data = agilent.load(os.path.join(data_path, "7700.b"))
-    assert data.shape == (3, 3)
-    assert data.dtype.names == ("A1", "B2")
-    assert np.isclose(np.sum(data["A1"]), 9.0)
-    assert np.isclose(np.sum(data["B2"]), 0.9)
-    # Test loading from 7500
-    data = agilent.load(os.path.join(data_path, "7500.b"))
-    assert data.shape == (3, 3)
-    assert data.dtype.names == ("A1", "B2")
-    assert np.isclose(np.sum(data["A1"]), 9.0)
-    assert np.isclose(np.sum(data["B2"]), 0.9)
-    # Make sure no error raised on missing data
-    data = agilent.load(os.path.join(data_path, "missing_line.b"))
-    assert np.all(data["A1"][1, :] == [0.0, 0.0, 0.0, 0.0, 0.0])
+def test_io_agilent_collection():
+    path = Path(__file__).parent.joinpath("data", "agilent", "8900", "test_ms.b")
+
+    truefiles = ["001.d", "002.d", "003.d", "004.d", "005.d"]
+
+    for method in ["batch_xml", "batch_csv", "acq_method_xml", "alphabetical"]:
+        datafiles = agilent.collect_datafiles(path, [method])
+        assert [df.name for df in datafiles] == truefiles
 
 
-def test_io_agilent_params():
-    data_path = os.path.join(os.path.dirname(__file__), "data", "agilent")
-    _, params = agilent.load(os.path.join(data_path, "7700.b"), full=True)
-    assert params["scantime"] == 0.1
+def test_io_agilent_mass_info():
+    path = Path(__file__).parent.joinpath("data", "agilent", "8900")
+
+    # Single quad data
+    masses = agilent.mass_info_datafile(path.joinpath("test_ms.b", "001.d"))
+    assert np.all([m.id for m in masses] == [1, 2, 3])
+    assert np.all(np.isclose([m.acctime for m in masses], [0.16, 0.16, 0.168]))
+    assert np.all([str(m) for m in masses] == ["P31", "Eu153", "W182"])
+
+    # Triple quad
+    masses = agilent.mass_info_datafile(path.joinpath("test_ms_ms.b", "001.d"))
+    assert np.all([m.id for m in masses] == [1, 2, 3])
+    assert np.all(np.isclose([m.acctime for m in masses], [0.16, 0.16, 0.168]))
+    assert np.all([str(m) for m in masses] == ["P31->47", "Eu153->153", "W182->182"])
 
 
-def test_io_agilent_data_files_collection():
-    acq_method_dfiles = ["c.d", "b.d", "a.d"]
-    batch_csv_dfiles = ["c.d", "a.d", "b.d"]
-    batch_xml_dfiles = ["a.d", "c.d", "b.d"]
+def test_io_agilent_load_binary():
+    path = Path(__file__).parent.joinpath("data", "agilent", "8900")
+    sums = {
+        "P31": 955719.21,
+        "Eu153": 168.75,
+        "W182": 797.62,
+        "P31->47": 18.750,
+        "Eu153->153": 93.750,
+        "W182->182": 440.48,
+    }
 
-    data_path = os.path.join(
-        os.path.dirname(__file__), "data", "agilent", "acq_batch_files.b"
+    data, params = agilent.load_binary(
+        path.joinpath("test_ms.b"), counts_per_second=True, full=True
     )
-    dfiles = agilent.collect_datafiles(data_path, ["acq_method_xml"])
-    assert dfiles == [os.path.join(data_path, df) for df in acq_method_dfiles]
-    dfiles = agilent.batch_csv_read_datafiles(
-        data_path, os.path.join(data_path, agilent.batch_csv_path)
+    assert data.shape == (5, 5)
+    assert data.dtype.names == ("P31", "Eu153", "W182")
+    for name in data.dtype.names:
+        assert np.isclose(data[name].sum(), sums[name], rtol=1e-5)
+
+    assert params["scantime"] == 0.5
+
+    data, params = agilent.load_binary(
+        path.joinpath("test_ms_ms.b"), counts_per_second=True, full=True
     )
-    assert dfiles == [os.path.join(data_path, df) for df in batch_csv_dfiles]
-    dfiles = agilent.batch_xml_read_datafiles(
-        data_path, os.path.join(data_path, agilent.batch_xml_path)
+    assert data.shape == (5, 5)
+    assert data.dtype.names == ("P31->47", "Eu153->153", "W182->182")
+    for name in data.dtype.names:
+        assert np.isclose(data[name].sum(), sums[name], rtol=1e-5)
+
+    assert params["scantime"] == 0.5
+
+
+def test_io_agilent_load_csv():
+    path = Path(__file__).parent.joinpath("data", "agilent", "8900")
+    sums = {
+        "P31": 955719.21,
+        "Eu153": 168.75,
+        "W182": 797.62,
+        "P31->47": 18.750,
+        "Eu153->153": 93.750,
+        "W182->182": 440.48,
+    }
+
+    data, params = agilent.load_csv(path.joinpath("test_ms.b"), full=True)
+    assert data.shape == (5, 5)
+    assert data.dtype.names == ("P31", "Eu153", "W182")
+    for name in data.dtype.names:
+        assert np.isclose(data[name].sum(), sums[name], rtol=1e-4)  # Lowered tol
+
+    assert params["scantime"] == 0.50
+
+    data, params = agilent.load_csv(path.joinpath("test_ms_ms.b"), full=True)
+    assert data.shape == (5, 5)
+    assert data.dtype.names == ("P31->47", "Eu153->153", "W182->182")
+    for name in data.dtype.names:
+        assert np.isclose(data[name].sum(), sums[name], rtol=1e-4)  # Lowered tol
+
+    assert params["scantime"] == 0.5
+
+
+def test_io_agilent_load_missing():
+    path = Path(__file__).parent.joinpath("data", "agilent", "8900")
+
+    data = agilent.load(  # Will fall back to csv
+        path.joinpath("test_ms_missing.b"),
+        use_acq_for_names=False,
+        collection_methods=["batch_csv"],
     )
-    assert dfiles == [os.path.join(data_path, df) for df in batch_xml_dfiles]
-
-
-def test_io_agilent_acq_method_elements():
-    data_path = os.path.join(
-        os.path.dirname(__file__), "data", "agilent", "acq_batch_files.b"
-    )
-    elements = agilent.acq_method_xml_read_elements(
-        os.path.join(data_path, agilent.acq_method_xml_path)
-    )
-    assert elements == ["A1", "B2"]
-
-
-def test_io_agilent_acq_method_elements_msms():
-    data_path = os.path.join(
-        os.path.dirname(__file__), "data", "agilent", "acq_method_msms.xml"
-    )
-    elements = agilent.acq_method_xml_read_elements(data_path)
-    assert elements == ["A1->2", "B3->4"]
-
-
+    assert data.shape == (4, 5)
+    assert np.all(data["P31"][3] == 0.0)

@@ -88,7 +88,11 @@ def batch_xml_read_datafiles(path: Path, batch_xml: Path) -> List[Path]:
 
 
 def collect_datafiles(path: Union[str, Path], methods: List[str]) -> List[Path]:
-    if isinstance(path, str):
+    """Finds datafiles in the batch folder 'path' using the methods provided.
+    Methods are tested in order until ones successfully finds ALL datafiles.
+    Valid methods are 'batch_xml', 'batch_csv', 'acq_method_xml' and 'alphabetical'.
+    """
+    if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
     for method in methods:
@@ -101,6 +105,8 @@ def collect_datafiles(path: Union[str, Path], methods: List[str]) -> List[Path]:
         elif method == "acq_method_xml":
             method_path = path.joinpath(acq_method_xml_path)
             method_func = acq_method_xml_read_datafiles
+        elif method == "alphabetical":
+            return find_datafiles_alphabetical(path)
 
         if method_path.exists():
             datafiles = method_func(path, method_path)
@@ -110,17 +116,15 @@ def collect_datafiles(path: Union[str, Path], methods: List[str]) -> List[Path]:
                 return datafiles
             else:  # pragma: no cover
                 logger.info(f"Missing {missing} datafiles using '{method}'.")
-        else:
+        else:  # pragma: no cover
             logger.warning(f"Unable to collect datafiles using '{method}'.")
 
-    # Fall back to alphabetical
-    logger.info("Falling back to alphabetical order for datafile collection.")
-    datafiles = find_datafiles_alphabetical(path)
-    return datafiles
+    logger.warning(f"All datafile collection methods '[methods]' failed.")
+    return []  # pragma: no cover
 
 
 def find_datafiles_alphabetical(path: Union[str, Path]) -> List[Path]:
-    if isinstance(path, str):
+    if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
     datafiles = []
@@ -194,7 +198,9 @@ def binary_read_msscan(path: Path):
     )
 
     with path.open("rb") as fp:
-        if int.from_bytes(fp.read(4), "little") != msscan_magic_number:
+        if (
+            int.from_bytes(fp.read(4), "little") != msscan_magic_number
+        ):  # pragma: no cover
             raise IOError("Invalid header for MSScan.")
         fp.seek(msscan_header_size + 20)
         offset = int.from_bytes(fp.read(4), "little")
@@ -202,7 +208,7 @@ def binary_read_msscan(path: Path):
         return np.frombuffer(fp.read(), dtype=msscan_dtype)
 
 
-def binary_read_msscan_xspecific(path: Path) -> np.ndarray:
+def binary_read_msscan_xspecific(path: Path) -> np.ndarray:  # pragma: no cover
     msscan_xspecific_magic_number = 275
     msscan_xspecific_header_size = 68
     msscan_xspecific_dtype = np.dtype([("_", np.int32), ("MZ", np.float64)])
@@ -237,7 +243,9 @@ def binary_read_msprofile(path: Path, n: int) -> np.ndarray:
         )
 
     with path.open("rb") as fp:
-        if int.from_bytes(fp.read(4), "little") != msprofile_magic_number:
+        if (
+            int.from_bytes(fp.read(4), "little") != msprofile_magic_number
+        ):  # pragma: no cover
             raise IOError("Invalid header for MSProfile.")
         fp.seek(msprofile_header_size)
         data = np.frombuffer(fp.read(), dtype=get_msprofile_dtype(n))
@@ -254,16 +262,16 @@ def mass_info_datafile(path: Path) -> List[XSpecificMass]:
 
     if msts_xspecific_path.exists():
         xspecific = msts_xspecific_xml_read_info(msts_xspecific_path)
-    else:
+    else:  # pragma: no cover
         raise FileNotFoundError("MSTS_XSpecific.xml not found.")
 
     masses = {k: XSpecificMass(k, v[0], v[1], k) for k, v in xspecific.items()}
 
     if msts_xaddition_path.exists():
         xaddition, scan_type = msts_xaddition_xml_read_info(msts_xaddition_path)
-        if scan_type == "MS_MS":
-            for k, v in xaddition.items():
-                masses[k].mz = v[0]
+        for k, v in xaddition.items():
+            masses[k].mz = v[0]
+            if scan_type == "MS_MS":
                 masses[k].mz2 = v[1]
 
     return sorted(masses.values(), key=lambda x: x.id)
@@ -318,15 +326,18 @@ def load_binary(
         PewException
 
     """
-    is isinstance(path, str):
+    if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
     if collection_methods is None:
         collection_methods = ["batch_xml", "batch_csv"]
 
-    datafiles = collect_datafiles(batch, collection_methods)
-    if len(datafiles) == 0:
-        raise PewException(f"No data files found in {batch}!")  # pragma: no cover
+    datafiles = collect_datafiles(path, collection_methods)
+    if len(datafiles) == 0:  # pragma: no cover
+        logger.info("Falling back to alphabetical order for datafile collection.")
+        datafiles = find_datafiles_alphabetical(path)
+        if len(datafiles) == 0:  # pragma: no cover
+            raise PewException(f"No data files found in {path.name}!")
 
     masses = mass_info_datafile(datafiles[0])
     data = np.stack([binary_read_datafile(df, masses) for df in datafiles], axis=0)
@@ -340,7 +351,7 @@ def load_binary(
 
     if full:
         return data, dict(scantime=scantime)
-    else:
+    else:  # pragma: no cover
         return data
 
 
@@ -377,9 +388,8 @@ def csv_read_params(path: Path) -> Tuple[List[str], float, int]:
     data = np.genfromtxt(
         csv_valid_lines(path), delimiter=b",", names=True, dtype=np.float64
     )
-    total_time = np.max(data["Time_Sec"])
     names = [name for name in data.dtype.names if name != "Time_Sec"]
-    return names, np.round(total_time / data.shape[0], 4), data.shape[0]
+    return names, np.round(np.mean(np.diff(data["Time_Sec"])), 4), data.shape[0]
 
 
 def csv_valid_lines(csv: Path) -> Generator[bytes, None, None]:
@@ -415,23 +425,25 @@ def load_csv(
 
     Raises:
         PewException
-
     """
-    if isinstance(path, str):
+    if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
     if collection_methods is None:
         collection_methods = ["batch_xml", "batch_csv"]
 
     # Collect data files
-    data_files = collect_datafiles(path, collection_methods)
-    if len(data_files) == 0:
-        raise PewException(f"No data files found in {path}!")  # pragma: no cover
+    datafiles = collect_datafiles(path, collection_methods)
+    if len(datafiles) == 0:  # pragma: no cover
+        logger.info("Falling back to alphabetical order for datafile collection.")
+        datafiles = find_datafiles_alphabetical(path)
+        if len(datafiles) == 0:  # pragma: no cover
+            raise PewException(f"No data files found in {path.name}!")
 
     # Collect csvs
     csvs: List[Path] = []
-    for df in data_files:
-        csv = path.joinpath(df, df.stem + ".csv")
+    for df in datafiles:
+        csv = path.joinpath(df.name, df.with_suffix(".csv").name)
         logger.debug(f"Looking for csv '{csv}'.")
         if not csv.exists():
             logger.warning(f"Missing csv '{csv}', line blanked.")
@@ -447,7 +459,7 @@ def load_csv(
             logger.warning("AcqMethod.xml not found, cannot read names.")
 
     data = np.empty(
-        (len(data_files), nscans), dtype=[(name, np.float64) for name in names]
+        (len(datafiles), nscans), dtype=[(name, np.float64) for name in names]
     )
     for i, csv in enumerate(csvs):
         if csv is None:
@@ -461,13 +473,13 @@ def load_csv(
                     usecols=np.arange(1, len(names) + 1),
                     dtype=np.float64,
                 )
-            except ValueError:
+            except ValueError:  # pragma: no cover
                 logger.warning(f"'{csv}' row {i} missing, line blanked.")
                 data[i, :] = np.zeros(data.shape[1], dtype=data.dtype)
 
     if full:
         return data, dict(scantime=scan_time)
-    else:
+    else:  # pragma: no cover
         return data
 
 
