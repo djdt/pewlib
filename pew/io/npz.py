@@ -16,7 +16,7 @@ from typing import Union
 def load(path: Union[str, Path]) -> _Laser:
     npz = np.load(path)
 
-    if "_version" not in npz.files or npz["_version"] < "0.6.0":
+    if "_version" not in npz.files or npz["_version"] < "0.6.0":  # pragma: no cover
         raise PewException("NPZ Version mismatch, only versions >=0.6.0 are supported.")
     data = npz["data"]
 
@@ -30,8 +30,8 @@ def load(path: Union[str, Path]) -> _Laser:
     elif npz["_class"] == "SRRLaser":
         laser = SRRLaser  # type: ignore
         config = SRRConfig.from_array(npz["config"])
-    else:
-        raise PewException("NPZ unable to import laser class {npz['class']}.")
+    else:  # pragma: no cover
+        raise PewException("NPZ unable to import laser class {npz['_class']}.")
 
     return laser(
         data=data,
