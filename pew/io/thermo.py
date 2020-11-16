@@ -1,12 +1,13 @@
 import numpy as np
+from pathlib import Path
 
 from pew.io.error import PewException
 
-from typing import Generator, TextIO
+from typing import Generator, TextIO, Union
 
 
 def _icap_csv_columns_read(
-    path: str, line_type: str, delimiter: str = None, comma_decimal: bool = False
+    path: Path, line_type: str, delimiter: str = None, comma_decimal: bool = False
 ) -> np.ndarray:
     def _read_lines(
         fp: TextIO, line_type: str, replace_decimal: bool = False
@@ -15,7 +16,7 @@ def _icap_csv_columns_read(
             if line.startswith("MainRuns") and line_type in line:
                 yield line.replace(",", ".") if replace_decimal else line
 
-    with open(path, "r", encoding="utf-8-sig") as fp:
+    with path.open("r", encoding="utf-8-sig") as fp:
         line = fp.readline()
         if delimiter is None:
             delimiter = line[0]  # Should be delimiter
@@ -45,11 +46,14 @@ def _icap_csv_columns_read(
 
 
 def icap_csv_columns_read_data(
-    path: str,
+    path: Union[str, Path],
     delimiter: str = None,
     comma_decimal: bool = False,
     use_analog: bool = False,
 ) -> np.ndarray:
+    if isinstance(path, str):  # pragma: no cover
+        path = Path(path)
+
     line_type = "Analog" if use_analog else "Counter"
     data = _icap_csv_columns_read(
         path, line_type=line_type, delimiter=delimiter, comma_decimal=comma_decimal
@@ -70,8 +74,13 @@ def icap_csv_columns_read_data(
 
 
 def icap_csv_columns_read_params(
-    path: str, delimiter: str = None, comma_decimal: bool = False,
+    path: Union[str, Path],
+    delimiter: str = None,
+    comma_decimal: bool = False,
 ) -> dict:
+    if isinstance(path, str):  # pragma: no cover
+        path = Path(path)
+
     data = _icap_csv_columns_read(
         path, line_type="Time", delimiter=delimiter, comma_decimal=comma_decimal
     )
@@ -82,7 +91,7 @@ def icap_csv_columns_read_params(
 
 
 def icap_csv_rows_read_data(
-    path: str,
+    path: Union[str, Path],
     delimiter: str = None,
     comma_decimal: bool = False,
     use_analog: bool = False,
@@ -93,7 +102,10 @@ def icap_csv_rows_read_data(
         for line in fp:
             yield line.replace(",", ".") if replace_decimal else line
 
-    with open(path, "r", encoding="utf-8-sig") as fp:
+    if isinstance(path, str):  # pragma: no cover
+        path = Path(path)
+
+    with path.open("r", encoding="utf-8-sig") as fp:
         line = fp.readline()
         if delimiter is None:
             delimiter = line[0]  # Should be delimiter
@@ -124,7 +136,8 @@ def icap_csv_rows_read_data(
             raise PewException("Could not read iCap CSV (samples in rows).") from e
 
     structured = np.empty(
-        (data.shape[0], nscans), dtype=[(name.decode(), np.float64) for name in names],
+        (data.shape[0], nscans),
+        dtype=[(name.decode(), np.float64) for name in names],
     )
     for name in names:
         structured[name.decode()] = data[:, isotopes[cols] == name]
@@ -133,7 +146,9 @@ def icap_csv_rows_read_data(
 
 
 def icap_csv_rows_read_params(
-    path: str, delimiter: str = None, comma_decimal: bool = False,
+    path: Union[str, Path],
+    delimiter: str = None,
+    comma_decimal: bool = False,
 ) -> dict:
     def _read_lines(
         fp: TextIO, replace_decimal: bool = False
@@ -141,7 +156,10 @@ def icap_csv_rows_read_params(
         for line in fp:
             yield line.replace(",", ".") if replace_decimal else line
 
-    with open(path, "r", encoding="utf-8-sig") as fp:
+    if isinstance(path, str):  # pragma: no cover
+        path = Path(path)
+
+    with path.open("r", encoding="utf-8-sig") as fp:
         line = fp.readline()
         if delimiter is None:
             delimiter = line[0]  # Should be delimiter
@@ -176,8 +194,11 @@ def icap_csv_rows_read_params(
     return dict(scantime=scantime)
 
 
-def icap_csv_sample_format(path: str) -> str:
-    with open(path, "r", encoding="utf-8-sig") as fp:
+def icap_csv_sample_format(path: Union[str, Path]) -> str:
+    if isinstance(path, str):  # pragma: no cover
+        path = Path(path)
+
+    with path.open("r", encoding="utf-8-sig") as fp:
         lines = [next(fp) for i in range(3)]
     if "MainRuns" in lines[0]:
         return "rows"
@@ -187,7 +208,7 @@ def icap_csv_sample_format(path: str) -> str:
         return "unknown"
 
 
-def load(path: str, full: bool = False) -> np.ndarray:
+def load(path: Union[str, Path], full: bool = False) -> np.ndarray:  # pragma: no cover
     """Imports iCap data exported using the CSV export function.
 
     Data is read from the "Counts" column.
@@ -203,6 +224,9 @@ def load(path: str, full: bool = False) -> np.ndarray:
         PewException
 
     """
+    if isinstance(path, str):  # pragma: no cover
+        path = Path(path)
+
     sample_format = icap_csv_sample_format(path)
     if sample_format == "rows":
         data = icap_csv_rows_read_data(path)
