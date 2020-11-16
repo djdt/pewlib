@@ -93,7 +93,7 @@ def shuffle_blocks(
         shuffle_partial: Shuffle partially masked blocks.
 """
     shape = x.shape
-    if mask is None:
+    if mask is None:  # pragma: no cover
         mask = np.ones(x.shape, dtype=bool)
     # Pad the array to fit the blocksize
     if mode == "pad":
@@ -101,11 +101,11 @@ def shuffle_blocks(
         x = np.pad(x, pads, mode="edge")
         mask = np.pad(mask, pads, mode="edge")
     elif mode == "inplace":
-        # Use mask to prevent shuffleing of blocks out of bounds
+        # Use mask to prevent shuffling of blocks out of bounds
         trim = x.shape - (np.array(x.shape) % block)
         for axis, t in enumerate(trim):
             np.swapaxes(mask, 0, axis)[slice(t, None)] = False
-    else:
+    else:  # pragma: no cover
         raise ValueError("Mode must be 'pad' or 'inplace'.")
 
     blocks = view_as_blocks(x, block)
