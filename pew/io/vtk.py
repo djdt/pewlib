@@ -1,7 +1,8 @@
 import sys
+from pathlib import Path
 import numpy as np
 
-from typing import Tuple
+from typing import Tuple, Union
 
 
 def escape_xml(string: str) -> str:
@@ -11,10 +12,12 @@ def escape_xml(string: str) -> str:
     return string
 
 
-def save(path: str, data: np.ndarray, spacing: Tuple[float, float, float]) -> None:
+def save(path: Union[str, Path], data: np.ndarray, spacing: Tuple[float, float, float]) -> None:
     """Save data as a VTK ImageData XML."""
+    if isinstance(path, str):  # pragma: no cover
+        path = Path(path)
 
-    if data.ndim < 3:
+    if data.ndim < 3:  # pragma: no cover
         data = np.reshape(data, (*data.shape, 1))
 
     # Paraview is x,y and numpy is y,x with y order reversed
@@ -30,7 +33,7 @@ def save(path: str, data: np.ndarray, spacing: Tuple[float, float, float]) -> No
     spacing_str = f"{spacing[0]} {spacing[1]} {spacing[2]}"
 
     offset = 0
-    with open(path, "wb") as fp:
+    with path.open("wb") as fp:
         fp.write(
             (
                 '<?xml version="1.0"?>\n'

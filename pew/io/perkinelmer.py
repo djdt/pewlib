@@ -28,8 +28,9 @@ def load(path: Union[str, Path], full: bool = False) -> np.ndarray:
         "acquisition.time": "scantime",
         "space.interval": "spotsize",
     }
-    if not isinstance(path, Path):
+    if not isinstance(path, Path):  # pragma: no cover
         path = Path(path)
+
     datafiles = collect_datafiles(path)
 
     data = np.vstack(
