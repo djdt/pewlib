@@ -41,19 +41,6 @@ def test_io_textimage():
     temp.close()
 
 
-# def test_io_thermo_load():
-#     data_path = os.path.join(os.path.dirname(__file__), "data", "thermo")
-#     data, params = io.thermo.load(
-#         os.path.join(data_path, "icap_columns.csv"), full=True
-#     )
-#     assert data.shape == (3, 3)
-#     assert data.dtype.names == ("1A", "2B")
-#     assert np.sum(data["1A"]) == pytest.approx(45.0)
-#     assert np.sum(data["2B"]) == pytest.approx(450.0)
-
-#     assert params["scantime"] == 0.1
-
-
 def test_io_thermo_format():
     path = Path(__file__).parent.joinpath("data", "thermo")
     path_csv = Path(__file__).parent.joinpath("data", "textimage")
