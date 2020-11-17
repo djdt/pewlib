@@ -443,7 +443,7 @@ def load_csv(
     # Collect csvs
     csvs: List[Path] = []
     for df in datafiles:
-        csv = path.joinpath(df.name, df.with_suffix(".csv").name)
+        csv = df.joinpath(df.with_suffix(".csv").name)
         logger.debug(f"Looking for csv '{csv}'.")
         if not csv.exists():
             logger.warning(f"Missing csv '{csv}', line blanked.")

@@ -115,7 +115,7 @@ def test_io_npz():
 
     laser = io.npz.load(path.joinpath("test.npz"))
     assert laser.name == "Test"
-    assert laser.path == str(path.joinpath("test.npz"))
+    assert laser.path.samefile(path.joinpath("test.npz"))
     # Config
     assert laser.config.spotsize == 1
     assert laser.config.speed == 2
