@@ -58,7 +58,7 @@ def load(
 
         for old, (new, mult) in param_conversion.items():
             if old in params:
-                params[new] = params.pop(old) * mult
+                params[new] = float(params.pop(old)) * mult
 
     # positions = path.joinpath("positions.txt")
     # if positions.exists():
