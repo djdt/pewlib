@@ -25,7 +25,12 @@ def rolling_mean(
     # Calculate means and stds
     axes = tuple(np.arange(x.ndim, x.ndim * 2))
     means = np.nanmean(blocks, axis=axes)
-    stds = np.nanstd(blocks, axis=axes)
+
+    # Don't include the central point in the std calculation
+    nancenter = np.ones(block, dtype=np.float64)
+    nancenter[np.array(nancenter.shape) // 2] = np.nan
+    stds = np.nanstd(blocks * nancenter, axis=axes)
+
     # Check for outlying values and set as nan
     outliers = np.abs(x - means) > threshold * stds
 
