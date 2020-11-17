@@ -15,9 +15,9 @@ def test_io_perkinelmer():
     assert np.isclose(np.sum(data["A1"]), 12.0)
     assert np.isclose(np.sum(data["B2"]), 15.0)
 
-    assert params["speed"] == 0.100
+    assert params["speed"] == 100.0
     assert params["scantime"] == 0.200
-    assert params["spotsize"] == 0.300
+    assert params["spotsize"] == 300.0
 
 
 def test_io_textimage():
