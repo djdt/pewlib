@@ -14,6 +14,9 @@ from typing import Union
 
 
 def load(path: Union[str, Path]) -> _Laser:
+    if isinstance(path, str):  # pragma: no cover
+        path = Path(path)
+
     npz = np.load(path)
 
     if "_version" not in npz.files or npz["_version"] < "0.6.0":  # pragma: no cover
@@ -38,7 +41,7 @@ def load(path: Union[str, Path]) -> _Laser:
         calibration=calibration,
         config=config,
         name=str(npz["name"]),
-        path=str(path),
+        path=str(path.resolve()),
     )
 
 
