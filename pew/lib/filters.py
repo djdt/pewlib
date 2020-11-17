@@ -50,7 +50,7 @@ def rolling_median(
     If the value of x is 'threshold' medians from the local median it is considered an outlier.
     Outliers are replaced with the local median.
     """
-    if isinstance(block, int):
+    if isinstance(block, int):  # pragma: no cover
         block = tuple([block])
     assert len(block) == x.ndim
 
