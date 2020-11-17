@@ -120,7 +120,7 @@ class SRRLaser(_Laser):
             ymax = data.shape[0]
             data = data[ymax - y1 : ymax - y0, x0:x1]
 
-        if calibrate:
+        if calibrate:  # pragma: no cover, covered in laser
             if isotope is None:  # Perform calibration on all data
                 for name in data.dtype.names:
                     data[name] = self.calibration[name].calibrate(data[name])
@@ -145,7 +145,9 @@ class SRRLaser(_Laser):
         limit = self.data[0].shape[0], self.data[1].shape[1]
         if config.magnification * shape[0] + config._warmup > limit[0]:
             return False
-        if config.magnification * shape[1] + config._warmup > limit[1]:
+        if (
+            config.magnification * shape[1] + config._warmup > limit[1]
+        ):  # pragma: no cover
             return False
         return True
 
