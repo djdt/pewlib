@@ -22,11 +22,13 @@ def collect_datafiles(path: Path) -> List[Path]:
     return datafiles
 
 
-def load(path: Union[str, Path], full: bool = False) -> np.ndarray:
-    key_exchange = {
-        "ablation.speed": "speed",
-        "acquisition.time": "scantime",
-        "space.interval": "spotsize",
+def load(
+    path: Union[str, Path], import_parameters: bool = True, full: bool = False
+) -> np.ndarray:
+    param_conversion = {
+        "ablation.speed": ("speed", 1e3),
+        "acquisition.time": ("scantime", 1e3),
+        "space.interval": ("spotsize", 1.0),
     }
     if not isinstance(path, Path):  # pragma: no cover
         path = Path(path)
@@ -42,19 +44,21 @@ def load(path: Union[str, Path], full: bool = False) -> np.ndarray:
     data = numpy.lib.recfunctions.drop_fields(data, "Time_in_Seconds")
     params: dict = {"origin": (0.0, 0.0)}
 
-    parameters = path.joinpath("parameters.conf")
-    if parameters.exists():
-        try:
-            with parameters.open() as fp:
-                for line in fp:
-                    if "=" in line:
-                        k, v = line.split("=")
-                        if k in key_exchange:
-                            params[key_exchange[k.strip()]] = float(v.strip())
-                        else:
+    if import_parameters:
+        parameters = path.joinpath("parameters.conf")
+        if parameters.exists():
+            try:
+                with parameters.open() as fp:
+                    for line in fp:
+                        if "=" in line:
+                            k, v = line.split("=")
                             params[k.strip()] = v.strip()
-        except ValueError:  # pragma: no cover
-            logger.warning("Parameters could not be read from parameters.conf.")
+            except ValueError:  # pragma: no cover
+                logger.warning("Parameters could not be read from parameters.conf.")
+
+        for old, (new, mult) in param_conversion.items():
+            if old in params:
+                params[new] = params.pop(old) * mult
 
     # positions = path.joinpath("positions.txt")
     # if positions.exists():
