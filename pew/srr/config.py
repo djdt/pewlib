@@ -94,7 +94,7 @@ class SRRConfig(Config):
     def to_array(self) -> np.ndarray:
         offsets = self.subpixel_offsets
         return np.array(
-            (self.spotsize, self.speed, self.scantime, self._warmup, offsets),
+            (self.spotsize, self.speed, self.scantime, self.warmup, offsets),
             dtype=[
                 ("spotsize", np.float64),
                 ("speed", np.float64),
