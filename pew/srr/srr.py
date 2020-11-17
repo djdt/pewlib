@@ -1,5 +1,6 @@
 import numpy as np
 import numpy.lib.recfunctions as rfn
+from pathlib import Path
 import copy
 
 from pew.laser import _Laser, Laser
@@ -19,7 +20,7 @@ class SRRLaser(_Laser):
         calibration: Dict[str, Calibration] = None,
         config: SRRConfig = None,
         name: str = "",
-        path: str = "",
+        path: Path = None,
     ):
         assert len(data) > 1
         self.data: List[np.ndarray] = data
@@ -32,7 +33,7 @@ class SRRLaser(_Laser):
         )
 
         self.name = name
-        self.path = path
+        self.path = path or Path()
 
     @property
     def extent(self) -> Tuple[float, float, float, float]:
@@ -182,7 +183,7 @@ class SRRLaser(_Laser):
         layers: List[List[np.ndarray]],
         config: SRRConfig = None,
         name: str = "",
-        path: str = "",
+        path: Path = None,
     ) -> "SRRLaser":
         dtype = [(isotope, float) for isotope in isotopes]
 

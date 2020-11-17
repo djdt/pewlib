@@ -41,7 +41,7 @@ def load(path: Union[str, Path]) -> _Laser:
         calibration=calibration,
         config=config,
         name=str(npz["name"]),
-        path=str(path.resolve()),
+        path=path,
     )
 
 

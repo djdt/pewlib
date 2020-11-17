@@ -1,5 +1,6 @@
 import numpy as np
 import numpy.lib.recfunctions as rfn
+from pathlib import Path
 import copy
 
 from pew.calibration import Calibration
@@ -13,7 +14,7 @@ class _Laser:
     calibration: Dict[str, Calibration] = None
     config: Config = None
     name: str = ""
-    path: str = ""
+    path: Path = None
 
     @property
     def extent(self) -> Tuple[float, float, float, float]:
@@ -53,7 +54,7 @@ class Laser(_Laser):
         calibration: Dict[str, Calibration] = None,
         config: Config = None,
         name: str = "",
-        path: str = "",
+        path: Path = None,
     ):
         self.data: np.ndarray = data
         self.calibration = {name: Calibration() for name in self.isotopes}
@@ -63,7 +64,7 @@ class Laser(_Laser):
         self.config = copy.copy(config) if config is not None else Config()
 
         self.name = name
-        self.path = path
+        self.path = path or Path()
 
     @property
     def extent(self) -> Tuple[float, float, float, float]:
@@ -141,7 +142,7 @@ class Laser(_Laser):
         datas: List[np.ndarray],
         config: Config = None,
         name: str = "",
-        path: str = "",
+        path: Path = None,
     ) -> "Laser":
         assert len(isotopes) == len(datas)
         dtype = [(isotope, float) for isotope in isotopes]
