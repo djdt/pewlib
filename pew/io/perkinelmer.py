@@ -27,8 +27,8 @@ def load(
 ) -> np.ndarray:
     param_conversion = {
         "ablation.speed": ("speed", 1e3),
-        "acquisition.time": ("scantime", 1e3),
-        "space.interval": ("spotsize", 1.0),
+        "acquisition.time": ("scantime", 1.0),
+        "space.interval": ("spotsize", 1e3),
     }
     if not isinstance(path, Path):  # pragma: no cover
         path = Path(path)
