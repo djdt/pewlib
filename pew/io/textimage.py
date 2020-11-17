@@ -34,4 +34,4 @@ def load(
 
 
 def save(path: Union[str, Path], data: np.ndarray, header: str = "") -> None:
-    np.savetxt(path, data, delimiter=",", comments="#", header=header)
+    np.savetxt(path, data, delimiter=",", comments="#", header=header, fmt="%.18g")
