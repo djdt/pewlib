@@ -4,6 +4,16 @@ from pathlib import Path
 from pew.io import agilent
 
 
+sums = {
+    "P31": 9.5571921387e5,
+    "Eu153": 1.6875011255e2,
+    "W182": 7.9762025047e2,
+    "P31->47": 1.8750004889e1,
+    "Eu153->153": 9.3750033388e1,
+    "W182->182": 4.4047663919e2,
+}
+
+
 def test_io_agilent_collection():
     path = Path(__file__).parent.joinpath("data", "agilent", "8900", "test_ms.b")
 
@@ -32,14 +42,6 @@ def test_io_agilent_mass_info():
 
 def test_io_agilent_load_binary():
     path = Path(__file__).parent.joinpath("data", "agilent", "8900")
-    sums = {
-        "P31": 955719.21,
-        "Eu153": 168.75,
-        "W182": 797.62,
-        "P31->47": 18.750,
-        "Eu153->153": 93.750,
-        "W182->182": 440.48,
-    }
 
     data, params = agilent.load_binary(
         path.joinpath("test_ms.b"), counts_per_second=True, full=True
@@ -47,7 +49,7 @@ def test_io_agilent_load_binary():
     assert data.shape == (5, 5)
     assert data.dtype.names == ("P31", "Eu153", "W182")
     for name in data.dtype.names:
-        assert np.isclose(data[name].sum(), sums[name], rtol=1e-5)
+        assert np.isclose(data[name].sum(), sums[name])
 
     assert params["scantime"] == 0.5
 
@@ -57,21 +59,13 @@ def test_io_agilent_load_binary():
     assert data.shape == (5, 5)
     assert data.dtype.names == ("P31->47", "Eu153->153", "W182->182")
     for name in data.dtype.names:
-        assert np.isclose(data[name].sum(), sums[name], rtol=1e-5)
+        assert np.isclose(data[name].sum(), sums[name])
 
     assert params["scantime"] == 0.5
 
 
 def test_io_agilent_load_csv():
     path = Path(__file__).parent.joinpath("data", "agilent", "8900")
-    sums = {
-        "P31": 955719.21,
-        "Eu153": 168.75,
-        "W182": 797.62,
-        "P31->47": 18.750,
-        "Eu153->153": 93.750,
-        "W182->182": 440.48,
-    }
 
     data, params = agilent.load_csv(path.joinpath("test_ms.b"), full=True)
     assert data.shape == (5, 5)

@@ -41,63 +41,6 @@ def test_io_textimage():
     temp.close()
 
 
-def test_io_thermo_format():
-    path = Path(__file__).parent.joinpath("data", "thermo")
-    path_csv = Path(__file__).parent.joinpath("data", "textimage")
-
-    assert (
-        io.thermo.icap_csv_sample_format(path.joinpath("icap_columns.csv")) == "columns"
-    )
-    assert io.thermo.icap_csv_sample_format(path.joinpath("icap_rows.csv")) == "rows"
-    assert io.thermo.icap_csv_sample_format(path_csv.joinpath("csv.csv")) == "unknown"
-
-
-def test_io_thermo_columns():
-    path = Path(__file__).parent.joinpath("data", "thermo")
-
-    data = io.thermo.icap_csv_columns_read_data(path.joinpath("icap_columns.csv"))
-    assert data.shape == (3, 3)
-    assert data.dtype.names == ("1A", "2B")
-    assert np.sum(data["1A"]) == pytest.approx(45.0)
-    assert np.sum(data["2B"]) == pytest.approx(450.0)
-
-    # Test analog
-    data = io.thermo.icap_csv_columns_read_data(
-        path.joinpath("icap_columns.csv"), use_analog=True
-    )
-    assert data.shape == (3, 3)
-    assert data.dtype.names == ("1A", "2B")
-    assert np.sum(data["1A"]) == pytest.approx(4.5)
-    assert np.sum(data["2B"]) == pytest.approx(0.0)
-
-    # Params
-    params = io.thermo.icap_csv_columns_read_params(path.joinpath("icap_columns.csv"))
-    assert params["scantime"] == 0.1
-
-
-def test_io_thermo_rows():
-    path = Path(__file__).parent.joinpath("data", "thermo")
-
-    data = io.thermo.icap_csv_rows_read_data(path.joinpath("icap_rows.csv"))
-    assert data.shape == (3, 3)
-    assert data.dtype.names == ("1A", "2B")
-    assert np.sum(data["1A"]) == pytest.approx(45.0)
-    assert np.sum(data["2B"]) == pytest.approx(450.0)
-
-    # Test analog
-    data = io.thermo.icap_csv_rows_read_data(
-        path.joinpath("icap_rows.csv"), use_analog=True
-    )
-    assert data.shape == (3, 3)
-    assert data.dtype.names == ("1A", "2B")
-    assert np.sum(data["1A"]) == pytest.approx(4.5)
-    assert np.sum(data["2B"]) == pytest.approx(0.0)
-
-    # Params
-    params = io.thermo.icap_csv_rows_read_params(path.joinpath("icap_rows.csv"))
-    assert params["scantime"] == 0.1
-
-
 def test_io_vtk():
     path = Path(__file__).parent.joinpath("data", "vtk")
 
