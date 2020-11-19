@@ -11,6 +11,15 @@ logger = logging.getLogger(__name__)
 
 
 def collect_datafiles(path: Path) -> List[Path]:
+    """Finds '.xl' files in directory.
+
+    Searches directory for '.xl' files and sorts them in numerical order.
+
+    Args:
+        path: path to directory
+    Returns:
+        list of paths ordered numerically
+    """
     datafiles = []
 
     for child in path.iterdir():
@@ -25,6 +34,24 @@ def collect_datafiles(path: Path) -> List[Path]:
 def load(
     path: Union[str, Path], import_parameters: bool = True, full: bool = False
 ) -> np.ndarray:
+    """Loads PerkinElmer directory.
+
+    Searches the directory `path` for '.xl' files and used them to reconstruct data.
+    If `import_parameters` and a 'parameters.conf' is used then the scantime,
+    speed and spotsize can be imported.
+
+    Args:
+        path: path to directory
+        import_parameters: import params from 'parameters.conf'
+        full: also return dict with params
+
+    Returns:
+        structured array of data
+        dict of params if `full`
+
+    See Also:
+        :func:`pew.io.perkinelmer.collect_datafiles`
+    """
     param_conversion = {
         "ablation.speed": ("speed", 1e3),
         "acquisition.time": ("scantime", 1.0),

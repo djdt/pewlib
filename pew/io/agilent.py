@@ -15,8 +15,6 @@ batch_xml_path = Path("Method", "BatchLog.xml")
 
 
 class XSpecificMass(object):
-    """Class for MSTS mass information."""
-
     def __init__(self, id: int, name: str, acctime: float, mz: int, mz2: int = None):
         self.id = id
         self.name = name
@@ -86,10 +84,19 @@ def batch_xml_read_datafiles(path: Path, batch_xml: Path) -> List[Path]:
 
 
 def collect_datafiles(path: Union[str, Path], methods: List[str]) -> List[Path]:
-    """Finds datafiles in the batch folder 'path' using the methods provided.
-    Methods are tested in order until ones successfully finds ALL datafiles.
-    Valid methods are 'batch_xml', 'batch_csv', 'acq_method_xml' and 'alphabetical'.
+    """Finds '.d' datafiles in a directory.
+
+    A list of expected datafiles is created for each method in `methods`.
+    Methods are tested in order until ones successfully finds ALL expected datafiles.
+
+    Args:
+        path: path to directory
+        methods: list of methods to try,
+            {'alphabetical', 'acq_method_xml', 'batch_csv', 'batch_xml'}
+    Returns:
+        A list of datafiles
     """
+
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
@@ -306,24 +313,28 @@ def load_binary(
     collection_methods: List[str] = None,
     counts_per_second: bool = False,
     full: bool = False,
-) -> np.ndarray:
-    """Imports an Agilent batch (.b) directory, using the MSScan and MSProfile binaries.
-    Finds lines using (in order of preference): BatchLog.xml, BatchLog.csv,
-     AcqMethod.xml, .d files sorted by name.
+) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
+    """Imports an Agilent '.b' batch.
+
+    Import is performed using the 'MSScan.bin', 'MSProfile.bin' binaries and
+    'MSTS_XSpecific.xml' document. If these are not present a 'FileNotFoundError'
+    is raised.
 
     Args:
-       path: Path to the .b directory.
-       collection_methods: List of data file collection methods to try.
-       counts_per_second: Return data in CPS instead of raw counts.
-       full: If True then also return a dict of available params.
+        path: path to batch
+        collection_methods: list of datafile collection methods,
+            default = ['batch_xml', 'batch_csv']
+        counts_per_second: return data in CPS
+        full: also return dict with scantime
 
     Returns:
-        The structured numpy array and optionally, params.
+        structured array of data
+        dict of params if `full`
 
-    Raises:
-        PewException
-
+    See Also:
+        :func:`pew.io.agilent.collect_datafiles`
     """
+
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
@@ -408,22 +419,28 @@ def load_csv(
     collection_methods: List[str] = None,
     use_acq_for_names: bool = True,
     full: bool = False,
-) -> np.ndarray:
-    """Imports an Agilent batch (.b) directory, returning structured array.
-    Finds lines using (in order of preference): BatchLog.xml, BatchLog.csv,
-     AcqMethod.xml, .d files sorted by name.
+) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
+    """Imports an Agilent '.b' batch.
+
+    Import is performed using the '.csv' files found in each '.d' datafile.
+    If a '.csv' can not be found then all data in the line is set to 0.
+    To load properly formatted element names use `use_acq_for_names`.
 
     Args:
-       path: Path to the .b directory.
-       collection_methods: List of data file collection methods to try.
-       full: If True then also return a dict of available params.
+        path: path to batch
+        collection_methods: list of datafile collection methods,
+            default = ['batch_xml', 'batch_csv']
+        use_acq_for_names: read element names from 'AcqMethod.xml'
+        full: also return dict with scantime
 
     Returns:
-        The structured numpy array and optionally, params.
+        structured array of data
+        dict of params if `full`
 
-    Raises:
-        PewException
+    See Also:
+        :func:`pew.io.agilent.collect_datafiles`
     """
+
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
@@ -487,22 +504,27 @@ def load(
     use_acq_for_names: bool = True,
     counts_per_second: bool = False,
     full: bool = False,
-) -> np.ndarray:
-    """Attempts to load using the binary method, falling back to csv import.
-    See also 'load_binary', 'load_csv'.
+) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
+    """Imports an Agilent '.b' batch.
+
+    First attempts a binary import, falling back to importing any '.csv' files.
 
     Args:
-        path: Path to batch folder.
-        collection_methods: Methods to use for datafile collection.
-        use_acq_for_names: Read aquistion method to find element names (CSV only).
-        counts_per_second: Import as CPS (Binary only).
-        full: Return data and a dict of params.
+        path: path to batch
+        collection_methods: list of datafile collection methods,
+            default = ['batch_xml', 'batch_csv']
+        use_acq_for_names: read element names from 'AcqMethod.xml', only for csv
+        counts_per_second: return data in CPS, only for binary
+        full: also return dict with scantime
 
     Returns:
-        The structured numpy array and optionally, params.
+        structured array of data
+        dict of params if `full`
 
-    Raises:
-        PewException
+    See Also:
+        :func:`pew.io.agilent.collect_datafiles`
+        :func:`pew.io.agilent.load_binary`
+        :func:`pew.io.agilent.load_csv`
     """
     try:
         result = load_binary(

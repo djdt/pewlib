@@ -13,7 +13,16 @@ def escape_xml(string: str) -> str:
 
 
 def save(path: Union[str, Path], data: np.ndarray, spacing: Tuple[float, float, float]) -> None:
-    """Save data as a VTK ImageData XML."""
+    """Save data as a VTK ImageData XML.
+
+    Saves an array to a '.vti' file. Data origin is set to (0, 0) and equally
+    spaced using x, y, z of `spacing`. If `data` is rasied to 3-dimensonal if lower.
+
+    Args:
+        path: path to file
+        data: array
+        spacing: spacing of '.vti'
+    """
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 

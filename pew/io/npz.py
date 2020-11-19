@@ -13,6 +13,21 @@ from typing import Union
 
 
 def load(path: Union[str, Path]) -> _Laser:
+    """Loads data from '.npz' file.
+
+    Loads files created using :func:`pew.io.npz.save`.
+    On load the a :class:`Laser` or :class:`SRRLaser` is reformed from the saved data.
+    If the file is invalid or of an incomatible version a 'ValueError' is raised.
+
+    Args:
+        path: path to '.npz'
+
+    Returns:
+        :class:`Laser` or :class:`SRRLaser`
+
+    See Also:
+        :func:`numpy.load`
+    """
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
@@ -44,7 +59,21 @@ def load(path: Union[str, Path]) -> _Laser:
     )
 
 
-def save(path: Union[str, Path], laser: Laser) -> None:
+def save(path: Union[str, Path], laser: _Laser) -> None:
+    """Saves data to '.npz' file.
+
+    Converts a :class:`Laser` or :class:`SRRLaser` to a series of `np.ndarray`
+    which are then saved to a compressed '.npz' archive. The time and current
+    version are also saved. If `path` does not end in '.npz' it is
+    appended.
+
+    Args:
+        path: path to save to
+        laser: :class:`Laser` or :class:`SRRLaser`
+
+    See Also:
+        :func:`numpy.savez_compressed`
+    """
     savedict: dict = {"_version": __version__, "_time": time.time(), "_multiple": False}
     savedict["_class"] = laser.__class__.__name__
     savedict["data"] = laser.data
