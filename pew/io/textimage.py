@@ -1,8 +1,6 @@
 import numpy as np
 from pathlib import Path
 
-from pew.io.error import PewException
-
 from typing import Union
 
 
@@ -12,21 +10,18 @@ def load(
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
-    try:
-        if delimiter is None:
-            with path.open("r") as fp:
-                gen = (line.replace(";", ",").replace("\t", ",") for line in fp)
-                data = np.genfromtxt(
-                    gen, delimiter=",", comments=comments, dtype=np.float64
-                )
-        else:
+    if delimiter is None:
+        with path.open("r") as fp:
+            gen = (line.replace(";", ",").replace("\t", ",") for line in fp)
             data = np.genfromtxt(
-                path, delimiter=delimiter, comments=comments, dtype=np.float64
+                gen, delimiter=",", comments=comments, dtype=np.float64
             )
-    except ValueError as e:  # pragma: no cover
-        raise PewException("Could not parse file.") from e
-    if data.ndim != 2:  # pragma: no cover
-        raise PewException(f"Invalid data dimensions '{data.ndim}'.")
+    else:
+        data = np.genfromtxt(
+            path, delimiter=delimiter, comments=comments, dtype=np.float64
+        )
+
+    data = np.atleast_2d(data)
 
     if name is not None:
         data.dtype = [(name, data.dtype)]

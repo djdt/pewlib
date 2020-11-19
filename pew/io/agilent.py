@@ -5,8 +5,6 @@ from pathlib import Path
 import numpy as np
 import numpy.lib.recfunctions
 
-from pew.io.error import PewException
-
 from typing import Callable, Dict, Generator, List, Tuple, Union
 
 logger = logging.getLogger(__name__)
@@ -337,7 +335,7 @@ def load_binary(
         logger.info("Falling back to alphabetical order for datafile collection.")
         datafiles = find_datafiles_alphabetical(path)
         if len(datafiles) == 0:  # pragma: no cover
-            raise PewException(f"No data files found in {path.name}!")
+            raise FileNotFoundError(f"No data files found in {path.name}!")
 
     masses = mass_info_datafile(datafiles[0])
     data = np.stack([binary_read_datafile(df, masses) for df in datafiles], axis=0)
@@ -438,7 +436,7 @@ def load_csv(
         logger.info("Falling back to alphabetical order for datafile collection.")
         datafiles = find_datafiles_alphabetical(path)
         if len(datafiles) == 0:  # pragma: no cover
-            raise PewException(f"No data files found in {path.name}!")
+            raise FileNotFoundError(f"No data files found in {path.name}!")
 
     # Collect csvs
     csvs: List[Path] = []
