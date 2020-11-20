@@ -79,13 +79,14 @@ def shuffle_blocks(
 
     Args:
         x: array
-        block: block shape, same dims as x
-        mask: mask, smae shape as x, optional
+        block: block shape, same dims as `x`
+        mask: mask, same shape as `x`, optional
         mode: method, {'pad', 'inplace'}
         shuffle_partial: shuffle partially masked blocks
 
     Returns:
-        new array if `mode`=='pad', view if `mode`=='inplace'"""
+        new array if pad, view if inplace
+    """
     shape = x.shape
     if mask is None:  # pragma: no cover
         mask = np.ones(x.shape, dtype=bool)
@@ -199,7 +200,7 @@ def view_as_blocks(
         view into array
 
     See Also:
-        :func: skimage.util.shape.view_as_blocks
+        :func:`skimage.util.shape.view_as_blocks`
     """
     assert len(block) == x.ndim
     if step is None:

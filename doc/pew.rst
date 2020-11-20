@@ -38,3 +38,12 @@ VTK
 
 .. automodule:: pew.io.vtk
     :members:
+
+
+Calculations Module
+===================
+
+This module mainly contains mathmatical functions used in other modules.
+
+.. automodule:: pew.lib.calc
+    :members:
