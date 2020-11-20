@@ -1,7 +1,7 @@
 import numpy as np
 from pathlib import Path
 
-from typing import Generator, TextIO, Union
+from typing import Generator, TextIO, Tuple, Union
 
 
 def _icap_csv_columns_read(
@@ -184,6 +184,16 @@ def icap_csv_rows_read_params(
 
 
 def icap_csv_sample_format(path: Union[str, Path]) -> str:
+    """Determines CSVsample format.
+
+    Valid formats are 'columns' and 'rows' depending on Qtegra export option.
+
+    Args:
+        Path: path to CSV
+
+        Returns:
+            'rows', 'columns' or 'unknown' if invalid
+    """
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
@@ -197,21 +207,28 @@ def icap_csv_sample_format(path: Union[str, Path]) -> str:
         return "unknown"
 
 
-def load(path: Union[str, Path], full: bool = False) -> np.ndarray:  # pragma: no cover
-    """Imports iCap data exported using the CSV export function.
+def load(
+    path: Union[str, Path], use_analog: bool = False, full: bool = False
+) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:  # pragma: no cover
+    """Imports iCap CSV export.
 
-    Data is read from the "Counts" column.
-    If full and a "Time" column is available then the scan time is also returned.
+    Data must be exported from Qtegra using the CSV export option.
+    At a mininmum the 'Counts' column must exported for each element.
+    If `use_analog` the 'Analog' channel must be exported.
+    If `full` and the 'Time' column is exported then the scantime can be determined.
+    Samples in columns and rows are both supported.
 
     Args:
-        path: Path to CSV
+        path: path to CSV
+        use_analog: ues 'Analog' instead of 'Counts'
+        full: also export a dict of params
 
     Returns:
-        Structured numpy array.
+        structured array of data
+        dict of params if `full`
 
     Raises:
-        PewException
-
+        ValueError: unknown or invalid CSV
     """
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)

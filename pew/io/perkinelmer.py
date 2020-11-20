@@ -17,6 +17,7 @@ def collect_datafiles(path: Path) -> List[Path]:
 
     Args:
         path: path to directory
+
     Returns:
         list of paths ordered numerically
     """

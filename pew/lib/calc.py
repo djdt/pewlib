@@ -4,36 +4,16 @@ from typing import List, Tuple
 
 
 def greyscale_to_rgb(array: np.ndarray, rgb: np.ndarray) -> np.ndarray:
-    """Convert a gret scale image to a single color rgb image.
+    """Convert a gray scale image to a single color rgb(a).
 
-    The image is clipped to 0.0 to 1.0.
+    The image should be a float type and is clipped to 0.0 to 1.0 before conversion.
 
     Args:
-        array: Image
-        rgb: 3 or 4 color array (rgb / rgba)
+        array: image
+        rgb: rgb with optional alpha
 """
     array = np.clip(array, 0.0, 1.0)
-    return array[..., None] * np.array(rgb, dtype=float)
-
-
-# def ida(
-#     a: np.ndarray,
-#     b: np.ndarray,
-#     Ct: float,
-#     ms: float,
-#     mt: float,
-#     Ms: float,
-#     Mt: float,
-#     Aas: float,
-#     Abs: float,
-#     Aat: float,
-#     Abt: float,
-# ) -> np.ndarray:
-#     Rm = a / b
-#     Rs = Abs / Aas
-#     Rt = Aat / Abt
-#     Cs = Ct * (mt / ms) * (Ms / Mt) * (Abt / Aas) * ((Rm - Rt) / (1.0 - Rm * Rs))
-#     return Cs
+    return array[..., None] * np.array(rgb, dtype=np.float32)
 
 
 def local_maxima(x: np.ndarray) -> np.ndarray:
@@ -46,9 +26,12 @@ def normalise(x: np.ndarray, vmin: float = 0.0, vmax: float = 1.0) -> np.ndarray
     """Normalise an array.
 
     Args:
-        x: Array
-        vmin: New minimum
-        vmax: New maxmimum
+        x: array
+        vmin: new minimum
+        vmax: new maxmimum
+
+    Raises:
+        ValueError if `x` is a simgle value
 """
     xmax, xmin = np.amax(x), np.amin(x)
     if xmax == xmin:  # pragma: no cover

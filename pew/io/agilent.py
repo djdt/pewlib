@@ -317,8 +317,7 @@ def load_binary(
     """Imports an Agilent '.b' batch.
 
     Import is performed using the 'MSScan.bin', 'MSProfile.bin' binaries and
-    'MSTS_XSpecific.xml' document. If these are not present a 'FileNotFoundError'
-    is raised.
+    'MSTS_XSpecific.xml' document.
 
     Args:
         path: path to batch
@@ -330,6 +329,10 @@ def load_binary(
     Returns:
         structured array of data
         dict of params if `full`
+
+    Raises:
+        FileNotFoundError: 'MSScan.bin', 'MSProfile.bin' or 'MSTS_XSpecific.xml' not found
+        IOError: invalid binary format
 
     See Also:
         :func:`pew.io.agilent.collect_datafiles`

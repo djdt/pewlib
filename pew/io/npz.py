@@ -17,13 +17,15 @@ def load(path: Union[str, Path]) -> _Laser:
 
     Loads files created using :func:`pew.io.npz.save`.
     On load the a :class:`Laser` or :class:`SRRLaser` is reformed from the saved data.
-    If the file is invalid or of an incomatible version a 'ValueError' is raised.
 
     Args:
         path: path to '.npz'
 
     Returns:
         :class:`Laser` or :class:`SRRLaser`
+
+    Raises:
+        ValueError: incomatible version
 
     See Also:
         :func:`numpy.load`
