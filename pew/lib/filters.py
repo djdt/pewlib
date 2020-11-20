@@ -8,9 +8,20 @@ from typing import Tuple, Union
 def rolling_mean(
     x: np.ndarray, block: Union[int, Tuple[int, ...]], threshold: float = 3.0
 ) -> np.ndarray:
-    """Rolling filter of size 'block'.
-    If the value of x is 'threshold' stddevs from the local mean it is considered an outlier.
-    Outliers are replaced with the local mean (excluding outliers).
+    """Filter an array using rolling mean.
+
+    Each value of `x` is compared to the mean of its `block`, the values arround it.
+    If it is `threshold` times the standard deviation *without the central value* then
+    it is considered an outlier. This prevents the value from impacting the stddev.
+    The mean of each block is recalculated outliers set to the new local mean.
+
+    Args:
+        x: array
+        block: size of window, int or same dims as `x`
+        threshold: number of stddevs away from mean to consider outlier
+
+    Returns:
+        array with outliers set to local means
     """
     if isinstance(block, int):
         block = tuple([block])
@@ -46,9 +57,20 @@ def rolling_mean(
 def rolling_median(
     x: np.ndarray, block: Union[int, Tuple[int, ...]], threshold: float = 3.0
 ) -> np.ndarray:
-    """Rolling filter of size 'block'.
-    If the value of x is 'threshold' medians from the local median it is considered an outlier.
-    Outliers are replaced with the local median.
+    """Filter an array using rolling median.
+
+    Each value of `x` is compared to the median of its `block`, the values arround it.
+    If it is `threshold` times the median distance from the median then
+    it is considered an outlier.
+    The mean of each block is recalculated outliers set to the local median.
+
+    Args:
+        x: array
+        block: size of window, int or same dims as `x`
+        threshold: number of median distances away from medians to consider outlier
+
+    Returns:
+        array with outliers set to local means
     """
     if isinstance(block, int):  # pragma: no cover
         block = tuple([block])
