@@ -10,13 +10,22 @@ def greyscale_to_rgb(array: np.ndarray, rgb: np.ndarray) -> np.ndarray:
 
     Args:
         array: image
-        rgb: rgb with optional alpha
-"""
+        rgb: rgb with optional alpha"""
     array = np.clip(array, 0.0, 1.0)
     return array[..., None] * np.array(rgb, dtype=np.float32)
 
 
 def local_maxima(x: np.ndarray) -> np.ndarray:
+    """Indicies of local maxima.
+
+    Maxima are values greater than the 2 values surrounding them.
+
+    Args:
+        x: 1d array
+
+    Returns:
+        indicies of maxima
+    """
     return np.nonzero(
         np.logical_and(np.r_[True, x[1:] > x[:-1]], np.r_[x[:-1] > x[1:], True])
     )[0]
@@ -31,8 +40,7 @@ def normalise(x: np.ndarray, vmin: float = 0.0, vmax: float = 1.0) -> np.ndarray
         vmax: new maxmimum
 
     Raises:
-        ValueError if `x` is a simgle value
-"""
+        ValueError if `x` is a simgle value"""
     xmax, xmin = np.amax(x), np.amin(x)
     if xmax == xmin:  # pragma: no cover
         raise ValueError("Cannot normalise array, min == max.")
@@ -47,9 +55,8 @@ def reset_cumsum(x: np.ndarray, reset_value: float = 0.0) -> np.ndarray:
     """Cumulative sum that resets at the given value.
 
     Args:
-        x: Input array.
-        reset_value: Value where the cumsum resets to 0.
-"""
+        x: array
+        reset_value: Value where the cumsum resets to 0"""
     c = np.cumsum(x)
     n = x == reset_value
     oc = np.maximum.accumulate(c * n)
@@ -64,17 +71,21 @@ def shuffle_blocks(
     shuffle_partial: bool = False,
 ) -> np.ndarray:
     """Shuffle an ndim array as tiles of a certain size.
-    If a mask is passed then only the region within the mask is shuffled.
-    If mask_all is True then only entirely masked blocks are shuffled otherwise
-    even partially masked blocks will be shuffled.
+
+    If a `mask` is passed then only the region within the mask is shuffled.
+    If `shuffle_partial` then partially masked blocks will be shuffled otherwise
+    only fully masked blocks are. The inplace `mode` is much faster but cannot shuffle
+    array edges.
 
     Args:
-        x: Input array.
-        block: Shape of blocks, ndim must be the same as x.
-        mask: Optional mask data, shape must be the same as x.
-        mode: Method for matching block size, 'pad' or 'inplace'.
-        shuffle_partial: Shuffle partially masked blocks.
-"""
+        x: array
+        block: block shape, same dims as x
+        mask: mask, smae shape as x, optional
+        mode: method, {'pad', 'inplace'}
+        shuffle_partial: shuffle partially masked blocks
+
+    Returns:
+        new array if `mode`=='pad', view if `mode`=='inplace'"""
     shape = x.shape
     if mask is None:  # pragma: no cover
         mask = np.ones(x.shape, dtype=bool)
@@ -110,34 +121,22 @@ def shuffle_blocks(
     return x
 
 
-def sliding_window(x: np.ndarray, window: int, step: int = 1) -> np.ndarray:
-    """1D version of view_as_blocks."""
-    shape = ((x.size - window) // step + 1, window)
-    strides = (step * x.strides[0], x.strides[0])
-    return np.lib.stride_tricks.as_strided(x, shape=shape, strides=strides)
-
-
-def sliding_window_centered(
-    x: np.ndarray, window: int, step: int = 1, mode: str = "edge"
-) -> np.ndarray:
-    x_pad = np.pad(x, (window // 2, window - window // 2 - 1), mode=mode)
-    return sliding_window(x_pad, window, step)
-
-
 def subpixel_offset(
     x: np.ndarray, offsets: List[Tuple[int, int]], pixelsize: Tuple[int, int]
 ) -> np.ndarray:
-    """Takes a 3d array and stretches and offsets each layer.
+    """Offsets layers in a 3d array.
 
-    Given an offset of (1,1) and pixelsize of (2,2) each layer will be streched by 2
-    and every even layer will be shifted by 1 pixel.
+    First `x` is enlarged by `pixelsize` then list of `offsets` are applied
+    across axis 2 of `x`. If the first offset is not (0, 0) then it is prepended.
+    Given `offsets` of [(0, 0), (1, 1)] and pixelsize of (2, 2) each layer
+    will be streched by 2 and every 2nd layer will be shifted by 1 pixel.
 
     Args:
-        offsets: The pixel offsets in (x, y).
-        pixelsize: Final size to stretch to.
+        offsets: pixel offsets in (x, y)
+        pixelsize: enlargement (x, y)
 
     Returns:
-        The offset array.
+        array
     """
     # Offset for first layer must be zero
     if offsets[0] != (0, 0):
@@ -167,22 +166,40 @@ def subpixel_offset(
 def subpixel_offset_equal(
     x: np.ndarray, offsets: List[int], pixelsize: int
 ) -> np.ndarray:
+    """Offsets layers in a 3d array.
+
+    Special case of 'subpixel_offset' where x==y for `offsets` and `pixelsize`.
+
+    Args:
+        offsets: pixel offsets in (x, y)
+        pixelsize: enlargement (x, y)
+
+    Returns:
+        array
+
+    See Also:
+        :func:`pew.lib.calc.subpixel_offset`
+    """
     return subpixel_offset(x, [(o, o) for o in offsets], (pixelsize, pixelsize))
 
 
 def view_as_blocks(
     x: np.ndarray, block: Tuple[int, ...], step: Tuple[int, ...] = None
 ) -> np.ndarray:
-    """Create block sized views into a array, offset by step amount.
-    https://github.com/scikit-image/scikit-image/blob/master/skimage/util/shape.py
+    """Block view of array
+
+    Can be overlapping if `step` < `block`.
 
     Args:
-        x: The array.
-        block: The size of the view.
-        step: Size of step, defaults to block.
+        x: array
+        block: block size, same dims as `x`
+        step: step, same dims as `x`, defaults to `block`
 
     Returns:
-        An array of views.
+        view into array
+
+    See Also:
+        :func: skimage.util.shape.view_as_blocks
     """
     assert len(block) == x.ndim
     if step is None:
@@ -191,14 +208,3 @@ def view_as_blocks(
     shape = tuple((np.array(x.shape) - block) // np.array(step) + 1) + block
     strides = tuple(x.strides * np.array(step)) + x.strides
     return np.lib.stride_tricks.as_strided(x, shape=shape, strides=strides)
-
-
-# def windowed_extrema(
-#     x: np.ndarray, window: int, step: int = 1, mode: str = "maxima"
-# ) -> np.ndarray:
-#     windows = sliding_window_centered(x, window, step)
-#     if mode == "minima":
-#         extrema = np.argmin(windows, axis=1)
-#     else:
-#         extrema = np.argmax(windows, axis=1)
-#     return np.nonzero(extrema == (window // 2))[0]

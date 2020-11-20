@@ -6,14 +6,41 @@ from typing import Tuple
 
 
 def li_icq(x: np.ndarray, y: np.ndarray) -> float:
+    """Calculates Li's ICQ.
+
+    The intenisty correlation quotient calculates the number of pixels where both
+    x and y are above or below their means. A value of 0 indicates no correlation,
+    below 0 segregation and above 0 colocalisation.
+
+    Args:
+        x: array
+        y: array, same shape as `x`
+
+    Returns:
+        value between -0.5 and 0.5
+
+    References:
+        .. [1] Li, Q. A Syntaxin 1, G o, and N-Type Calcium Channel Complex at
+        a Presynaptic Nerve Terminal: Analysis by Quantitative Immunocolocalization
+        Journal of Neuroscience, Society for Neuroscience, 2004, 24, 4070-4081
+
+    """
     ux, uy = np.mean(x), np.mean(y)
     return np.sum((x - ux) * (y - uy) >= 0.0) / x.size - 0.5
 
 
 def pearsonr(x: np.ndarray, y: np.ndarray) -> float:
-    """Returns Pearson's colocalisation coefficient for the two arrays.
-    This value for colocalisation between -1 and 1 (colocalised).
-"""
+    """Pearson's colocalisation coefficient.
+
+    A value of 0 indicates no correlation, below 0 segregation and above 0 colocalisation.
+
+    Args:
+        x: array
+        y: array, same shape as `x`
+
+    Returns:
+        value between -1 and 1
+    """
     return (np.mean(x * y) - (np.mean(x) * np.mean(y))) / (np.std(x) * np.std(y))
 
 
@@ -25,9 +52,34 @@ def pearsonr_probablity(
     shuffle_partial: bool = False,
     n: int = 500,
 ) -> Tuple[float, float]:
-    """Returns Pearson's colocalisation coefficient and the relevant probabilty.
-    If a mask is passsed then masked shuffle_blocks is used.
-"""
+    """Evalulates Probability of Pearson's coefficient.
+
+    Calculates Pearson's R of `x` and `y` then shuffles `y` `n` times, retesting
+    Pearson's R. The probability is defined as the ratio of R's produced by the
+    shuffling that are lower than the original R. Args `block`, `mask` and
+    `shuffle_partial` are passed to 'shuffle_blocks'.
+
+    Args:
+        x: array
+        y: array, same shape as `x`
+        block: block size for shuffle
+        mask: mask for shuffle
+        shuffle_partial: shuffle partially masked blocks
+        n: number of shuffles to perform
+
+    Returns:
+        Pearsons's r
+        probability, p, of the r
+
+    See Also:
+        :func:`pew.lib.colocal.pearsonr`
+        :func:`pew.lib.calc.shuffle_blocks`
+
+    References:
+        .. [1] Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G. & Lockett, S.
+        Automatic and Quantitative Measurement of Protein-Protein Colocalization in Live Cells
+        Biophysical Journal, Elsevier BV, 2004, 86, 3993-4003
+    """
     if mask is None:
         mask = np.ones(x.shape, dtype=bool)
 
@@ -50,10 +102,22 @@ def pearsonr_probablity(
 def manders(
     x: np.ndarray, y: np.ndarray, tx: float = None, ty: float = None
 ) -> Tuple[float, float]:
-    """Returns Manders' correlation coefficients m1, m2.
-    tx and ty are the thresholds for x and y respectively.
-    If ty is None then tx is used.
-"""
+    """Manders' correlation coefficients.
+
+    Args:
+        x: array
+        y: array, same shape as `x`
+        tx: threshold for `x`, defaults to x.min()
+        ty: threshold for `y`, defaults to y.min()
+
+    Returns:
+        M1, factional overlap of `x` to `y`
+        M2, factional overlap of `y` to `x`
+
+    References:
+        .. [1] MANDERS, E. M. M.; VERBEEK, F. J. & J. A., ATEN
+        Measurement of co-localization of objects in dual-colour confocal images
+        Journal of Microscopy, Wiley, 1993, 169, 375-382"""
     if tx is None:
         tx = np.amin(x)
     if ty is None:
@@ -65,14 +129,30 @@ def manders(
 def costes_threshold(
     x: np.ndarray, y: np.ndarray, target_r: float = 0.0
 ) -> Tuple[float, float, float]:
-    """Calculates the thresholds Tx and Ty for the given arrays.
-    Arrays should be normalised before calling this function.
+    """Calculates Costes thresholds.
+
+    Pearson's R is calculated for values of `x` and `y` that are above a decreasing threhold.
+    Once the caluclated R value is below `target_r` the thresholds are returned.
+    The threshold for `y` equals 'tx' * 'a' + 'b'.
+
+    Args:
+        x: array
+        y: array, same shape as `x`
+        target_r: value of R at which stop incrementing
 
     Returns:
-        T -> threshold for x
-        a -> slope
-        b -> interept
-"""
+        threshold for x, tx
+        slope, a
+        intercept, b
+
+    See Also:
+        :func:`pew.lib.colocal.pearsonr`
+
+    References:
+        .. [1] Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G. & Lockett, S.
+        Automatic and Quantitative Measurement of Protein-Protein Colocalization in Live Cells
+        Biophysical Journal, Elsevier BV, 2004, 86, 3993-4003
+    """
     b, a = np.polynomial.polynomial.polyfit(x.ravel(), y.ravel(), 1)
     threshold = x.max()
     threshold_min = x.min()
@@ -95,6 +175,27 @@ def costes_threshold(
 def costes(
     x: np.ndarray, y: np.ndarray, n_scrambles: int = 200
 ) -> Tuple[float, float, float, float]:  # pragma: no cover, covered in other funcs
+    """Performs Costes colocalisation.
+
+    The threshold at which no colocalisation appears (R < 0) is first calculated
+    and then used to find Manders M1 and M2.
+
+    Args:
+        x: array
+        y: array, same shape as `x`
+        n_scrambles: scrambles for Pearson probability
+
+    Returns:
+        Pearson's R
+        probability of Pearson's R
+        Mander's M1
+        Mander's M2
+
+    See Also:
+        :func:`pew.lib.colocal.costes_threshold`
+        :func:`pew.lib.colocal.manders`
+        :func:`pew.lib.colocal.pearsonr_probablity`
+    """
     x, y = normalise(x), normalise(y)
     t, a, b = costes_threshold(x, y)
     tx, ty = t, t * a + b

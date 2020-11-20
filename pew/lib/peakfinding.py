@@ -1,6 +1,6 @@
 import numpy as np
 
-from pew.lib.calc import local_maxima, reset_cumsum, sliding_window_centered
+from pew.lib.calc import local_maxima, reset_cumsum, view_as_blocks
 
 from typing import Callable, Tuple
 
@@ -96,7 +96,12 @@ def _cwt_filter_ridges(
     max_coords = np.vstack((max_rows[col_order], max_cols[col_order]))
 
     # Reducing number of windows here improves performance
-    windows = sliding_window_centered(cwt_coef[0], noise_window, 1)[max_coords[1]]
+    cwt_pad = np.pad(
+        cwt_coef[0],
+        (noise_window // 2, noise_window - noise_window // 2 - 1),
+        mode="edge",
+    )
+    windows = view_as_blocks(cwt_pad, (noise_window,), (1,))[max_coords[1]]
     signals = cwt_coef[max_coords[0], max_coords[1]]
     noises = np.percentile(np.abs(windows), 10, axis=1)
     noises[noises < min_noise] = min_noise
@@ -187,6 +192,7 @@ def find_peaks_zscore(
 
     if use_cython:
         from pew.lib.zscore import zscore_peaks
+
         signal, _ = zscore_peaks(x, lag, threshold, influence)
     else:
         signal, _ = _zscore_peaks(x, lag, threshold, influence)
@@ -300,7 +306,7 @@ def bin_and_bound_peaks(
     offset: int = 0,
 ) -> np.ndarray:
     """Bins peaks and ensures that there is 1 peak per bin. If less a zero
-     area peak is added, if more the largest peak in the bin is used."""
+    area peak is added, if more the largest peak in the bin is used."""
     bins = np.arange(0, data_size, bin_size)
     idx = np.searchsorted(bins, peaks["top"]) - 1
 
@@ -393,7 +399,9 @@ def peaks_from_edges(
 
     if base_method == "baseline":
         bottoms = tops  # Default to tops
-        windows = sliding_window_centered(x, np.amax(widths) * 4)
+        bwin = np.amax(widths) * 4
+        x_pad = np.pad(x, (bwin // 2, bwin - bwin // 2 - 1), mode="edge")
+        windows = view_as_blocks(x_pad, (bwin,), (1,))
         bases = np.percentile(windows[bottoms], 25, axis=1)
     elif base_method == "edge":
         bottoms = np.minimum(lefts, rights)
