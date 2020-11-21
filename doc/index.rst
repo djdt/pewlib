@@ -6,11 +6,13 @@
 Welcome to pew's documentation!
 ===============================
 
+Pew is a python library for import, processing and export of LA-ICP-MS imaging data.
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
-   pew
+   io
+   lib
 
 
 
