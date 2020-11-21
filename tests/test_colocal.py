@@ -23,6 +23,7 @@ def test_pearson_r():
 
 
 def test_pearson_r_probability():
+    np.random.seed(872634)
     r, p = colocal.pearsonr_probablity(a, b, block=3, n=500, shuffle_partial=False)
     assert r == 0.0
     assert 0.66 > p > 0.33
