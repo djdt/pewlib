@@ -20,7 +20,7 @@ def li_icq(x: np.ndarray, y: np.ndarray) -> float:
         value between -0.5 and 0.5
 
     References:
-        .. [1] Li, Q. A Syntaxin 1, G o, and N-Type Calcium Channel Complex at
+        Li, Q. A Syntaxin 1, G o, and N-Type Calcium Channel Complex at
             a Presynaptic Nerve Terminal: Analysis by Quantitative Immunocolocalization
             Journal of Neuroscience, Society for Neuroscience, 2004, 24, 4070-4081
 
@@ -58,7 +58,8 @@ def pearsonr_probablity(
     Calculates Pearson's R of `x` and `y` then shuffles `y` `n` times, retesting
     Pearson's R. The probability is defined as the ratio of R's produced by the
     shuffling that are lower than the original R. Args `block`, `mask` and
-    `shuffle_partial` are passed to 'shuffle_blocks'.
+    `shuffle_partial` are passed to 'shuffle_blocks'. Implemented as per
+    Costes [1].
 
     Args:
         x: array
@@ -77,7 +78,7 @@ def pearsonr_probablity(
         :func:`pew.lib.calc.shuffle_blocks`
 
     References:
-        .. [2] Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G.
+        .. [1] Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G.
             & Lockett, S. Automatic and Quantitative Measurement of Protein-Protein
             Colocalization in Live Cells Biophysical Journal, Elsevier BV,
             2004, 86, 3993-4003
@@ -117,7 +118,7 @@ def manders(
         M2, factional overlap of `y` to `x`
 
     References:
-        .. [3] MANDERS, E. M. M.; VERBEEK, F. J. & J. A., ATEN
+        MANDERS, E. M. M.; VERBEEK, F. J. & J. A., ATEN
             Measurement of co-localization of objects in dual-colour confocal images
             Journal of Microscopy, Wiley, 1993, 169, 375-382
     """
@@ -152,7 +153,7 @@ def costes_threshold(
         :func:`pew.lib.colocal.pearsonr`
 
     References:
-        .. [2] Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G.
+        Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G.
             & Lockett, S. Automatic and Quantitative Measurement of Protein-Protein
             Colocalization in Live Cells Biophysical Journal, Elsevier BV,
             2004, 86, 3993-4003
@@ -199,6 +200,12 @@ def costes(
         :func:`pew.lib.colocal.costes_threshold`
         :func:`pew.lib.colocal.manders`
         :func:`pew.lib.colocal.pearsonr_probablity`
+
+    References:
+        Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G.
+            & Lockett, S. Automatic and Quantitative Measurement of Protein-Protein
+            Colocalization in Live Cells Biophysical Journal, Elsevier BV,
+            2004, 86, 3993-4003
     """
     x, y = normalise(x), normalise(y)
     t, a, b = costes_threshold(x, y)

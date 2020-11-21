@@ -31,9 +31,6 @@ for 1-dimensional convolution as well as functions for creating distributions.
 Filtering
 =========
 
-Filtering can be used to remove artifacts, such as spikes, from images.
-Care must be taken when using filtering to enusre that legitmate data is not
-altered.
 
 .. automodule:: pew.lib.filters
     :members:

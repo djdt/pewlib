@@ -1,3 +1,7 @@
+"""Filtering can be used to remove artifacts, such as spikes, from images.
+Care must be taken when using filtering to ensure that legitmate data is not
+also altered.
+"""
 import numpy as np
 
 from pew.lib.calc import view_as_blocks
@@ -22,6 +26,33 @@ def rolling_mean(
 
     Returns:
         array with outliers set to local means
+
+    Example
+    -------
+
+    Removing spikes from 1d data.
+
+    >>> import numpy as np
+    >>> from pew.lib import filters
+    >>> a = np.sin(np.linspace(0, 1, 50))
+    >>> a[5::10] +=np.random.choice([-1, 1], size=10)
+    >>> b = filters.rolling_mean(a, 3, threshold=3.0)
+
+    .. plot::
+
+        import matplotlib.pyplot as plt
+        import numpy as np
+        from pew.lib import filters
+        import numpy as np
+        from pew.lib import filters
+        a = np.sin(np.linspace(0, 10, 50))
+        a[5::10] +=np.random.choice([-1, 1], size=5)
+        b = filters.rolling_mean(a, 3, threshold=3.0)
+
+        plt.plot(a, c="black")
+        plt.plot(b, ls=":", c="red", label="filtered")
+        plt.legend()
+        plt.show()
     """
     if isinstance(block, int):
         block = tuple([block])
@@ -71,6 +102,34 @@ def rolling_median(
 
     Returns:
         array with outliers set to local means
+
+    Example
+    -------
+
+    Removing poisson noise from an image.
+
+    >>> import numpy as np
+    >>> from pew.lib import filters
+    >>> a = np.sin(np.linspace(0, 1, 2500).reshape((50, 50)))
+    >>> a += np.random.poisson(lam=0.01, size=(50, 50))
+    >>> b = filters.rolling_median(a, (5, 5), threshold=3.0)
+
+    .. plot::
+
+        import matplotlib.pyplot as plt
+        import numpy as np
+        from pew.lib import filters
+        a = np.sin(np.linspace(0, 1, 2500).reshape((50, 50)))
+        a += np.random.poisson(lam=0.01, size=(50, 50))
+        b = filters.rolling_median(a, (5, 5), threshold=3.0)
+
+        f, ax = plt.subplots(1, 2)
+        ax[0].imshow(a, vmax=1.0)
+        ax[0].set_title("raw image 'a'")
+        ax[1].imshow(b, vmax=1.0)
+        ax[1].set_title("filtered image 'b'")
+        plt.show()
+
     """
     if isinstance(block, int):  # pragma: no cover
         block = tuple([block])

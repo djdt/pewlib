@@ -59,7 +59,7 @@ def deconvolve(x: np.ndarray, psf: np.ndarray, mode: str = "valid"):
 def erf(x: float) -> float:
     """Error function approximation.
 
-    The maximum error is 5e-4.
+    The maximum error is 5e-4 [1].
 
     Args:
         x: value
@@ -83,7 +83,7 @@ def erf(x: float) -> float:
 def erfinv(x: float) -> float:
     """Inverse error function approximation.
 
-    The maximum error is 6e-3.
+    The maximum error is 6e-3 [2].
 
     Args:
         x: value
@@ -107,6 +107,8 @@ def erfinv(x: float) -> float:
 def gamma(x: float) -> float:
     """Gamma function approximation.
 
+    Maximum error of 3e-7 [3].
+
     Args:
         x: value
 
@@ -115,7 +117,7 @@ def gamma(x: float) -> float:
 
     References:
 
-    .. [1] Abramowitz, Milton, and Irene A. Stegun, eds. Handbook of mathematical
+    .. [3] Abramowitz, Milton, and Irene A. Stegun, eds. Handbook of mathematical
         functions with formulas, graphs, and mathematical tables.
         Vol. 55. US Government printing office, 1970.
     """
