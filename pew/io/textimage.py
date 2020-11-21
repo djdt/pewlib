@@ -1,3 +1,7 @@
+"""
+Import and export of text-images, files where data is stored as delimited text values.
+Data is read in order from the first line.
+"""
 import numpy as np
 from pathlib import Path
 
@@ -8,7 +12,7 @@ def load(
     path: Union[str, Path], delimiter: str = None, comments: str = "#", name: str = None
 ) -> np.ndarray:
     """Load text-image.
-    
+
     Loads 2d data from file. If `delimiter` is specified then all tab and ';'
     are converted to ',' before import. If `name` is specified then a single
     field structured array is returned.

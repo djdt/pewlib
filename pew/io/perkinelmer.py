@@ -1,3 +1,6 @@
+"""
+Import of PerkinElmer ELAN 'XL' directories.
+"""
 import logging
 
 import numpy as np

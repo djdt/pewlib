@@ -1,3 +1,8 @@
+"""
+Import of line-by-line collected Agilent '.b' batches.
+Both raw binaries and the '.csv' exports are supported.
+Tested with Agilent 7500, 7700 and 8900 ICPs.
+"""
 import logging
 from xml.etree import ElementTree
 from pathlib import Path
@@ -124,7 +129,7 @@ def collect_datafiles(path: Union[str, Path], methods: List[str]) -> List[Path]:
         else:  # pragma: no cover
             logger.warning(f"Unable to collect datafiles using '{method}'.")
 
-    logger.warning(f"All datafile collection methods '[methods]' failed.")
+    logger.warning(f"All datafile collection methods '{methods}' failed.")
     return []  # pragma: no cover
 
 
@@ -331,7 +336,8 @@ def load_binary(
         dict of params if `full`
 
     Raises:
-        FileNotFoundError: 'MSScan.bin', 'MSProfile.bin' or 'MSTS_XSpecific.xml' not found
+        FileNotFoundError: 'MSScan.bin', 'MSProfile.bin' or 'MSTS_XSpecific.xml'
+            not found
         IOError: invalid binary format
 
     See Also:

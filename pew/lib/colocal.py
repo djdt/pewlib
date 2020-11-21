@@ -21,8 +21,8 @@ def li_icq(x: np.ndarray, y: np.ndarray) -> float:
 
     References:
         .. [1] Li, Q. A Syntaxin 1, G o, and N-Type Calcium Channel Complex at
-        a Presynaptic Nerve Terminal: Analysis by Quantitative Immunocolocalization
-        Journal of Neuroscience, Society for Neuroscience, 2004, 24, 4070-4081
+            a Presynaptic Nerve Terminal: Analysis by Quantitative Immunocolocalization
+            Journal of Neuroscience, Society for Neuroscience, 2004, 24, 4070-4081
 
     """
     ux, uy = np.mean(x), np.mean(y)
@@ -32,7 +32,8 @@ def li_icq(x: np.ndarray, y: np.ndarray) -> float:
 def pearsonr(x: np.ndarray, y: np.ndarray) -> float:
     """Pearson's colocalisation coefficient.
 
-    A value of 0 indicates no correlation, below 0 segregation and above 0 colocalisation.
+    A value of 0 indicates no correlation, below 0 segregation and above 0
+    colocalisation.
 
     Args:
         x: array
@@ -76,9 +77,10 @@ def pearsonr_probablity(
         :func:`pew.lib.calc.shuffle_blocks`
 
     References:
-        .. [1] Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G. & Lockett, S.
-        Automatic and Quantitative Measurement of Protein-Protein Colocalization in Live Cells
-        Biophysical Journal, Elsevier BV, 2004, 86, 3993-4003
+        .. [2] Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G.
+            & Lockett, S. Automatic and Quantitative Measurement of Protein-Protein
+            Colocalization in Live Cells Biophysical Journal, Elsevier BV,
+            2004, 86, 3993-4003
     """
     if mask is None:
         mask = np.ones(x.shape, dtype=bool)
@@ -115,9 +117,10 @@ def manders(
         M2, factional overlap of `y` to `x`
 
     References:
-        .. [1] MANDERS, E. M. M.; VERBEEK, F. J. & J. A., ATEN
-        Measurement of co-localization of objects in dual-colour confocal images
-        Journal of Microscopy, Wiley, 1993, 169, 375-382"""
+        .. [3] MANDERS, E. M. M.; VERBEEK, F. J. & J. A., ATEN
+            Measurement of co-localization of objects in dual-colour confocal images
+            Journal of Microscopy, Wiley, 1993, 169, 375-382
+    """
     if tx is None:
         tx = np.amin(x)
     if ty is None:
@@ -131,9 +134,9 @@ def costes_threshold(
 ) -> Tuple[float, float, float]:
     """Calculates Costes thresholds.
 
-    Pearson's R is calculated for values of `x` and `y` that are above a decreasing threhold.
-    Once the caluclated R value is below `target_r` the thresholds are returned.
-    The threshold for `y` equals 'tx' * 'a' + 'b'.
+    Pearson's R is calculated for values of `x` and `y` that are above a decreasing
+    threshold. Once the caluclated R value is below `target_r` the thresholds are
+    returned. The threshold for `y` equals 'tx' * 'a' + 'b'.
 
     Args:
         x: array
@@ -149,9 +152,10 @@ def costes_threshold(
         :func:`pew.lib.colocal.pearsonr`
 
     References:
-        .. [1] Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G. & Lockett, S.
-        Automatic and Quantitative Measurement of Protein-Protein Colocalization in Live Cells
-        Biophysical Journal, Elsevier BV, 2004, 86, 3993-4003
+        .. [2] Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G.
+            & Lockett, S. Automatic and Quantitative Measurement of Protein-Protein
+            Colocalization in Live Cells Biophysical Journal, Elsevier BV,
+            2004, 86, 3993-4003
     """
     b, a = np.polynomial.polynomial.polyfit(x.ravel(), y.ravel(), 1)
     threshold = x.max()

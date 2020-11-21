@@ -1,3 +1,7 @@
+"""
+Import and export in pew's custom file format, based on numpy's compressed '.npz'.
+This format svaes image data, laser parameters and calibrations in one file.
+"""
 import time
 from pathlib import Path
 

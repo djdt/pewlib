@@ -70,8 +70,8 @@ def erf(x: float) -> float:
     References:
 
     .. [1] Abramowitz, Milton, and Irene A. Stegun, eds. Handbook of mathematical
-    functions with formulas, graphs, and mathematical tables.
-    Vol. 55. US Government printing office, 1970.
+        functions with formulas, graphs, and mathematical tables.
+        Vol. 55. US Government printing office, 1970.
     """
     assert x >= 0.0
     # Maximum error: 2.5e-5
@@ -92,7 +92,8 @@ def erfinv(x: float) -> float:
         approximation of inverse error function
 
     References:
-        .. [1] Winitzki, S. A handy approximation for the error function and its inverse 2008
+        .. [2] Winitzki, S. A handy approximation for the error function and its inverse
+            2008
     """
     sign = np.sign(x)
     x = np.log((1.0 - x) * (1.0 + x))
@@ -115,8 +116,8 @@ def gamma(x: float) -> float:
     References:
 
     .. [1] Abramowitz, Milton, and Irene A. Stegun, eds. Handbook of mathematical
-    functions with formulas, graphs, and mathematical tables.
-    Vol. 55. US Government printing office, 1970.
+        functions with formulas, graphs, and mathematical tables.
+        Vol. 55. US Government printing office, 1970.
     """
     assert x >= 0.0
     # Use recursion
@@ -186,7 +187,8 @@ def exponential(
 ) -> np.ndarray:
     """Exponential distribution.
 
-    Range of 0 to `size`, the `scale` and `shift` arguments can be used to change the range.
+    Range of 0 to `size`, the `scale` and `shift` arguments can be used to change
+    the range.
 
     Args:
         size: size of distribution
@@ -211,7 +213,8 @@ def inversegamma(
 ) -> np.ndarray:
     """Inverse Gamma distribution.
 
-    Range of 0 to `size`, the `scale` and `shift` arguments can be used to change the range.
+    Range of 0 to `size`, the `scale` and `shift` arguments can be used to change
+    the range.
 
     Args:
         size: size of distribution
@@ -256,7 +259,7 @@ def laplace(
 
 
 # def logcauchy_pdf(x: np.ndarray, sigma: float, mu: float) -> np.ndarray:
-#     return (1.0 / (x * np.pi)) * (sigma / (np.power(np.log(x) - mu, 2) + sigma * sigma))
+# return (1.0 / (x * np.pi)) * (sigma / (np.power(np.log(x) - mu, 2) + sigma * sigma))
 
 
 # def logcauchy(
@@ -276,7 +279,8 @@ def loglaplace(
 ) -> np.ndarray:
     """Log-Laplace distribution.
 
-    Range of 0 to `size`, the `scale` and `shift` arguments can be used to change the range.
+    Range of 0 to `size`, the `scale` and `shift` arguments can be used to change
+    the range.
 
     Args:
         size: size of distribution
@@ -302,7 +306,8 @@ def lognormal(
 ) -> np.ndarray:
     """Log-normal distribution.
 
-    Range of 0 to `size`, the `scale` and `shift` arguments can be used to change the range.
+    Range of 0 to `size`, the `scale` and `shift` arguments can be used to change
+    the range.
 
     Args:
         size: size of distribution
