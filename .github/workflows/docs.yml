@@ -24,6 +24,9 @@ jobs:
       - name: Test with pytest
         run: |
           pytest
+      - name: Install doc dependencies
+        run: |
+          pip install sphinx sphinx-rtd-theme matplotlib
       - name: Build docs
         run: |
           cd docs
