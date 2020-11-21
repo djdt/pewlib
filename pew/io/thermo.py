@@ -1,3 +1,8 @@
+"""
+Import of line-byy-line data exported from Qtegra using the '.csv' export function.
+Both column and row formats are supported.
+Tested with Thermo iCAP RQ ICP-MS.
+"""
 import numpy as np
 from pathlib import Path
 

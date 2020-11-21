@@ -1,5 +1,5 @@
 """
-Import of PerkinElmer ELAN 'XL' directories.
+Import of line-by-line PerkinElmer ELAN 'XL' directories.
 """
 import logging
 
