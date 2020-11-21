@@ -6,6 +6,19 @@ from typing import Tuple
 
 
 class SRRConfig(Config):
+    """Class for the super-resolution-reconstruction image parameters.
+
+    Args:
+        spotsize: laser-spot diameter, μm
+        speed: laser movement speed, μm/s
+        scantime: MS acquisition time, s
+        warmup: warmup time in s
+        subpixel_offsets: list of offsets of layers, (offset, pixelsize)
+
+    See Also:
+        :class:`pew.config.Config`
+    """
+
     def __init__(
         self,
         spotsize: float = 35.0,
@@ -24,7 +37,7 @@ class SRRConfig(Config):
 
     @property
     def warmup(self) -> float:
-        """Returns the laser warmup (time before data recorded) in seconds."""
+        """Laser warmup (time before data recorded) in seconds."""
         return self._warmup * self.scantime
 
     @warmup.setter
@@ -33,10 +46,12 @@ class SRRConfig(Config):
 
     @property
     def magnification(self) -> float:
+        """Magnification due to non-equal aspect."""
         return np.round(self.spotsize / (self.speed * self.scantime)).astype(int)
 
     @property
     def subpixel_offsets(self) -> np.ndarray:
+        """Layer offsets."""
         return np.array(
             [[offset, self._subpixel_size] for offset in self._subpixel_offsets]
         )
@@ -51,6 +66,7 @@ class SRRConfig(Config):
 
     @property
     def subpixels_per_pixel(self) -> int:
+        """Pixel width in subpixels."""
         return np.lcm(self._subpixel_size, self.magnification) // self.magnification
 
     def set_equal_subpixel_offsets(self, width: int) -> None:
@@ -58,6 +74,11 @@ class SRRConfig(Config):
         self._subpixel_size = width
 
     def get_pixel_width(self, layer: int = None) -> float:
+        """Pixel width in μm.
+
+        Args:
+            layer: limit to layer
+        """
         if layer is None:
             return super().get_pixel_width() / self.subpixels_per_pixel
         elif layer % 2 == 0:
@@ -66,6 +87,11 @@ class SRRConfig(Config):
             return super().get_pixel_height()
 
     def get_pixel_height(self, layer: int = None) -> float:
+        """Pixel height in μm.
+
+        Args:
+            layer: limit to layer
+        """
         if layer is None:
             return super().get_pixel_width() / self.subpixels_per_pixel
         elif layer % 2 == 0:
@@ -75,12 +101,18 @@ class SRRConfig(Config):
 
     # Return without the washout included
     def data_extent(
-        self, shape: Tuple[int, ...], **kwargs
+        self,
+        shape: Tuple[int, ...],
+        layer: int = None,
     ) -> Tuple[float, float, float, float]:
-        layer = kwargs.get("layer", None)
-        px, py = self.get_pixel_width(layer), self.get_pixel_height(layer)
+        """Extent of data in μm.
 
-        warmup = self._warmup if kwargs.get("warmup", True) else 0.0
+        Args:
+            shape: data shape
+            layer: limit calculation to layer
+        """
+        px, py = self.get_pixel_width(layer), self.get_pixel_height(layer)
+        warmup = self._warmup
         if layer is None:
             return (
                 px * warmup,

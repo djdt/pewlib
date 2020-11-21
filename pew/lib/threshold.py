@@ -4,8 +4,8 @@ import numpy as np
 def otsu(x: np.ndarray) -> float:
     """Calculates the otsu threshold of the input array.
 
-    References:
-        https://github.com/scikit-image/scikit-image/blob/master/skimage/filters/thresholding.py
+    See Also:
+        :func:`skimage.filters.threshold_otsu`
     """
     hist, bin_edges = np.histogram(x, bins=256)
     bin_centers = (bin_edges[1:] + bin_edges[:-1]) / 2.0

@@ -10,6 +10,8 @@ from typing import Any, Dict, List, Tuple, Union
 
 
 class _Laser:
+    """Base class for other laser classes."""
+
     data: Union[np.ndarray, List[np.ndarray]] = None
     calibration: Dict[str, Calibration] = None
     config: Config = None
@@ -48,6 +50,22 @@ class _Laser:
 
 
 class Laser(_Laser):
+    """Class for line-by-line laser data.
+
+    Line-by-line data is collected in multiple lines, with each line performed as a
+    continuous ablation in one direction. The lines are then stacked to form an image.
+
+    Args:
+        data: structured array of elemental data
+        calibration: dict mapping elements to calibrations, optional
+        config: laser parameters
+        name: name of image
+        path: path to file
+
+    Todo:
+        Support rastered collection.
+    """
+
     def __init__(
         self,
         data: np.ndarray,
@@ -68,10 +86,12 @@ class Laser(_Laser):
 
     @property
     def extent(self) -> Tuple[float, float, float, float]:
+        """Image extent in μm"""
         return self.config.data_extent(self.shape[:2])
 
     @property
     def isotopes(self) -> Tuple[str, ...]:
+        """Elements stored."""
         return self.data.dtype.names
 
     @property
@@ -81,6 +101,13 @@ class Laser(_Laser):
     def add(
         self, isotope: str, data: np.ndarray, calibration: Calibration = None
     ) -> None:
+        """Adds a new element.
+
+        Args:
+            isotope: element name
+            data: array
+            calibration: calibration for data, optional
+        """
         assert data.shape == self.data.shape
         new_dtype = self.data.dtype.descr + [(isotope, data.dtype.str)]
 
@@ -95,6 +122,7 @@ class Laser(_Laser):
         self.calibration[isotope] = calibration
 
     def remove(self, names: Union[str, List[str]]) -> None:
+        """Remove element(s)."""
         if isinstance(names, str):
             names = [names]
         self.data = rfn.drop_fields(self.data, names, usemask=False)
@@ -102,6 +130,11 @@ class Laser(_Laser):
             self.calibration.pop(name)
 
     def rename(self, names: Dict[str, str]) -> None:
+        """Change the name of element(s).
+
+        Args:
+            names: dict mapping old to new names
+        """
         self.data = rfn.rename_fields(self.data, names)
         for old, new in names.items():
             self.calibration[new] = self.calibration.pop(old)
@@ -113,7 +146,18 @@ class Laser(_Laser):
         extent: Tuple[float, float, float, float] = None,
         **kwargs,
     ) -> np.ndarray:
-        """Valid kwargs are calibrate, extent, flat."""
+        """Get elemental data.
+
+        If `isotope` is None then all elements are returned in a structured array.
+
+        Args:
+            isotope: element name, optional
+            calibrate: apply calibration
+            extent: trim to extent, μm
+
+        Returns:
+            structured if isotope is None else unstructured
+        """
         if isotope is None:
             data = self.data.copy()
         else:
@@ -144,6 +188,7 @@ class Laser(_Laser):
         name: str = "",
         path: Path = None,
     ) -> "Laser":
+        """Creates class from a list of names and unstructured arrays."""
         assert len(isotopes) == len(datas)
         dtype = [(isotope, float) for isotope in isotopes]
 

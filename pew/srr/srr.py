@@ -14,6 +14,21 @@ from typing import Dict, List, Tuple, Union
 
 
 class SRRLaser(_Laser):
+    """Class for SRR laser data.
+
+    Super-Resolution-Reconstruction is performed by ablating layers of a sample
+    in a line-by-line fashion. Layers are offset by a faction of the spotsize
+    to increase image resolution. The resulting image is 3d.
+
+    Args:
+        data: list of structured arrays
+        calibration: dict mapping elements to calibrations, optional
+        config: SRR laser parameters
+        name: name of image
+        path: path to file
+
+    """
+
     def __init__(
         self,
         data: List[np.ndarray],
@@ -37,7 +52,10 @@ class SRRLaser(_Laser):
 
     @property
     def extent(self) -> Tuple[float, float, float, float]:
-        """Calculates the extent of the array POST srr."""
+        """Data extent in μm
+
+        This is calculated *post* SRR.
+        """
         pixelsize = self.config.subpixels_per_pixel
         offset = np.max(self.config._subpixel_offsets)
         new_shape = np.array(self.shape[:2]) * self.config.magnification
@@ -59,6 +77,7 @@ class SRRLaser(_Laser):
     def add(
         self, isotope: str, data: List[np.ndarray], calibration: Calibration = None
     ) -> None:
+        """Add an element."""
         assert len(data) == len(self.data)
         for i in range(0, len(self.data)):
             assert data[i].shape == self.data[i].shape
@@ -76,6 +95,7 @@ class SRRLaser(_Laser):
         self.calibration[isotope] = calibration
 
     def remove(self, names: Union[str, List[str]]) -> None:
+        """Remove element(s)."""
         if isinstance(names, str):
             names = [names]
         for i in range(len(self.data)):
@@ -84,6 +104,11 @@ class SRRLaser(_Laser):
             self.calibration.pop(name)
 
     def rename(self, names: Dict[str, str]) -> None:
+        """Rename element(s).
+
+        Args:
+            names: dict mapping old to new name
+        """
         for i in range(len(self.data)):
             self.data[i] = rfn.rename_fields(self.data[i], names)
         for old, new in names.items():
@@ -98,6 +123,24 @@ class SRRLaser(_Laser):
         layer: int = None,
         **kwargs,
     ) -> np.ndarray:
+        """Get elemental data.
+
+        If `isotope` is None then all elements are returned in a structured array.
+        If a 2d array is required then `flat` will flatten the array by calculating
+        the mean across the 2nd axis. If a `layer` is given then the layer is extracted
+        otherwise SRR is performed and the resulting array returned.
+
+        Args:
+            isotope: element name, optional
+            calibrate: apply calibration
+            extent: trim to extent, μm
+            flat: flatten to 2d
+            layer: extract layer, optional
+
+        Returns:
+            structured if isotope is None else unstructured
+            2d if layer or flat, else 3d
+        """
         if layer is not None:
             data = self.data[layer].copy()
             # Flip alternate layers
@@ -140,6 +183,7 @@ class SRRLaser(_Laser):
         return data
 
     def check_config_valid(self, config: SRRConfig) -> bool:
+        """Checks if SRRConfig is valid for data."""
         if config.warmup < 0:
             return False
         shape = self.data[1].shape[0], self.data[0].shape[1]
@@ -153,6 +197,7 @@ class SRRLaser(_Laser):
         return True
 
     def krisskross(self) -> np.ndarray:
+        """Perform SRR."""
         # Calculate the line lengths
         length = (
             self.data[1].shape[0] * self.config.magnification,
@@ -185,6 +230,7 @@ class SRRLaser(_Laser):
         name: str = "",
         path: Path = None,
     ) -> "SRRLaser":
+        """Creates class from a list of names and lists of unstructured arrays."""
         dtype = [(isotope, float) for isotope in isotopes]
 
         structured_layers = []
@@ -199,6 +245,10 @@ class SRRLaser(_Laser):
 
     @classmethod
     def from_lasers(cls, lasers: List[Laser]) -> "SRRLaser":
+        """Stacks :class:`Laser` to form SRR.
+
+        Calibration and config are taken from the first :class:`Laser`.
+        """
         assert all(lasers[0].isotopes == laser.isotopes for laser in lasers[1:])
 
         config = SRRConfig(
