@@ -1,0 +1,531 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>IO Module &mdash; pew  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Line-by-line Lasers" href="pew.html" />
+    <link rel="prev" title="Welcome to pew’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> pew
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">IO Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-pew.io.agilent">Agilent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pew.io.npz">Numpy NPZ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pew.io.perkinelmer">PerkinElmer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pew.io.textimage">Text Image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pew.io.vtk">VTK</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pew.html">Line-by-line Lasers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pew.html#srr-lasers">SRR Lasers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lib.html">Processing Library</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pew</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>IO Module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/io.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="io-module">
+<h1>IO Module<a class="headerlink" href="#io-module" title="Permalink to this headline">¶</a></h1>
+<p>This module contains the functions pew uses for importing and exporting data.</p>
+<div class="section" id="module-pew.io.agilent">
+<span id="agilent"></span><h2>Agilent<a class="headerlink" href="#module-pew.io.agilent" title="Permalink to this headline">¶</a></h2>
+<p>Import of line-by-line collected Agilent ‘.b’ batches.
+Both raw binaries and the ‘.csv’ exports are supported.
+Tested with Agilent 7500, 7700 and 8900 ICPs.</p>
+<dl class="py function">
+<dt id="pew.io.agilent.collect_datafiles">
+<code class="sig-prename descclassname">pew.io.agilent.</code><code class="sig-name descname">collect_datafiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">methods</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.agilent.collect_datafiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds ‘.d’ datafiles in a directory.</p>
+<p>A list of expected datafiles is created for each method in <cite>methods</cite>.
+Methods are tested in order until ones successfully finds ALL expected datafiles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to directory</p></li>
+<li><p><strong>methods</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – list of methods to try,
+{‘alphabetical’, ‘acq_method_xml’, ‘batch_csv’, ‘batch_xml’}</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of datafiles</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pew.io.agilent.load">
+<code class="sig-prename descclassname">pew.io.agilent.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">collection_methods</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_acq_for_names</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">counts_per_second</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.agilent.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Imports an Agilent ‘.b’ batch.</p>
+<p>First attempts a binary import, falling back to importing any ‘.csv’ files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to batch</p></li>
+<li><p><strong>collection_methods</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – list of datafile collection methods,
+default = [‘batch_xml’, ‘batch_csv’]</p></li>
+<li><p><strong>use_acq_for_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – read element names from ‘AcqMethod.xml’, only for csv</p></li>
+<li><p><strong>counts_per_second</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – return data in CPS, only for binary</p></li>
+<li><p><strong>full</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – also return dict with scantime</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>structured array of data
+dict of params if <cite>full</cite></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#pew.io.agilent.collect_datafiles" title="pew.io.agilent.collect_datafiles"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.io.agilent.collect_datafiles()</span></code></a>
+<a class="reference internal" href="#pew.io.agilent.load_binary" title="pew.io.agilent.load_binary"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.io.agilent.load_binary()</span></code></a>
+<a class="reference internal" href="#pew.io.agilent.load_csv" title="pew.io.agilent.load_csv"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.io.agilent.load_csv()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pew.io.agilent.load_binary">
+<code class="sig-prename descclassname">pew.io.agilent.</code><code class="sig-name descname">load_binary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">collection_methods</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">counts_per_second</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.agilent.load_binary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Imports an Agilent ‘.b’ batch.</p>
+<p>Import is performed using the ‘MSScan.bin’, ‘MSProfile.bin’ binaries and
+‘MSTS_XSpecific.xml’ document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to batch</p></li>
+<li><p><strong>collection_methods</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – list of datafile collection methods,
+default = [‘batch_xml’, ‘batch_csv’]</p></li>
+<li><p><strong>counts_per_second</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – return data in CPS</p></li>
+<li><p><strong>full</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – also return dict with scantime</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>structured array of data
+dict of params if <cite>full</cite></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>FileNotFoundError</strong> – ‘MSScan.bin’, ‘MSProfile.bin’ or ‘MSTS_XSpecific.xml’
+    not found</p></li>
+<li><p><strong>IOError</strong> – invalid binary format</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#pew.io.agilent.collect_datafiles" title="pew.io.agilent.collect_datafiles"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.io.agilent.collect_datafiles()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pew.io.agilent.load_csv">
+<code class="sig-prename descclassname">pew.io.agilent.</code><code class="sig-name descname">load_csv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">collection_methods</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_acq_for_names</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.agilent.load_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Imports an Agilent ‘.b’ batch.</p>
+<p>Import is performed using the ‘.csv’ files found in each ‘.d’ datafile.
+If a ‘.csv’ can not be found then all data in the line is set to 0.
+To load properly formatted element names use <cite>use_acq_for_names</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to batch</p></li>
+<li><p><strong>collection_methods</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – list of datafile collection methods,
+default = [‘batch_xml’, ‘batch_csv’]</p></li>
+<li><p><strong>use_acq_for_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – read element names from ‘AcqMethod.xml’</p></li>
+<li><p><strong>full</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – also return dict with scantime</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>structured array of data
+dict of params if <cite>full</cite></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#pew.io.agilent.collect_datafiles" title="pew.io.agilent.collect_datafiles"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.io.agilent.collect_datafiles()</span></code></a></p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pew.io.npz">
+<span id="numpy-npz"></span><h2>Numpy NPZ<a class="headerlink" href="#module-pew.io.npz" title="Permalink to this headline">¶</a></h2>
+<p>Import and export in pew’s custom file format, based on numpy’s compressed ‘.npz’.
+This format svaes image data, laser parameters and calibrations in one file.</p>
+<dl class="py function">
+<dt id="pew.io.npz.load">
+<code class="sig-prename descclassname">pew.io.npz.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.npz.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads data from ‘.npz’ file.</p>
+<p>Loads files created using <a class="reference internal" href="#pew.io.npz.save" title="pew.io.npz.save"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.io.npz.save()</span></code></a>.
+On load the a <code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code> is reformed from the saved data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to ‘.npz’</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">_Laser</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – incomatible version</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.load()</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pew.io.npz.save">
+<code class="sig-prename descclassname">pew.io.npz.</code><code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">laser</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.npz.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves data to ‘.npz’ file.</p>
+<p>Converts a <code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code> to a series of <cite>np.ndarray</cite>
+which are then saved to a compressed ‘.npz’ archive. The time and current
+version are also saved. If <cite>path</cite> does not end in ‘.npz’ it is
+appended.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to save to</p></li>
+<li><p><strong>laser</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">_Laser</span></code>) – <code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.savez_compressed()</span></code></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pew.io.perkinelmer">
+<span id="perkinelmer"></span><h2>PerkinElmer<a class="headerlink" href="#module-pew.io.perkinelmer" title="Permalink to this headline">¶</a></h2>
+<p>Import of line-by-line PerkinElmer ELAN ‘XL’ directories.</p>
+<dl class="py function">
+<dt id="pew.io.perkinelmer.collect_datafiles">
+<code class="sig-prename descclassname">pew.io.perkinelmer.</code><code class="sig-name descname">collect_datafiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.perkinelmer.collect_datafiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds ‘.xl’ files in directory.</p>
+<p>Searches directory for ‘.xl’ files and sorts them in numerical order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>) – path to directory</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>list of paths ordered numerically</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pew.io.perkinelmer.load">
+<code class="sig-prename descclassname">pew.io.perkinelmer.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">import_parameters</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.perkinelmer.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads PerkinElmer directory.</p>
+<p>Searches the directory <cite>path</cite> for ‘.xl’ files and used them to reconstruct data.
+If <cite>import_parameters</cite> and a ‘parameters.conf’ is used then the scantime,
+speed and spotsize can be imported.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to directory</p></li>
+<li><p><strong>import_parameters</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – import params from ‘parameters.conf’</p></li>
+<li><p><strong>full</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – also return dict with params</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>structured array of data
+dict of params if <cite>full</cite></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#pew.io.perkinelmer.collect_datafiles" title="pew.io.perkinelmer.collect_datafiles"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.io.perkinelmer.collect_datafiles()</span></code></a></p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pew.io.textimage">
+<span id="text-image"></span><h2>Text Image<a class="headerlink" href="#module-pew.io.textimage" title="Permalink to this headline">¶</a></h2>
+<p>Import and export of text-images, files where data is stored as delimited text values.
+Data is read in order from the first line.</p>
+<dl class="py function">
+<dt id="pew.io.textimage.load">
+<code class="sig-prename descclassname">pew.io.textimage.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">delimiter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">comments</span><span class="o">=</span><span class="default_value">'#'</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.textimage.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load text-image.</p>
+<p>Loads 2d data from file. If <cite>delimiter</cite> is specified then all tab and ‘;’
+are converted to ‘,’ before import. If <cite>name</cite> is specified then a single
+field structured array is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to file</p></li>
+<li><p><strong>delimiter</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – file delimiter</p></li>
+<li><p><strong>comments</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – file comment character</p></li>
+<li><p><strong>name</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – return single <cite>name</cite> field structured array</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pew.io.textimage.save">
+<code class="sig-prename descclassname">pew.io.textimage.</code><code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">header</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.textimage.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save data to csv.</p>
+<p>See <code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.savetxt()</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to file</p></li>
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – unstructured array</p></li>
+<li><p><strong>header</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – file header</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pew.io.vtk">
+<span id="vtk"></span><h2>VTK<a class="headerlink" href="#module-pew.io.vtk" title="Permalink to this headline">¶</a></h2>
+<p>Exports to VTK formats for use in programs such as Paraview.</p>
+<dl class="py function">
+<dt id="pew.io.vtk.save">
+<code class="sig-prename descclassname">pew.io.vtk.</code><code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">spacing</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.vtk.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save data as a VTK ImageData XML.</p>
+<p>Saves an array to a ‘.vti’ file. Data origin is set to (0, 0) and equally
+spaced using x, y, z of <cite>spacing</cite>. If <cite>data</cite> is rasied to 3-dimensonal if lower.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to file</p></li>
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
+<li><p><strong>spacing</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – spacing of ‘.vti’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pew.html" class="btn btn-neutral float-right" title="Line-by-line Lasers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to pew’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, djdt
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
