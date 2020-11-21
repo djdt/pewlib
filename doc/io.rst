@@ -3,9 +3,6 @@ IO Module
 
 This module contains the functions pew uses for importing and exporting data.
 
-.. contents::
-   :depth: 2
-
 Agilent
 -------
 

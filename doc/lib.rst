@@ -1,5 +1,10 @@
+Processing Library
+==================
+
+Functions for processing laser image data.
+
 Calculations
-============
+------------
 
 This module mainly contains mathmatical functions used in other modules.
 
@@ -8,7 +13,7 @@ This module mainly contains mathmatical functions used in other modules.
 
 
 Colocalisation
-==============
+--------------
 
 Colocalisation can be used to quanitify the positional relationship between
 elements. Various algorithms exist and a few of them are implemented in this module.
@@ -18,7 +23,7 @@ elements. Various algorithms exist and a few of them are implemented in this mod
 
 
 Convolution
-===========
+-----------
 
 The are many applications for convolution and deconvolution of images such as
 blurring an image or removing wash-out tailing. This module contains functions
@@ -29,20 +34,19 @@ for 1-dimensional convolution as well as functions for creating distributions.
 
 
 Filtering
-=========
-
+---------
 
 .. automodule:: pew.lib.filters
     :members:
 
 
 Peakfinding
-===========
+-----------
 
 This module is under devolopment.
 
 Thresholding
-============
+------------
 
 Currently this module only contains a reimplementation of Otsu's method.
 

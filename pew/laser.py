@@ -1,3 +1,7 @@
+"""Class for data collected line-by-line.
+Line-by-line data is collected in multiple lines, with each line performed as a
+continuous ablation in one direction. The lines are then stacked to form an image.
+"""
 import numpy as np
 import numpy.lib.recfunctions as rfn
 from pathlib import Path
@@ -51,9 +55,6 @@ class _Laser:
 
 class Laser(_Laser):
     """Class for line-by-line laser data.
-
-    Line-by-line data is collected in multiple lines, with each line performed as a
-    continuous ablation in one direction. The lines are then stacked to form an image.
 
     Args:
         data: structured array of elemental data

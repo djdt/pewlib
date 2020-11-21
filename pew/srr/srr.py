@@ -1,3 +1,14 @@
+"""
+Class for Super-Resolution-Reconstruction (SRR) LA-ICP-MS.
+SRR is performed by ablating layers of a sample in a line-by-line fashion.
+Layers are offset by a faction of the spotsize to increase image resolution.
+The resulting image is 3d, but can be flattened to a higher resolution 2d image.
+
+References:
+    Westerhausen, M. T.; Bishop, D. P.; Dowd, A.; Wanagat, J.; Cole, N.
+    & Doble, P. A. Super-Resolution Reconstruction for Two- and Three-Dimensional
+    LA-ICP-MS Bioimaging Analytical Chemistry, American Chemical Society (ACS), 2019
+"""
 import numpy as np
 import numpy.lib.recfunctions as rfn
 from pathlib import Path
@@ -16,10 +27,6 @@ from typing import Dict, List, Tuple, Union
 class SRRLaser(_Laser):
     """Class for SRR laser data.
 
-    Super-Resolution-Reconstruction is performed by ablating layers of a sample
-    in a line-by-line fashion. Layers are offset by a faction of the spotsize
-    to increase image resolution. The resulting image is 3d.
-
     Args:
         data: list of structured arrays
         calibration: dict mapping elements to calibrations, optional
@@ -27,6 +34,8 @@ class SRRLaser(_Laser):
         name: name of image
         path: path to file
 
+    See Also:
+        :class:`pew.laser.Laser`
     """
 
     def __init__(
