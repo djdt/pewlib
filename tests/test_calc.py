@@ -10,25 +10,6 @@ def test_greyscale_to_rgb():
     )
 
 
-def test_kmeans():
-    x = np.empty((100, 2), dtype=float)
-    x[:50, 0] = np.random.normal(loc=-1.0, size=50)
-    x[50:, 0] = np.random.normal(loc=1.0, size=50)
-    x[:, 1] = np.random.normal(loc=3.0, size=100)
-
-    x = np.random.random(100)
-    y = np.zeros(100)
-    y[50:] += 1.0
-    y[80:] += 1.0
-
-    idx = calc.kmeans(np.stack((x, y), axis=1), 3, init="kmeans++")
-    _, counts = np.unique(idx, return_counts=True)
-    assert np.allclose(np.sort(counts), [20, 30, 50], atol=5)
-    idx = calc.kmeans(np.stack((x, y), axis=1), 3, init="random")
-    _, counts = np.unique(idx, return_counts=True)
-    assert np.allclose(np.sort(counts), [20, 30, 50], atol=10)
-
-
 def test_local_maxima():
     x = np.linspace(0.0, 1.0, 100)
     i = np.arange(5, 95, 5)
@@ -60,14 +41,6 @@ def test_shuffle_blocks():
     assert np.allclose(y[50:], x[50:])
     assert not np.allclose(y[:50], x[:50])
     assert np.allclose(y.sum(), x.sum())
-
-
-def test_sliding_window():
-    x = np.arange(10)
-    w = calc.sliding_window(x, 3)
-    assert np.all(np.mean(w, axis=1) == [1, 2, 3, 4, 5, 6, 7, 8])
-    w = calc.sliding_window_centered(x, 3)
-    assert np.all(np.mean(w, axis=1) == [1 / 3.0, 1, 2, 3, 4, 5, 6, 7, 8, 26 / 3.0])
 
 
 def test_subpixel_offset():

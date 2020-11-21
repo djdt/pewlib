@@ -5,6 +5,19 @@ _s2pi = np.sqrt(2.0 * np.pi)
 
 
 def convolve(x: np.ndarray, psf: np.ndarray, mode: str = "pad") -> np.ndarray:
+    """Convolve with 'pad' mode.
+
+    If `mode` is 'pad' then `x` is edge padded to converse size on convolution.
+    Other modes are passed directly to :func:`numpy.convolve`.
+
+    Args:
+        x: array
+        psf: point spread function
+        mode: convolution mode {'pad', 'full', 'valid', 'same'}
+
+    See Also:
+        :func:`numpy.convolve`
+    """
     # Pad array with edge
     if mode == "pad":
         x_pad = np.pad(
@@ -16,7 +29,18 @@ def convolve(x: np.ndarray, psf: np.ndarray, mode: str = "pad") -> np.ndarray:
 
 
 def deconvolve(x: np.ndarray, psf: np.ndarray, mode: str = "valid"):
-    """From https://rosettacode.org/wiki/Deconvolution/1D"""
+    """Inverse of convolution.
+
+    Deconvolution is performed in frequency domain.
+
+    Args:
+        x: array
+        psf: point spread function
+        mode: if same, return same size as `x` {'valid', 'same'}
+
+    Notes:
+        Based on https://rosettacode.org/wiki/Deconvolution/1D
+    """
 
     def shift_bit_length(x: int) -> int:
         return 1 << (x - 1).bit_length()
@@ -33,8 +57,21 @@ def deconvolve(x: np.ndarray, psf: np.ndarray, mode: str = "valid"):
 
 
 def erf(x: float) -> float:
-    """Error function. Maximum error is 5e-4.
-    From 'Abramowitz and Stegun'.
+    """Error function approximation.
+
+    The maximum error is 5e-4 [1].
+
+    Args:
+        x: value
+
+    Returns:
+        approximation of error function
+
+    References:
+
+    .. [1] Abramowitz, Milton, and Irene A. Stegun, eds. Handbook of mathematical
+        functions with formulas, graphs, and mathematical tables.
+        Vol. 55. US Government printing office, 1970.
     """
     assert x >= 0.0
     # Maximum error: 2.5e-5
@@ -44,8 +81,19 @@ def erf(x: float) -> float:
 
 
 def erfinv(x: float) -> float:
-    """Inverse error function. Maximum error is 6e-3.
-    From 'A handy approximation for the error function and its inverse' by Sergei Winitzki
+    """Inverse error function approximation.
+
+    The maximum error is 6e-3 [2].
+
+    Args:
+        x: value
+
+    Returns:
+        approximation of inverse error function
+
+    References:
+        .. [2] Winitzki, S. A handy approximation for the error function and its inverse
+            2008
     """
     sign = np.sign(x)
     x = np.log((1.0 - x) * (1.0 + x))
@@ -57,7 +105,22 @@ def erfinv(x: float) -> float:
 
 
 def gamma(x: float) -> float:
-    """From 'Abramowitz and Stegun'."""
+    """Gamma function approximation.
+
+    Maximum error of 3e-7 [3].
+
+    Args:
+        x: value
+
+    Returns:
+        approximation of error function
+
+    References:
+
+    .. [3] Abramowitz, Milton, and Irene A. Stegun, eds. Handbook of mathematical
+        functions with formulas, graphs, and mathematical tables.
+        Vol. 55. US Government printing office, 1970.
+    """
     assert x >= 0.0
     # Use recursion
     b = np.array(
@@ -83,7 +146,23 @@ def beta_pdf(x: np.ndarray, alpha: float, beta: float) -> np.ndarray:
     return x ** (alpha - 1.0) * (1.0 - x) ** (beta - 1.0) / B
 
 
-def beta(size: int, alpha: float, beta: float, scale=1.0, shift=0.0) -> np.ndarray:
+def beta(
+    size: int, alpha: float, beta: float, scale: float = 1.0, shift: float = 0.0
+) -> np.ndarray:
+    """Beta distribution.
+
+    Range of 0 to 1. The `scale` and `shift` arguments can be used to change the range.
+
+    Args:
+        size: size of distribution
+        alpha: alpha term, > 0
+        beta: beta term, > 0
+        scale: scale x
+        shift: shift x
+
+    Returns:
+        array of (x, y) points
+    """
     x = np.linspace(shift, 1.0 * scale + shift, size)
     y = beta_pdf(x, alpha, beta)
     return np.stack((x, y / y.sum()), axis=1)
@@ -108,6 +187,20 @@ def exponential_pdf(x: np.ndarray, _lambda: float) -> np.ndarray:
 def exponential(
     size: int, _lambda: float, scale: float = 1.0, shift: float = 1e-6
 ) -> np.ndarray:
+    """Exponential distribution.
+
+    Range of 0 to `size`, the `scale` and `shift` arguments can be used to change
+    the range.
+
+    Args:
+        size: size of distribution
+        _lambda: lambda term, > 0
+        scale: scale x
+        shift: shift x
+
+    Returns:
+        array of (x, y) points
+    """
     x = np.linspace(shift, size * scale + shift, size)
     y = exponential_pdf(x, _lambda)
     return np.stack((x, y / y.sum()), axis=1)
@@ -120,6 +213,21 @@ def inversegamma_pdf(x: np.ndarray, alpha: float, beta: float) -> np.ndarray:
 def inversegamma(
     size: int, alpha: float, beta: float, scale: float = 1.0, shift: float = 1e-6
 ) -> np.ndarray:
+    """Inverse Gamma distribution.
+
+    Range of 0 to `size`, the `scale` and `shift` arguments can be used to change
+    the range.
+
+    Args:
+        size: size of distribution
+        alpha: alpha term, > 0
+        beta: beta term, > 0
+        scale: scale x
+        shift: shift x
+
+    Returns:
+        array of (x, y) points
+    """
     x = np.linspace(shift, size * scale + shift, size)
     y = inversegamma_pdf(x, alpha, beta)
     return np.stack((x, y / y.sum()), axis=1)
@@ -132,13 +240,28 @@ def laplace_pdf(x: np.ndarray, b: float, mu: float) -> np.ndarray:
 def laplace(
     size: int, b: float, mu: float, scale: float = 1.0, shift: float = 0.0
 ) -> np.ndarray:
+    """Laplace distribution.
+
+    Range of -0.5 * `size` to 0.5 * `size`, the `scale` and `shift` arguments
+    can be used to change the range.
+
+    Args:
+        size: size of distribution
+        b: scale term, > 0
+        mu: location
+        scale: scale x
+        shift: shift x
+
+    Returns:
+        array of (x, y) points
+    """
     x = np.linspace(-size * 0.5 * scale + shift, size * 0.5 * scale + shift, size)
     y = laplace_pdf(x, b, mu)
     return np.stack((x, y / y.sum()), axis=1)
 
 
 # def logcauchy_pdf(x: np.ndarray, sigma: float, mu: float) -> np.ndarray:
-#     return (1.0 / (x * np.pi)) * (sigma / (np.power(np.log(x) - mu, 2) + sigma * sigma))
+# return (1.0 / (x * np.pi)) * (sigma / (np.power(np.log(x) - mu, 2) + sigma * sigma))
 
 
 # def logcauchy(
@@ -156,6 +279,21 @@ def loglaplace_pdf(x: np.ndarray, b: float, mu: float) -> np.ndarray:
 def loglaplace(
     size: int, b: float, mu: float, scale: float = 1.0, shift: float = 1e-6
 ) -> np.ndarray:
+    """Log-Laplace distribution.
+
+    Range of 0 to `size`, the `scale` and `shift` arguments can be used to change
+    the range.
+
+    Args:
+        size: size of distribution
+        b: scale term, > 0
+        mu: location
+        scale: scale x
+        shift: shift x
+
+    Returns:
+        array of (x, y) points
+    """
     x = np.linspace(shift, size * scale + shift, size)
     y = loglaplace_pdf(x, b, mu)
     return np.stack((x, y / y.sum()), axis=1)
@@ -168,6 +306,21 @@ def lognormal_pdf(x: np.ndarray, sigma: float, mu: float) -> np.ndarray:
 def lognormal(
     size: int, sigma: float, mu: float, scale: float = 1.0, shift: float = 1e-6
 ) -> np.ndarray:
+    """Log-normal distribution.
+
+    Range of 0 to `size`, the `scale` and `shift` arguments can be used to change
+    the range.
+
+    Args:
+        size: size of distribution
+        sigma: sigma term, > 0
+        mu: location
+        scale: scale x
+        shift: shift x
+
+    Returns:
+        array of (x, y) points
+    """
     x = np.linspace(shift, size * scale + shift, size)
     y = lognormal_pdf(x, sigma, mu)
     return np.stack((x, y / y.sum()), axis=1)
@@ -180,6 +333,21 @@ def normal_pdf(x: np.ndarray, sigma: float, mu: float) -> np.ndarray:
 def normal(
     size: int, sigma: float, mu: float, scale: float = 1.0, shift: float = 0.0
 ) -> np.ndarray:
+    """Normal distribution.
+
+    Range of -0.5 * `size` to 0.5 * `size`, the `scale` and `shift` arguments
+    can be used to change the range.
+
+    Args:
+        size: size of distribution
+        sigma: sqrt variance, > 0
+        mu: mean
+        scale: scale x
+        shift: shift x
+
+    Returns:
+        array of (x, y) points
+    """
     x = np.linspace(-size * 0.5 * scale + shift, size * 0.5 * scale + shift, size)
     y = normal_pdf(x, sigma, mu)
     return np.stack((x, y / y.sum()), axis=1)
@@ -199,6 +367,22 @@ def super_gaussian(
     scale: float = 1.0,
     shift: float = 0.0,
 ) -> np.ndarray:
+    """Super-Gaussian distribution.
+
+    Range of -0.5 * `size` to 0.5 * `size`, the `scale` and `shift` arguments
+    can be used to change the range.
+
+    Args:
+        size: size of distribution
+        sigma: sqrt variance, > 0
+        mu: mean
+        power: exponent
+        scale: scale x
+        shift: shift x
+
+    Returns:
+        array of (x, y) points
+    """
     x = np.linspace(-size * 0.5 * scale + shift, size * 0.5 * scale + shift, size)
     y = super_gaussian_pdf(x, sigma, mu, power)
     return np.stack((x, y / y.sum()), axis=1)
@@ -216,6 +400,22 @@ def triangular_pdf(x: np.ndarray, a: float, b: float) -> np.ndarray:
 def triangular(
     size: int, a: float, b: float, scale: float = 1.0, shift: float = 0.0
 ) -> np.ndarray:
+    """Triangular distribution.
+
+    Range of -0.5 * `size` to 0.5 * `size`, the `scale` and `shift` arguments
+    can be used to change the range.
+
+    Args:
+        size: size of distribution
+        a: a <= x <= b
+        b: a < b
+        c: a <= c <= b
+        scale: scale x
+        shift: shift x
+
+    Returns:
+        array of (x, y) points
+    """
     x = np.linspace(-size * 0.5 * scale + shift, size * 0.5 * scale + shift, size)
     y = triangular_pdf(x, a, b)
     return np.stack((x, y / y.sum()), axis=1)

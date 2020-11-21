@@ -4,97 +4,28 @@ from typing import List, Tuple
 
 
 def greyscale_to_rgb(array: np.ndarray, rgb: np.ndarray) -> np.ndarray:
-    """Convert a gret scale image to a single color rgb image.
+    """Convert a gray scale image to a single color rgb(a).
 
-    The image is clipped to 0.0 to 1.0.
+    The image should be a float type and is clipped to 0.0 to 1.0 before conversion.
 
     Args:
-        array: Image
-        rgb: 3 or 4 color array (rgb / rgba)
-"""
+        array: image
+        rgb: rgb with optional alpha"""
     array = np.clip(array, 0.0, 1.0)
-    return array[..., None] * np.array(rgb, dtype=float)
-
-
-# def ida(
-#     a: np.ndarray,
-#     b: np.ndarray,
-#     Ct: float,
-#     ms: float,
-#     mt: float,
-#     Ms: float,
-#     Mt: float,
-#     Aas: float,
-#     Abs: float,
-#     Aat: float,
-#     Abt: float,
-# ) -> np.ndarray:
-#     Rm = a / b
-#     Rs = Abs / Aas
-#     Rt = Aat / Abt
-#     Cs = Ct * (mt / ms) * (Ms / Mt) * (Abt / Aas) * ((Rm - Rt) / (1.0 - Rm * Rs))
-#     return Cs
-
-
-def kmeans(
-    x: np.ndarray, k: int, init: str = "kmeans++", max_iterations: int = 1000,
-) -> np.ndarray:
-    """K-means clustering. Returns an array mapping objects to their clusters.
-     Raises a ValueError if the loop exceeds max_iterations.
-
-     Args:
-        x: Data. Shape is (n, m) for n objects with m attributes.
-        k: Number of clusters.
-        init: Method to determine initial cluster centers. Can be 'kmeans++' or 'random'.
-"""
-    # Ensure at least 1 dim for variables
-    if x.ndim == 1:
-        x = x.reshape(-1, 1)
-
-    if init == "kmeans++":
-        centers = kmeans_plus_plus(x, k)
-    elif init == "random":
-        ix = np.random.choice(np.arange(x.shape[0]), k)
-        centers = x[ix].copy()
-    else:  # pragma: no cover
-        raise ValueError("'init' must be 'kmeans++' or 'random'.")
-
-    # Sort centers by the first attribute
-    centers = centers[np.argsort((centers[:, 0]))]
-
-    while max_iterations > 0:
-        max_iterations -= 1
-
-        distances = np.sqrt(np.sum((centers[:, None] - x) ** 2, axis=2))
-        idx = np.argmin(distances, axis=0)
-
-        new_centers = centers.copy()
-        for i in np.unique(idx):
-            new_centers[i] = np.mean(x[idx == i], axis=0)
-
-        if np.allclose(centers, new_centers):
-            return idx
-        centers = new_centers
-
-    raise ValueError("No convergance in allowed iterations.")  # pragma: no cover
-
-
-def kmeans_plus_plus(x: np.ndarray, k: int) -> np.ndarray:
-    """Selects inital cluster positions using K-means++ algorithm.
-"""
-    ix = np.arange(x.shape[0])
-    centers = np.empty((k, *x.shape[1:]))
-    centers[0] = x[np.random.choice(ix, 1)]
-
-    for i in range(1, k):
-        distances = np.sqrt(np.sum((centers[:i, None] - x) ** 2, axis=2))
-        distances = np.amin(distances, axis=0) ** 2
-        centers[i] = x[np.random.choice(ix, 1, p=distances / distances.sum())]
-
-    return centers.copy()
+    return array[..., None] * np.array(rgb, dtype=np.float32)
 
 
 def local_maxima(x: np.ndarray) -> np.ndarray:
+    """Indicies of local maxima.
+
+    Maxima are values greater than the 2 values surrounding them.
+
+    Args:
+        x: 1d array
+
+    Returns:
+        indicies of maxima
+    """
     return np.nonzero(
         np.logical_and(np.r_[True, x[1:] > x[:-1]], np.r_[x[:-1] > x[1:], True])
     )[0]
@@ -104,10 +35,12 @@ def normalise(x: np.ndarray, vmin: float = 0.0, vmax: float = 1.0) -> np.ndarray
     """Normalise an array.
 
     Args:
-        x: Array
-        vmin: New minimum
-        vmax: New maxmimum
-"""
+        x: array
+        vmin: new minimum
+        vmax: new maxmimum
+
+    Raises:
+        ValueError if `x` is a simgle value"""
     xmax, xmin = np.amax(x), np.amin(x)
     if xmax == xmin:  # pragma: no cover
         raise ValueError("Cannot normalise array, min == max.")
@@ -122,9 +55,8 @@ def reset_cumsum(x: np.ndarray, reset_value: float = 0.0) -> np.ndarray:
     """Cumulative sum that resets at the given value.
 
     Args:
-        x: Input array.
-        reset_value: Value where the cumsum resets to 0.
-"""
+        x: array
+        reset_value: Value where the cumsum resets to 0"""
     c = np.cumsum(x)
     n = x == reset_value
     oc = np.maximum.accumulate(c * n)
@@ -139,19 +71,24 @@ def shuffle_blocks(
     shuffle_partial: bool = False,
 ) -> np.ndarray:
     """Shuffle an ndim array as tiles of a certain size.
-    If a mask is passed then only the region within the mask is shuffled.
-    If mask_all is True then only entirely masked blocks are shuffled otherwise
-    even partially masked blocks will be shuffled.
+
+    If a `mask` is passed then only the region within the mask is shuffled.
+    If `shuffle_partial` then partially masked blocks will be shuffled otherwise
+    only fully masked blocks are. The inplace `mode` is much faster but cannot shuffle
+    array edges.
 
     Args:
-        x: Input array.
-        block: Shape of blocks, ndim must be the same as x.
-        mask: Optional mask data, shape must be the same as x.
-        mode: Method for matching block size, 'pad' or 'inplace'.
-        shuffle_partial: Shuffle partially masked blocks.
-"""
+        x: array
+        block: block shape, same dims as `x`
+        mask: mask, same shape as `x`, optional
+        mode: method, {'pad', 'inplace'}
+        shuffle_partial: shuffle partially masked blocks
+
+    Returns:
+        new array if pad, view if inplace
+    """
     shape = x.shape
-    if mask is None:
+    if mask is None:  # pragma: no cover
         mask = np.ones(x.shape, dtype=bool)
     # Pad the array to fit the blocksize
     if mode == "pad":
@@ -159,11 +96,11 @@ def shuffle_blocks(
         x = np.pad(x, pads, mode="edge")
         mask = np.pad(mask, pads, mode="edge")
     elif mode == "inplace":
-        # Use mask to prevent shuffleing of blocks out of bounds
+        # Use mask to prevent shuffling of blocks out of bounds
         trim = x.shape - (np.array(x.shape) % block)
         for axis, t in enumerate(trim):
             np.swapaxes(mask, 0, axis)[slice(t, None)] = False
-    else:
+    else:  # pragma: no cover
         raise ValueError("Mode must be 'pad' or 'inplace'.")
 
     blocks = view_as_blocks(x, block)
@@ -185,34 +122,22 @@ def shuffle_blocks(
     return x
 
 
-def sliding_window(x: np.ndarray, window: int, step: int = 1) -> np.ndarray:
-    """1D version of view_as_blocks."""
-    shape = ((x.size - window) // step + 1, window)
-    strides = (step * x.strides[0], x.strides[0])
-    return np.lib.stride_tricks.as_strided(x, shape=shape, strides=strides)
-
-
-def sliding_window_centered(
-    x: np.ndarray, window: int, step: int = 1, mode: str = "edge"
-) -> np.ndarray:
-    x_pad = np.pad(x, (window // 2, window - window // 2 - 1), mode=mode)
-    return sliding_window(x_pad, window, step)
-
-
 def subpixel_offset(
     x: np.ndarray, offsets: List[Tuple[int, int]], pixelsize: Tuple[int, int]
 ) -> np.ndarray:
-    """Takes a 3d array and stretches and offsets each layer.
+    """Offsets layers in a 3d array.
 
-    Given an offset of (1,1) and pixelsize of (2,2) each layer will be streched by 2
-    and every even layer will be shifted by 1 pixel.
+    First `x` is enlarged by `pixelsize` then list of `offsets` are applied
+    across axis 2 of `x`. If the first offset is not (0, 0) then it is prepended.
+    Given `offsets` of [(0, 0), (1, 1)] and pixelsize of (2, 2) each layer
+    will be streched by 2 and every 2nd layer will be shifted by 1 pixel.
 
     Args:
-        offsets: The pixel offsets in (x, y).
-        pixelsize: Final size to stretch to.
+        offsets: pixel offsets in (x, y)
+        pixelsize: enlargement (x, y)
 
     Returns:
-        The offset array.
+        array
     """
     # Offset for first layer must be zero
     if offsets[0] != (0, 0):
@@ -242,22 +167,40 @@ def subpixel_offset(
 def subpixel_offset_equal(
     x: np.ndarray, offsets: List[int], pixelsize: int
 ) -> np.ndarray:
+    """Offsets layers in a 3d array.
+
+    Special case of 'subpixel_offset' where x==y for `offsets` and `pixelsize`.
+
+    Args:
+        offsets: pixel offsets in (x, y)
+        pixelsize: enlargement (x, y)
+
+    Returns:
+        array
+
+    See Also:
+        :func:`pew.lib.calc.subpixel_offset`
+    """
     return subpixel_offset(x, [(o, o) for o in offsets], (pixelsize, pixelsize))
 
 
 def view_as_blocks(
     x: np.ndarray, block: Tuple[int, ...], step: Tuple[int, ...] = None
 ) -> np.ndarray:
-    """Create block sized views into a array, offset by step amount.
-    https://github.com/scikit-image/scikit-image/blob/master/skimage/util/shape.py
+    """Block view of array
+
+    Can be overlapping if `step` < `block`.
 
     Args:
-        x: The array.
-        block: The size of the view.
-        step: Size of step, defaults to block.
+        x: array
+        block: block size, same dims as `x`
+        step: step, same dims as `x`, defaults to `block`
 
     Returns:
-        An array of views.
+        view into array
+
+    See Also:
+        :func:`skimage.util.shape.view_as_blocks`
     """
     assert len(block) == x.ndim
     if step is None:
@@ -266,14 +209,3 @@ def view_as_blocks(
     shape = tuple((np.array(x.shape) - block) // np.array(step) + 1) + block
     strides = tuple(x.strides * np.array(step)) + x.strides
     return np.lib.stride_tricks.as_strided(x, shape=shape, strides=strides)
-
-
-# def windowed_extrema(
-#     x: np.ndarray, window: int, step: int = 1, mode: str = "maxima"
-# ) -> np.ndarray:
-#     windows = sliding_window_centered(x, window, step)
-#     if mode == "minima":
-#         extrema = np.argmin(windows, axis=1)
-#     else:
-#         extrema = np.argmax(windows, axis=1)
-#     return np.nonzero(extrema == (window // 2))[0]

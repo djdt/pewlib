@@ -1,101 +1,90 @@
+"""
+Import and export in pew's custom file format, based on numpy's compressed '.npz'.
+This format svaes image data, laser parameters and calibrations in one file.
+"""
+import time
+from pathlib import Path
+
 import numpy as np
 
 from pew import __version__
-
-from pew.io.error import PewException
-
-from typing import Any, Dict, List
-from pew.laser import _Laser
 from pew import Laser, Calibration, Config
+
+from pew.laser import _Laser
 from pew.srr import SRRLaser, SRRConfig
 
+from typing import Union
 
-def load(path: str) -> List[_Laser]:
-    """Imports the given numpy archive given, returning a list of data.
 
-    Both the config and calibration read from the archive may be overriden.
+def load(path: Union[str, Path]) -> _Laser:
+    """Loads data from '.npz' file.
+
+    Loads files created using :func:`pew.io.npz.save`.
+    On load the a :class:`Laser` or :class:`SRRLaser` is reformed from the saved data.
 
     Args:
-        path: Path to numpy archive
-        config_override: If not None will be applied to all imports
-        calibration_override: If not None will be applied to all imports
+        path: path to '.npz'
 
     Returns:
-        List of IsotopeData and SRRData
+        :class:`Laser` or :class:`SRRLaser`
 
     Raises:
-        PewPewFileError: Version of archive missing or incompatable.
+        ValueError: incomatible version
 
+    See Also:
+        :func:`numpy.load`
     """
-    lasers: List[_Laser] = []
-    npz = np.load(path, allow_pickle=True)
+    if isinstance(path, str):  # pragma: no cover
+        path = Path(path)
 
-    if "version" not in npz.files:
-        raise PewException("Archive version mismatch.")
-    elif npz["version"] < "0.2.5":
-        raise PewException(f"Archive version mismatch: {npz['version']}.")
+    npz = np.load(path)
 
-    for f in npz.files:
-        if f == "version":
-            continue
-        laserdict: Dict[str, Any] = npz[f].item()
-        # Config
-        if laserdict["type"] == "SRRLaser":
-            config: Config = SRRConfig()
-        else:
-            config = Config()
-        for k, v in laserdict["config"].items():
-            setattr(config, k, v)
+    if "_version" not in npz.files or npz["_version"] < "0.6.0":  # pragma: no cover
+        raise ValueError("NPZ Version mismatch, only versions >=0.6.0 are supported.")
+    data = npz["data"]
 
-        # Calibration
-        calibration = {}
-        for name, cal in laserdict["calibration"].items():
-            calibration[name] = Calibration()
-            for k, v in cal.items():
-                setattr(calibration[name], k, v)
+    calibration = {}
+    for name in data.dtype.names:
+        calibration[name] = Calibration.from_array(npz[f"calibration_{name}"])
 
-        if laserdict["type"] == "Laser":
-            lasers.append(
-                Laser(
-                    data=laserdict["data"],
-                    calibration=calibration,
-                    config=config,
-                    name=laserdict["name"],
-                    path=path,
-                )
-            )
-        elif laserdict["type"] == "SRRLaser":
-            assert isinstance(config, SRRConfig)
-            lasers.append(
-                SRRLaser(
-                    data=laserdict["data"],
-                    calibration=calibration,
-                    config=config,
-                    name=laserdict["name"],
-                    path=path,
-                )
-            )
-        else:
-            raise PewException("Unknown Laser type.")
+    if npz["_class"] == "Laser":
+        laser = Laser
+        config = Config.from_array(npz["config"])
+    elif npz["_class"] == "SRRLaser":
+        laser = SRRLaser  # type: ignore
+        config = SRRConfig.from_array(npz["config"])
+    else:  # pragma: no cover
+        raise ValueError("NPZ unable to import laser class {npz['_class']}.")
 
-    return lasers
+    return laser(
+        data=data,
+        calibration=calibration,
+        config=config,
+        name=str(npz["name"]),
+        path=path,
+    )
 
 
-def save(path: str, laser_list: List[Laser]) -> None:
-    savedict: Dict[str, Any] = {"version": __version__}
-    for laser in laser_list:
-        laserdict = {
-            "type": laser.__class__.__name__,
-            "name": laser.name,
-            "config": laser.config.__dict__,
-            "calibration": {k: v.__dict__ for k, v in laser.calibration.items()},
-            "data": laser.data,
-        }
-        name = laser.name
-        if name in savedict:
-            i = 0
-            while f"{name}{i}" in savedict:
-                i += 1
-            name += f"{name}{i}"
-        savedict[name] = laserdict
+def save(path: Union[str, Path], laser: _Laser) -> None:
+    """Saves data to '.npz' file.
+
+    Converts a :class:`Laser` or :class:`SRRLaser` to a series of `np.ndarray`
+    which are then saved to a compressed '.npz' archive. The time and current
+    version are also saved. If `path` does not end in '.npz' it is
+    appended.
+
+    Args:
+        path: path to save to
+        laser: :class:`Laser` or :class:`SRRLaser`
+
+    See Also:
+        :func:`numpy.savez_compressed`
+    """
+    savedict: dict = {"_version": __version__, "_time": time.time(), "_multiple": False}
+    savedict["_class"] = laser.__class__.__name__
+    savedict["data"] = laser.data
+    savedict["name"] = laser.name
+    savedict["config"] = laser.config.to_array()
+    for name in laser.calibration:
+        savedict[f"calibration_{name}"] = laser.calibration[name].to_array()
     np.savez_compressed(path, **savedict)

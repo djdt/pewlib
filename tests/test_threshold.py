@@ -1,17 +1,6 @@
 import numpy as np
 
-from pew.lib.threshold import kmeans_threshold, otsu
-
-
-def test_kmeans_threshold():
-    x = np.zeros(100)
-    x[:25] += 1.0
-    x[:50] += 1.0
-    x[:75] += 1.0
-
-    t = kmeans_threshold(x, 4)
-
-    assert np.allclose(t, [1.0, 2.0, 3.0])
+from pew.lib.threshold import otsu
 
 
 def test_otsu():

@@ -23,7 +23,7 @@ def test_srr():
     assert laser.extent == (0, 10.5, 0, 10.5)
     # Check config params
     assert laser.check_config_valid(SRRConfig(1, 1, 1, warmup=0))
-    assert not laser.check_config_valid(SRRConfig(2, 1, 1, warmup=0))
+    assert not laser.check_config_valid(SRRConfig(1.5, 1, 1, warmup=0))
     assert not laser.check_config_valid(SRRConfig(3, 1, 1, warmup=0))
     assert not laser.check_config_valid(SRRConfig(warmup=100))
     assert not laser.check_config_valid(SRRConfig(warmup=-1))
@@ -31,12 +31,17 @@ def test_srr():
     # Get layer
     assert np.all(laser.get("A", layer=1) == data[1]["A"].T)
 
-    # Test adding and removing datas
+    # Get flat
+    assert laser.get("A", flat=True).ndim == 2
+
+    # Test adding, removing, renaming datas
     new_data = [np.random.random((10, 20)), np.random.random((10, 20))]
     laser.add("C", new_data)
     assert laser.isotopes == ("A", "B", "C")
     laser.remove("B")
     assert laser.isotopes == ("A", "C")
+    laser.rename({"C": "B"})
+    assert laser.isotopes == ("A", "B")
 
 
 def test_srr_from_list():
