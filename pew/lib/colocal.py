@@ -23,7 +23,6 @@ def li_icq(x: np.ndarray, y: np.ndarray) -> float:
         Li, Q. A Syntaxin 1, G o, and N-Type Calcium Channel Complex at
             a Presynaptic Nerve Terminal: Analysis by Quantitative Immunocolocalization
             Journal of Neuroscience, Society for Neuroscience, 2004, 24, 4070-4081
-
     """
     ux, uy = np.mean(x), np.mean(y)
     return np.sum((x - ux) * (y - uy) >= 0.0) / x.size - 0.5

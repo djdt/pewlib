@@ -92,5 +92,6 @@ def test_io_agilent_load_missing():
         use_acq_for_names=False,
         collection_methods=["batch_csv"],
     )
+    assert isinstance(data, np.ndarray)
     assert data.shape == (4, 5)
     assert np.all(data["P31"][3] == 0.0)
