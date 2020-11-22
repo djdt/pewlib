@@ -1,4 +1,4 @@
-name: Build, Test, Docs
+name: Build
 on:
   push:
     branches: [ master ]
