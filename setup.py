@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 from pew import __version__
 
 setup(
-    name="pew",
+    name="pewlib",
     description="Import, export and processing library for LA-ICP-MS data.",
     url="https://github.com/djdt/pew",
     author="T. Lockwood",
