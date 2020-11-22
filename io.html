@@ -88,16 +88,16 @@
 <p class="caption"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">IO Module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-pew.io.agilent">Agilent</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pew.io.npz">Numpy NPZ</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pew.io.perkinelmer">PerkinElmer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pew.io.textimage">Text Image</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pew.io.vtk">VTK</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.agilent">Agilent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.npz">Numpy NPZ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.perkinelmer">PerkinElmer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.textimage">Text Image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.vtk">VTK</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pew.html">Line-by-line Lasers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pew.html#srr-lasers">SRR Lasers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lib.html">Processing Library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a></li>
 </ul>
 
             
@@ -166,14 +166,14 @@
   <div class="section" id="io-module">
 <h1>IO Module<a class="headerlink" href="#io-module" title="Permalink to this headline">¶</a></h1>
 <p>This module contains the functions pew uses for importing and exporting data.</p>
-<div class="section" id="module-pew.io.agilent">
-<span id="agilent"></span><h2>Agilent<a class="headerlink" href="#module-pew.io.agilent" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pewlib.io.agilent">
+<span id="agilent"></span><h2>Agilent<a class="headerlink" href="#module-pewlib.io.agilent" title="Permalink to this headline">¶</a></h2>
 <p>Import of line-by-line collected Agilent ‘.b’ batches.
 Both raw binaries and the ‘.csv’ exports are supported.
 Tested with Agilent 7500, 7700 and 8900 ICPs.</p>
 <dl class="py function">
-<dt id="pew.io.agilent.collect_datafiles">
-<code class="sig-prename descclassname">pew.io.agilent.</code><code class="sig-name descname">collect_datafiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">methods</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.agilent.collect_datafiles" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.io.agilent.collect_datafiles">
+<code class="sig-prename descclassname">pewlib.io.agilent.</code><code class="sig-name descname">collect_datafiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">methods</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.agilent.collect_datafiles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds ‘.d’ datafiles in a directory.</p>
 <p>A list of expected datafiles is created for each method in <cite>methods</cite>.
 Methods are tested in order until ones successfully finds ALL expected datafiles.</p>
@@ -195,8 +195,8 @@ Methods are tested in order until ones successfully finds ALL expected datafiles
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.io.agilent.load">
-<code class="sig-prename descclassname">pew.io.agilent.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">collection_methods</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_acq_for_names</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">counts_per_second</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.agilent.load" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.io.agilent.load">
+<code class="sig-prename descclassname">pewlib.io.agilent.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">collection_methods</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_acq_for_names</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">counts_per_second</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.agilent.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Imports an Agilent ‘.b’ batch.</p>
 <p>First attempts a binary import, falling back to importing any ‘.csv’ files.</p>
 <dl class="field-list simple">
@@ -220,15 +220,15 @@ dict of params if <cite>full</cite></p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="#pew.io.agilent.collect_datafiles" title="pew.io.agilent.collect_datafiles"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.io.agilent.collect_datafiles()</span></code></a>
-<a class="reference internal" href="#pew.io.agilent.load_binary" title="pew.io.agilent.load_binary"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.io.agilent.load_binary()</span></code></a>
-<a class="reference internal" href="#pew.io.agilent.load_csv" title="pew.io.agilent.load_csv"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.io.agilent.load_csv()</span></code></a></p>
+<p><a class="reference internal" href="#pewlib.io.agilent.collect_datafiles" title="pewlib.io.agilent.collect_datafiles"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.agilent.collect_datafiles()</span></code></a>
+<a class="reference internal" href="#pewlib.io.agilent.load_binary" title="pewlib.io.agilent.load_binary"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.agilent.load_binary()</span></code></a>
+<a class="reference internal" href="#pewlib.io.agilent.load_csv" title="pewlib.io.agilent.load_csv"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.agilent.load_csv()</span></code></a></p>
 </div>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.io.agilent.load_binary">
-<code class="sig-prename descclassname">pew.io.agilent.</code><code class="sig-name descname">load_binary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">collection_methods</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">counts_per_second</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.agilent.load_binary" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.io.agilent.load_binary">
+<code class="sig-prename descclassname">pewlib.io.agilent.</code><code class="sig-name descname">load_binary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">collection_methods</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">counts_per_second</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.agilent.load_binary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Imports an Agilent ‘.b’ batch.</p>
 <p>Import is performed using the ‘MSScan.bin’, ‘MSProfile.bin’ binaries and
 ‘MSTS_XSpecific.xml’ document.</p>
@@ -259,13 +259,13 @@ dict of params if <cite>full</cite></p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="#pew.io.agilent.collect_datafiles" title="pew.io.agilent.collect_datafiles"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.io.agilent.collect_datafiles()</span></code></a></p>
+<p><a class="reference internal" href="#pewlib.io.agilent.collect_datafiles" title="pewlib.io.agilent.collect_datafiles"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.agilent.collect_datafiles()</span></code></a></p>
 </div>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.io.agilent.load_csv">
-<code class="sig-prename descclassname">pew.io.agilent.</code><code class="sig-name descname">load_csv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">collection_methods</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_acq_for_names</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.agilent.load_csv" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.io.agilent.load_csv">
+<code class="sig-prename descclassname">pewlib.io.agilent.</code><code class="sig-name descname">load_csv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">collection_methods</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_acq_for_names</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.agilent.load_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Imports an Agilent ‘.b’ batch.</p>
 <p>Import is performed using the ‘.csv’ files found in each ‘.d’ datafile.
 If a ‘.csv’ can not be found then all data in the line is set to 0.
@@ -290,20 +290,20 @@ dict of params if <cite>full</cite></p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="#pew.io.agilent.collect_datafiles" title="pew.io.agilent.collect_datafiles"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.io.agilent.collect_datafiles()</span></code></a></p>
+<p><a class="reference internal" href="#pewlib.io.agilent.collect_datafiles" title="pewlib.io.agilent.collect_datafiles"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.agilent.collect_datafiles()</span></code></a></p>
 </div>
 </dd></dl>
 
 </div>
-<div class="section" id="module-pew.io.npz">
-<span id="numpy-npz"></span><h2>Numpy NPZ<a class="headerlink" href="#module-pew.io.npz" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pewlib.io.npz">
+<span id="numpy-npz"></span><h2>Numpy NPZ<a class="headerlink" href="#module-pewlib.io.npz" title="Permalink to this headline">¶</a></h2>
 <p>Import and export in pew’s custom file format, based on numpy’s compressed ‘.npz’.
 This format svaes image data, laser parameters and calibrations in one file.</p>
 <dl class="py function">
-<dt id="pew.io.npz.load">
-<code class="sig-prename descclassname">pew.io.npz.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.npz.load" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.io.npz.load">
+<code class="sig-prename descclassname">pewlib.io.npz.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.npz.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads data from ‘.npz’ file.</p>
-<p>Loads files created using <a class="reference internal" href="#pew.io.npz.save" title="pew.io.npz.save"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.io.npz.save()</span></code></a>.
+<p>Loads files created using <a class="reference internal" href="#pewlib.io.npz.save" title="pewlib.io.npz.save"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.npz.save()</span></code></a>.
 On load the a <code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code> is reformed from the saved data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -326,8 +326,8 @@ On load the a <code class="xref py py-class docutils literal notranslate"><span 
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.io.npz.save">
-<code class="sig-prename descclassname">pew.io.npz.</code><code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">laser</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.npz.save" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.io.npz.save">
+<code class="sig-prename descclassname">pewlib.io.npz.</code><code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">laser</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.npz.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Saves data to ‘.npz’ file.</p>
 <p>Converts a <code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code> to a series of <cite>np.ndarray</cite>
 which are then saved to a compressed ‘.npz’ archive. The time and current
@@ -353,12 +353,12 @@ appended.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-pew.io.perkinelmer">
-<span id="perkinelmer"></span><h2>PerkinElmer<a class="headerlink" href="#module-pew.io.perkinelmer" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pewlib.io.perkinelmer">
+<span id="perkinelmer"></span><h2>PerkinElmer<a class="headerlink" href="#module-pewlib.io.perkinelmer" title="Permalink to this headline">¶</a></h2>
 <p>Import of line-by-line PerkinElmer ELAN ‘XL’ directories.</p>
 <dl class="py function">
-<dt id="pew.io.perkinelmer.collect_datafiles">
-<code class="sig-prename descclassname">pew.io.perkinelmer.</code><code class="sig-name descname">collect_datafiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.perkinelmer.collect_datafiles" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.io.perkinelmer.collect_datafiles">
+<code class="sig-prename descclassname">pewlib.io.perkinelmer.</code><code class="sig-name descname">collect_datafiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.perkinelmer.collect_datafiles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds ‘.xl’ files in directory.</p>
 <p>Searches directory for ‘.xl’ files and sorts them in numerical order.</p>
 <dl class="field-list simple">
@@ -375,8 +375,8 @@ appended.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.io.perkinelmer.load">
-<code class="sig-prename descclassname">pew.io.perkinelmer.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">import_parameters</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.perkinelmer.load" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.io.perkinelmer.load">
+<code class="sig-prename descclassname">pewlib.io.perkinelmer.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">import_parameters</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.perkinelmer.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads PerkinElmer directory.</p>
 <p>Searches the directory <cite>path</cite> for ‘.xl’ files and used them to reconstruct data.
 If <cite>import_parameters</cite> and a ‘parameters.conf’ is used then the scantime,
@@ -399,18 +399,18 @@ dict of params if <cite>full</cite></p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="#pew.io.perkinelmer.collect_datafiles" title="pew.io.perkinelmer.collect_datafiles"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.io.perkinelmer.collect_datafiles()</span></code></a></p>
+<p><a class="reference internal" href="#pewlib.io.perkinelmer.collect_datafiles" title="pewlib.io.perkinelmer.collect_datafiles"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.perkinelmer.collect_datafiles()</span></code></a></p>
 </div>
 </dd></dl>
 
 </div>
-<div class="section" id="module-pew.io.textimage">
-<span id="text-image"></span><h2>Text Image<a class="headerlink" href="#module-pew.io.textimage" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pewlib.io.textimage">
+<span id="text-image"></span><h2>Text Image<a class="headerlink" href="#module-pewlib.io.textimage" title="Permalink to this headline">¶</a></h2>
 <p>Import and export of text-images, files where data is stored as delimited text values.
 Data is read in order from the first line.</p>
 <dl class="py function">
-<dt id="pew.io.textimage.load">
-<code class="sig-prename descclassname">pew.io.textimage.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">delimiter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">comments</span><span class="o">=</span><span class="default_value">'#'</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.textimage.load" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.io.textimage.load">
+<code class="sig-prename descclassname">pewlib.io.textimage.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">delimiter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">comments</span><span class="o">=</span><span class="default_value">'#'</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.textimage.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load text-image.</p>
 <p>Loads 2d data from file. If <cite>delimiter</cite> is specified then all tab and ‘;’
 are converted to ‘,’ before import. If <cite>name</cite> is specified then a single
@@ -431,8 +431,8 @@ field structured array is returned.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.io.textimage.save">
-<code class="sig-prename descclassname">pew.io.textimage.</code><code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">header</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.textimage.save" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.io.textimage.save">
+<code class="sig-prename descclassname">pewlib.io.textimage.</code><code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">header</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.textimage.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save data to csv.</p>
 <p>See <code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.savetxt()</span></code></p>
 <dl class="field-list simple">
@@ -450,12 +450,12 @@ field structured array is returned.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-pew.io.vtk">
-<span id="vtk"></span><h2>VTK<a class="headerlink" href="#module-pew.io.vtk" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pewlib.io.vtk">
+<span id="vtk"></span><h2>VTK<a class="headerlink" href="#module-pewlib.io.vtk" title="Permalink to this headline">¶</a></h2>
 <p>Exports to VTK formats for use in programs such as Paraview.</p>
 <dl class="py function">
-<dt id="pew.io.vtk.save">
-<code class="sig-prename descclassname">pew.io.vtk.</code><code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">spacing</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.io.vtk.save" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.io.vtk.save">
+<code class="sig-prename descclassname">pewlib.io.vtk.</code><code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">spacing</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.vtk.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save data as a VTK ImageData XML.</p>
 <p>Saves an array to a ‘.vti’ file. Data origin is set to (0, 0) and equally
 spaced using x, y, z of <cite>spacing</cite>. If <cite>data</cite> is rasied to 3-dimensonal if lower.</p>

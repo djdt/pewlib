@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Processing Library &mdash; pew  documentation</title>
+  <title>Processing &mdash; pew  documentation</title>
   
 
   
@@ -89,13 +89,13 @@
 <li class="toctree-l1"><a class="reference internal" href="io.html">IO Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pew.html">Line-by-line Lasers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pew.html#srr-lasers">SRR Lasers</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Processing Library</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#calculations">Calculations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#colocalisation">Colocalisation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#convolution">Convolution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pew.lib.filters">Filtering</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.process.calc">Calculations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.process.colocal">Colocalisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.process.convolve">Convolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.process.filters">Filtering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#peakfinding">Peakfinding</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#thresholding">Thresholding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.process.threshold">Thresholding</a></li>
 </ul>
 </li>
 </ul>
@@ -144,13 +144,13 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Processing Library</li>
+      <li>Processing</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/lib.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/processing.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -163,15 +163,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="processing-library">
-<h1>Processing Library<a class="headerlink" href="#processing-library" title="Permalink to this headline">¶</a></h1>
-<p>Functions for processing laser image data.</p>
-<div class="section" id="calculations">
-<h2>Calculations<a class="headerlink" href="#calculations" title="Permalink to this headline">¶</a></h2>
-<p>This module mainly contains mathmatical functions used in other modules.</p>
-<span class="target" id="module-pew.lib.calc"></span><dl class="py function">
-<dt id="pew.lib.calc.greyscale_to_rgb">
-<code class="sig-prename descclassname">pew.lib.calc.</code><code class="sig-name descname">greyscale_to_rgb</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em>, <em class="sig-param"><span class="n">rgb</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.calc.greyscale_to_rgb" title="Permalink to this definition">¶</a></dt>
+  <div class="section" id="processing">
+<h1>Processing<a class="headerlink" href="#processing" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pewlib.process.calc">
+<span id="calculations"></span><h2>Calculations<a class="headerlink" href="#module-pewlib.process.calc" title="Permalink to this headline">¶</a></h2>
+<p>This module contains functions used by other processing modules.</p>
+<dl class="py function">
+<dt id="pewlib.process.calc.greyscale_to_rgb">
+<code class="sig-prename descclassname">pewlib.process.calc.</code><code class="sig-name descname">greyscale_to_rgb</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em>, <em class="sig-param"><span class="n">rgb</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.calc.greyscale_to_rgb" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a gray scale image to a single color rgb(a).</p>
 <p>The image should be a float type and is clipped to 0.0 to 1.0 before conversion.</p>
 <dl class="field-list simple">
@@ -188,8 +187,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.calc.local_maxima">
-<code class="sig-prename descclassname">pew.lib.calc.</code><code class="sig-name descname">local_maxima</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.calc.local_maxima" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.calc.local_maxima">
+<code class="sig-prename descclassname">pewlib.process.calc.</code><code class="sig-name descname">local_maxima</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.calc.local_maxima" title="Permalink to this definition">¶</a></dt>
 <dd><p>Indicies of local maxima.</p>
 <p>Maxima are values greater than the 2 values surrounding them.</p>
 <dl class="field-list simple">
@@ -206,8 +205,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.calc.normalise">
-<code class="sig-prename descclassname">pew.lib.calc.</code><code class="sig-name descname">normalise</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">vmin</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">vmax</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.calc.normalise" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.calc.normalise">
+<code class="sig-prename descclassname">pewlib.process.calc.</code><code class="sig-name descname">normalise</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">vmin</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">vmax</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.calc.normalise" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normalise an array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -227,8 +226,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.calc.reset_cumsum">
-<code class="sig-prename descclassname">pew.lib.calc.</code><code class="sig-name descname">reset_cumsum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">reset_value</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.calc.reset_cumsum" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.calc.reset_cumsum">
+<code class="sig-prename descclassname">pewlib.process.calc.</code><code class="sig-name descname">reset_cumsum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">reset_value</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.calc.reset_cumsum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cumulative sum that resets at the given value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -244,8 +243,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.calc.shuffle_blocks">
-<code class="sig-prename descclassname">pew.lib.calc.</code><code class="sig-name descname">shuffle_blocks</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">block</span></em>, <em class="sig-param"><span class="n">mask</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'pad'</span></em>, <em class="sig-param"><span class="n">shuffle_partial</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.calc.shuffle_blocks" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.calc.shuffle_blocks">
+<code class="sig-prename descclassname">pewlib.process.calc.</code><code class="sig-name descname">shuffle_blocks</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">block</span></em>, <em class="sig-param"><span class="n">mask</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'pad'</span></em>, <em class="sig-param"><span class="n">shuffle_partial</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.calc.shuffle_blocks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shuffle an ndim array as tiles of a certain size.</p>
 <p>If a <cite>mask</cite> is passed then only the region within the mask is shuffled.
 If <cite>shuffle_partial</cite> then partially masked blocks will be shuffled otherwise
@@ -271,8 +270,8 @@ array edges.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.calc.subpixel_offset">
-<code class="sig-prename descclassname">pew.lib.calc.</code><code class="sig-name descname">subpixel_offset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">offsets</span></em>, <em class="sig-param"><span class="n">pixelsize</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.calc.subpixel_offset" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.calc.subpixel_offset">
+<code class="sig-prename descclassname">pewlib.process.calc.</code><code class="sig-name descname">subpixel_offset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">offsets</span></em>, <em class="sig-param"><span class="n">pixelsize</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.calc.subpixel_offset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Offsets layers in a 3d array.</p>
 <p>First <cite>x</cite> is enlarged by <cite>pixelsize</cite> then list of <cite>offsets</cite> are applied
 across axis 2 of <cite>x</cite>. If the first offset is not (0, 0) then it is prepended.
@@ -295,8 +294,8 @@ will be streched by 2 and every 2nd layer will be shifted by 1 pixel.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.calc.subpixel_offset_equal">
-<code class="sig-prename descclassname">pew.lib.calc.</code><code class="sig-name descname">subpixel_offset_equal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">offsets</span></em>, <em class="sig-param"><span class="n">pixelsize</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.calc.subpixel_offset_equal" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.calc.subpixel_offset_equal">
+<code class="sig-prename descclassname">pewlib.process.calc.</code><code class="sig-name descname">subpixel_offset_equal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">offsets</span></em>, <em class="sig-param"><span class="n">pixelsize</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.calc.subpixel_offset_equal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Offsets layers in a 3d array.</p>
 <p>Special case of ‘subpixel_offset’ where x==y for <cite>offsets</cite> and <cite>pixelsize</cite>.</p>
 <dl class="field-list simple">
@@ -315,13 +314,13 @@ will be streched by 2 and every 2nd layer will be shifted by 1 pixel.</p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="#pew.lib.calc.subpixel_offset" title="pew.lib.calc.subpixel_offset"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.lib.calc.subpixel_offset()</span></code></a></p>
+<p><a class="reference internal" href="#pewlib.process.calc.subpixel_offset" title="pewlib.process.calc.subpixel_offset"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.process.calc.subpixel_offset()</span></code></a></p>
 </div>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.calc.view_as_blocks">
-<code class="sig-prename descclassname">pew.lib.calc.</code><code class="sig-name descname">view_as_blocks</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">block</span></em>, <em class="sig-param"><span class="n">step</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.calc.view_as_blocks" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.calc.view_as_blocks">
+<code class="sig-prename descclassname">pewlib.process.calc.</code><code class="sig-name descname">view_as_blocks</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">block</span></em>, <em class="sig-param"><span class="n">step</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.calc.view_as_blocks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Block view of array</p>
 <p>Can be overlapping if <cite>step</cite> &lt; <cite>block</cite>.</p>
 <dl class="field-list simple">
@@ -346,13 +345,13 @@ will be streched by 2 and every 2nd layer will be shifted by 1 pixel.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="colocalisation">
-<h2>Colocalisation<a class="headerlink" href="#colocalisation" title="Permalink to this headline">¶</a></h2>
-<p>Colocalisation can be used to quanitify the positional relationship between
-elements. Various algorithms exist and a few of them are implemented in this module.</p>
-<span class="target" id="module-pew.lib.colocal"></span><dl class="py function">
-<dt id="pew.lib.colocal.costes">
-<code class="sig-prename descclassname">pew.lib.colocal.</code><code class="sig-name descname">costes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">n_scrambles</span><span class="o">=</span><span class="default_value">200</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.colocal.costes" title="Permalink to this definition">¶</a></dt>
+<div class="section" id="module-pewlib.process.colocal">
+<span id="colocalisation"></span><h2>Colocalisation<a class="headerlink" href="#module-pewlib.process.colocal" title="Permalink to this headline">¶</a></h2>
+<p>Colcalisation can be used to quantify the spacial relationship between
+elements. A few ofthe many available algorithms are implemented in this file.</p>
+<dl class="py function">
+<dt id="pewlib.process.colocal.costes">
+<code class="sig-prename descclassname">pewlib.process.colocal.</code><code class="sig-name descname">costes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">n_scrambles</span><span class="o">=</span><span class="default_value">200</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.colocal.costes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs Costes colocalisation.</p>
 <p>The threshold at which no colocalisation appears (R &lt; 0) is first calculated
 and then used to find Manders M1 and M2.</p>
@@ -376,9 +375,9 @@ Mander’s M2</p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="#pew.lib.colocal.costes_threshold" title="pew.lib.colocal.costes_threshold"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.lib.colocal.costes_threshold()</span></code></a>
-<a class="reference internal" href="#pew.lib.colocal.manders" title="pew.lib.colocal.manders"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.lib.colocal.manders()</span></code></a>
-<a class="reference internal" href="#pew.lib.colocal.pearsonr_probablity" title="pew.lib.colocal.pearsonr_probablity"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.lib.colocal.pearsonr_probablity()</span></code></a></p>
+<p><a class="reference internal" href="#pewlib.process.colocal.costes_threshold" title="pewlib.process.colocal.costes_threshold"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.process.colocal.costes_threshold()</span></code></a>
+<a class="reference internal" href="#pewlib.process.colocal.manders" title="pewlib.process.colocal.manders"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.process.colocal.manders()</span></code></a>
+<a class="reference internal" href="#pewlib.process.colocal.pearsonr_probablity" title="pewlib.process.colocal.pearsonr_probablity"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.process.colocal.pearsonr_probablity()</span></code></a></p>
 </div>
 <p class="rubric">References</p>
 <dl class="simple">
@@ -390,8 +389,8 @@ Colocalization in Live Cells Biophysical Journal, Elsevier BV,
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.colocal.costes_threshold">
-<code class="sig-prename descclassname">pew.lib.colocal.</code><code class="sig-name descname">costes_threshold</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">target_r</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.colocal.costes_threshold" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.colocal.costes_threshold">
+<code class="sig-prename descclassname">pewlib.process.colocal.</code><code class="sig-name descname">costes_threshold</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">target_r</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.colocal.costes_threshold" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates Costes thresholds.</p>
 <p>Pearson’s R is calculated for values of <cite>x</cite> and <cite>y</cite> that are above a decreasing
 threshold. Once the caluclated R value is below <cite>target_r</cite> the thresholds are
@@ -415,7 +414,7 @@ intercept, b</p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="#pew.lib.colocal.pearsonr" title="pew.lib.colocal.pearsonr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.lib.colocal.pearsonr()</span></code></a></p>
+<p><a class="reference internal" href="#pewlib.process.colocal.pearsonr" title="pewlib.process.colocal.pearsonr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.process.colocal.pearsonr()</span></code></a></p>
 </div>
 <p class="rubric">References</p>
 <dl class="simple">
@@ -427,8 +426,8 @@ Colocalization in Live Cells Biophysical Journal, Elsevier BV,
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.colocal.li_icq">
-<code class="sig-prename descclassname">pew.lib.colocal.</code><code class="sig-name descname">li_icq</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.colocal.li_icq" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.colocal.li_icq">
+<code class="sig-prename descclassname">pewlib.process.colocal.</code><code class="sig-name descname">li_icq</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.colocal.li_icq" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates Li’s ICQ.</p>
 <p>The intenisty correlation quotient calculates the number of pixels where both
 x and y are above or below their means. A value of 0 indicates no correlation,
@@ -456,8 +455,8 @@ Journal of Neuroscience, Society for Neuroscience, 2004, 24, 4070-4081</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.colocal.manders">
-<code class="sig-prename descclassname">pew.lib.colocal.</code><code class="sig-name descname">manders</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">tx</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ty</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.colocal.manders" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.colocal.manders">
+<code class="sig-prename descclassname">pewlib.process.colocal.</code><code class="sig-name descname">manders</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">tx</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ty</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.colocal.manders" title="Permalink to this definition">¶</a></dt>
 <dd><p>Manders’ correlation coefficients.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -485,8 +484,8 @@ Journal of Microscopy, Wiley, 1993, 169, 375-382</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.colocal.pearsonr">
-<code class="sig-prename descclassname">pew.lib.colocal.</code><code class="sig-name descname">pearsonr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.colocal.pearsonr" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.colocal.pearsonr">
+<code class="sig-prename descclassname">pewlib.process.colocal.</code><code class="sig-name descname">pearsonr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.colocal.pearsonr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pearson’s colocalisation coefficient.</p>
 <p>A value of 0 indicates no correlation, below 0 segregation and above 0
 colocalisation.</p>
@@ -507,8 +506,8 @@ colocalisation.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.colocal.pearsonr_probablity">
-<code class="sig-prename descclassname">pew.lib.colocal.</code><code class="sig-name descname">pearsonr_probablity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">3</span></em>, <em class="sig-param"><span class="n">mask</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">shuffle_partial</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">500</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.colocal.pearsonr_probablity" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.colocal.pearsonr_probablity">
+<code class="sig-prename descclassname">pewlib.process.colocal.</code><code class="sig-name descname">pearsonr_probablity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">3</span></em>, <em class="sig-param"><span class="n">mask</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">shuffle_partial</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">500</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.colocal.pearsonr_probablity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evalulates Probability of Pearson’s coefficient.</p>
 <p>Calculates Pearson’s R of <cite>x</cite> and <cite>y</cite> then shuffles <cite>y</cite> <cite>n</cite> times, retesting
 Pearson’s R. The probability is defined as the ratio of R’s produced by the
@@ -536,8 +535,8 @@ probability, p, of the r</p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="#pew.lib.colocal.pearsonr" title="pew.lib.colocal.pearsonr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.lib.colocal.pearsonr()</span></code></a>
-<a class="reference internal" href="#pew.lib.calc.shuffle_blocks" title="pew.lib.calc.shuffle_blocks"><code class="xref py py-func docutils literal notranslate"><span class="pre">pew.lib.calc.shuffle_blocks()</span></code></a></p>
+<p><a class="reference internal" href="#pewlib.process.colocal.pearsonr" title="pewlib.process.colocal.pearsonr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.process.colocal.pearsonr()</span></code></a>
+<a class="reference internal" href="#pewlib.process.calc.shuffle_blocks" title="pewlib.process.calc.shuffle_blocks"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.process.calc.shuffle_blocks()</span></code></a></p>
 </div>
 <p class="rubric">References</p>
 <dl class="footnote brackets">
@@ -551,14 +550,14 @@ Colocalization in Live Cells Biophysical Journal, Elsevier BV,
 </dd></dl>
 
 </div>
-<div class="section" id="convolution">
-<h2>Convolution<a class="headerlink" href="#convolution" title="Permalink to this headline">¶</a></h2>
-<p>The are many applications for convolution and deconvolution of images such as
-blurring an image or removing wash-out tailing. This module contains functions
-for 1-dimensional convolution as well as functions for creating distributions.</p>
-<span class="target" id="module-pew.lib.convolve"></span><dl class="py function">
-<dt id="pew.lib.convolve.beta">
-<code class="sig-prename descclassname">pew.lib.convolve.</code><code class="sig-name descname">beta</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">alpha</span></em>, <em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.convolve.beta" title="Permalink to this definition">¶</a></dt>
+<div class="section" id="module-pewlib.process.convolve">
+<span id="convolution"></span><h2>Convolution<a class="headerlink" href="#module-pewlib.process.convolve" title="Permalink to this headline">¶</a></h2>
+<p>Conv- and deconvolution have many applications in image processing such as
+adding or removing blur. This module contains functions for performing 1-dimensional
+convolutions as well as functions for creating various distributions.</p>
+<dl class="py function">
+<dt id="pewlib.process.convolve.beta">
+<code class="sig-prename descclassname">pewlib.process.convolve.</code><code class="sig-name descname">beta</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">alpha</span></em>, <em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.convolve.beta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Beta distribution.</p>
 <p>Range of 0 to 1. The <cite>scale</cite> and <cite>shift</cite> arguments can be used to change the range.</p>
 <dl class="field-list simple">
@@ -581,8 +580,8 @@ for 1-dimensional convolution as well as functions for creating distributions.</
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.convolve.convolve">
-<code class="sig-prename descclassname">pew.lib.convolve.</code><code class="sig-name descname">convolve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">psf</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'pad'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.convolve.convolve" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.convolve.convolve">
+<code class="sig-prename descclassname">pewlib.process.convolve.</code><code class="sig-name descname">convolve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">psf</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'pad'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.convolve.convolve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convolve with ‘pad’ mode.</p>
 <p>If <cite>mode</cite> is ‘pad’ then <cite>x</cite> is edge padded to converse size on convolution.
 Other modes are passed directly to <code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.convolve()</span></code>.</p>
@@ -607,8 +606,8 @@ Other modes are passed directly to <code class="xref py py-func docutils literal
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.convolve.deconvolve">
-<code class="sig-prename descclassname">pew.lib.convolve.</code><code class="sig-name descname">deconvolve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">psf</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'valid'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.convolve.deconvolve" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.convolve.deconvolve">
+<code class="sig-prename descclassname">pewlib.process.convolve.</code><code class="sig-name descname">deconvolve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">psf</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'valid'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.convolve.deconvolve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inverse of convolution.</p>
 <p>Deconvolution is performed in frequency domain.</p>
 <dl class="field-list simple">
@@ -625,8 +624,8 @@ Other modes are passed directly to <code class="xref py py-func docutils literal
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.convolve.erf">
-<code class="sig-prename descclassname">pew.lib.convolve.</code><code class="sig-name descname">erf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.convolve.erf" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.convolve.erf">
+<code class="sig-prename descclassname">pewlib.process.convolve.</code><code class="sig-name descname">erf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.convolve.erf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Error function approximation.</p>
 <p>The maximum error is 5e-4 [1].</p>
 <dl class="field-list simple">
@@ -651,8 +650,8 @@ Vol. 55. US Government printing office, 1970.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.convolve.erfinv">
-<code class="sig-prename descclassname">pew.lib.convolve.</code><code class="sig-name descname">erfinv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.convolve.erfinv" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.convolve.erfinv">
+<code class="sig-prename descclassname">pewlib.process.convolve.</code><code class="sig-name descname">erfinv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.convolve.erfinv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inverse error function approximation.</p>
 <p>The maximum error is 6e-3 [2].</p>
 <dl class="field-list simple">
@@ -676,8 +675,8 @@ Vol. 55. US Government printing office, 1970.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.convolve.exponential">
-<code class="sig-prename descclassname">pew.lib.convolve.</code><code class="sig-name descname">exponential</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">_lambda</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">1e-06</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.convolve.exponential" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.convolve.exponential">
+<code class="sig-prename descclassname">pewlib.process.convolve.</code><code class="sig-name descname">exponential</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">_lambda</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">1e-06</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.convolve.exponential" title="Permalink to this definition">¶</a></dt>
 <dd><p>Exponential distribution.</p>
 <p>Range of 0 to <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments can be used to change
 the range.</p>
@@ -700,8 +699,8 @@ the range.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.convolve.gamma">
-<code class="sig-prename descclassname">pew.lib.convolve.</code><code class="sig-name descname">gamma</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.convolve.gamma" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.convolve.gamma">
+<code class="sig-prename descclassname">pewlib.process.convolve.</code><code class="sig-name descname">gamma</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.convolve.gamma" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gamma function approximation.</p>
 <p>Maximum error of 3e-7 [3].</p>
 <dl class="field-list simple">
@@ -726,8 +725,8 @@ Vol. 55. US Government printing office, 1970.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.convolve.inversegamma">
-<code class="sig-prename descclassname">pew.lib.convolve.</code><code class="sig-name descname">inversegamma</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">alpha</span></em>, <em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">1e-06</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.convolve.inversegamma" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.convolve.inversegamma">
+<code class="sig-prename descclassname">pewlib.process.convolve.</code><code class="sig-name descname">inversegamma</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">alpha</span></em>, <em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">1e-06</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.convolve.inversegamma" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inverse Gamma distribution.</p>
 <p>Range of 0 to <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments can be used to change
 the range.</p>
@@ -751,8 +750,8 @@ the range.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.convolve.laplace">
-<code class="sig-prename descclassname">pew.lib.convolve.</code><code class="sig-name descname">laplace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">b</span></em>, <em class="sig-param"><span class="n">mu</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.convolve.laplace" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.convolve.laplace">
+<code class="sig-prename descclassname">pewlib.process.convolve.</code><code class="sig-name descname">laplace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">b</span></em>, <em class="sig-param"><span class="n">mu</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.convolve.laplace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Laplace distribution.</p>
 <p>Range of -0.5 * <cite>size</cite> to 0.5 * <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments
 can be used to change the range.</p>
@@ -776,8 +775,8 @@ can be used to change the range.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.convolve.loglaplace">
-<code class="sig-prename descclassname">pew.lib.convolve.</code><code class="sig-name descname">loglaplace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">b</span></em>, <em class="sig-param"><span class="n">mu</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">1e-06</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.convolve.loglaplace" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.convolve.loglaplace">
+<code class="sig-prename descclassname">pewlib.process.convolve.</code><code class="sig-name descname">loglaplace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">b</span></em>, <em class="sig-param"><span class="n">mu</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">1e-06</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.convolve.loglaplace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Log-Laplace distribution.</p>
 <p>Range of 0 to <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments can be used to change
 the range.</p>
@@ -801,8 +800,8 @@ the range.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.convolve.lognormal">
-<code class="sig-prename descclassname">pew.lib.convolve.</code><code class="sig-name descname">lognormal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">sigma</span></em>, <em class="sig-param"><span class="n">mu</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">1e-06</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.convolve.lognormal" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.convolve.lognormal">
+<code class="sig-prename descclassname">pewlib.process.convolve.</code><code class="sig-name descname">lognormal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">sigma</span></em>, <em class="sig-param"><span class="n">mu</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">1e-06</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.convolve.lognormal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Log-normal distribution.</p>
 <p>Range of 0 to <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments can be used to change
 the range.</p>
@@ -826,8 +825,8 @@ the range.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.convolve.normal">
-<code class="sig-prename descclassname">pew.lib.convolve.</code><code class="sig-name descname">normal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">sigma</span></em>, <em class="sig-param"><span class="n">mu</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.convolve.normal" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.convolve.normal">
+<code class="sig-prename descclassname">pewlib.process.convolve.</code><code class="sig-name descname">normal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">sigma</span></em>, <em class="sig-param"><span class="n">mu</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.convolve.normal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normal distribution.</p>
 <p>Range of -0.5 * <cite>size</cite> to 0.5 * <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments
 can be used to change the range.</p>
@@ -851,8 +850,8 @@ can be used to change the range.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.convolve.super_gaussian">
-<code class="sig-prename descclassname">pew.lib.convolve.</code><code class="sig-name descname">super_gaussian</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">sigma</span></em>, <em class="sig-param"><span class="n">mu</span></em>, <em class="sig-param"><span class="n">power</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.convolve.super_gaussian" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.convolve.super_gaussian">
+<code class="sig-prename descclassname">pewlib.process.convolve.</code><code class="sig-name descname">super_gaussian</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">sigma</span></em>, <em class="sig-param"><span class="n">mu</span></em>, <em class="sig-param"><span class="n">power</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.convolve.super_gaussian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Super-Gaussian distribution.</p>
 <p>Range of -0.5 * <cite>size</cite> to 0.5 * <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments
 can be used to change the range.</p>
@@ -877,8 +876,8 @@ can be used to change the range.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.convolve.triangular">
-<code class="sig-prename descclassname">pew.lib.convolve.</code><code class="sig-name descname">triangular</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">b</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.convolve.triangular" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.convolve.triangular">
+<code class="sig-prename descclassname">pewlib.process.convolve.</code><code class="sig-name descname">triangular</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">b</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">shift</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.convolve.triangular" title="Permalink to this definition">¶</a></dt>
 <dd><p>Triangular distribution.</p>
 <p>Range of -0.5 * <cite>size</cite> to 0.5 * <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments
 can be used to change the range.</p>
@@ -903,14 +902,14 @@ can be used to change the range.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-pew.lib.filters">
-<span id="filtering"></span><h2>Filtering<a class="headerlink" href="#module-pew.lib.filters" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pewlib.process.filters">
+<span id="filtering"></span><h2>Filtering<a class="headerlink" href="#module-pewlib.process.filters" title="Permalink to this headline">¶</a></h2>
 <p>Filtering can be used to remove artifacts, such as spikes, from images.
 Care must be taken when using filtering to ensure that legitmate data is not
 also altered.</p>
 <dl class="py function">
-<dt id="pew.lib.filters.rolling_mean">
-<code class="sig-prename descclassname">pew.lib.filters.</code><code class="sig-name descname">rolling_mean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">block</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">3.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.filters.rolling_mean" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.filters.rolling_mean">
+<code class="sig-prename descclassname">pewlib.process.filters.</code><code class="sig-name descname">rolling_mean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">block</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">3.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.filters.rolling_mean" title="Permalink to this definition">¶</a></dt>
 <dd><p>Filter an array using rolling mean.</p>
 <p>Each value of <cite>x</cite> is compared to the mean of its <cite>block</cite>, the values arround it.
 If it is <cite>threshold</cite> times the standard deviation <em>without the central value</em> then
@@ -934,21 +933,21 @@ The mean of each block is recalculated outliers set to the new local mean.</p>
 <p class="rubric">Example</p>
 <p>Removing spikes from 1d data.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pew.lib</span> <span class="kn">import</span> <span class="n">filters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pewlib.process</span> <span class="kn">import</span> <span class="n">filters</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">[</span><span class="mi">5</span><span class="p">::</span><span class="mi">10</span><span class="p">]</span> <span class="o">+=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">rolling_mean</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>(<a class="reference external" href=".//lib-1.py">Source code</a>, <a class="reference external" href=".//lib-1.png">png</a>, <a class="reference external" href=".//lib-1.hires.png">hires.png</a>, <a class="reference external" href=".//lib-1.pdf">pdf</a>)</p>
+<p>(<a class="reference external" href=".//processing-1.py">Source code</a>, <a class="reference external" href=".//processing-1.png">png</a>, <a class="reference external" href=".//processing-1.hires.png">hires.png</a>, <a class="reference external" href=".//processing-1.pdf">pdf</a>)</p>
 <div class="figure align-default">
-<img alt="_images/lib-1.png" src="_images/lib-1.png" />
+<img alt="_images/processing-1.png" src="_images/processing-1.png" />
 </div>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pew.lib.filters.rolling_median">
-<code class="sig-prename descclassname">pew.lib.filters.</code><code class="sig-name descname">rolling_median</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">block</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">3.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.filters.rolling_median" title="Permalink to this definition">¶</a></dt>
+<dt id="pewlib.process.filters.rolling_median">
+<code class="sig-prename descclassname">pewlib.process.filters.</code><code class="sig-name descname">rolling_median</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">block</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">3.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.filters.rolling_median" title="Permalink to this definition">¶</a></dt>
 <dd><p>Filter an array using rolling median.</p>
 <p>Each value of <cite>x</cite> is compared to the median of its <cite>block</cite>, the values arround it.
 If it is <cite>threshold</cite> times the median distance from the median then
@@ -972,15 +971,15 @@ The mean of each block is recalculated outliers set to the local median.</p>
 <p class="rubric">Example</p>
 <p>Removing poisson noise from an image.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pew.lib</span> <span class="kn">import</span> <span class="n">filters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pewlib.process</span> <span class="kn">import</span> <span class="n">filters</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2500</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">)))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">lam</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">rolling_median</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>(<a class="reference external" href=".//lib-2.py">Source code</a>, <a class="reference external" href=".//lib-2.png">png</a>, <a class="reference external" href=".//lib-2.hires.png">hires.png</a>, <a class="reference external" href=".//lib-2.pdf">pdf</a>)</p>
+<p>(<a class="reference external" href=".//processing-2.py">Source code</a>, <a class="reference external" href=".//processing-2.png">png</a>, <a class="reference external" href=".//processing-2.hires.png">hires.png</a>, <a class="reference external" href=".//processing-2.pdf">pdf</a>)</p>
 <div class="figure align-default">
-<img alt="_images/lib-2.png" src="_images/lib-2.png" />
+<img alt="_images/processing-2.png" src="_images/processing-2.png" />
 </div>
 </dd></dl>
 
@@ -989,12 +988,11 @@ The mean of each block is recalculated outliers set to the local median.</p>
 <h2>Peakfinding<a class="headerlink" href="#peakfinding" title="Permalink to this headline">¶</a></h2>
 <p>This module is under devolopment.</p>
 </div>
-<div class="section" id="thresholding">
-<h2>Thresholding<a class="headerlink" href="#thresholding" title="Permalink to this headline">¶</a></h2>
-<p>Currently this module only contains a reimplementation of Otsu’s method.</p>
-<span class="target" id="module-pew.lib.threshold"></span><dl class="py function">
-<dt id="pew.lib.threshold.otsu">
-<code class="sig-prename descclassname">pew.lib.threshold.</code><code class="sig-name descname">otsu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pew.lib.threshold.otsu" title="Permalink to this definition">¶</a></dt>
+<div class="section" id="module-pewlib.process.threshold">
+<span id="thresholding"></span><h2>Thresholding<a class="headerlink" href="#module-pewlib.process.threshold" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pewlib.process.threshold.otsu">
+<code class="sig-prename descclassname">pewlib.process.threshold.</code><code class="sig-name descname">otsu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.threshold.otsu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the otsu threshold of the input array.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>

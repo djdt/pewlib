@@ -4,19 +4,19 @@ Line-by-line Lasers
 Laser
 -----
 
-.. automodule:: pew.laser
+.. automodule:: pewlib.laser
     :members:
 
 Config
 ------
 
-.. automodule:: pew.config
+.. automodule:: pewlib.config
     :members:
 
-Calibration
+Capewlib.ration
 -----------
 
-.. automodule:: pew.calibration
+.. automodule:: pewlib.calibration
     :members:
 
 
@@ -26,11 +26,11 @@ SRR Lasers
 SRRLaser
 --------
 
-.. automodule:: pew.srr.srr
+.. automodule:: pewlib.srr.srr
     :members:
 
 SRRConfig
 ---------
 
-.. automodule:: pew.srr.config
+.. automodule:: pewlib.srr.config
     :members:

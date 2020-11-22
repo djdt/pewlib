@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from pew.lib import filters
+from pewlib.process import filters
 a = np.sin(np.linspace(0, 1, 2500).reshape((50, 50)))
 a += np.random.poisson(lam=0.01, size=(50, 50))
 b = filters.rolling_median(a, (5, 5), threshold=3.0)
