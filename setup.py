@@ -1,14 +1,12 @@
 from setuptools import setup, find_packages
 
-from pew import __version__
-
 setup(
     name="pewlib",
     description="Import, export and processing library for LA-ICP-MS data.",
     url="https://github.com/djdt/pew",
     author="T. Lockwood",
     author_email="thomas.lockwood@uts.edu.au",
-    version=__version__,
+    version="0.6.0",
     packages=find_packages(include=["pew", "pew.*"]),
     install_requires=["numpy"],
     setup_requires=["pytest-runner"],
