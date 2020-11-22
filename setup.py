@@ -12,7 +12,7 @@ setup(
     author="T. Lockwood",
     author_email="thomas.lockwood@uts.edu.au",
     version="0.6.2",
-    packages=find_packages(include=["pew", "pewlib.*"]),
+    packages=find_packages(include=["pewlib", "pewlib.*"]),
     install_requires=["numpy"],
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],
