@@ -11,7 +11,7 @@ setup(
     url="https://github.com/djdt/pewlib",
     author="T. Lockwood",
     author_email="thomas.lockwood@uts.edu.au",
-    version="0.6.0",
+    version="0.6.1",
     packages=find_packages(include=["pew", "pew.*"]),
     install_requires=["numpy"],
     setup_requires=["pytest-runner"],
