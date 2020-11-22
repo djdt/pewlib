@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from pew.laser import _Laser, Laser
-from pew import Calibration, Config
+from pewlib.laser import _Laser, Laser
+from pewlib import Calibration, Config
 
 from typing import List
 

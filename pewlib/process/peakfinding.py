@@ -1,6 +1,6 @@
 import numpy as np
 
-from pew.lib.calc import local_maxima, reset_cumsum, view_as_blocks
+from pewlib.process.calc import local_maxima, reset_cumsum, view_as_blocks
 
 from typing import Callable, Tuple
 
@@ -191,7 +191,7 @@ def find_peaks_zscore(
 ) -> np.ndarray:
 
     if use_cython:
-        from pew.lib.zscore import zscore_peaks
+        from pewlib.process.zscore import zscore_peaks
 
         signal, _ = zscore_peaks(x, lag, threshold, influence)
     else:

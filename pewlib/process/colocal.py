@@ -1,6 +1,11 @@
+"""Colcalisation can be used to quantify the spacial relationship between
+elements. A few ofthe many available algorithms are implemented in this file.
+
+"""
+
 import numpy as np
 
-from pew.lib.calc import normalise, shuffle_blocks
+from pewlib.process.calc import normalise, shuffle_blocks
 
 from typing import Tuple
 
@@ -73,8 +78,8 @@ def pearsonr_probablity(
         probability, p, of the r
 
     See Also:
-        :func:`pew.lib.colocal.pearsonr`
-        :func:`pew.lib.calc.shuffle_blocks`
+        :func:`pewlib.process.colocal.pearsonr`
+        :func:`pewlib.process.calc.shuffle_blocks`
 
     References:
         .. [1] Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G.
@@ -149,7 +154,7 @@ def costes_threshold(
         intercept, b
 
     See Also:
-        :func:`pew.lib.colocal.pearsonr`
+        :func:`pewlib.process.colocal.pearsonr`
 
     References:
         Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G.
@@ -196,9 +201,9 @@ def costes(
         Mander's M2
 
     See Also:
-        :func:`pew.lib.colocal.costes_threshold`
-        :func:`pew.lib.colocal.manders`
-        :func:`pew.lib.colocal.pearsonr_probablity`
+        :func:`pewlib.process.colocal.costes_threshold`
+        :func:`pewlib.process.colocal.manders`
+        :func:`pewlib.process.colocal.pearsonr_probablity`
 
     References:
         Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G.

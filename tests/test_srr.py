@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
 
-from pew import Laser
-from pew.srr import SRRLaser, SRRConfig
+from pewlib import Laser
+from pewlib.srr import SRRLaser, SRRConfig
 
 from typing import List, Tuple
 

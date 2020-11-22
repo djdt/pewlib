@@ -1,3 +1,9 @@
+"""Conv- and deconvolution have many applications in image processing such as
+adding or removing blur. This module contains functions for performing 1-dimensional
+convolutions as well as functions for creating various distributions.
+
+"""
+
 import numpy as np
 
 _s2 = np.sqrt(2.0)

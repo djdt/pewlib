@@ -1,6 +1,6 @@
 import numpy as np
 
-from pew.lib.threshold import otsu
+from pewlib.process.threshold import otsu
 
 
 def test_otsu():

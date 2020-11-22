@@ -4,7 +4,7 @@ also altered.
 """
 import numpy as np
 
-from pew.lib.calc import view_as_blocks
+from pewlib.process.calc import view_as_blocks
 
 from typing import Tuple, Union
 
@@ -33,7 +33,7 @@ def rolling_mean(
     Removing spikes from 1d data.
 
     >>> import numpy as np
-    >>> from pew.lib import filters
+    >>> from pewlib.process import filters
     >>> a = np.sin(np.linspace(0, 1, 50))
     >>> a[5::10] +=np.random.choice([-1, 1], size=10)
     >>> b = filters.rolling_mean(a, 3, threshold=3.0)
@@ -42,9 +42,9 @@ def rolling_mean(
 
         import matplotlib.pyplot as plt
         import numpy as np
-        from pew.lib import filters
+        from pewlib.process import filters
         import numpy as np
-        from pew.lib import filters
+        from pewlib.process import filters
         a = np.sin(np.linspace(0, 10, 50))
         a[5::10] +=np.random.choice([-1, 1], size=5)
         b = filters.rolling_mean(a, 3, threshold=3.0)
@@ -109,7 +109,7 @@ def rolling_median(
     Removing poisson noise from an image.
 
     >>> import numpy as np
-    >>> from pew.lib import filters
+    >>> from pewlib.process import filters
     >>> a = np.sin(np.linspace(0, 1, 2500).reshape((50, 50)))
     >>> a += np.random.poisson(lam=0.01, size=(50, 50))
     >>> b = filters.rolling_median(a, (5, 5), threshold=3.0)
@@ -118,7 +118,7 @@ def rolling_median(
 
         import matplotlib.pyplot as plt
         import numpy as np
-        from pew.lib import filters
+        from pewlib.process import filters
         a = np.sin(np.linspace(0, 1, 2500).reshape((50, 50)))
         a += np.random.poisson(lam=0.01, size=(50, 50))
         b = filters.rolling_median(a, (5, 5), threshold=3.0)

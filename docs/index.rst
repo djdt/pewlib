@@ -4,6 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to pewlib's documentation!
+
 ===============================
 
 Pewlib is a python library for the import, processing and export of LA-ICP-MS imaging data.
@@ -19,7 +20,7 @@ Pewlib is a python library for the import, processing and export of LA-ICP-MS im
 
     io
     pew
-    lib
+    processing
 
 
 Indices and tables

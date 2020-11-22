@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from pew.calibration import weights_from_weighting, weighted_rsq, weighted_linreg
-from pew.calibration import Calibration
+from pewlib.calibration import weights_from_weighting, weighted_rsq, weighted_linreg
+from pewlib.calibration import Calibration
 
 
 def test_weighting():

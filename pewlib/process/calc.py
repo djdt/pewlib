@@ -1,3 +1,5 @@
+"""This module contains functions used by other processing modules."""
+
 import numpy as np
 
 from typing import List, Tuple
@@ -179,7 +181,7 @@ def subpixel_offset_equal(
         array
 
     See Also:
-        :func:`pew.lib.calc.subpixel_offset`
+        :func:`pewlib.process.calc.subpixel_offset`
     """
     return subpixel_offset(x, [(o, o) for o in offsets], (pixelsize, pixelsize))
 

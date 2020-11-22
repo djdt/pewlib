@@ -1,6 +1,6 @@
 import numpy as np
 
-from pew.lib import filters
+from pewlib.process import filters
 
 def test_mean_filter_1d():
     np.random.seed(93546376)

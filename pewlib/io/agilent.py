@@ -341,7 +341,7 @@ def load_binary(
         IOError: invalid binary format
 
     See Also:
-        :func:`pew.io.agilent.collect_datafiles`
+        :func:`pewlib.io.agilent.collect_datafiles`
     """
 
     if isinstance(path, str):  # pragma: no cover
@@ -447,7 +447,7 @@ def load_csv(
         dict of params if `full`
 
     See Also:
-        :func:`pew.io.agilent.collect_datafiles`
+        :func:`pewlib.io.agilent.collect_datafiles`
     """
 
     if isinstance(path, str):  # pragma: no cover
@@ -531,9 +531,9 @@ def load(
         dict of params if `full`
 
     See Also:
-        :func:`pew.io.agilent.collect_datafiles`
-        :func:`pew.io.agilent.load_binary`
-        :func:`pew.io.agilent.load_csv`
+        :func:`pewlib.io.agilent.collect_datafiles`
+        :func:`pewlib.io.agilent.load_binary`
+        :func:`pewlib.io.agilent.load_csv`
     """
     try:
         result = load_binary(

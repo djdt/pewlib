@@ -1,6 +1,6 @@
 import numpy as np
 
-from pew.lib import convolve
+from pewlib.process import convolve
 
 
 # The majority of these tests are comparing against results from scipy.stats

@@ -4,8 +4,8 @@ from pathlib import Path
 import pytest
 import tempfile
 
-from pew import io
-from pew.srr import SRRLaser, SRRConfig
+from pewlib import io
+from pewlib.srr import SRRLaser, SRRConfig
 
 
 def test_io_perkinelmer():

@@ -6,31 +6,30 @@ This module contains the functions pew uses for importing and exporting data.
 Agilent
 -------
 
-.. automodule:: pew.io.agilent
+.. automodule:: pewlib.io.agilent
     :members:
 
 
 Numpy NPZ
 ---------
 
-.. automodule:: pew.io.npz
+.. automodule:: pewlib.io.npz
     :members:
-    :undoc-members:
 
 PerkinElmer
 -----------
 
-.. automodule:: pew.io.perkinelmer
+.. automodule:: pewlib.io.perkinelmer
     :members:
 
 Text Image
 ----------
 
-.. automodule:: pew.io.textimage
+.. automodule:: pewlib.io.textimage
     :members:
 
 VTK
 ---
 
-.. automodule:: pew.io.vtk
+.. automodule:: pewlib.io.vtk
     :members:

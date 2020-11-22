@@ -77,7 +77,7 @@ def weighted_linreg(
        r²
 
     See Also:
-        :func:`pew.calibration.weighted_rsq`
+        :func:`pewlib.calibration.weighted_rsq`
     """
     coef, stats = np.polynomial.polynomial.polyfit(
         x, y, 1, w=w if w is None else np.sqrt(w), full=True

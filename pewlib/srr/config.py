@@ -1,6 +1,6 @@
 import numpy as np
 
-from pew.config import Config
+from pewlib.config import Config
 
 from typing import Tuple
 
@@ -16,7 +16,7 @@ class SRRConfig(Config):
         subpixel_offsets: list of offsets of layers, (offset, pixelsize)
 
     See Also:
-        :class:`pew.config.Config`
+        :class:`pewlib.config.Config`
     """
 
     def __init__(

@@ -7,11 +7,11 @@ from pathlib import Path
 
 import numpy as np
 
-from pew import __version__
-from pew import Laser, Calibration, Config
+from pewlib import __version__
+from pewlib import Laser, Calibration, Config
 
-from pew.laser import _Laser
-from pew.srr import SRRLaser, SRRConfig
+from pewlib.laser import _Laser
+from pewlib.srr import SRRLaser, SRRConfig
 
 from typing import Union
 
@@ -19,7 +19,7 @@ from typing import Union
 def load(path: Union[str, Path]) -> _Laser:
     """Loads data from '.npz' file.
 
-    Loads files created using :func:`pew.io.npz.save`.
+    Loads files created using :func:`pewlib.io.npz.save`.
     On load the a :class:`Laser` or :class:`SRRLaser` is reformed from the saved data.
 
     Args:

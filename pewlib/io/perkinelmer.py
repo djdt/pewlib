@@ -54,7 +54,7 @@ def load(
         dict of params if `full`
 
     See Also:
-        :func:`pew.io.perkinelmer.collect_datafiles`
+        :func:`pewlib.io.perkinelmer.collect_datafiles`
     """
     param_conversion = {
         "ablation.speed": ("speed", 1e3),

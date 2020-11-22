@@ -1,7 +1,7 @@
 import numpy as np
 from pathlib import Path
 
-from pew.io import agilent
+from pewlib.io import agilent
 
 
 sums = {

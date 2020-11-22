@@ -1,7 +1,7 @@
 import numpy as np
 from pathlib import Path
 
-from pew.io import thermo
+from pewlib.io import thermo
 
 
 sums = {"31P": 4.8708803607e4, "153Eu": 5.5000012000e1, "182W": 2.5000003000e1}

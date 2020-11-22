@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from pew.config import Config
-from pew.srr import SRRConfig
+from pewlib.config import Config
+from pewlib.srr import SRRConfig
 
 
 def test_config():

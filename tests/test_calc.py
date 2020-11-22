@@ -1,6 +1,6 @@
 import numpy as np
 
-from pew.lib import calc
+from pewlib.process import calc
 
 
 def test_greyscale_to_rgb():

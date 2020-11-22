@@ -1,6 +1,6 @@
 import numpy as np
 
-from pew.lib import colocal
+from pewlib.process import colocal
 
 
 a = np.tile([[0.0, 1.0], [0.0, 1.0]], (10, 10))

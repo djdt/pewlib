@@ -14,12 +14,12 @@ import numpy.lib.recfunctions as rfn
 from pathlib import Path
 import copy
 
-from pew.laser import _Laser, Laser
-from pew.calibration import Calibration
+from pewlib.laser import _Laser, Laser
+from pewlib.calibration import Calibration
 
-from pew.lib.calc import subpixel_offset_equal
+from pewlib.process.calc import subpixel_offset_equal
 
-from pew.srr.config import SRRConfig
+from pewlib.srr.config import SRRConfig
 
 from typing import Dict, List, Tuple, Union
 
@@ -35,7 +35,7 @@ class SRRLaser(_Laser):
         path: path to file
 
     See Also:
-        :class:`pew.laser.Laser`
+        :class:`pewlib.laser.Laser`
     """
 
     def __init__(

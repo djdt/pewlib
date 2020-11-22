@@ -7,8 +7,8 @@ import numpy.lib.recfunctions as rfn
 from pathlib import Path
 import copy
 
-from pew.calibration import Calibration
-from pew.config import Config
+from pewlib.calibration import Calibration
+from pewlib.config import Config
 
 from typing import Any, Dict, List, Tuple, Union
 
