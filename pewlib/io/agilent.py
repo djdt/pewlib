@@ -496,6 +496,7 @@ def load_csv(
                     names=True,
                     usecols=np.arange(1, len(names) + 1),
                     dtype=np.float64,
+                    deletechars="",
                 )
             except ValueError:  # pragma: no cover
                 logger.warning(f"'{csv}' row {i} missing, line blanked.")

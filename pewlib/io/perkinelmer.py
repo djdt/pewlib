@@ -66,11 +66,12 @@ def load(
 
     datafiles = collect_datafiles(path)
 
-    data = np.vstack(
+    data = np.stack(
         [
-            np.genfromtxt(df, skip_header=1, delimiter=",", names=True)
+            np.genfromtxt(df, skip_header=1, delimiter=",", names=True, deletechars="")
             for df in datafiles
-        ]
+        ],
+        axis=1,
     )
     data = numpy.lib.recfunctions.drop_fields(data, "Time_in_Seconds")
     params: dict = {"origin": (0.0, 0.0)}
