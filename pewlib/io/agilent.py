@@ -275,27 +275,32 @@ def mass_info_datafile(path: Path) -> List[XSpecificMass]:
     else:  # pragma: no cover
         raise FileNotFoundError("MSTS_XSpecific.xml not found.")
 
-    masses = {k: XSpecificMass(k, v[0], v[1], k) for k, v in xspecific.items()}
+    masses = {
+        idx: XSpecificMass(idx, name=name, acctime=acctime, mz=mz)
+        for idx, (name, mz, acctime) in xspecific.items()
+    }
 
     if msts_xaddition_path.exists():
         xaddition, scan_type = msts_xaddition_xml_read_info(msts_xaddition_path)
-        for k, v in xaddition.items():
-            masses[k].mz = v[0]
+        for idx, (mz, mz2) in xaddition.items():
+            masses[idx].mz = mz
             if scan_type == "MS_MS":
-                masses[k].mz2 = v[1]
+                masses[idx].mz2 = mz2
 
     return sorted(masses.values(), key=lambda x: x.id)
 
 
-def msts_xspecific_xml_read_info(path: Path) -> Dict[int, Tuple[str, float]]:
+def msts_xspecific_xml_read_info(path: Path) -> Dict[int, Tuple[str, int, float]]:
     xml = ElementTree.parse(path)
+    idx = 1
     xdict = {}
     for record in xml.iter("IonRecord"):
         for masses in record.iter("Masses"):
             mass = int(masses.findtext("Mass") or 0)
             name = masses.findtext("Name") or ""
             acctime = float(masses.findtext("AccumulationTime") or 0.0)
-            xdict[mass] = (name, acctime)
+            xdict[idx] = (name, mass, acctime)
+            idx += 1
     return xdict
 
 

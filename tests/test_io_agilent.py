@@ -4,7 +4,13 @@ from pathlib import Path
 from pewlib.io import agilent
 
 
-sums = {
+sums_7700 = {
+    "P31": 7.4188098658e3,
+    "Eu153": 2.5000009499e1,
+    "W182": 0.0000000000e0,
+}
+
+sums_8900 = {
     "P31": 9.5571921387e5,
     "Eu153": 1.6875011255e2,
     "W182": 7.9762025047e2,
@@ -40,7 +46,33 @@ def test_io_agilent_mass_info():
     assert np.all([str(m) for m in masses] == ["P31->47", "Eu153->153", "W182->182"])
 
 
-def test_io_agilent_load_binary():
+def test_io_agilent_load_7700_binary():
+    path = Path(__file__).parent.joinpath("data", "agilent", "7700")
+
+    data, params = agilent.load_binary(
+        path.joinpath("test.b"), counts_per_second=True, full=True
+    )
+    assert data.shape == (5, 5)
+    assert data.dtype.names == ("P31", "Eu153", "W182")
+    for name in data.dtype.names:
+        assert np.isclose(data[name].sum(), sums_7700[name])
+
+    assert np.isclose(params["scantime"], 0.5, rtol=1e-2)
+
+
+def test_io_agilent_load_7700_csv():
+    path = Path(__file__).parent.joinpath("data", "agilent", "7700")
+
+    data, params = agilent.load_csv(path.joinpath("test.b"), full=True)
+    assert data.shape == (5, 5)
+    assert data.dtype.names == ("P31", "Eu153", "W182")
+    for name in data.dtype.names:
+        assert np.isclose(data[name].sum(), sums_7700[name], rtol=1e-4)  # Lowered tol
+
+    assert np.isclose(params["scantime"], 0.5, rtol=1e-2)
+
+
+def test_io_agilent_load_8900_binary():
     path = Path(__file__).parent.joinpath("data", "agilent", "8900")
 
     data, params = agilent.load_binary(
@@ -49,9 +81,10 @@ def test_io_agilent_load_binary():
     assert data.shape == (5, 5)
     assert data.dtype.names == ("P31", "Eu153", "W182")
     for name in data.dtype.names:
-        assert np.isclose(data[name].sum(), sums[name])
+        assert np.isclose(data[name].sum(), sums_8900[name])
 
-    assert params["scantime"] == 0.5
+
+    assert np.isclose(params["scantime"], 0.5, rtol=1e-2)
 
     data, params = agilent.load_binary(
         path.joinpath("test_ms_ms.b"), counts_per_second=True, full=True
@@ -59,29 +92,32 @@ def test_io_agilent_load_binary():
     assert data.shape == (5, 5)
     assert data.dtype.names == ("P31->47", "Eu153->153", "W182->182")
     for name in data.dtype.names:
-        assert np.isclose(data[name].sum(), sums[name])
-
-    assert params["scantime"] == 0.5
+        assert np.isclose(data[name].sum(), sums_8900[name])
 
 
-def test_io_agilent_load_csv():
+    assert np.isclose(params["scantime"], 0.5, rtol=1e-2)
+
+
+def test_io_agilent_load_8900_csv():
     path = Path(__file__).parent.joinpath("data", "agilent", "8900")
 
     data, params = agilent.load_csv(path.joinpath("test_ms.b"), full=True)
     assert data.shape == (5, 5)
     assert data.dtype.names == ("P31", "Eu153", "W182")
     for name in data.dtype.names:
-        assert np.isclose(data[name].sum(), sums[name], rtol=1e-4)  # Lowered tol
+        assert np.isclose(data[name].sum(), sums_8900[name], rtol=1e-4)  # Lowered tol
 
-    assert params["scantime"] == 0.50
+
+    assert np.isclose(params["scantime"], 0.5, rtol=1e-2)
 
     data, params = agilent.load_csv(path.joinpath("test_ms_ms.b"), full=True)
     assert data.shape == (5, 5)
     assert data.dtype.names == ("P31->47", "Eu153->153", "W182->182")
     for name in data.dtype.names:
-        assert np.isclose(data[name].sum(), sums[name], rtol=1e-4)  # Lowered tol
+        assert np.isclose(data[name].sum(), sums_8900[name], rtol=1e-4)  # Lowered tol
 
-    assert params["scantime"] == 0.5
+
+    assert np.isclose(params["scantime"], 0.5, rtol=1e-2)
 
 
 def test_io_agilent_load_missing():

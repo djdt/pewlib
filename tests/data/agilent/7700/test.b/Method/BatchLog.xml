@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BatchLogDataSet SchemaVersion="65536" DataVersion="1" SIVersion="C.1.5.588.3" BatchName="test_7700.b" BatchDataPath="D:\DATA\OM\test_7700.b" UserDefineColumnsCaptions="" HashCode="874B274C8C1CB524CD327DA1953AD7769E1ADA9B8B0F7DE2EA062D937B44B5E195BA4AA05570F70F9785A2CE00B4C9D91A868B0120771B4E9668C7CF13F74332" xmlns="BatchLog">
+  <BatchLogInfo>
+    <BatchLogID>-1</BatchLogID>
+    <SampleLogID>0</SampleLogID>
+    <AcqDateTime>2020-11-18T14:24:29+11:00</AcqDateTime>
+    <AcqResult>Pass</AcqResult>
+    <DataFileName>D:\DATA\OM\test_7700.b\1.d</DataFileName>
+    <DilutionResult>1</DilutionResult>
+    <OperatorName>Student</OperatorName>
+    <SampleName>1</SampleName>
+    <SampleType>Sample</SampleType>
+    <ErrorMessage />
+  </BatchLogInfo>
+  <BatchLogInfo>
+    <BatchLogID>-1</BatchLogID>
+    <SampleLogID>1</SampleLogID>
+    <AcqDateTime>2020-11-18T14:24:51+11:00</AcqDateTime>
+    <AcqResult>Pass</AcqResult>
+    <DataFileName>D:\DATA\OM\test_7700.b\2.d</DataFileName>
+    <DilutionResult>1</DilutionResult>
+    <OperatorName>Student</OperatorName>
+    <SampleName>2</SampleName>
+    <SampleType>Sample</SampleType>
+    <ErrorMessage />
+  </BatchLogInfo>
+  <BatchLogInfo>
+    <BatchLogID>-1</BatchLogID>
+    <SampleLogID>2</SampleLogID>
+    <AcqDateTime>2020-11-18T14:25:08+11:00</AcqDateTime>
+    <AcqResult>Pass</AcqResult>
+    <DataFileName>D:\DATA\OM\test_7700.b\3.d</DataFileName>
+    <DilutionResult>1</DilutionResult>
+    <OperatorName>Student</OperatorName>
+    <SampleName>3</SampleName>
+    <SampleType>Sample</SampleType>
+    <ErrorMessage />
+  </BatchLogInfo>
+  <BatchLogInfo>
+    <BatchLogID>-1</BatchLogID>
+    <SampleLogID>3</SampleLogID>
+    <AcqDateTime>2020-11-18T14:25:18+11:00</AcqDateTime>
+    <AcqResult>Pass</AcqResult>
+    <DataFileName>D:\DATA\OM\test_7700.b\4.d</DataFileName>
+    <DilutionResult>1</DilutionResult>
+    <OperatorName>Student</OperatorName>
+    <SampleName>4</SampleName>
+    <SampleType>Sample</SampleType>
+    <ErrorMessage />
+  </BatchLogInfo>
+  <BatchLogInfo>
+    <BatchLogID>-1</BatchLogID>
+    <SampleLogID>4</SampleLogID>
+    <AcqDateTime>2020-11-18T14:25:26+11:00</AcqDateTime>
+    <AcqResult>Pass</AcqResult>
+    <DataFileName>D:\DATA\OM\test_7700.b\5.d</DataFileName>
+    <DilutionResult>1</DilutionResult>
+    <OperatorName>Student</OperatorName>
+    <SampleName>5</SampleName>
+    <SampleType>Sample</SampleType>
+    <ErrorMessage />
+  </BatchLogInfo>
+</BatchLogDataSet>

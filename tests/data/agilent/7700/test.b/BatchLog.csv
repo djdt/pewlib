@@ -1,0 +1,7 @@
+#,Acq. Date-Time,Sample Type,Sample Name,Vial#,File Name,Acquisition Result,Error Message,Dilution Result,Comment,Operator,Error Action,Replicates,Level,ISTD Conc,Auto Dilution (ISIS 2),Total Dil.,Final Weight or Volume,Sample Weight or Volume,Dilution Multiplier,Sublist,Total Acq Time,Max. Daily Dose,%J,User Def. 1,User Def. 2,User Def. 3,QC Failed Criteria,QC Failed Elements,
+1,2020/11/18 14:24:29,Sample,1,<Manual>,D:\DATA\OM\test_7700.b\1.d,Pass,-,1,-,Student,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,
+2,2020/11/18 14:24:51,Sample,2,<Manual>,D:\DATA\OM\test_7700.b\2.d,Pass,-,1,-,Student,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,
+3,2020/11/18 14:25:08,Sample,3,<Manual>,D:\DATA\OM\test_7700.b\3.d,Pass,-,1,-,Student,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,
+4,2020/11/18 14:25:18,Sample,4,<Manual>,D:\DATA\OM\test_7700.b\4.d,Pass,-,1,-,Student,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,
+5,2020/11/18 14:25:26,Sample,5,<Manual>,D:\DATA\OM\test_7700.b\5.d,Pass,-,1,-,Student,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,
+
