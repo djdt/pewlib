@@ -8,31 +8,45 @@ import numpy.lib.recfunctions
 
 from pathlib import Path
 
-from typing import List, Union
+from typing import Union
 
 logger = logging.getLogger(__name__)
 
 
-def collect_datafiles(path: Path) -> List[Path]:
-    """Finds '.xl' files in directory.
+# def collect_datafiles(path: Path) -> List[Path]:
+#     """Finds '.xl' files in directory.
 
-    Searches directory for '.xl' files and sorts them in numerical order.
+#     Searches directory for '.xl' files and sorts them in numerical order.
 
-    Args:
-        path: path to directory
+#     Args:
+#         path: path to directory
 
-    Returns:
-        list of paths ordered numerically
+#     Returns:
+#         list of paths ordered numerically
+#     """
+#     datafiles = []
+
+#     for child in path.iterdir():
+#         if child.suffix == ".xl":
+#             datafiles.append(child)
+
+#     # Sort by any numerical order
+#     datafiles.sort(key=lambda f: int("".join(filter(str.isdigit, f.name))))
+#     return datafiles
+
+
+def is_perkinelmer_directory(path: Union[str, Path]) -> bool:
+    """Tests if a directory contains PerkinElmer data.
+
+    Ensures the path exists, is a directory and contains at least one '.xl' file.
     """
-    datafiles = []
+    if isinstance(path, str):
+        path = Path(path)
 
-    for child in path.iterdir():
-        if child.suffix == ".xl":
-            datafiles.append(child)
+    if not path.exists() or not path.is_dir():
+        return False
 
-    # Sort by any numerical order
-    datafiles.sort(key=lambda f: int("".join(filter(str.isdigit, f.name))))
-    return datafiles
+    return len(list(path.glob("*.xl"))) > 0
 
 
 def load(
@@ -64,7 +78,9 @@ def load(
     if not isinstance(path, Path):  # pragma: no cover
         path = Path(path)
 
-    datafiles = collect_datafiles(path)
+    datafiles = sorted(
+        path.glob("*.xl"), key=lambda p: int("".join(filter(str.isdigit, p.stem)))
+    )
 
     data = np.stack(
         [
