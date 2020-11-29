@@ -11,6 +11,10 @@ from pewlib.srr import SRRLaser, SRRConfig
 def test_io_perkinelmer():
     path = Path(__file__).parent.joinpath("data", "perkinelmer")
 
+    assert io.perkinelmer.is_perkinelmer_directory(path.joinpath("perkinelmer"))
+    assert not io.perkinelmer.is_perkinelmer_directory(path.joinpath("fake"))
+    assert not io.perkinelmer.is_perkinelmer_directory(path)
+
     data, params = io.perkinelmer.load(path.joinpath("perkinelmer"), full=True)
     assert np.isclose(np.sum(data["A1"]), 12.0)
     assert np.isclose(np.sum(data["B2"]), 15.0)
@@ -77,7 +81,7 @@ def test_io_npz():
     assert calibration.unit == "test"
     # Saving
     temp = tempfile.NamedTemporaryFile(suffix=".npz")
-    io.npz.save(temp.name, laser)  # type: ignore
+    io.npz.save(temp.name, laser)
     loaded = io.npz.load(temp.name)
     temp.close()
 

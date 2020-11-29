@@ -40,7 +40,7 @@ def is_perkinelmer_directory(path: Union[str, Path]) -> bool:
 
     Ensures the path exists, is a directory and contains at least one '.xl' file.
     """
-    if isinstance(path, str):
+    if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
     if not path.exists() or not path.is_dir():
