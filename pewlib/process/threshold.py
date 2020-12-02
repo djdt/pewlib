@@ -1,12 +1,22 @@
 import numpy as np
 
 
-def otsu(x: np.ndarray) -> float:
-    """Calculates the otsu threshold of the input array.
+def otsu(x: np.ndarray, remove_nan: bool = False) -> float:
+    """Calculates the otsu threshold.
+
+    The Otsu threshold minimises intra-class variance for a two class system.
+    If `remove_nan` then all nans are removed before computation.
+
+    Args:
+        x: array
+        remove_nan: remove nan values
 
     See Also:
         :func:`skimage.filters.threshold_otsu`
     """
+    if remove_nan:
+        x = x[~np.isnan(x)]
+
     hist, bin_edges = np.histogram(x, bins=256)
     bin_centers = (bin_edges[1:] + bin_edges[:-1]) / 2.0
 
