@@ -193,17 +193,7 @@ class SRRLaser(_Laser):
 
     def check_config_valid(self, config: SRRConfig) -> bool:
         """Checks if SRRConfig is valid for data."""
-        if config.warmup < 0:
-            return False
-        shape = self.data[1].shape[0], self.data[0].shape[1]
-        limit = self.data[0].shape[0], self.data[1].shape[1]
-        if config.magnification * shape[0] + config._warmup > limit[0]:
-            return False
-        if (
-            config.magnification * shape[1] + config._warmup > limit[1]
-        ):  # pragma: no cover
-            return False
-        return True
+        return config.valid_for_data(self.data)
 
     def krisskross(self) -> np.ndarray:
         """Perform SRR."""

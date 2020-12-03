@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List, Tuple, Union
 
 
-def is_nu_directory(path: Union[str, Path]) -> bool:
+def is_valid_directory(path: Union[str, Path]) -> bool:
     """Tests if a directory contains Nu instruments data.
 
     Ensures the path exists, is a directory and contains a File_Report and at

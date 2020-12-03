@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 #     return datafiles
 
 
-def is_perkinelmer_directory(path: Union[str, Path]) -> bool:
+def is_valid_directory(path: Union[str, Path]) -> bool:
     """Tests if a directory contains PerkinElmer data.
 
     Ensures the path exists, is a directory and contains at least one '.xl' file.

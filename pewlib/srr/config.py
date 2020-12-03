@@ -2,7 +2,7 @@ import numpy as np
 
 from pewlib.config import Config
 
-from typing import Tuple
+from typing import Tuple, List
 
 
 class SRRConfig(Config):
@@ -122,6 +122,20 @@ class SRRConfig(Config):
             )
         else:
             return (0.0, px * shape[1], 0.0, py * shape[0])
+
+    def valid_for_data(self, data: List[np.ndarray]) -> bool:
+        """Checks if this config is valid for data."""
+        if self.warmup < 0:
+            return False
+        shape = data[1].shape[0], data[0].shape[1]
+        limit = data[0].shape[0], data[1].shape[1]
+        if self.magnification * shape[0] + self._warmup > limit[0]:
+            return False
+        if (
+            self.magnification * shape[1] + self._warmup > limit[1]
+        ):  # pragma: no cover
+            return False
+        return True
 
     def to_array(self) -> np.ndarray:
         offsets = self.subpixel_offsets
