@@ -82,7 +82,7 @@ def rolling_mean(
     # As the mean is sensitive to outliers reclaculate it
     means = np.nanmean(blocks, axis=axes)
 
-    return np.where(np.logical_and(outliers, means), means, x)
+    return np.where(np.logical_and(outliers, ~np.isnan(means)), means, x)
 
 
 def rolling_median(
@@ -155,4 +155,4 @@ def rolling_median(
     # Outliers are n medians from data
     outliers = np.abs(x - medians) > threshold * median_medians
 
-    return np.where(np.logical_and(outliers, medians), medians, x)
+    return np.where(np.logical_and(outliers, ~np.isnan(medians)), medians, x)
