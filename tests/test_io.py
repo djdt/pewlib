@@ -11,9 +11,9 @@ from pewlib.srr import SRRLaser, SRRConfig
 def test_io_perkinelmer():
     path = Path(__file__).parent.joinpath("data", "perkinelmer")
 
-    assert io.perkinelmer.is_perkinelmer_directory(path.joinpath("perkinelmer"))
-    assert not io.perkinelmer.is_perkinelmer_directory(path.joinpath("fake"))
-    assert not io.perkinelmer.is_perkinelmer_directory(path)
+    assert io.perkinelmer.is_valid_directory(path.joinpath("perkinelmer"))
+    assert not io.perkinelmer.is_valid_directory(path.joinpath("fake"))
+    assert not io.perkinelmer.is_valid_directory(path)
 
     data, params = io.perkinelmer.load(path.joinpath("perkinelmer"), full=True)
     assert np.isclose(np.sum(data["A1"]), 12.0)
