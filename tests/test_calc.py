@@ -56,3 +56,14 @@ def test_subpixel_offset():
         calc.subpixel_offset(x, [(0, 0), (1, 1)], (2, 2))
         == calc.subpixel_offset_equal(x, [0, 1], 2)
     )
+
+
+def test_subpixel_offset_means():
+    x = np.stack((np.random.random((10, 10)), np.random.random((10, 10))), axis=2)
+
+    z = calc.subpixel_offset(x, [(0, 0), (1, 1)], (2, 2))
+
+    x = np.repeat(x, 2, axis=0)
+    x = np.repeat(x, 2, axis=1)
+
+    assert z[1:-1, 1:-1].mean() == (x[1:, 1:, 0].mean() + x[:-1, :-1, 1].mean()) / 2.0

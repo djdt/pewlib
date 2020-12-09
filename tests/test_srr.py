@@ -62,8 +62,8 @@ def test_srr_from_lasers():
 
 
 def test_srr_krisskross():
-    data = np.empty((3, 3), dtype=[('a', float)])
-    data['a'] = [[3, 2, 1], [2, 1, 0], [1, 0, 0]]
+    data = np.empty((3, 3), dtype=[("a", float)])
+    data["a"] = [[3, 2, 1], [2, 1, 0], [1, 0, 0]]
 
     laser = SRRLaser(config=SRRConfig(1, 1, 1, warmup=0), data=[data, data.copy()])
 
