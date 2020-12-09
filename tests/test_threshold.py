@@ -4,6 +4,7 @@ from pewlib.process.threshold import otsu
 
 
 def test_otsu():
+    np.random.seed(61945331)
     x = np.hstack(
         (np.random.normal(1.0, 1.0, size=500), np.random.normal(4.0, 2.0, size=500))
     )
