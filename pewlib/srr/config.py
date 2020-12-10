@@ -45,7 +45,7 @@ class SRRConfig(Config):
         self._warmup = np.round(seconds / self.scantime).astype(int)
 
     @property
-    def magnification(self) -> float:
+    def magnification(self) -> int:
         """Magnification due to non-equal aspect."""
         return np.round(self.spotsize / (self.speed * self.scantime)).astype(int)
 
@@ -127,13 +127,15 @@ class SRRConfig(Config):
         """Checks if this config is valid for data."""
         if self.warmup < 0:
             return False
-        shape = data[1].shape[0], data[0].shape[1]
-        limit = data[0].shape[0], data[1].shape[1]
-        if self.magnification * shape[0] + self._warmup > limit[0]:
+        if self.magnification <= 0:
             return False
-        if (
-            self.magnification * shape[1] + self._warmup > limit[1]
-        ):  # pragma: no cover
+        limit = (
+            data[1].shape[0] * self.magnification,
+            data[0].shape[0] * self.magnification,
+        )
+        if data[0].shape[1] < self._warmup + limit[0]:
+            return False
+        if data[1].shape[1] < self._warmup + limit[1]:
             return False
         return True
 
