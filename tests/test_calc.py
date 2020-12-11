@@ -66,4 +66,6 @@ def test_subpixel_offset_means():
     x = np.repeat(x, 2, axis=0)
     x = np.repeat(x, 2, axis=1)
 
-    assert z[1:-1, 1:-1].mean() == (x[1:, 1:, 0].mean() + x[:-1, :-1, 1].mean()) / 2.0
+    assert np.isclose(
+        z[1:-1, 1:-1].mean(), (x[1:, 1:, 0].mean() + x[:-1, :-1, 1].mean()) / 2.0
+    )

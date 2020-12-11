@@ -10,3 +10,7 @@ def test_otsu():
     )
 
     assert np.allclose(otsu(x), 3.0, atol=2e-1)
+
+    x[::10] = np.nan
+
+    assert np.allclose(otsu(x, remove_nan=True), 3.0, atol=2e-1)
