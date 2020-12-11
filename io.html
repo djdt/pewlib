@@ -357,19 +357,13 @@ appended.</p>
 <span id="perkinelmer"></span><h2>PerkinElmer<a class="headerlink" href="#module-pewlib.io.perkinelmer" title="Permalink to this headline">¶</a></h2>
 <p>Import of line-by-line PerkinElmer ELAN ‘XL’ directories.</p>
 <dl class="py function">
-<dt id="pewlib.io.perkinelmer.collect_datafiles">
-<code class="sig-prename descclassname">pewlib.io.perkinelmer.</code><code class="sig-name descname">collect_datafiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.perkinelmer.collect_datafiles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds ‘.xl’ files in directory.</p>
-<p>Searches directory for ‘.xl’ files and sorts them in numerical order.</p>
+<dt id="pewlib.io.perkinelmer.is_valid_directory">
+<code class="sig-prename descclassname">pewlib.io.perkinelmer.</code><code class="sig-name descname">is_valid_directory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.perkinelmer.is_valid_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if a directory contains PerkinElmer data.</p>
+<p>Ensures the path exists, is a directory and contains at least one ‘.xl’ file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>) – path to directory</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>list of paths ordered numerically</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -399,7 +393,7 @@ dict of params if <cite>full</cite></p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="#pewlib.io.perkinelmer.collect_datafiles" title="pewlib.io.perkinelmer.collect_datafiles"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.perkinelmer.collect_datafiles()</span></code></a></p>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.perkinelmer.collect_datafiles()</span></code></p>
 </div>
 </dd></dl>
 

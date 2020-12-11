@@ -992,8 +992,18 @@ The mean of each block is recalculated outliers set to the local median.</p>
 <span id="thresholding"></span><h2>Thresholding<a class="headerlink" href="#module-pewlib.process.threshold" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt id="pewlib.process.threshold.otsu">
-<code class="sig-prename descclassname">pewlib.process.threshold.</code><code class="sig-name descname">otsu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.threshold.otsu" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the otsu threshold of the input array.</p>
+<code class="sig-prename descclassname">pewlib.process.threshold.</code><code class="sig-name descname">otsu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">remove_nan</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.threshold.otsu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the otsu threshold.</p>
+<p>The Otsu threshold minimises intra-class variance for a two class system.
+If <cite>remove_nan</cite> then all nans are removed before computation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
+<li><p><strong>remove_nan</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – remove nan values</p></li>
+</ul>
+</dd>
+</dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><code class="xref py py-func docutils literal notranslate"><span class="pre">skimage.filters.threshold_otsu()</span></code></p>
