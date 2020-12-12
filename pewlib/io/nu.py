@@ -50,7 +50,7 @@ def read_acq_file(path: Path, number_cycles: int) -> np.ndarray:
     """
     return np.genfromtxt(
         path, delimiter=",", deletechars="", names=True, dtype=np.float64
-    )
+    )[:number_cycles]
 
 
 def load(
@@ -71,9 +71,9 @@ def load(
         drop_names = ["X (um)", "Y (um)"]
 
     # Read report
-    report_path = list(Path().glob("File_Report*.csv"))
+    report_path = list(path.glob("File_Report*.csv"))
     if len(report_path) == 0:
-        raise FileNotFoundError("Could no find report file!")
+        raise FileNotFoundError("Could not find report file!")
     number_files, min_cycles = read_report_file(report_path[0])
 
     acq_paths = sorted(
@@ -85,3 +85,5 @@ def load(
         data = np.stack([r.result() for r in results], axis=1)
 
     data = rfn.drop_fields(data, drop_names)
+
+    return data
