@@ -1,3 +1,8 @@
+"""
+Import of line-by-line nu instruments data.
+Uses ProcessPoolExecutor for multithreaded import of aquistions.
+Untested and under development.
+"""
 from concurrent.futures import ProcessPoolExecutor
 import logging
 import numpy as np
@@ -65,7 +70,7 @@ def load(
 ) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
     """Load a Nu instruments data directory.
 
-    The directory must contain at least one acquistion CSV and a File_Report,
+    The directory must contain at least one acquistion '.csv' and a File_Report,
     this can be checked using :func:`pewlib.io.nu.is_valid_directory`.
     Names passed to `drop_names` as removed from the final array, the default
     is to drop 'Y_(um)' and 'X_(um)'.

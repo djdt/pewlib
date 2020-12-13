@@ -1,3 +1,8 @@
+"""
+Import of line-by-line TOFWERKs data.
+Uses ProcessPoolExecutor for multithreaded import of aquistions.
+Untested and under development.
+"""
 from concurrent.futures import ProcessPoolExecutor
 import logging
 import numpy as np
@@ -17,8 +22,8 @@ acquistion_regex = re.compile(r"(\w+?)([0-9.]+-\d\dh\d\dm\d\ds).*\.csv")
 def is_valid_directory(path: Union[str, Path]) -> bool:
     """Tests if a directory contains TOFWERK data.
 
-    Ensures the path exists, is a directory contains at
-    least one acquistion '.csv'.
+    Ensures the path exists, is a directory contains at least one acquistion
+    '.csv' with a complete timestamp in the format 'YYYY.MM.DD-%%h%%m%%s'.
     """
     if isinstance(path, str):
         path = Path(path)
@@ -59,7 +64,7 @@ def load(
 ) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
     """Load a TOFWERK data directory.
 
-    The directory must contain at least one acquistion CSV,
+    The directory must contain at least one acquistion '.csv',
     this can be checked using :func:`pewlib.io.tofwerk.is_valid_directory`.
     Names passed to `drop_names` as removed from the final array, the default
     is to drop 't_elapsed_Buf'.
