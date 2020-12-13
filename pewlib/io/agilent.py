@@ -322,6 +322,7 @@ def load_binary(
     path: Union[str, Path],
     collection_methods: List[str] = None,
     counts_per_second: bool = False,
+    drop_names: List[str] = None,
     full: bool = False,
 ) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
     """Imports an Agilent '.b' batch.
@@ -352,6 +353,9 @@ def load_binary(
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
+    if drop_names is None:
+        drop_names = ["Time"]
+
     if collection_methods is None:
         collection_methods = ["batch_xml", "batch_csv"]
 
@@ -365,15 +369,21 @@ def load_binary(
     masses = mass_info_datafile(datafiles[0])
     data = np.stack([binary_read_datafile(df, masses) for df in datafiles], axis=0)
 
-    scantime = np.round(np.mean(np.diff(data["Time"], axis=1)), 4)
-    data = numpy.lib.recfunctions.drop_fields(data, "Time")
+    params = {}
+    if full:
+        if "Time" in data.dtype.names:
+            params["scantime"] = np.round(np.mean(np.diff(data["Time"], axis=1)), 4)
+        else:
+            logger.warning("'Time' field not found, unable to import scantime.")
 
     if counts_per_second:
         for mass in masses:
             data[str(mass)] /= mass.acctime
 
+    data = numpy.lib.recfunctions.drop_fields(data, drop_names)
+
     if full:
-        return data, dict(scantime=scantime)
+        return data, params
     else:  # pragma: no cover
         return data
 
@@ -432,6 +442,7 @@ def load_csv(
     path: Union[str, Path],
     collection_methods: List[str] = None,
     use_acq_for_names: bool = True,
+    drop_names: List[str] = None,
     full: bool = False,
 ) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
     """Imports an Agilent '.b' batch.
@@ -457,6 +468,9 @@ def load_csv(
 
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
+
+    if drop_names is None:
+        drop_names = ["Time"]
 
     if collection_methods is None:
         collection_methods = ["batch_xml", "batch_csv"]
@@ -499,13 +513,21 @@ def load_csv(
                     csv_valid_lines(csv),
                     delimiter=b",",
                     names=True,
-                    usecols=np.arange(1, len(names) + 1),
                     dtype=np.float64,
                     deletechars="",
                 )
             except ValueError:  # pragma: no cover
                 logger.warning(f"'{csv}' row {i} missing, line blanked.")
                 data[i, :] = np.zeros(data.shape[1], dtype=data.dtype)
+
+    params = {}
+    if full:
+        if "Time" in data.dtype.names:
+            params["scantime"] = np.round(np.mean(np.diff(data["Time"], axis=1)), 4)
+        else:
+            logger.warning("'Time' field not found, unable to import scantime.")
+
+    data = numpy.lib.recfunctions.drop_fields(data, drop_names)
 
     if full:
         return data, dict(scantime=scan_time)
@@ -518,6 +540,7 @@ def load(
     collection_methods: List[str] = None,
     use_acq_for_names: bool = True,
     counts_per_second: bool = False,
+    drop_names: List[str] = None,
     full: bool = False,
 ) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
     """Imports an Agilent '.b' batch.
@@ -543,12 +566,20 @@ def load(
     """
     try:
         result = load_binary(
-            path, collection_methods, counts_per_second=counts_per_second, full=full
+            path,
+            collection_methods,
+            counts_per_second=counts_per_second,
+            drop_names=drop_names,
+            full=full,
         )
     except Exception as e:
         logger.info("Unable to import as binary, reverting to CSV import.")
         logger.exception(e)
         result = load_csv(
-            path, collection_methods, use_acq_for_names=use_acq_for_names, full=full
+            path,
+            collection_methods,
+            use_acq_for_names=use_acq_for_names,
+            drop_names=drop_names,
+            full=full,
         )
     return result
