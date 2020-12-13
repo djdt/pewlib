@@ -8,7 +8,7 @@ from xml.etree import ElementTree
 from pathlib import Path
 
 import numpy as np
-import numpy.lib.recfunctions
+import numpy.lib.recfunctions as rfn
 
 from typing import Callable, Dict, Generator, List, Tuple, Union
 
@@ -373,14 +373,14 @@ def load_binary(
     if full:
         if "Time" in data.dtype.names:
             params["scantime"] = np.round(np.mean(np.diff(data["Time"], axis=1)), 4)
-        else:
+        else:  # pragma: no cover
             logger.warning("'Time' field not found, unable to import scantime.")
 
     if counts_per_second:
         for mass in masses:
             data[str(mass)] /= mass.acctime
 
-    data = numpy.lib.recfunctions.drop_fields(data, drop_names)
+    data = rfn.drop_fields(data, drop_names)
 
     if full:
         return data, params
@@ -417,14 +417,6 @@ def acq_method_xml_read_elements(path: Path) -> List[str]:
     return names
 
 
-def csv_read_params(path: Path) -> Tuple[List[str], float, int]:
-    data = np.genfromtxt(
-        csv_valid_lines(path), delimiter=b",", names=True, dtype=np.float64
-    )
-    names = [name for name in data.dtype.names if name != "Time_Sec"]
-    return names, np.round(np.mean(np.diff(data["Time_Sec"])), 4), data.shape[0]
-
-
 def csv_valid_lines(csv: Path) -> Generator[bytes, None, None]:
     delimiter_count = 0
     past_header = False
@@ -432,10 +424,27 @@ def csv_valid_lines(csv: Path) -> Generator[bytes, None, None]:
         for line in fp:
             if past_header and line.count(b",") == delimiter_count:
                 yield line
-            if line.startswith(b"Time"):
+            elif line.startswith(b"Time"):
                 past_header = True
                 delimiter_count = line.count(b",")
                 yield line
+
+
+def read_datafile_csvs(datafiles: List[Path]) -> Generator[np.ndarray, None, None]:
+    for df in datafiles:
+        csv = df.joinpath(df.with_suffix(".csv").name)
+        logger.debug(f"Looking for csv '{csv}'.")
+        if not csv.exists():
+            logger.warning(f"Missing csv '{csv}', line blanked.")
+            yield None
+        else:
+            yield np.genfromtxt(
+                csv_valid_lines(csv),
+                delimiter=b",",
+                names=True,
+                dtype=np.float64,
+                deletechars="",
+            )
 
 
 def load_csv(
@@ -470,7 +479,7 @@ def load_csv(
         path = Path(path)
 
     if drop_names is None:
-        drop_names = ["Time"]
+        drop_names = ["Time_[Sec]"]
 
     if collection_methods is None:
         collection_methods = ["batch_xml", "batch_csv"]
@@ -483,54 +492,41 @@ def load_csv(
         if len(datafiles) == 0:  # pragma: no cover
             raise FileNotFoundError(f"No data files found in {path.name}!")
 
-    # Collect csvs
-    csvs: List[Path] = []
-    for df in datafiles:
-        csv = df.joinpath(df.with_suffix(".csv").name)
-        logger.debug(f"Looking for csv '{csv}'.")
-        if not csv.exists():
-            logger.warning(f"Missing csv '{csv}', line blanked.")
-            csvs.append(None)
-        else:
-            csvs.append(csv)
+    lines = list(read_datafile_csvs(datafiles))
 
-    names, scan_time, nscans = csv_read_params(next(c for c in csvs if c is not None))
+    data_shape = next(line for line in lines if line is not None).shape
+    data_dtype = next(line for line in lines if line is not None).dtype
+
+    data = np.empty((len(datafiles), data_shape[0]), dtype=data_dtype)
+
+    for i, line in enumerate(lines):
+        if line is None:
+            data[i, :] = np.zeros(data_shape[0], dtype=data_dtype)
+        else:
+            data[i, :] = line
+
     if use_acq_for_names:
         if path.joinpath(acq_method_xml_path).exists():
             names = acq_method_xml_read_elements(path.joinpath(acq_method_xml_path))
+            data = rfn.rename_fields(
+                data, {old: new for old, new in zip(data.dtype.names[1:], names)}
+            )
         else:  # pragma: no cover
             logger.warning("AcqMethod.xml not found, cannot read names.")
 
-    data = np.empty(
-        (len(datafiles), nscans), dtype=[(name, np.float64) for name in names]
-    )
-    for i, csv in enumerate(csvs):
-        if csv is None:
-            data[i, :] = np.zeros(data.shape[1], dtype=data.dtype)
-        else:
-            try:
-                data[i, :] = np.genfromtxt(
-                    csv_valid_lines(csv),
-                    delimiter=b",",
-                    names=True,
-                    dtype=np.float64,
-                    deletechars="",
-                )
-            except ValueError:  # pragma: no cover
-                logger.warning(f"'{csv}' row {i} missing, line blanked.")
-                data[i, :] = np.zeros(data.shape[1], dtype=data.dtype)
-
     params = {}
     if full:
-        if "Time" in data.dtype.names:
-            params["scantime"] = np.round(np.mean(np.diff(data["Time"], axis=1)), 4)
-        else:
-            logger.warning("'Time' field not found, unable to import scantime.")
+        if "Time_[Sec]" in data.dtype.names:
+            params["scantime"] = np.round(
+                np.mean(np.diff(data["Time_[Sec]"], axis=1)), 4
+            )
+        else:  # pragma: no cover
+            logger.warning("'Time_[Sec]' field not found, unable to import scantime.")
 
-    data = numpy.lib.recfunctions.drop_fields(data, drop_names)
+    data = rfn.drop_fields(data, drop_names)
 
     if full:
-        return data, dict(scantime=scan_time)
+        return data, params
     else:  # pragma: no cover
         return data
 

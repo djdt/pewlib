@@ -83,7 +83,6 @@ def test_io_agilent_load_8900_binary():
     for name in data.dtype.names:
         assert np.isclose(data[name].sum(), sums_8900[name])
 
-
     assert np.isclose(params["scantime"], 0.5, rtol=1e-2)
 
     data, params = agilent.load_binary(
@@ -93,7 +92,6 @@ def test_io_agilent_load_8900_binary():
     assert data.dtype.names == ("P31->47", "Eu153->153", "W182->182")
     for name in data.dtype.names:
         assert np.isclose(data[name].sum(), sums_8900[name])
-
 
     assert np.isclose(params["scantime"], 0.5, rtol=1e-2)
 
@@ -107,7 +105,6 @@ def test_io_agilent_load_8900_csv():
     for name in data.dtype.names:
         assert np.isclose(data[name].sum(), sums_8900[name], rtol=1e-4)  # Lowered tol
 
-
     assert np.isclose(params["scantime"], 0.5, rtol=1e-2)
 
     data, params = agilent.load_csv(path.joinpath("test_ms_ms.b"), full=True)
@@ -115,7 +112,6 @@ def test_io_agilent_load_8900_csv():
     assert data.dtype.names == ("P31->47", "Eu153->153", "W182->182")
     for name in data.dtype.names:
         assert np.isclose(data[name].sum(), sums_8900[name], rtol=1e-4)  # Lowered tol
-
 
     assert np.isclose(params["scantime"], 0.5, rtol=1e-2)
 
