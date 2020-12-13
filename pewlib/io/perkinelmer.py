@@ -8,7 +8,7 @@ import numpy.lib.recfunctions
 
 from pathlib import Path
 
-from typing import Union
+from typing import Tuple, Union
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ def is_valid_directory(path: Union[str, Path]) -> bool:
 
 def load(
     path: Union[str, Path], import_parameters: bool = True, full: bool = False
-) -> np.ndarray:
+) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
     """Loads PerkinElmer directory.
 
     Searches the directory `path` for '.xl' files and used them to reconstruct data.
