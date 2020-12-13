@@ -23,7 +23,7 @@ def test_srr():
     assert laser.extent == (0, 10.5, 0, 10.5)
     # Check config params
     assert laser.check_config_valid(SRRConfig(1, 1, 1, warmup=0))
-    assert not laser.check_config_valid(SRRConfig(1.5, 1, 1, warmup=0))
+    assert not laser.check_config_valid(SRRConfig(1, 3, 1, warmup=0))
     assert not laser.check_config_valid(SRRConfig(3, 1, 1, warmup=0))
     assert not laser.check_config_valid(SRRConfig(warmup=100))
     assert not laser.check_config_valid(SRRConfig(warmup=-1))

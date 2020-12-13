@@ -135,7 +135,7 @@ class SRRConfig(Config):
         )
         if data[0].shape[1] < self._warmup + limit[0]:
             return False
-        if data[1].shape[1] < self._warmup + limit[1]:
+        if data[1].shape[1] < self._warmup + limit[1]:  # pragma: no cover
             return False
         return True
 
