@@ -329,12 +329,14 @@ def load_binary(
 
     Import is performed using the 'MSScan.bin', 'MSProfile.bin' binaries and
     'MSTS_XSpecific.xml' document.
+    By default `drop_names` drops the 'Time' field.
 
     Args:
         path: path to batch
         collection_methods: list of datafile collection methods,
             default = ['batch_xml', 'batch_csv']
         counts_per_second: return data in CPS
+        drop_names: names to remove from final array
         full: also return dict with scantime
 
     Returns:
@@ -459,12 +461,14 @@ def load_csv(
     Import is performed using the '.csv' files found in each '.d' datafile.
     If a '.csv' can not be found then all data in the line is set to 0.
     To load properly formatted element names use `use_acq_for_names`.
+    By default `drop_names` drops the 'Time_[Sec]' field.
 
     Args:
         path: path to batch
         collection_methods: list of datafile collection methods,
             default = ['batch_xml', 'batch_csv']
         use_acq_for_names: read element names from 'AcqMethod.xml'
+        drop_names: names to remove from final array
         full: also return dict with scantime
 
     Returns:
@@ -549,6 +553,7 @@ def load(
             default = ['batch_xml', 'batch_csv']
         use_acq_for_names: read element names from 'AcqMethod.xml', only for csv
         counts_per_second: return data in CPS, only for binary
+        drop_names: names to remove from final array
         full: also return dict with scantime
 
     Returns:

@@ -17,7 +17,7 @@ acquistion_regex = re.compile(r"(\w+?)([0-9.]+-\d\dh\d\dm\d\ds).*\.csv")
 def is_valid_directory(path: Union[str, Path]) -> bool:
     """Tests if a directory contains TOFWERK data.
 
-    Ensures the path exists, is a directory and contains a File_Report and at
+    Ensures the path exists, is a directory contains at
     least one acquistion '.csv'.
     """
     if isinstance(path, str):
@@ -57,17 +57,17 @@ def load(
     drop_names: List[str] = None,
     full: bool = False,
 ) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
-    """Load a Nu instruments data directory.
+    """Load a TOFWERK data directory.
 
-    The directory must contain at least one acquistion CSV and a File_Report,
-    this can be checked using :func:`pewlib.io.nu.is_valid_directory`.
+    The directory must contain at least one acquistion CSV,
+    this can be checked using :func:`pewlib.io.tofwerk.is_valid_directory`.
     Names passed to `drop_names` as removed from the final array, the default
-    is to drop 'Y_(um)' and 'X_(um)'.
-    If `full` then a dict with the spotsize is also returned.
+    is to drop 't_elapsed_Buf'.
+    If `full` then a dict with the scantime is also returned.
 
     Args:
         path: directory
-        drop_names: names removed from data, default removes positions.
+        drop_names: names removed from data
         full: also return parameters
 
     Returns:
