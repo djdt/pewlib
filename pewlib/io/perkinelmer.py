@@ -13,28 +13,6 @@ from typing import Tuple, Union
 logger = logging.getLogger(__name__)
 
 
-# def collect_datafiles(path: Path) -> List[Path]:
-#     """Finds '.xl' files in directory.
-
-#     Searches directory for '.xl' files and sorts them in numerical order.
-
-#     Args:
-#         path: path to directory
-
-#     Returns:
-#         list of paths ordered numerically
-#     """
-#     datafiles = []
-
-#     for child in path.iterdir():
-#         if child.suffix == ".xl":
-#             datafiles.append(child)
-
-#     # Sort by any numerical order
-#     datafiles.sort(key=lambda f: int("".join(filter(str.isdigit, f.name))))
-#     return datafiles
-
-
 def is_valid_directory(path: Union[str, Path]) -> bool:
     """Tests if a directory contains PerkinElmer data.
 
