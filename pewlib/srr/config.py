@@ -142,10 +142,9 @@ class SRRConfig(Config):
             data[0].shape[mag_axis] * mag,
         )
 
-        test_axis = 1 if mag_axis == 1 else 0
-        if data[0].shape[test_axis] < self._warmup + limit[0]:
+        if data[0].shape[1] < self._warmup + limit[0]:
             return False
-        if data[1].shape[test_axis] < self._warmup + limit[1]:  # pragma: no cover
+        if data[1].shape[1] < self._warmup + limit[1]:  # pragma: no cover
             return False
         return True
 
