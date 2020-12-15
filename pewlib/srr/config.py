@@ -45,9 +45,8 @@ class SRRConfig(Config):
         self._warmup = np.round(seconds / self.scantime).astype(int)
 
     @property
-    def magnification(self) -> int:
+    def magnification(self) -> float:
         """Magnification due to non-equal aspect."""
-
         return self.spotsize / (self.speed * self.scantime)
 
     @property
