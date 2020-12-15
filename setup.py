@@ -1,11 +1,17 @@
+from pathlib import Path
 from setuptools import setup, find_packages
 
 with open("README.md") as fp:
     long_description = fp.read()
 
+with Path("pewlib", "__init__.py").open() as fp:
+    for line in fp:
+        if line.startswith("__version__"):
+            version = line.split("=")[1].strip().strip('"')
+
 setup(
     name="pewlib",
-    version="0.6.3",
+    version=version,
     description="Import, processing and export library for LA-ICP-MS data.",
     long_description=long_description,
     long_description_content_type="text/markdown",
