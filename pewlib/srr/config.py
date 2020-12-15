@@ -68,7 +68,9 @@ class SRRConfig(Config):
     @property
     def subpixels_per_pixel(self) -> int:
         """Pixel width in subpixels."""
-        mag = 1.0 / self.magnification if self.magnification < 1.0 else self.magnification
+        mag = (
+            1.0 / self.magnification if self.magnification < 1.0 else self.magnification
+        )
         mag = np.round(mag).astype(int)
         return np.lcm(self._subpixel_size, mag) // mag
 
@@ -130,13 +132,20 @@ class SRRConfig(Config):
         """Checks if this config is valid for data."""
         if self.warmup < 0:
             return False
+
+        mag = self.magnification
+        mag = np.round(1.0 / mag if mag < 1.0 else mag).astype(int)
+        mag_axis = 0 if self.magnification > 1.0 else 1
+
         limit = (
-            data[1].shape[0] * self.magnification,
-            data[0].shape[0] * self.magnification,
+            data[1].shape[mag_axis] * mag,
+            data[0].shape[mag_axis] * mag,
         )
-        if data[0].shape[1] < self._warmup + limit[0]:
+
+        test_axis = 1 if mag_axis == 1 else 0
+        if data[0].shape[test_axis] < self._warmup + limit[0]:
             return False
-        if data[1].shape[1] < self._warmup + limit[1]:  # pragma: no cover
+        if data[1].shape[test_axis] < self._warmup + limit[1]:  # pragma: no cover
             return False
         return True
 
