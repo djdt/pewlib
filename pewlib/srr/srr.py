@@ -198,9 +198,13 @@ class SRRLaser(_Laser):
     def krisskross(self) -> np.ndarray:
         """Perform SRR."""
         # Calculate the line lengths
+        mag = self.config.magnification
+        mag = np.round(1.0 / mag if mag < 1.0 else mag).astype(int)
+        mag_axis = 0 if self.config.magnification > 1.0 else 1
+
         length = (
-            self.data[1].shape[0] * self.config.magnification,
-            self.data[0].shape[0] * self.config.magnification,
+            self.data[1].shape[mag_axis] * mag,
+            self.data[0].shape[mag_axis] * mag,
         )
         # Reshape the layers and stack into matrix
         aligned = np.empty(
@@ -210,7 +214,7 @@ class SRRLaser(_Laser):
             # Trim data of warmup time and excess
             layer = layer[:, self.config._warmup : self.config._warmup + length[i % 2]]
             # Stretch array
-            layer = np.repeat(layer, self.config.magnification, axis=0)
+            layer = np.repeat(layer, mag, axis=mag_axis)
             # Flip vertical layers
             if i % 2 == 1:
                 layer = layer.T

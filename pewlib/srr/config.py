@@ -45,9 +45,9 @@ class SRRConfig(Config):
         self._warmup = np.round(seconds / self.scantime).astype(int)
 
     @property
-    def magnification(self) -> int:
+    def magnification(self) -> float:
         """Magnification due to non-equal aspect."""
-        return np.round(self.spotsize / (self.speed * self.scantime)).astype(int)
+        return self.spotsize / (self.speed * self.scantime)
 
     @property
     def subpixel_offsets(self) -> np.ndarray:
@@ -67,7 +67,11 @@ class SRRConfig(Config):
     @property
     def subpixels_per_pixel(self) -> int:
         """Pixel width in subpixels."""
-        return np.lcm(self._subpixel_size, self.magnification) // self.magnification
+        mag = (
+            1.0 / self.magnification if self.magnification < 1.0 else self.magnification
+        )
+        mag = np.round(mag).astype(int)
+        return np.lcm(self._subpixel_size, mag) // mag
 
     def set_equal_subpixel_offsets(self, width: int) -> None:
         self._subpixel_offsets = np.arange(0, width, dtype=int)
@@ -127,12 +131,16 @@ class SRRConfig(Config):
         """Checks if this config is valid for data."""
         if self.warmup < 0:
             return False
-        if self.magnification <= 0:
-            return False
+
+        mag = self.magnification
+        mag = np.round(1.0 / mag if mag < 1.0 else mag).astype(int)
+        mag_axis = 0 if self.magnification > 1.0 else 1
+
         limit = (
-            data[1].shape[0] * self.magnification,
-            data[0].shape[0] * self.magnification,
+            data[1].shape[mag_axis] * mag,
+            data[0].shape[mag_axis] * mag,
         )
+
         if data[0].shape[1] < self._warmup + limit[0]:
             return False
         if data[1].shape[1] < self._warmup + limit[1]:  # pragma: no cover
