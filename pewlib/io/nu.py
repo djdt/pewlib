@@ -104,12 +104,12 @@ def load(
     # Multithreaded read greatly improves load times
     with ProcessPoolExecutor() as execuctor:
         results = [execuctor.submit(read_acqusition, p, min_cycles) for p in acq_paths]
-        data = np.stack([r.result() for r in results], axis=1)
+    data = np.stack((r.result() for r in results), axis=0)
 
     params = {}
     if full:
         if "Y_(um)" in data.dtype.names:
-            params["spotsize"] = np.round(np.mean(np.diff(data["Y_(um)"], axis=1)), 2)
+            params["spotsize"] = np.round(np.mean(np.diff(data["Y_(um)"], axis=0)), 2)
         else:
             logger.warning("'Y_(um)' field not found, unable to import spotsize.")
 

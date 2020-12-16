@@ -98,13 +98,13 @@ def load(
     # Multithreaded read greatly improves load times
     with ProcessPoolExecutor() as execuctor:
         results = [execuctor.submit(read_acqusition, p) for p in acq_paths]
-        data = np.stack([r.result() for r in results], axis=1)
+        data = np.stack([r.result() for r in results], axis=0)
 
     params = {}
     if full:
         if "t_elapsed_Buf" in data.dtype.names:
             params["scantime"] = np.round(
-                np.mean(np.diff(data["t_elapsed_Buf"], axis=1)), 4
+                np.mean(np.diff(data["t_elapsed_Buf"], axis=0)), 4
             )
         else:
             logger.warning(
