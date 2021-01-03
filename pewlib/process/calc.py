@@ -5,18 +5,6 @@ import numpy as np
 from typing import List, Tuple
 
 
-def greyscale_to_rgb(array: np.ndarray, rgb: np.ndarray) -> np.ndarray:
-    """Convert a gray scale image to a single color rgb(a).
-
-    The image should be a float type and is clipped to 0.0 to 1.0 before conversion.
-
-    Args:
-        array: image
-        rgb: rgb with optional alpha"""
-    array = np.clip(array, 0.0, 1.0)
-    return array[..., None] * np.array(rgb, dtype=np.float32)
-
-
 def local_maxima(x: np.ndarray) -> np.ndarray:
     """Indicies of local maxima.
 
