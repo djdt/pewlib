@@ -60,7 +60,7 @@ class NuHint(CsvTypeHint):
 
     def readParams(self, data: np.ndarray) -> dict:
         if "Y_(um)" in data.dtype.names:
-            return {"spotsize": np.round(np.mean(np.diff(data["Y_(um)"], axis=0)), 2)}
+            return {"spotsize": np.round(np.mean(np.diff(data["Y_(um)"], axis=1)), 2)}
         logger.warning("Y_(um) not found, unable to read spotsize.")
         return super().readParams(data)
 
@@ -166,7 +166,7 @@ def load(
     lines = [future.result() for future in futures]
 
     length = min(line.size for line in lines)
-    data = np.stack((line[:length] for line in lines), axis=1)
+    data = np.stack([line[:length] for line in lines], axis=1)
 
     if full:
         params = hint.readParams(data)

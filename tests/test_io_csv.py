@@ -12,8 +12,12 @@ def test_io_csv_generic():
 
     data, params = io.csv.load(path, full=True)
 
-    assert data.dtype.names == ()
-    assert np.isclose(np.sum(data["_"]), 0.0)
+    assert data.shape == (5, 3)
+    assert data.dtype.names == ("A", "B")
+
+    assert np.all(data["A"].T.ravel() == np.arange(1, 16))
+    assert np.isclose(np.sum(data["A"]), 120.0)
+    assert np.isclose(np.sum(data["B"]), 12.0)
 
 
 def test_io_csv_nu_instruments():
@@ -24,10 +28,14 @@ def test_io_csv_nu_instruments():
 
     data, params = io.csv.load(path, full=True)
 
-    assert data.dtype.names == ()
-    assert np.isclose(np.sum(data["_"]), 0.0)
+    assert data.shape == (5, 3)
+    assert data.dtype.names == ("A", "B")
 
-    assert params["spotsize"] == 0.0
+    assert np.all(data["A"].T.ravel() == np.arange(1, 16))
+    assert np.isclose(np.sum(data["A"]), 120.0)
+    assert np.isclose(np.sum(data["B"]), 12.0)
+
+    assert params["spotsize"] == 10.0
 
 
 def test_io_csv_tofwerk():
@@ -38,7 +46,11 @@ def test_io_csv_tofwerk():
 
     data, params = io.csv.load(path, full=True)
 
-    assert data.dtype.names == ()
-    assert np.isclose(np.sum(data["_"]), 0.0)
+    assert data.shape == (5, 3)
+    assert data.dtype.names == ("A", "B")
 
-    assert params["scantime"] == 0.0
+    assert np.all(data["A"].T.ravel() == np.arange(1, 16))
+    assert np.isclose(np.sum(data["A"]), 120.0)
+    assert np.isclose(np.sum(data["B"]), 12.0)
+
+    assert params["scantime"] == 0.1
