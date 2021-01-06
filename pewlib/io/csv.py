@@ -17,15 +17,16 @@ from typing import Any, List, Tuple, Union
 logger = logging.getLogger(__name__)
 
 
-class CsvTypeHint(object):
-    """Contains hints for instrument specific imports.
+class GenericOption(object):
+    """Options for instrument specific csv imports.
 
-    These hints are used to filter and sort the .csv files in an imported directory,
-    provide kwargs to numpy.genfromtxt and read parameters from imported data.
+    Options are used by :func:`pewlib.io.csv.load` to filter and sort paths,
+    generate data and read parameters from csvs.
 
-    `drop_names` determine columns to be dropped from the final import.
-    `kw_genfromtxt` are kwargs that should be passed to numpy.genfromtxt.
-    `regex` is a regex str that should match file names.
+    Args:
+        drop_names: columns dropped from imports
+        kw_genfromtxt: kwargs for numpy.genfromtxt
+        regex: regex string for matching filenames
     """
 
     def __init__(
@@ -35,40 +36,52 @@ class CsvTypeHint(object):
         regex: str = r".*\.csv",
     ):
         self.drop_names = drop_names
-        self.kw_genfromtxt = kw_genfromtxt or {}
+        self.kw_genfromtxt = kw_genfromtxt
         self.regex = re.compile(regex, re.IGNORECASE)
 
     def filter(self, paths: List[Path]) -> List[Path]:
+        """Filter non matching paths."""
         return [path for path in paths if self.regex.match(path.name) is not None]
 
-    def directoryIsType(self, path: Path) -> bool:
-        return any(self.regex.match(p.name) is not None for p in path.glob("*.csv"))
+    def validForPath(self, path: Path) -> bool:
+        """Checks if option is valid for a file or directory."""
+        if path.is_dir():
+            return any(self.regex.match(p.name) is not None for p in path.glob("*.csv"))
+        else:
+            return self.regex.match(path.name) is not None
 
     def readParams(self, data: np.ndarray) -> dict:
+        """Read parameters from data."""
         return {}
 
     def sort(self, paths: List[Path]) -> List[Path]:
+        """Sort paths."""
         return sorted(paths, key=self.sortkey)  # type: ignore
 
     def sortkey(self, path: Path) -> Any:
         return path
 
 
-class NuHint(CsvTypeHint):
+class NuOption(GenericOption):
+    """Option for Nu Instruments data."""
+
     def __init__(self):
         super().__init__(drop_names=["X_(um)", "Y_(um)"], regex=r"acq.*\.csv")
 
     def readParams(self, data: np.ndarray) -> dict:
         if "Y_(um)" in data.dtype.names:
-            return {"spotsize": np.round(np.mean(np.diff(data["Y_(um)"], axis=1)), 2)}
-        logger.warning("Y_(um) not found, unable to read spotsize.")
-        return super().readParams(data)
+            return {"spotsize": np.round(np.mean(np.diff(data["Y_(um)"], axis=0)), 2)}
+        else:  # pragma: no cover
+            logger.warning("Y_(um) not found, unable to read spotsize.")
+            return super().readParams(data)
 
     def sortkey(self, path: Path) -> int:
         return int("".join(filter(str.isdigit, path.stem)))
 
 
-class TofwerkHint(CsvTypeHint):
+class TofwerkOption(GenericOption):
+    """Option for TOFWERK data."""
+
     def __init__(self):
         super().__init__(
             drop_names=["t_elapsed_Buf"],
@@ -79,33 +92,20 @@ class TofwerkHint(CsvTypeHint):
     def readParams(self, data: np.ndarray) -> dict:
         if "t_elapsed_Buf" in data.dtype.names:
             return {
-                "scantime": np.round(np.mean(np.diff(data["t_elapsed_Buf"], axis=0)), 4)
+                "scantime": np.round(np.mean(np.diff(data["t_elapsed_Buf"], axis=1)), 4)
             }
-        logger.warning("t_elapsed_Buf not found, unable to read scantime.")
-        return super().readParams(data)
+        else:  # pragma: no cover
+            logger.warning("Y_(um) not found, unable to read spotsize.")
+            return super().readParams(data)
 
     def sortkey(self, path: Path) -> float:
         match = self.regex.match(path.name)
         return time.mktime(time.strptime(match.group(2), "%Y.%m.%d-%Hh%Mm%Ss"))
 
 
-def directory_type(path: Union[str, Path]) -> CsvTypeHint:
-    """Attempts to find the correct type hint for the directory.
-    If no specific type hint is found then a default CsvTypeHint is returned."""
-    typehints = [NuHint(), TofwerkHint()]
-
-    if isinstance(path, str):
-        path = Path(path)
-
-    return next(
-        (hint for hint in typehints if hint.directoryIsType(path)),
-        CsvTypeHint(),
-    )
-
-
 def is_valid_directory(path: Union[str, Path]) -> bool:
     """Tests if a directory contains at least one csv."""
-    if isinstance(path, str):
+    if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
     if not path.exists() or not path.is_dir():
@@ -114,18 +114,29 @@ def is_valid_directory(path: Union[str, Path]) -> bool:
     return len(list(path.glob("*.csv"))) > 0
 
 
+def option_for_path(path: Union[str, Path]) -> GenericOption:
+    """Attempts to find the correct type hint for the directory.
+    If no specific type hint is found then a GenericOption."""
+    options = [NuOption(), TofwerkOption()]
+
+    if isinstance(path, str):  # pragma: no cover
+        path = Path(path)
+
+    return next(
+        (op for op in options if op.validForPath(path)),
+        GenericOption(),
+    )
+
+
 def load(
     path: Union[str, Path],
-    hint: CsvTypeHint = None,
-    kw_genfromtxt: dict = None,
+    option: GenericOption = None,
     full: bool = False,
 ) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
     """Load a directory where lines are stored in separate .csv files.
 
-    Paths are filtered and sorted according to the `hint` used. The default hint
-    is generated from the file names within the directory.
-    Kwargs in `kw_genfromtxt` are passed directly to :func:`numpy.genfromtxt`
-    and override any previous default or hint kwargs.
+    Paths are filtered and sorted according to the `option` used, defaulting
+    to the value of :func:`pewlib.io.csv.option_for_path`.
 
     Args:
         path: directory
@@ -138,44 +149,44 @@ def load(
         dict of params if `full`
 
     See Also:
-        :class:`pewlib.io.csv.CsvTypeHint`
+        :class:`pewlib.io.csv.GenericOption`
         :func:`numpy.genfromtxt`
     """
-    if isinstance(path, str):
+
+    if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
-    if hint is None:
-        hint = directory_type(path)
+    if option is None:
+        option = option_for_path(path)
 
     kwargs = dict(delimiter=",", deletechars="", names=True, dtype=np.float64)
-    kwargs.update(hint.kw_genfromtxt)
-    if kw_genfromtxt is not None:
-        kwargs.update(kw_genfromtxt)
+    if option.kw_genfromtxt is not None:
+        kwargs.update(option.kw_genfromtxt)
 
     paths = list(path.glob("*.csv"))
 
-    if len(paths) == 0:
-        raise ValueError(f"No csv files found with '{hint.regex}' in {path.name}!")
+    if len(paths) == 0:  # pragma: no cover
+        raise ValueError(f"No csv files found with '{option.regex}' in {path.name}!")
 
-    paths = hint.filter(paths)
-    paths = hint.sort(paths)
+    paths = option.filter(paths)
+    paths = option.sort(paths)
 
     with ProcessPoolExecutor() as execuctor:
         futures = [execuctor.submit(np.genfromtxt, path, **kwargs) for path in paths]
 
     lines = [future.result() for future in futures]
-
     length = min(line.size for line in lines)
-    data = np.stack([line[:length] for line in lines], axis=1)
+
+    data = np.stack([line[:length] for line in lines], axis=0)
 
     if full:
-        params = hint.readParams(data)
+        params = option.readParams(data)
 
-    drop_names = hint.drop_names
+    drop_names = option.drop_names
 
     data = rfn.drop_fields(data, drop_names)
 
     if full:
         return data, params
-    else:
+    else:  # pragma: no cover
         return data
