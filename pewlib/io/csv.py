@@ -89,6 +89,20 @@ class TofwerkHint(CsvTypeHint):
         return time.mktime(time.strptime(match.group(2), "%Y.%m.%d-%Hh%Mm%Ss"))
 
 
+def directory_type(path: Union[str, Path]) -> CsvTypeHint:
+    """Attempts to find the correct type hint for the directory.
+    If no specific type hint is found then a default CsvTypeHint is returned."""
+    typehints = [NuHint(), TofwerkHint()]
+
+    if isinstance(path, str):
+        path = Path(path)
+
+    return next(
+        (hint for hint in typehints if hint.directoryIsType(path)),
+        CsvTypeHint(),
+    )
+
+
 def is_valid_directory(path: Union[str, Path]) -> bool:
     """Tests if a directory contains at least one csv."""
     if isinstance(path, str):
@@ -131,10 +145,7 @@ def load(
         path = Path(path)
 
     if hint is None:
-        hint = next(
-            (t for t in [NuHint(), TofwerkHint()] if t.directoryIsType(path)),
-            CsvTypeHint(),
-        )
+        hint = directory_type(path)
 
     kwargs = dict(delimiter=",", deletechars="", names=True, dtype=np.float64)
     kwargs.update(hint.kw_genfromtxt)
