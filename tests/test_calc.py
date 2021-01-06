@@ -3,13 +3,6 @@ import numpy as np
 from pewlib.process import calc
 
 
-def test_greyscale_to_rgb():
-    grey = calc.greyscale_to_rgb(np.linspace(0, 1, 5), [128, 256, 256])
-    assert np.allclose(
-        grey, [[0, 0, 0], [32, 64, 64], [64, 128, 128], [96, 192, 192], [128, 256, 256]]
-    )
-
-
 def test_local_maxima():
     x = np.linspace(0.0, 1.0, 100)
     i = np.arange(5, 95, 5)
