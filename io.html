@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>IO Module &mdash; pew  documentation</title>
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -29,7 +32,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -51,7 +53,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> pew
+            <a href="index.html" class="icon icon-home"> pew
           
 
           
@@ -138,6 +140,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -149,7 +153,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/io.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -196,7 +200,7 @@ Methods are tested in order until ones successfully finds ALL expected datafiles
 
 <dl class="py function">
 <dt id="pewlib.io.agilent.load">
-<code class="sig-prename descclassname">pewlib.io.agilent.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">collection_methods</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_acq_for_names</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">counts_per_second</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.agilent.load" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pewlib.io.agilent.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">collection_methods</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_acq_for_names</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">counts_per_second</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">drop_names</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.agilent.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Imports an Agilent ‘.b’ batch.</p>
 <p>First attempts a binary import, falling back to importing any ‘.csv’ files.</p>
 <dl class="field-list simple">
@@ -207,6 +211,7 @@ Methods are tested in order until ones successfully finds ALL expected datafiles
 default = [‘batch_xml’, ‘batch_csv’]</p></li>
 <li><p><strong>use_acq_for_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – read element names from ‘AcqMethod.xml’, only for csv</p></li>
 <li><p><strong>counts_per_second</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – return data in CPS, only for binary</p></li>
+<li><p><strong>drop_names</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – names to remove from final array</p></li>
 <li><p><strong>full</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – also return dict with scantime</p></li>
 </ul>
 </dd>
@@ -228,10 +233,11 @@ dict of params if <cite>full</cite></p>
 
 <dl class="py function">
 <dt id="pewlib.io.agilent.load_binary">
-<code class="sig-prename descclassname">pewlib.io.agilent.</code><code class="sig-name descname">load_binary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">collection_methods</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">counts_per_second</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.agilent.load_binary" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pewlib.io.agilent.</code><code class="sig-name descname">load_binary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">collection_methods</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">counts_per_second</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">drop_names</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.agilent.load_binary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Imports an Agilent ‘.b’ batch.</p>
 <p>Import is performed using the ‘MSScan.bin’, ‘MSProfile.bin’ binaries and
-‘MSTS_XSpecific.xml’ document.</p>
+‘MSTS_XSpecific.xml’ document.
+By default <cite>drop_names</cite> drops the ‘Time’ field.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -239,6 +245,7 @@ dict of params if <cite>full</cite></p>
 <li><p><strong>collection_methods</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – list of datafile collection methods,
 default = [‘batch_xml’, ‘batch_csv’]</p></li>
 <li><p><strong>counts_per_second</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – return data in CPS</p></li>
+<li><p><strong>drop_names</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – names to remove from final array</p></li>
 <li><p><strong>full</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – also return dict with scantime</p></li>
 </ul>
 </dd>
@@ -265,11 +272,12 @@ dict of params if <cite>full</cite></p>
 
 <dl class="py function">
 <dt id="pewlib.io.agilent.load_csv">
-<code class="sig-prename descclassname">pewlib.io.agilent.</code><code class="sig-name descname">load_csv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">collection_methods</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_acq_for_names</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.agilent.load_csv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pewlib.io.agilent.</code><code class="sig-name descname">load_csv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">collection_methods</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_acq_for_names</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">drop_names</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.agilent.load_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Imports an Agilent ‘.b’ batch.</p>
 <p>Import is performed using the ‘.csv’ files found in each ‘.d’ datafile.
 If a ‘.csv’ can not be found then all data in the line is set to 0.
-To load properly formatted element names use <cite>use_acq_for_names</cite>.</p>
+To load properly formatted element names use <cite>use_acq_for_names</cite>.
+By default <cite>drop_names</cite> drops the ‘Time_[Sec]’ field.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -277,6 +285,7 @@ To load properly formatted element names use <cite>use_acq_for_names</cite>.</p>
 <li><p><strong>collection_methods</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – list of datafile collection methods,
 default = [‘batch_xml’, ‘batch_csv’]</p></li>
 <li><p><strong>use_acq_for_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – read element names from ‘AcqMethod.xml’</p></li>
+<li><p><strong>drop_names</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – names to remove from final array</p></li>
 <li><p><strong>full</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – also return dict with scantime</p></li>
 </ul>
 </dd>
@@ -384,7 +393,7 @@ speed and spotsize can be imported.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]]</p>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>structured array of data
@@ -475,37 +484,29 @@ spaced using x, y, z of <cite>spacing</cite>. If <cite>data</cite> is rasied to 
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="pew.html" class="btn btn-neutral float-right" title="Line-by-line Lasers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="install.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="pew.html" class="btn btn-neutral float-right" title="Line-by-line Lasers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="install.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, djdt
+        &#169; Copyright 2020, djdt.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

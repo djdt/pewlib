@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Processing &mdash; pew  documentation</title>
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -29,7 +32,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -50,7 +52,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> pew
+            <a href="index.html" class="icon icon-home"> pew
           
 
           
@@ -138,6 +140,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -149,7 +153,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/processing.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -168,24 +172,6 @@
 <div class="section" id="module-pewlib.process.calc">
 <span id="calculations"></span><h2>Calculations<a class="headerlink" href="#module-pewlib.process.calc" title="Permalink to this headline">¶</a></h2>
 <p>This module contains functions used by other processing modules.</p>
-<dl class="py function">
-<dt id="pewlib.process.calc.greyscale_to_rgb">
-<code class="sig-prename descclassname">pewlib.process.calc.</code><code class="sig-name descname">greyscale_to_rgb</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em>, <em class="sig-param"><span class="n">rgb</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.calc.greyscale_to_rgb" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert a gray scale image to a single color rgb(a).</p>
-<p>The image should be a float type and is clipped to 0.0 to 1.0 before conversion.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>array</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – image</p></li>
-<li><p><strong>rgb</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – rgb with optional alpha</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py function">
 <dt id="pewlib.process.calc.local_maxima">
 <code class="sig-prename descclassname">pewlib.process.calc.</code><code class="sig-name descname">local_maxima</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.calc.local_maxima" title="Permalink to this definition">¶</a></dt>
@@ -1023,35 +1009,28 @@ If <cite>remove_nan</cite> then all nans are removed before computation.</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-      
-        <a href="pew.html" class="btn btn-neutral float-left" title="Line-by-line Lasers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="pew.html" class="btn btn-neutral float-left" title="Line-by-line Lasers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, djdt
+        &#169; Copyright 2020, djdt.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
