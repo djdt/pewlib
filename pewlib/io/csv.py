@@ -56,7 +56,7 @@ class GenericOption(object):
         return {}
 
     def sort(self, paths: List[Path]) -> List[Path]:
-        """Sort paths."""
+        """Sort paths using 'sortkey'."""
         return sorted(paths, key=self.sortkey)  # type: ignore
 
     def sortkey(self, path: Path) -> Any:
@@ -77,7 +77,8 @@ class NuOption(GenericOption):
             return super().readParams(data)
 
     def sortkey(self, path: Path) -> int:
-        return int("".join(filter(str.isdigit, path.stem)))
+        """Sorts files numerically."""
+        return int("".join(filter(str.isdigit, path.stem)) or -1)
 
 
 class TofwerkOption(GenericOption):
@@ -100,6 +101,7 @@ class TofwerkOption(GenericOption):
             return super().readParams(data)
 
     def sortkey(self, path: Path) -> float:
+        """Sorts files using the timestamp in name."""
         match = self.regex.match(path.name)
         return time.mktime(time.strptime(match.group(2), "%Y.%m.%d-%Hh%Mm%Ss"))
 
