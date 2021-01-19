@@ -46,7 +46,8 @@ class GenericOption(object):
     def validForPath(self, path: Path) -> bool:
         """Checks if option is valid for a file or directory."""
         if path.is_dir():
-            return any(self.regex.match(p.name) is not None for p in path.glob("*.csv"))
+            paths = (p for p in path.glob("*") if p.is_file())
+            return any(self.regex.match(p.name) is not None for p in paths)
         else:
             return self.regex.match(path.name) is not None
 
@@ -163,7 +164,7 @@ def load(
     if option.kw_genfromtxt is not None:
         kwargs.update(option.kw_genfromtxt)
 
-    paths = list(path.glob("*.csv"))
+    paths = list(p for p in path.glob("*") if p.is_file())
 
     if len(paths) == 0:  # pragma: no cover
         raise ValueError(f"No csv files found with '{option.regex}' in {path.name}!")
