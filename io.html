@@ -91,6 +91,7 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">IO Module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.agilent">Agilent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.csv">CSV</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.npz">Numpy NPZ</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.perkinelmer">PerkinElmer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.textimage">Text Image</a></li>
@@ -301,6 +302,180 @@ dict of params if <cite>full</cite></p>
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="#pewlib.io.agilent.collect_datafiles" title="pewlib.io.agilent.collect_datafiles"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.agilent.collect_datafiles()</span></code></a></p>
 </div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pewlib.io.csv">
+<span id="csv"></span><h2>CSV<a class="headerlink" href="#module-pewlib.io.csv" title="Permalink to this headline">¶</a></h2>
+<p>Import of line-by-line data stored as a series of .csv files.</p>
+<dl class="py class">
+<dt id="pewlib.io.csv.GenericOption">
+<em class="property">class </em><code class="sig-prename descclassname">pewlib.io.csv.</code><code class="sig-name descname">GenericOption</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">drop_names</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">kw_genfromtxt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">regex</span><span class="o">=</span><span class="default_value">'.*\\\\.csv'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.GenericOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Options for instrument specific csv imports.</p>
+<p>Options are used by <a class="reference internal" href="#pewlib.io.csv.load" title="pewlib.io.csv.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.csv.load()</span></code></a> to filter and sort paths,
+generate data and read parameters from csvs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>drop_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – columns dropped from imports</p></li>
+<li><p><strong>kw_genfromtxt</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – kwargs for numpy.genfromtxt</p></li>
+<li><p><strong>regex</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – regex string for matching filenames</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="pewlib.io.csv.GenericOption.filter">
+<code class="sig-name descname">filter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">paths</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.GenericOption.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter non matching paths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pewlib.io.csv.GenericOption.readParams">
+<code class="sig-name descname">readParams</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.GenericOption.readParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read parameters from data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pewlib.io.csv.GenericOption.sort">
+<code class="sig-name descname">sort</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">paths</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.GenericOption.sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort paths using ‘sortkey’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pewlib.io.csv.GenericOption.validForPath">
+<code class="sig-name descname">validForPath</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.GenericOption.validForPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if option is valid for a file or directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pewlib.io.csv.NuOption">
+<em class="property">class </em><code class="sig-prename descclassname">pewlib.io.csv.</code><code class="sig-name descname">NuOption</code><a class="headerlink" href="#pewlib.io.csv.NuOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Option for Nu Instruments data.</p>
+<dl class="py method">
+<dt id="pewlib.io.csv.NuOption.readParams">
+<code class="sig-name descname">readParams</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.NuOption.readParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read parameters from data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pewlib.io.csv.NuOption.sortkey">
+<code class="sig-name descname">sortkey</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.NuOption.sortkey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorts files numerically.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pewlib.io.csv.TofwerkOption">
+<em class="property">class </em><code class="sig-prename descclassname">pewlib.io.csv.</code><code class="sig-name descname">TofwerkOption</code><a class="headerlink" href="#pewlib.io.csv.TofwerkOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Option for TOFWERK data.</p>
+<dl class="py method">
+<dt id="pewlib.io.csv.TofwerkOption.readParams">
+<code class="sig-name descname">readParams</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.TofwerkOption.readParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read parameters from data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pewlib.io.csv.TofwerkOption.sortkey">
+<code class="sig-name descname">sortkey</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.TofwerkOption.sortkey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorts files using the timestamp in name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="pewlib.io.csv.is_valid_directory">
+<code class="sig-prename descclassname">pewlib.io.csv.</code><code class="sig-name descname">is_valid_directory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.is_valid_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if a directory contains at least one csv.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pewlib.io.csv.load">
+<code class="sig-prename descclassname">pewlib.io.csv.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">option</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a directory where lines are stored in separate .csv files.</p>
+<p>Paths are filtered and sorted according to the <cite>option</cite> used, defaulting
+to the value of <a class="reference internal" href="#pewlib.io.csv.option_for_path" title="pewlib.io.csv.option_for_path"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.csv.option_for_path()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – directory</p></li>
+<li><p><strong>hint</strong> – type hint (NuHint, TofwerkHint)</p></li>
+<li><p><strong>genfromtxtkws</strong> – kwargs for numpy.genfromtxt</p></li>
+<li><p><strong>full</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – also return parameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>structured array of data
+dict of params if <cite>full</cite></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#pewlib.io.csv.GenericOption" title="pewlib.io.csv.GenericOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">pewlib.io.csv.GenericOption</span></code></a>
+<code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.genfromtxt()</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pewlib.io.csv.option_for_path">
+<code class="sig-prename descclassname">pewlib.io.csv.</code><code class="sig-name descname">option_for_path</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.option_for_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempts to find the correct type hint for the directory.
+If no specific type hint is found then a GenericOption.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pewlib.io.csv.GenericOption" title="pewlib.io.csv.GenericOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenericOption</span></code></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
