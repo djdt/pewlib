@@ -9,6 +9,12 @@ Agilent
 .. automodule:: pewlib.io.agilent
     :members:
 
+CSV
+---
+
+.. automodule:: pewlib.io.csv
+    :members:
+
 
 Numpy NPZ
 ---------

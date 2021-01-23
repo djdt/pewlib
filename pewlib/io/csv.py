@@ -46,7 +46,8 @@ class GenericOption(object):
     def validForPath(self, path: Path) -> bool:
         """Checks if option is valid for a file or directory."""
         if path.is_dir():
-            return any(self.regex.match(p.name) is not None for p in path.glob("*.csv"))
+            paths = (p for p in path.glob("*") if p.is_file())
+            return any(self.regex.match(p.name) is not None for p in paths)
         else:
             return self.regex.match(path.name) is not None
 
@@ -55,7 +56,7 @@ class GenericOption(object):
         return {}
 
     def sort(self, paths: List[Path]) -> List[Path]:
-        """Sort paths."""
+        """Sort paths using 'sortkey'."""
         return sorted(paths, key=self.sortkey)  # type: ignore
 
     def sortkey(self, path: Path) -> Any:
@@ -76,7 +77,8 @@ class NuOption(GenericOption):
             return super().readParams(data)
 
     def sortkey(self, path: Path) -> int:
-        return int("".join(filter(str.isdigit, path.stem)))
+        """Sorts files numerically."""
+        return int("".join(filter(str.isdigit, path.stem)) or -1)
 
 
 class TofwerkOption(GenericOption):
@@ -99,6 +101,7 @@ class TofwerkOption(GenericOption):
             return super().readParams(data)
 
     def sortkey(self, path: Path) -> float:
+        """Sorts files using the timestamp in name."""
         match = self.regex.match(path.name)
         return time.mktime(time.strptime(match.group(1), "%Y.%m.%d-%Hh%Mm%Ss"))
 
@@ -163,7 +166,7 @@ def load(
     if option.kw_genfromtxt is not None:
         kwargs.update(option.kw_genfromtxt)
 
-    paths = list(path.glob("*.csv"))
+    paths = list(p for p in path.glob("*") if p.is_file())
 
     if len(paths) == 0:  # pragma: no cover
         raise ValueError(f"No csv files found with '{option.regex}' in {path.name}!")
