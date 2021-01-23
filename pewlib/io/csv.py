@@ -86,7 +86,7 @@ class TofwerkOption(GenericOption):
         super().__init__(
             drop_names=["t_elapsed_Buf"],
             kw_genfromtxt={"deletechars": "'"},
-            regex=r"(\w+?)([0-9.]+-\d\dh\d\dm\d\ds).*\.csv",
+            regex=r"\w+?([0-9.]+-\d\dh\d\dm\d\ds).*\.csv",
         )
 
     def readParams(self, data: np.ndarray) -> dict:
@@ -100,7 +100,7 @@ class TofwerkOption(GenericOption):
 
     def sortkey(self, path: Path) -> float:
         match = self.regex.match(path.name)
-        return time.mktime(time.strptime(match.group(2), "%Y.%m.%d-%Hh%Mm%Ss"))
+        return time.mktime(time.strptime(match.group(1), "%Y.%m.%d-%Hh%Mm%Ss"))
 
 
 def is_valid_directory(path: Union[str, Path]) -> bool:
