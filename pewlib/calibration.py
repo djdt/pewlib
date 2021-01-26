@@ -23,6 +23,8 @@ def weights_from_weighting(
         return np.empty(0, dtype=x.dtype)
 
     if safe:
+        if np.all(x == 0):  # Impossible weighting
+            return np.ones_like(x)
         x = x.copy()
         x[x == 0] = np.nanmin(x[x != 0])
 
@@ -186,7 +188,7 @@ class Calibration(object):
         if self.points.size == 0:
             self.gradient, self.intercept, self.rsq, self.error = 1.0, 0.0, None, None
         else:
-            no_nans = ~np.isnan(self.points).any(axis=1)
+            no_nans = ~(np.isnan(self.points).any(axis=1))
             if np.count_nonzero(no_nans) < 2:
                 self.gradient, self.intercept, self.rsq, self.error = (
                     1.0,
