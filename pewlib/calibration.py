@@ -187,7 +187,7 @@ class Calibration(object):
             self.gradient, self.intercept, self.rsq, self.error = 1.0, 0.0, None, None
         else:
             no_nans = ~np.isnan(self.points).any(axis=1)
-            if np.count_nonzero(no_nans) == 0:
+            if np.count_nonzero(no_nans) < 2:
                 self.gradient, self.intercept, self.rsq, self.error = (
                     1.0,
                     0.0,
