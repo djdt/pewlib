@@ -102,8 +102,8 @@ class Calibration(object):
         rsq: r² of line-of-best-fit
         error: error in line-of-best-fit
         points: array of (x, y)
-        weights: weighting string {'Equal', 'x', '1/x', '1/(x^2)'} or
-            name, array of weights for linear-regression, same length as `points`
+        weights: weighting {'Equal', 'x', '1/x', '1/(x^2)', 'y', '1/y', '1/(y^2)'}
+            or (name, array) of weights for linear-regression, same length as `points`
     """
 
     KNOWN_WEIGHTING = ["Equal", "x", "1/x", "1/(x^2)", "y", "1/y", "1/(y^2)"]
@@ -156,7 +156,10 @@ class Calibration(object):
     @property
     def weights(self) -> np.ndarray:
         if self.weighting in Calibration.KNOWN_WEIGHTING:
-            return weights_from_weighting(self.x, self.weighting)
+            if "y" in self.weighting:
+                return weights_from_weighting(self.y, self.weighting)
+            else:
+                return weights_from_weighting(self.x, self.weighting)
         return self._weights
 
     @weights.setter
