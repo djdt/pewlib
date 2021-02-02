@@ -157,7 +157,7 @@ class Calibration(object):
     def weights(self) -> np.ndarray:
         if self.weighting in Calibration.KNOWN_WEIGHTING:
             if "y" in self.weighting:
-                return weights_from_weighting(self.y, self.weighting)
+                return weights_from_weighting(self.y, self.weighting.replace("y", "x"))
             else:
                 return weights_from_weighting(self.x, self.weighting)
         return self._weights
