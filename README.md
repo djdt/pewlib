@@ -13,4 +13,4 @@ Pewlib is availble on PyPI and installable via pip.
 
 ## Documentation
 
-Documenations is available at <https://djdt.github.io/pewlib>.
+Documenation is available at <https://djdt.github.io/pewlib>.
