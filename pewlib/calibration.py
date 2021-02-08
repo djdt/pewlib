@@ -149,8 +149,8 @@ class Calibration(object):
     @points.setter
     def points(self, points: np.ndarray) -> None:
         points = np.array(points, dtype=np.float64)
-        if points.ndim != 2:
-            raise ValueError("Points must have 2 dimensions.")
+        if points.ndim != 2 or points.shape[1] != 2:
+            raise ValueError("Points must have shape (n, 2).")
         self._points = points
 
     @property
