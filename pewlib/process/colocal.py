@@ -162,21 +162,16 @@ def costes_threshold(
             Colocalization in Live Cells Biophysical Journal, Elsevier BV,
             2004, 86, 3993-4003
     """
-    b, a = np.polynomial.polynomial.polyfit(x.ravel(), y.ravel(), 1)
-    threshold = x.max()
-    threshold_min = x.min()
-    increment = (threshold - threshold_min) / 256.0
+    b, a = np.polynomial.polynomial.polyfit(x.flat, y.flat, 1)
 
-    idx = np.logical_or(x <= threshold, y <= (a * threshold + b))
-    r = pearsonr(x[idx], y[idx])
+    thresholds = np.linspace(x.max(), x.min(), 256)
 
-    while r > target_r and threshold > threshold_min:
-        threshold -= increment
+    for threshold in thresholds:
         idx = np.logical_or(x <= threshold, y <= (a * threshold + b))
-        if np.unique(x[idx]).size == 1 or np.unique(y[idx]).size == 1:
-            threshold = threshold_min
+        if np.all(x[idx] == x[idx][0]) or np.all(y[idx] == y[idx][0]):
+            return thresholds[-1], a, b
+        if pearsonr(x[idx], y[idx]) <= target_r:
             break
-        r = pearsonr(x[idx], y[idx])  # pragma: no cover
 
     return threshold, a, b
 

@@ -38,3 +38,4 @@ def test_manders():
 
 def test_costes_threshold():
     assert np.allclose(colocal.costes_threshold(a, a), (0.0, 1.0, 0.0))
+    assert np.allclose(colocal.costes_threshold(a, b), (1.0, 0.0, 0.5))
