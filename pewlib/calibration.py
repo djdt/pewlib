@@ -77,6 +77,7 @@ def weighted_linreg(
        gradient
        intercept
        r²
+       error, S(y,x) the residual standard deviation
 
     See Also:
         :func:`pewlib.calibration.weighted_rsq`
