@@ -177,6 +177,46 @@ def find_peaks_cwt(
     return peaks
 
 
+def find_peaks_windowed(
+    x: np.ndarray,
+    size: int,
+    baseline: Callable,
+    threshold: Callable,
+    peak_base_method: str = "baseline",
+    peak_height_method: str = "maxima",
+    peak_min_area: float = 0.0,
+    peak_min_height: float = 0.0,
+    peak_min_width: float = 0.0,
+):
+    x_pad = np.pad(x, [size // 2, size - size // 2 - 1], mode="edge")
+    windows = view_as_blocks(x_pad, (size,), (1,))
+
+    baseline = baseline(windows, axis=1)
+    threshold = threshold(windows, axis=1)
+
+    diff = np.diff((x > (baseline + threshold)).astype(np.int8), prepend=0)
+    lefts = np.flatnonzero(diff == 1)
+    rights = np.flatnonzero(diff == -1)
+
+    peaks = peaks_from_edges(
+        x,
+        lefts,
+        rights,
+        base_method=peak_base_method,
+        height_method=peak_height_method,
+        baseline=baseline,
+    )
+
+    peaks = filter_peaks(
+        peaks,
+        min_area=peak_min_area,
+        min_height=peak_min_height,
+        min_width=peak_min_width,
+    )
+
+    return peaks
+
+
 def find_peaks_zscore(
     x: np.ndarray,
     lag: int = 10,
@@ -214,88 +254,6 @@ def find_peaks_zscore(
     )
 
     return peaks
-
-
-# def find_regularly_spaced_peaks(
-#     x: np.ndarray,
-#     domain: Tuple[int, int],
-#     peak_spacing: float,
-#     peak_max_width: int = None,
-#     peak_search_dist: int = None,
-#     peak_base_method: str = "baseline",
-#     peak_height_method: str = "maxima",
-#     peak_width_method: str = "minima",
-# ) -> np.ndarray:
-#     if peak_search_dist is None:
-#         peak_search_dist = int(peak_spacing / 2.0)
-#     if peak_max_width is None:
-#         peak_max_width = peak_search_dist
-
-#     ideal_locations = np.round(np.arange(domain[0], domain[1], peak_spacing)).astype(
-#         int
-#     )
-
-#     if peak_height_method == "maxima":
-#         search_lefts = ideal_locations - peak_search_dist // 2
-#         search_indicies = search_lefts + np.arange(peak_search_dist)[:, None]
-#         tops = np.argmax(x[search_indicies], axis=0) + search_lefts
-#     elif peak_height_method == "none":
-#         tops = ideal_locations
-#     else:
-#         raise ValueError("Valid values for height_method are 'maxima', 'none'.")
-
-#     if peak_width_method == "minima":
-#         indicies = (tops - peak_max_width // 2) + np.arange(peak_max_width // 2)[
-#             :, None
-#         ]
-#         lefts = np.argmin(x[indicies], axis=0) + (tops - peak_max_width // 2)
-#         print(lefts)
-#         indicies = tops + np.arange(peak_max_width // 2)[:, None]
-#         rights = np.argmin(x[indicies], axis=0) + tops
-#     elif peak_width_method == "full":
-#         lefts = tops - peak_max_width // 2
-#         rights = tops + peak_max_width // 2
-#     else:
-#         raise ValueError("Valid values for width_method are 'minima', 'full'.")
-
-#     if peak_base_method == "baseline":
-#         bottoms = tops  # Default to tops
-#         windows = sliding_window_centered(x, peak_search_dist * 2)
-#         bases = np.percentile(windows[bottoms], 25, axis=1)
-#     elif peak_base_method == "edge":
-#         bottoms = np.minimum(lefts, rights)
-#         bases = x[bottoms]
-#     elif peak_base_method == "minima":
-#         bottoms = np.argmin(x[indicies], axis=0) + lefts
-#         bases = x[bottoms]
-#     elif peak_base_method == "prominence":
-#         bottoms = np.maximum(lefts, rights)
-#         bases = x[bottoms]
-#     elif peak_base_method == "zero":
-#         bottoms = tops  # Default to tops
-#         bases = 0.0
-#     else:
-#         raise ValueError(
-#             "Valid values for base_method are 'baseline', "
-#             "'edge', 'prominence', 'minima', 'zero'."
-#         )
-
-#     widths = rights - lefts
-#     indicies = lefts + np.arange(peak_max_width + 1)[:, None]
-#     indicies = np.clip(indicies, 0, x.size - 1)
-#     indicies = np.where(indicies - lefts < widths, indicies, rights)
-#     area = np.trapz(x[indicies] - bases, indicies, axis=0)
-
-#     peaks = np.empty(tops.shape, dtype=PEAK_DTYPE)
-#     peaks["area"] = area
-#     peaks["height"] = x[tops] - bases
-#     peaks["width"] = widths
-#     peaks["base"] = bases
-#     peaks["top"] = tops
-#     peaks["bottom"] = bottoms
-#     peaks["left"] = lefts
-#     peaks["right"] = rights
-#     return peaks
 
 
 def bin_and_bound_peaks(
@@ -383,6 +341,7 @@ def peaks_from_edges(
     rights: np.ndarray,
     base_method: str = "baseline",
     height_method: str = "maxima",
+    baseline: np.ndarray = None,
 ) -> np.ndarray:
 
     widths = rights - lefts
@@ -400,9 +359,12 @@ def peaks_from_edges(
     if base_method == "baseline":
         bottoms = tops  # Default to tops
         bwin = np.amax(widths) * 4
-        x_pad = np.pad(x, (bwin // 2, bwin - bwin // 2 - 1), mode="edge")
-        windows = view_as_blocks(x_pad, (bwin,), (1,))
-        bases = np.percentile(windows[bottoms], 25, axis=1)
+        if baseline is None:
+            x_pad = np.pad(x, (bwin // 2, bwin - bwin // 2 - 1), mode="edge")
+            windows = view_as_blocks(x_pad, (bwin,), (1,))
+            bases = np.percentile(windows[bottoms], 25, axis=1)
+        else:
+            bases = baseline[bottoms]
     elif base_method == "edge":
         bottoms = np.minimum(lefts, rights)
         bases = x[bottoms]
