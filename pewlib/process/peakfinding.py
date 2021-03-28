@@ -384,7 +384,6 @@ def peaks_from_edges(
     base_method: str = "baseline",
     height_method: str = "maxima",
 ) -> np.ndarray:
-
     widths = rights - lefts
     indicies = lefts + np.arange(np.amax(widths) + 1)[:, None]
     indicies = np.clip(indicies, 0, x.size - 1)
