@@ -19,6 +19,8 @@ class SRRConfig(Config):
         :class:`pewlib.config.Config`
     """
 
+    _class = "SRR"
+
     def __init__(
         self,
         spotsize: float = 35.0,

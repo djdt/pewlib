@@ -4,13 +4,15 @@ from typing import Tuple
 
 
 class Config(object):
-    """Class for the laser-specific parameters of image.
+    """Class for the rastered parameters of image.
 
     Args:
         spotsize: laser-spot diameter, μm
         speed: laser movement speed, μm/s
         scantime: MS acquisition time, s
     """
+
+    _class = "Raster"
 
     def __init__(
         self, spotsize: float = 35.0, speed: float = 140.0, scantime: float = 0.25
@@ -49,3 +51,31 @@ class Config(object):
             speed=float(array["speed"]),
             scantime=float(array["scantime"]),
         )
+
+
+class SpotConfig(Config):
+    """Class for the spotwise parameters of image.
+
+    Args:
+        spotsize: x, y distance between laser-spots, μm
+    """
+
+    _class = "Spot"
+
+    def __init__(self, spotsize: Tuple[float, float] = (100.0, 100.0)):
+        self.spotsize = spotsize
+
+    def to_array(self) -> np.ndarray:
+        return np.array((self.spotsize,), dtype=[("spotsize", np.float64)])
+
+    def get_pixel_width(self) -> float:
+        """Pixel width in μm."""
+        return self.spotsize[0]
+
+    def get_pixel_height(self) -> float:
+        """Pixel height in μm."""
+        return self.spotsize[1]
+
+    @classmethod
+    def from_array(cls, array: np.ndarray) -> "Config":
+        return cls(spotsize=array["spotsize"])

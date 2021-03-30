@@ -130,8 +130,8 @@ def collect_datafiles(path: Union[str, Path], methods: List[str]) -> List[Path]:
         else:  # pragma: no cover
             logger.warning(f"Unable to collect datafiles using '{method}'.")
 
-    logger.warning(f"All datafile collection methods '{methods}' failed.")
-    return []  # pragma: no cover
+    logger.error(f"All datafile collection methods '{methods}' failed.")
+    raise ValueError(f"All datafile collection methods '{methods}' failed.")
 
 
 def find_datafiles_alphabetical(path: Union[str, Path]) -> List[Path]:
