@@ -66,7 +66,7 @@ class SpotConfig(Config):
         self.spotsize = spotsize
 
     def to_array(self) -> np.ndarray:
-        return np.array((self.spotsize,), dtype=[("spotsize", np.float64)])
+        return np.array((self.spotsize,), dtype=[("spotsize", np.float64, 2)])
 
     def get_pixel_width(self) -> float:
         """Pixel width in μm."""
