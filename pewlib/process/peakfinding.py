@@ -198,6 +198,14 @@ def find_peaks_windowed(
     lefts = np.flatnonzero(diff == 1)
     rights = np.flatnonzero(diff == -1)
 
+    if lefts.size == 0 or rights.size == 0:
+        return np.array([], dtype=PEAK_DTYPE)
+
+    if lefts.size > rights.size:
+        lefts = lefts[1:]
+    elif rights.size > lefts.size:
+        rights = rights[:-1]
+
     peaks = peaks_from_edges(
         x,
         lefts,
