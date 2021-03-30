@@ -70,10 +70,10 @@ def test_io_npz():
     # Data
     assert laser.isotopes == ("A1", "B2")
     assert laser.get("A1").shape == (10, 10)
-    pytest.approx(laser.get("A1").sum(), 100)
+    assert laser.get("A1").sum() == pytest.approx(100)
     # Calibration
     calibration = laser.calibration["A1"]
-    pytest.approx(calibration.gradient, 1.0)
+    assert calibration.gradient == pytest.approx(1.0)
     assert calibration.intercept == 2.0
     assert calibration.rsq is None
     assert calibration.weighting == "x"
