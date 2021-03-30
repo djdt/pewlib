@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from pewlib.config import Config
+from pewlib.config import Config, SpotConfig
 from pewlib.srr import SRRConfig
 
 
@@ -23,6 +23,22 @@ def test_config_to_from_array():
     assert config.spotsize == 1.0
     assert config.speed == 2.0
     assert config.scantime == 3.0
+
+
+def test_config_spot():
+    config = SpotConfig((20.0, 50.0))
+    # Standard stuff
+    assert config.get_pixel_width() == 20.0
+    assert config.get_pixel_height() == 50.0
+    assert config.data_extent((10, 10)) == (0.0, 200.0, 0.0, 500.0)
+
+
+def test_config_spot_to_from_array():
+    config = SpotConfig((10.0, 20.0))
+    array = config.to_array()
+    assert np.all(array["spotsize"] == [10.0, 20.0])
+    config = SpotConfig.from_array(array)
+    assert np.all(config.spotsize == (10.0, 20.0))
 
 
 def test_config_srr():
