@@ -26,7 +26,7 @@ def test_config_to_from_array():
 
 
 def test_config_spot():
-    config = SpotConfig((20.0, 50.0))
+    config = SpotConfig(20.0, 50.0)
     # Standard stuff
     assert config.get_pixel_width() == 20.0
     assert config.get_pixel_height() == 50.0
@@ -34,11 +34,12 @@ def test_config_spot():
 
 
 def test_config_spot_to_from_array():
-    config = SpotConfig((10.0, 20.0))
+    config = SpotConfig(10.0)
     array = config.to_array()
-    assert np.all(array["spotsize"] == [10.0, 20.0])
+    assert np.all(array["spotsize"] == [10.0, 10.0])
     config = SpotConfig.from_array(array)
-    assert np.all(config.spotsize == (10.0, 20.0))
+    assert config.spotsize == 10.0
+    assert config.spotsize_y == 10.0
 
 
 def test_config_srr():

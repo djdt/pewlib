@@ -62,20 +62,25 @@ class SpotConfig(Config):
 
     _class = "Spot"
 
-    def __init__(self, spotsize: Tuple[float, float] = (100.0, 100.0)):
-        self.spotsize = spotsize
+    def __init__(self, spotsize: float = 100.0, spotsize_y: float = None):
+        super().__init__(spotsize=spotsize, speed=0.0, scantime=0.0)
+        if spotsize_y is None:
+            spotsize_y = spotsize
+        self.spotsize_y = spotsize_y
 
     def to_array(self) -> np.ndarray:
-        return np.array((self.spotsize,), dtype=[("spotsize", np.float64, 2)])
+        return np.array(
+            [self.spotsize, self.spotsize_y], dtype=[("spotsize", np.float64)]
+        )
 
     def get_pixel_width(self) -> float:
         """Pixel width in μm."""
-        return self.spotsize[0]
+        return self.spotsize
 
     def get_pixel_height(self) -> float:
         """Pixel height in μm."""
-        return self.spotsize[1]
+        return self.spotsize_y
 
     @classmethod
     def from_array(cls, array: np.ndarray) -> "Config":
-        return cls(spotsize=array["spotsize"])
+        return cls(spotsize=array["spotsize"][0], spotsize_y=array["spotsize"][1])

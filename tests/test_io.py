@@ -104,8 +104,8 @@ def test_io_npz_spot():
     laser = io.npz.load(path.joinpath("spot.npz"))
 
     assert isinstance(laser.config, SpotConfig)
-    assert laser.config.spotsize[0] == 10.0
-    assert laser.config.spotsize[1] == 20.0
+    assert laser.config.spotsize == 10.0
+    assert laser.config.spotsize_y == 20.0
 
 
 def test_io_npz_srr():
