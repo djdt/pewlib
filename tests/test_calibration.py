@@ -30,6 +30,9 @@ def test_weighting():
         == [1.0, 1.0, 0.5]
     )
 
+    # Reuturn all ones if x all 0
+    assert np.all(weights_from_weighting(np.zeros(10), "1/x") == 1.0)
+
 
 def test_weighted_rsq():
     x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
@@ -64,7 +67,7 @@ def test_default_calibration():
     assert calibration.rsq is None
 
 
-def test_coverage_array():
+def test_calibration_array():
     calibration = Calibration(1.0, 2.0, unit="ppm")
     array = calibration.to_array()
     assert array["intercept"] == 1.0
@@ -128,10 +131,6 @@ def test_calibration_from_points():
 
 
 def test_calibration_from_points_invalid():
-    # Test shape[0] = 1
-    # with pytest.raises(ValueError):
-    #     Calibration.from_points([[0, 1]])
-    # Test shape[1] = 3
     with pytest.raises(ValueError):
         Calibration.from_points([[0, 1, 1]])
     # Test one dimnesion
@@ -143,19 +142,28 @@ def test_calibration_from_points_weights():
     points = np.vstack([[1.0, 2.0, 3.0, 4.0, 5.0], [1.0, 1.0, 2.0, 4.0, 8.0]]).T
     calibration = Calibration.from_points(points=points, weights="x")
     assert np.all(calibration.weights == [1.0, 2.0, 3.0, 4.0, 5.0])
-    assert pytest.approx(calibration.gradient, 2.085814)
-    assert pytest.approx(calibration.intercept, -3.314286)
-    assert pytest.approx(calibration.rsq, 0.865097)
+    assert calibration.gradient == pytest.approx(2.085714)
+    assert calibration.intercept == pytest.approx(-3.314286)
+    assert calibration.rsq == pytest.approx(0.865097)
 
     calibration = Calibration.from_points(
         points=points, weights=("w", [1.0, 2.0, 3.0, 4.0, 5.0])
     )
-    assert pytest.approx(calibration.gradient, 2.085814)
-    assert pytest.approx(calibration.intercept, -3.314286)
-    assert pytest.approx(calibration.rsq, 0.865097)
+    assert calibration.gradient == pytest.approx(2.085714)
+    assert calibration.intercept == pytest.approx(-3.314286)
+    assert calibration.rsq == pytest.approx(0.865097)
 
     with pytest.raises(ValueError):
         calibration = Calibration.from_points(points=points, weights=("w", [1.0]))
+
+
+def test_calibration_weighting_y():
+    points = np.vstack([[1.0, 2.0, 3.0, 4.0, 5.0], [1.0, 1.0, 2.0, 4.0, 8.0]]).T
+    calibration = Calibration.from_points(points=points, weights="y")
+    assert np.all(calibration.weights == [1.0, 1.0, 2.0, 4.0, 8.0])
+    assert calibration.gradient == pytest.approx(2.163488)
+    assert calibration.intercept == pytest.approx(-3.414169)
+    assert calibration.rsq == pytest.approx(0.867580)
 
 
 def test_calibration_update_linreg():

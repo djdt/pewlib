@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from pathlib import Path
 
 from pewlib.io import agilent
@@ -119,10 +120,16 @@ def test_io_agilent_load_8900_csv():
 def test_io_agilent_load_missing():
     path = Path(__file__).parent.joinpath("data", "agilent", "8900")
 
-    data = agilent.load(  # Will fall back to csv
+    with pytest.raises(ValueError):
+        agilent.load(
+            path.joinpath("test_ms_missing.b"),
+            use_acq_for_names=False,
+            collection_methods=["batch_csv"],  # Missing batch csv
+        )
+    data = agilent.load(
         path.joinpath("test_ms_missing.b"),
         use_acq_for_names=False,
-        collection_methods=["batch_csv"],
+        collection_methods=["alphabetical"],
     )
     assert isinstance(data, np.ndarray)
     assert data.shape == (4, 5)

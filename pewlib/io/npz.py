@@ -9,6 +9,7 @@ import numpy as np
 
 from pewlib import __version__
 from pewlib import Laser, Calibration, Config
+from pewlib.config import SpotConfig
 
 from pewlib.laser import _Laser
 from pewlib.srr import SRRLaser, SRRConfig
@@ -47,10 +48,13 @@ def load(path: Union[str, Path]) -> _Laser:
     for name in data.dtype.names:
         calibration[name] = Calibration.from_array(npz[f"calibration_{name}"])
 
-    if npz["_class"] == "Laser":
+    if npz["_class"] in ["Laser", "Raster"]:
         laser = Laser
         config = Config.from_array(npz["config"])
-    elif npz["_class"] == "SRRLaser":
+    elif npz["_class"] in ["Spot"]:
+        laser = Laser
+        config = SpotConfig.from_array(npz["config"])
+    elif npz["_class"] in ["SRRLaser", "SRR"]:
         laser = SRRLaser  # type: ignore
         config = SRRConfig.from_array(npz["config"])
     else:  # pragma: no cover
@@ -81,7 +85,7 @@ def save(path: Union[str, Path], laser: _Laser) -> None:
         :func:`numpy.savez_compressed`
     """
     savedict: dict = {"_version": __version__, "_time": time.time(), "_multiple": False}
-    savedict["_class"] = laser.__class__.__name__
+    savedict["_class"] = laser.config._class
     savedict["data"] = laser.data
     savedict["name"] = laser.name
     savedict["config"] = laser.config.to_array()
