@@ -1,7 +1,6 @@
 import numpy as np
 
 from pewlib.process import peakfinding
-import matplotlib.pyplot as plt
 
 
 def test_peakfinding_cwt():
