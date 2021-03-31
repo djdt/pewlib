@@ -5,6 +5,7 @@ import pytest
 import tempfile
 
 from pewlib import io
+from pewlib.config import SpotConfig
 from pewlib.srr import SRRLaser, SRRConfig
 
 
@@ -96,6 +97,15 @@ def test_io_npz():
     assert loaded.calibration["A1"].weighting == laser.calibration["A1"].weighting
     assert loaded.calibration["A1"].unit == laser.calibration["A1"].unit
     assert np.all(loaded.calibration["A1"].points == laser.calibration["A1"].points)
+
+
+def test_io_npz_spot():
+    path = Path(__file__).parent.joinpath("data", "npz")
+    laser = io.npz.load(path.joinpath("spot.npz"))
+
+    assert isinstance(laser.config, SpotConfig)
+    assert laser.config.spotsize[0] == 10.0
+    assert laser.config.spotsize[1] == 20.0
 
 
 def test_io_npz_srr():
