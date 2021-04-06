@@ -2,7 +2,7 @@
 
 ![Build](https://github.com/djdt/pewlib/workflows/Build/badge.svg)
 
-Pewlib is a library for importing, processing and exporting line-by-line collected LA-ICP-MS data.
+Pewlib is a library for importing, processing and exporting LA-ICP-MS data.
 Currently exports from Agilent, Thermo and PerkinElmer software is supported, as well as delimited text images.
 
 ## Installation
