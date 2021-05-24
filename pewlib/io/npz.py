@@ -74,12 +74,13 @@ def load(path: Union[str, Path]) -> _Laser:
         raise ValueError("NPZ unable to import laser class {npz['_class']}.")
 
     if "_version" < "0.7.0":  # Prior to use of info dict
-        info = {str(npz["name"])}
+        info = {"name": str(npz["name"])}
     else:
         info = unpack_info(npz["info"])
 
     # Update the path
-    info["path"] = str(path)
+    info["name"] = info.get("name", path.stem)  # Ensure name
+    info["path"] = str(path.resolve())
 
     return laser(
         data=data,
