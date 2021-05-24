@@ -571,7 +571,17 @@ def device_xml_read_info(path: Path) -> Dict[str, str]:
 
 
 def load_info(path: Union[str, Path]) -> Dict[str, str]:
-    """Reads instrument information from a batch."""
+    """Reads information from a batch.
+
+    Instrument info is read from the first Devices.xml found, batch info from
+    the BatchLog.xml. An empty dictionary is returned if neither file can be read.
+
+    Args:
+        path: path to batch
+
+    Returns:
+        dict
+    """
 
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
