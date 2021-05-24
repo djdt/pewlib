@@ -19,23 +19,6 @@ batch_csv_path = Path("BatchLog.csv")
 batch_xml_path = Path("Method", "BatchLog.xml")
 
 
-# TODO info for: model, type, serial, date, original_path
-# Contents
-# date: datafile/AcqData/Contents.xml <Contents><AcquiredTime>YYYY-MM-DDTHH:MM:SSZ
-# Batch Log
-# date: BatchLog.csv Acq. Data-Time YYYY/MM/DD HH:MM:SS
-# !date: Method/BatchLog.xml <BatchLogDataSet><BatchLogInfo><AcqDateTime>YYYY-MM-DDTHH:MM:SS+HH:MM
-# path: Method/BatchLog.xml <BatchLogDataSet BatchDataPath=>
-# name: BatchName=
-# Devices
-# model: datafile/AcqData/Devices.xml <Devices><Device><ModelNumber>
-# serial: datafile/AcqData/Devices.xml <Devices><Device><SerialNumber>
-# AcqMethod
-# path: Method/AcqMethod.xml <AcquisitionDataSet BatchDataPath=>
-# type: <AcquisitionDataSet InstrumentType= >
-# Hardware
-# model, serial, type HardwareConfig*.xml <HardwardSettingDataSet ModelName= SerialNumber= LaserIntrumentType=
-
 class XSpecificMass(object):
     def __init__(self, id: int, name: str, acctime: float, mz: int, mz2: int = None):
         self.id = id
@@ -553,6 +536,29 @@ def load_csv(
         return data, params
     else:  # pragma: no cover
         return data
+
+
+def load_info(path: Union[str, Path]) -> Dict[str, str]:
+    """Reads instrument information from a batch."""
+    pass
+
+
+# TODO info for: model, type, serial, date, original_path
+# Contents
+# date: datafile/AcqData/Contents.xml <Contents><AcquiredTime>YYYY-MM-DDTHH:MM:SSZ
+# Batch Log
+# date: BatchLog.csv Acq. Data-Time YYYY/MM/DD HH:MM:SS
+# !date: Method/BatchLog.xml <BatchLogDataSet><BatchLogInfo><AcqDateTime>YYYY-MM-DDTHH:MM:SS+HH:MM
+# path: Method/BatchLog.xml <BatchLogDataSet BatchDataPath=>
+# name: BatchName=
+# Devices
+# model: datafile/AcqData/Devices.xml <Devices><Device><ModelNumber>
+# serial: datafile/AcqData/Devices.xml <Devices><Device><SerialNumber>
+# AcqMethod
+# path: Method/AcqMethod.xml <AcquisitionDataSet BatchDataPath=>
+# type: <AcquisitionDataSet InstrumentType= >
+# Hardware
+# model, serial, type HardwareConfig*.xml <HardwardSettingDataSet ModelName= SerialNumber= LaserIntrumentType=
 
 
 def load(
