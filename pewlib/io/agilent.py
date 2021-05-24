@@ -563,6 +563,7 @@ def device_xml_read_info(path: Path) -> Dict[str, str]:
     model = device.findtext("ModelNumber")
     serial = device.findtext("SerialNumber")
     return {
+        "instrument_vendor": "Agilent",
         "instrument_type": type,
         "instrument_model": model,
         "instrument_serial": serial,
