@@ -4,7 +4,6 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 """
 import numpy as np
 import numpy.lib.recfunctions as rfn
-from pathlib import Path
 import copy
 
 from pewlib.calibration import Calibration
@@ -19,8 +18,7 @@ class _Laser:
     data: Union[np.ndarray, List[np.ndarray]] = None
     calibration: Dict[str, Calibration] = None
     config: Config = None
-    name: str = ""
-    path: Path = None
+    info: Dict[str, str] = None
 
     @property
     def extent(self) -> Tuple[float, float, float, float]:
@@ -60,8 +58,7 @@ class Laser(_Laser):
         data: structured array of elemental data
         calibration: dict mapping elements to calibrations, optional
         config: laser parameters
-        name: name of image
-        path: path to file
+        info: dict (str, str) of additional info
 
     Todo:
         Support rastered collection.
@@ -72,8 +69,7 @@ class Laser(_Laser):
         data: np.ndarray,
         calibration: Dict[str, Calibration] = None,
         config: Config = None,
-        name: str = "",
-        path: Path = None,
+        info: Dict[str, str] = None,
     ):
         self.data: np.ndarray = data
         self.calibration = {name: Calibration() for name in self.isotopes}
@@ -82,8 +78,7 @@ class Laser(_Laser):
 
         self.config = copy.copy(config) if config is not None else Config()
 
-        self.name = name
-        self.path = path or Path()
+        self.info = info or {}
 
     @property
     def extent(self) -> Tuple[float, float, float, float]:
@@ -186,8 +181,7 @@ class Laser(_Laser):
         isotopes: List[str],
         datas: List[np.ndarray],
         config: Config = None,
-        name: str = "",
-        path: Path = None,
+        info: Dict[str, str] = {},
     ) -> "Laser":
         """Creates class from a list of names and unstructured arrays."""
         assert len(isotopes) == len(datas)
@@ -197,4 +191,4 @@ class Laser(_Laser):
         for isotope, data in zip(isotopes, datas):
             structured[isotope] = data
 
-        return cls(data=structured, config=config, name=name, path=path)
+        return cls(data=structured, config=config, info=info)
