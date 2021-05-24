@@ -3,6 +3,7 @@ Import of line-by-line collected Agilent '.b' batches.
 Both raw binaries and the '.csv' exports are supported.
 Tested with Agilent 7500, 7700 and 8900 ICPs.
 """
+import time
 import logging
 from xml.etree import ElementTree
 from pathlib import Path
@@ -538,27 +539,60 @@ def load_csv(
         return data
 
 
+def batch_xml_read_info(path: Path) -> Dict[str, str]:
+    xml = ElementTree.parse(path)
+    ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
+    name = xml.getroot().get("BatchName")
+    path = xml.getroot().get("BatchDataPath")
+    info = xml.find("ns:BatchLogInfo", namespaces=ns)
+    date = info.findtext("ns:AcqDateTime", namespaces=ns)
+    user = info.findtext("ns:OperatorName", namespaces=ns)
+
+    return {
+        "aquisition_name": name,
+        "acquistion_path": path,
+        "acquistion_date": date,
+        "aquisition_user": user,
+    }
+
+
+def device_xml_read_info(path: Path) -> Dict[str, str]:
+    xml = ElementTree.parse(path)
+    device = xml.find("Device")
+    type = device.findtext("Name")
+    model = device.findtext("ModelNumber")
+    serial = device.findtext("SerialNumber")
+    return {
+        "instrument_type": type,
+        "instrument_model": model,
+        "instrument_serial": serial,
+    }
+
+
 def load_info(path: Union[str, Path]) -> Dict[str, str]:
     """Reads instrument information from a batch."""
-    pass
 
+    if isinstance(path, str):  # pragma: no cover
+        path = Path(path)
 
-# TODO info for: model, type, serial, date, original_path
-# Contents
-# date: datafile/AcqData/Contents.xml <Contents><AcquiredTime>YYYY-MM-DDTHH:MM:SSZ
-# Batch Log
-# date: BatchLog.csv Acq. Data-Time YYYY/MM/DD HH:MM:SS
-# !date: Method/BatchLog.xml <BatchLogDataSet><BatchLogInfo><AcqDateTime>YYYY-MM-DDTHH:MM:SS+HH:MM
-# path: Method/BatchLog.xml <BatchLogDataSet BatchDataPath=>
-# name: BatchName=
-# Devices
-# model: datafile/AcqData/Devices.xml <Devices><Device><ModelNumber>
-# serial: datafile/AcqData/Devices.xml <Devices><Device><SerialNumber>
-# AcqMethod
-# path: Method/AcqMethod.xml <AcquisitionDataSet BatchDataPath=>
-# type: <AcquisitionDataSet InstrumentType= >
-# Hardware
-# model, serial, type HardwareConfig*.xml <HardwardSettingDataSet ModelName= SerialNumber= LaserIntrumentType=
+    try:
+        device_xml = path.glob("*.d/AcqData/Devices.xml")
+        info = device_xml_read_info(next(device_xml))
+    except (
+        StopIteration,
+        FileNotFoundError,
+        ElementTree.ParseError,
+    ):  # pragma: no cover
+        logger.warning("Unable to read info from Devices.xml.")
+        info = {}
+
+    try:
+        batch_xml = path.joinpath(batch_xml_path)
+        info.update(batch_xml_read_info(batch_xml))
+    except (FileNotFoundError, ElementTree.ParseError):  # pragma: no cover
+        logger.warning("Unable to read info from BatchLog.xml.")
+
+    return {k: v for k, v in sorted(info.items()) if v is not None}
 
 
 def load(
