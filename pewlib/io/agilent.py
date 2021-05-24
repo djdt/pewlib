@@ -19,6 +19,23 @@ batch_csv_path = Path("BatchLog.csv")
 batch_xml_path = Path("Method", "BatchLog.xml")
 
 
+# TODO info for: model, type, serial, date, original_path
+# Contents
+# date: datafile/AcqData/Contents.xml <Contents><AcquiredTime>YYYY-MM-DDTHH:MM:SSZ
+# Batch Log
+# date: BatchLog.csv Acq. Data-Time YYYY/MM/DD HH:MM:SS
+# !date: Method/BatchLog.xml <BatchLogDataSet><BatchLogInfo><AcqDateTime>YYYY-MM-DDTHH:MM:SS+HH:MM
+# path: Method/BatchLog.xml <BatchLogDataSet BatchDataPath=>
+# name: BatchName=
+# Devices
+# model: datafile/AcqData/Devices.xml <Devices><Device><ModelNumber>
+# serial: datafile/AcqData/Devices.xml <Devices><Device><SerialNumber>
+# AcqMethod
+# path: Method/AcqMethod.xml <AcquisitionDataSet BatchDataPath=>
+# type: <AcquisitionDataSet InstrumentType= >
+# Hardware
+# model, serial, type HardwareConfig*.xml <HardwardSettingDataSet ModelName= SerialNumber= LaserIntrumentType=
+
 class XSpecificMass(object):
     def __init__(self, id: int, name: str, acctime: float, mz: int, mz2: int = None):
         self.id = id
@@ -378,6 +395,8 @@ def load_binary(
             params["scantime"] = np.round(np.mean(np.diff(data["Time"], axis=1)), 4)
         else:  # pragma: no cover
             logger.warning("'Time' field not found, unable to import scantime.")
+
+        # Read devices.xml
 
     if counts_per_second:
         for mass in masses:
