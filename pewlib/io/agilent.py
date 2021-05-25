@@ -548,10 +548,10 @@ def batch_xml_read_info(path: Path) -> Dict[str, str]:
     user = info.findtext("ns:OperatorName", namespaces=ns)
 
     return {
-        "aquisition name": name,
-        "acquistion path": path,
-        "acquistion date": date,
-        "aquisition user": user,
+        "Aquisition Name": name,
+        "Acquistion Path": path,
+        "Acquistion Date": date,
+        "Aquisition User": user,
     }
 
 
@@ -562,10 +562,10 @@ def device_xml_read_info(path: Path) -> Dict[str, str]:
     model = device.findtext("ModelNumber")
     serial = device.findtext("SerialNumber")
     return {
-        "instrument vendor": "Agilent",
-        "instrument type": type,
-        "instrument model": model,
-        "instrument serial": serial,
+        "Instrument Vendor": "Agilent",
+        "Instrument Type": type,
+        "Instrument Model": model,
+        "Instrument Serial": serial,
     }
 
 
