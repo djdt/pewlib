@@ -3,7 +3,6 @@ Import of line-by-line collected Agilent '.b' batches.
 Both raw binaries and the '.csv' exports are supported.
 Tested with Agilent 7500, 7700 and 8900 ICPs.
 """
-import time
 import logging
 from xml.etree import ElementTree
 from pathlib import Path
@@ -549,10 +548,10 @@ def batch_xml_read_info(path: Path) -> Dict[str, str]:
     user = info.findtext("ns:OperatorName", namespaces=ns)
 
     return {
-        "aquisition_name": name,
-        "acquistion_path": path,
-        "acquistion_date": date,
-        "aquisition_user": user,
+        "aquisition name": name,
+        "acquistion path": path,
+        "acquistion date": date,
+        "aquisition user": user,
     }
 
 
@@ -563,10 +562,10 @@ def device_xml_read_info(path: Path) -> Dict[str, str]:
     model = device.findtext("ModelNumber")
     serial = device.findtext("SerialNumber")
     return {
-        "instrument_vendor": "Agilent",
-        "instrument_type": type,
-        "instrument_model": model,
-        "instrument_serial": serial,
+        "instrument vendor": "Agilent",
+        "instrument type": type,
+        "instrument model": model,
+        "instrument serial": serial,
     }
 
 
