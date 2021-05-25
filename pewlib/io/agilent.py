@@ -548,10 +548,10 @@ def batch_xml_read_info(path: Path) -> Dict[str, str]:
     user = info.findtext("ns:OperatorName", namespaces=ns)
 
     return {
-        "Aquisition Name": name,
-        "Acquistion Path": path,
-        "Acquistion Date": date,
-        "Aquisition User": user,
+        "Acquisition Name": name,
+        "Acquisition Path": path,
+        "Acquisition Date": date,
+        "Acquisition User": user,
     }
 
 
