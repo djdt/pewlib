@@ -17,15 +17,15 @@ from pewlib.srr import SRRLaser, SRRConfig
 from typing import Dict, Union
 
 
-def pack_info(info: Dict[str, str], sep: str = "\0") -> np.ndarray:
+def pack_info(info: Dict[str, str], sep: str = "\t") -> np.ndarray:
     string = sep.join(
-        f"{key.replace(sep, '')}{sep}{val.replace(sep, '')}"
+        f"{key.replace(sep, ' ')}{sep}{val.replace(sep, ' ')}"
         for key, val in info.items()
     )
     return np.array(string)
 
 
-def unpack_info(info: np.ndarray, sep: str = "\0") -> Dict[str, str]:
+def unpack_info(info: np.ndarray, sep: str = "\t") -> Dict[str, str]:
     tokens = str(info).split(sep)
     return {key: val for key, val in zip(tokens[::2], tokens[1::2])}
 
@@ -73,8 +73,8 @@ def load(path: Union[str, Path]) -> _Laser:
     else:  # pragma: no cover
         raise ValueError("NPZ unable to import laser class {npz['_class']}.")
 
-    if "_version" < "0.7.0":  # Prior to use of info dict
-        info = {"Name": str(npz["Name"])}
+    if npz["_version"] < "0.7.0":  # Prior to use of info dict
+        info = {"Name": str(npz["name"])}
     else:
         info = unpack_info(npz["info"])
 
