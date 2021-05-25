@@ -21,7 +21,8 @@ def pack_info(info: Dict[str, str], sep: str = "\t") -> np.ndarray:
     string = sep.join(
         f"{key.replace(sep, ' ')}{sep}{val.replace(sep, ' ')}"
         for key, val in info.items()
-    )
+        if key not in ["File Path"]
+    )  # Makes no sense to store file path so drop it
     return np.array(string)
 
 
