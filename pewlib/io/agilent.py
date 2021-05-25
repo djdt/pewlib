@@ -575,6 +575,10 @@ def load_info(path: Union[str, Path]) -> Dict[str, str]:
     Instrument info is read from the first Devices.xml found, batch info from
     the BatchLog.xml. An empty dictionary is returned if neither file can be read.
 
+    Possible keys:
+        Acquisition {Date,Name,Path,User}
+        Instrument {Type,Model,Serial,Vendor}
+
     Args:
         path: path to batch
 
