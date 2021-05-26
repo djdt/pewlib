@@ -62,8 +62,12 @@ def test_io_npz():
     path = Path(__file__).parent.joinpath("data", "npz")
 
     laser = io.npz.load(path.joinpath("test.npz"))
-    assert laser.name == "Test"
-    assert laser.path.samefile(path.joinpath("test.npz"))
+    # Info
+    assert laser.info["Name"] == "Test"
+    assert Path(laser.info["File Path"]).samefile(path.joinpath("test.npz"))
+    assert laser.info["1"] == "1"
+    assert laser.info["tab"] == "tab "  # Replace value tab with space
+    assert laser.info["tab name"] == "tabname"  # Replace key tab with space
     # Config
     assert laser.config.spotsize == 1
     assert laser.config.speed == 2

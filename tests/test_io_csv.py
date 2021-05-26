@@ -24,6 +24,24 @@ def test_io_csv_generic():
     assert np.isclose(np.sum(data["B"]), 12.0)
 
 
+def test_io_csv_thermo_icap_ldr():
+    sums = {"31P": 4.8708803607e4, "153Eu": 5.5000012000e1, "182W": 2.5000003000e1}
+    path = Path(__file__).parent.joinpath("data", "csv", "thermo_icap_ldr")
+
+    assert io.csv.is_valid_directory(path)
+    assert isinstance(io.csv.option_for_path(path), io.csv.ThermoLDROption)
+
+    data, params = io.csv.load(path, full=True)
+
+    assert data.shape == (5, 5)
+    assert data.dtype.names == ("31P", "153Eu", "182W")
+
+    for name in data.dtype.names:
+        assert np.isclose(np.sum(data[name]), sums[name])
+
+    assert params["scantime"] == 1.0049
+
+
 def test_io_csv_nu_instruments():
     path = Path(__file__).parent.joinpath("data", "csv", "nu")
 

@@ -11,7 +11,6 @@ References:
 """
 import numpy as np
 import numpy.lib.recfunctions as rfn
-from pathlib import Path
 import copy
 
 from pewlib.laser import _Laser, Laser
@@ -31,8 +30,7 @@ class SRRLaser(_Laser):
         data: list of structured arrays
         calibration: dict mapping elements to calibrations, optional
         config: SRR laser parameters
-        name: name of image
-        path: path to file
+        info: dict(str, str) of additional info
 
     See Also:
         :class:`pewlib.laser.Laser`
@@ -43,8 +41,7 @@ class SRRLaser(_Laser):
         data: List[np.ndarray],
         calibration: Dict[str, Calibration] = None,
         config: SRRConfig = None,
-        name: str = "",
-        path: Path = None,
+        info: Dict[str, str] = None,
     ):
         assert len(data) > 1
         self.data: List[np.ndarray] = data
@@ -55,9 +52,7 @@ class SRRLaser(_Laser):
         self.config: SRRConfig = (
             copy.copy(config) if config is not None else SRRConfig()
         )
-
-        self.name = name
-        self.path = path or Path()
+        self.info = info or {}
 
     @property
     def extent(self) -> Tuple[float, float, float, float]:
@@ -230,8 +225,7 @@ class SRRLaser(_Laser):
         isotopes: List[str],
         layers: List[List[np.ndarray]],
         config: SRRConfig = None,
-        name: str = "",
-        path: Path = None,
+        info: Dict[str, str] = None,
     ) -> "SRRLaser":
         """Creates class from a list of names and lists of unstructured arrays."""
         dtype = [(isotope, float) for isotope in isotopes]
@@ -244,7 +238,7 @@ class SRRLaser(_Laser):
                 structured[isotope] = data
             structured_layers.append(structured)
 
-        return cls(data=structured_layers, config=config, name=name, path=path)
+        return cls(data=structured_layers, config=config, info=info)
 
     @classmethod
     def from_lasers(cls, lasers: List[Laser]) -> "SRRLaser":
@@ -264,6 +258,5 @@ class SRRLaser(_Laser):
             data=data,
             calibration=calibration,
             config=config,
-            name=lasers[0].name,
-            path=lasers[0].path,
+            info=lasers[0].info,
         )

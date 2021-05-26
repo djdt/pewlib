@@ -134,3 +134,42 @@ def test_io_agilent_load_missing():
     assert isinstance(data, np.ndarray)
     assert data.shape == (4, 5)
     assert np.all(data["P31"][3] == 0.0)
+
+
+def test_io_agilent_load_info_7700():
+    path = Path(__file__).parent.joinpath("data", "agilent", "7700")
+    info = agilent.load_info(path.joinpath("test.b"))
+
+    assert info["Acquisition Date"] == "2020-11-18T14:24:29+11:00"
+    assert info["Acquisition Name"] == "test_7700.b"
+    assert info["Acquisition Path"] == "D:\\DATA\\OM\\test_7700.b"
+    assert info["Acquisition User"] == "Student"
+
+    assert info["Instrument Type"] == "ICPMS"
+    assert info["Instrument Model"] == "G3282A"
+    assert info["Instrument Serial"] == "JP11161014"
+
+
+def test_io_agilent_load_info_8900():
+    path = Path(__file__).parent.joinpath("data", "agilent", "8900")
+    info = agilent.load_info(path.joinpath("test_ms_ms.b"))
+
+    assert info["Acquisition Date"] == "2020-11-16T13:05:17+11:00"
+    assert info["Acquisition Name"] == "test_ms_ms.b"
+    assert (
+        info["Acquisition Path"]
+        == "D:\\Agilent\\ICPMH\\1\\DATA\\Tom\\Tests\\test_ms_ms.b"
+    )
+    assert info["Acquisition User"] == "ICPMS8900"
+
+    assert info["Instrument Type"] == "ICPQQQ"
+    assert info["Instrument Model"] == "G3665A"
+    assert info["Instrument Serial"] == "SG19441319"
+
+
+def test_io_agilent_load_info_8900_missing():
+    path = Path(__file__).parent.joinpath("data", "agilent", "8900")
+    info = agilent.load_info(path.joinpath("test_ms_missing.b"))
+
+    assert not any("Acquisition " + x in info for x in ["Date", "Name", "Path", "User"])
+    assert all("Instrument " + x in info for x in ["Type", "Model", "Serial"])

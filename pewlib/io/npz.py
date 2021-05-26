@@ -14,7 +14,21 @@ from pewlib.config import SpotConfig
 from pewlib.laser import _Laser
 from pewlib.srr import SRRLaser, SRRConfig
 
-from typing import Union
+from typing import Dict, Union
+
+
+def pack_info(info: Dict[str, str], sep: str = "\t") -> np.ndarray:
+    string = sep.join(
+        f"{key.replace(sep, ' ')}{sep}{val.replace(sep, ' ')}"
+        for key, val in info.items()
+        if key not in ["File Path"]
+    )  # Makes no sense to store file path so drop it
+    return np.array(string)
+
+
+def unpack_info(info: np.ndarray, sep: str = "\t") -> Dict[str, str]:
+    tokens = str(info).split(sep)
+    return {key: val for key, val in zip(tokens[::2], tokens[1::2])}
 
 
 def load(path: Union[str, Path]) -> _Laser:
@@ -60,12 +74,20 @@ def load(path: Union[str, Path]) -> _Laser:
     else:  # pragma: no cover
         raise ValueError("NPZ unable to import laser class {npz['_class']}.")
 
+    if npz["_version"] < "0.7.0":  # Prior to use of info dict
+        info = {"Name": str(npz["name"])}
+    else:
+        info = unpack_info(npz["info"])
+
+    # Update the path
+    info["Name"] = info.get("Name", path.stem)  # Ensure name
+    info["File Path"] = str(path.resolve())
+
     return laser(
         data=data,
         calibration=calibration,
         config=config,
-        name=str(npz["name"]),
-        path=path,
+        info=info,
     )
 
 
@@ -87,7 +109,7 @@ def save(path: Union[str, Path], laser: _Laser) -> None:
     savedict: dict = {"_version": __version__, "_time": time.time(), "_multiple": False}
     savedict["_class"] = laser.config._class
     savedict["data"] = laser.data
-    savedict["name"] = laser.name
+    savedict["info"] = pack_info(laser.info)
     savedict["config"] = laser.config.to_array()
     for name in laser.calibration:
         savedict[f"calibration_{name}"] = laser.calibration[name].to_array()

@@ -34,10 +34,17 @@ class GenericOption(object):
         drop_names: List[str] = [],
         kw_genfromtxt: dict = None,
         regex: str = r".*\.csv",
+        drop_nan_rows: bool = False,
+        drop_nan_columns: bool = False,
+        transposed: bool = False,
     ):
         self.drop_names = drop_names
         self.kw_genfromtxt = kw_genfromtxt
         self.regex = re.compile(regex, re.IGNORECASE)
+
+        self.drop_nan_rows = drop_nan_rows
+        self.drop_nan_columns = drop_nan_columns
+        self.transposed = transposed
 
     def filter(self, paths: List[Path]) -> List[Path]:
         """Filter non matching paths."""
@@ -74,6 +81,30 @@ class NuOption(GenericOption):
             return {"spotsize": np.round(np.mean(np.diff(data["Y_(um)"], axis=0)), 2)}
         else:  # pragma: no cover
             logger.warning("Y_(um) not found, unable to read spotsize.")
+            return super().readParams(data)
+
+    def sortkey(self, path: Path) -> int:
+        """Sorts files numerically."""
+        return int("".join(filter(str.isdigit, path.stem)) or -1)
+
+
+class ThermoLDROption(GenericOption):
+    """Option for Thermo iCAP LDR data."""
+
+    def __init__(self):
+        super().__init__(
+            drop_names=["Time"],
+            kw_genfromtxt={"skip_header": 13},
+            regex=r"\w*_ldr_\d+\.csv",
+            drop_nan_rows=True,
+            drop_nan_columns=True,
+        )
+
+    def readParams(self, data: np.ndarray) -> dict:
+        if "Time" in data.dtype.names:
+            return {"scantime": np.round(np.mean(np.diff(data["Time"], axis=1)), 4)}
+        else:  # pragma: no cover
+            logger.warning("Time not found, unable to read scantime.")
             return super().readParams(data)
 
     def sortkey(self, path: Path) -> int:
@@ -120,7 +151,7 @@ def is_valid_directory(path: Union[str, Path]) -> bool:
 def option_for_path(path: Union[str, Path]) -> GenericOption:
     """Attempts to find the correct type hint for the directory.
     If no specific type hint is found then a GenericOption."""
-    options = [NuOption(), TofwerkOption()]
+    options = [NuOption(), ThermoLDROption(), TofwerkOption()]
 
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
@@ -166,7 +197,9 @@ def load(
     if option.kw_genfromtxt is not None:
         kwargs.update(option.kw_genfromtxt)
 
-    paths = list(p for p in path.glob("*") if p.is_file())
+    paths = list(
+        p for p in path.glob("*") if p.is_file() and not p.name.startswith(".")
+    )
 
     if len(paths) == 0:  # pragma: no cover
         raise ValueError(f"No csv files found with '{option.regex}' in {path.name}!")
@@ -176,18 +209,30 @@ def load(
 
     with ProcessPoolExecutor() as execuctor:
         futures = [execuctor.submit(np.genfromtxt, path, **kwargs) for path in paths]
-
     lines = [future.result() for future in futures]
-    length = min(line.size for line in lines)
 
+    length = min(line.size for line in lines)
     data = np.stack([line[:length] for line in lines], axis=0)
+
+    if option.transposed:  # pragma: no cover
+        data = data.T
+
+    if option.drop_nan_rows:
+        mask = np.all(np.isnan(rfn.structured_to_unstructured(data)), axis=(0, 2))
+        rows = np.flatnonzero(mask)
+        data = np.delete(data, rows, 1)
+
+    if option.drop_nan_columns:
+        column_drop_names = []
+        for name in data.dtype.names:
+            if np.all(np.isnan(data[name])):
+                column_drop_names.append(name)
+        data = rfn.drop_fields(data, column_drop_names)
 
     if full:
         params = option.readParams(data)
 
-    drop_names = option.drop_names
-
-    data = rfn.drop_fields(data, drop_names)
+    data = rfn.drop_fields(data, option.drop_names)
 
     if full:
         return data, params

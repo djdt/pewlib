@@ -1,0 +1,21 @@
+<Identifier>:11-18-2020 04:26:50 AM;
+Software:Name=Qtegra;Version=2.7.2425.65;File Version=1;
+Configuration:Machine=iCAP RQ;
+STD:Additional Gas Flow 1=0;Additional Gas Flow 2=0;Additional Gas Flow 3=0;CCT Entry Lens=-52;Angular Deflection=-275;Deflection Entry Lens=-35;Extraction Lens 1 Polarity=0;Extraction Lens 1 Negative=0;Extraction Lens 1 Positive=0;Spray Chamber Temperature=2.7;Peristaltic Pump Speed=40;Cool Flow=14;Sampling Depth=5;Plasma Power=1550;Auxilliary Flow=0.8;Nebulizer Flow=1.08181818181818;Torch Horizontal Position=-0.620000000000001;Torch Vertical Position=0.173333333333333;Extraction Lens 2=-137.333333333333;CCT Focus Lens=2.16;CCT Bias=-2;CCT Exit Lens=-160;Focus Lens=17.4;D1 Lens=-186;D2 Lens=-80;Quad Entry Lens=-23.8;Pole Bias=-1;CCT1 Flow=0;CCT2 Flow=0;CCT1 Shut-Off Valve=0;CCT2 Shut-Off Valve=0;Virtual CCT Mass to Dac Factor=130;Virtual CCT Mass to Dac Offset=-237.5;Virtual CCT Mass parameter b=0.65;Virtual CCT Mass Maximum Dac Limit Set=4095;
+RF Generator:RF Plasma Lit Readback=1;RF FET Temperature Ok Readback=1;Plasma Power Readback=1548.6077186126;
+Ion Optics:Pole Bias Readback=-0.950146627565982;Torch Horizontal Position Readback=-0.596480938416422;Torch Vertical Position Readback=0.18475073313783;Sampling Depth Readback=5;Extraction Lens 1 Negative Readback=-208.211143695015;Extraction Lens 1 Positive Readback=0.205278592375366;Extraction Lens 2 Readback=-136.852394916911;Angular Deflection Readback=-273.489736070381;Quad Entry Lens Readback=-23.4604105571848;Focus Lens Readback=17.5513196480938;D2 Lens Readback=-79.3743890518084;Deflection Exit Lens Readback=35;Deflection Entry Lens Readback=-35.1906158357771;D1 Lens Readback=-187.683284457478;CCT Exit Lens Readback=-160.80156402737;CCT Bias Readback=-1.12903225806451;CCT Entry Lens Readback=-54.0078201368524;CCT Focus Lens Readback=1.40273704789834;
+Vacuum:Analyzer Vacuum Ok Readback=1;Interface Pressure Readback=1.69141525956502;Analyzer Pressure Readback=4.31417105509124E-07;
+Detector:Detector Voltage (Counting) Readback=1376.34408602151;Detector Voltage (Analog) Readback=-2037.14565004888;
+Cooling System:Plasma Cooling Water Flow Readback=0.636862745098039;Interface Temperature Readback=30.2579539349946;Exhaust Flow Readback=0.198300097751711;Quad Board Temperature Readback=0;Inlet Fan Speed Readback=2447.05882352941;Outlet Fan Speed Readback=2400;Peltier Temperature Hot Side Readback=20.6273259532682;Spray Chamber Temperature Readback=2.6293915694153;
+Power Supply:Supply Voltage 500 V Readback=-537.634408602151;Supply Voltage 1 kV Readback=-1169.35483870968;
+Gas Supply:Nebulizer Supply Pressure Readback=2.70181129032258;Nebulizer Flow Readback=1.07771260997067;Cool Flow Readback=14.0371456500489;Auxilliary Flow Readback=0.799120234604106;CCT2 Flow Readback=0;CCT1 Flow Readback=0;Additional Gas Flow 1 Readback=0;
+Pulse Counting:Threshold=2500000;
+
+Time,31P,153Eu,182W,
+,dwell time=0.2;xcal factor=66159.13097,dwell time=0.4;xcal factor=91049.85677,dwell time=0.4;xcal factor=98840.91543,
+0.20224,1935.14978059302,2.50000025000002,0,
+1.20717,1925.1482364142,0,0,
+2.21208,2030.16484938577,5.0000010000002,2.50000025000002,
+3.21703,2020.16322918892,5.0000010000002,0,
+4.22197,2100.17641481884,0,0,
+

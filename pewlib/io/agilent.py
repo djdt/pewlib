@@ -379,6 +379,8 @@ def load_binary(
         else:  # pragma: no cover
             logger.warning("'Time' field not found, unable to import scantime.")
 
+        # Read devices.xml
+
     if counts_per_second:
         for mass in masses:
             data[str(mass)] /= mass.acctime
@@ -534,6 +536,77 @@ def load_csv(
         return data, params
     else:  # pragma: no cover
         return data
+
+
+def batch_xml_read_info(path: Path) -> Dict[str, str]:
+    xml = ElementTree.parse(path)
+    ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
+    name = xml.getroot().get("BatchName")
+    path = xml.getroot().get("BatchDataPath")
+    info = xml.find("ns:BatchLogInfo", namespaces=ns)
+    date = info.findtext("ns:AcqDateTime", namespaces=ns)
+    user = info.findtext("ns:OperatorName", namespaces=ns)
+
+    return {
+        "Acquisition Name": name,
+        "Acquisition Path": path,
+        "Acquisition Date": date,
+        "Acquisition User": user,
+    }
+
+
+def device_xml_read_info(path: Path) -> Dict[str, str]:
+    xml = ElementTree.parse(path)
+    device = xml.find("Device")
+    type = device.findtext("Name")
+    model = device.findtext("ModelNumber")
+    serial = device.findtext("SerialNumber")
+    return {
+        "Instrument Vendor": "Agilent",
+        "Instrument Type": type,
+        "Instrument Model": model,
+        "Instrument Serial": serial,
+    }
+
+
+def load_info(path: Union[str, Path]) -> Dict[str, str]:
+    """Reads information from a batch.
+
+    Instrument info is read from the first Devices.xml found, batch info from
+    the BatchLog.xml. An empty dictionary is returned if neither file can be read.
+
+    Possible keys:
+        Acquisition {Date,Name,Path,User}
+        Instrument {Type,Model,Serial,Vendor}
+
+    Args:
+        path: path to batch
+
+    Returns:
+        dict
+    """
+
+    if isinstance(path, str):  # pragma: no cover
+        path = Path(path)
+
+    try:
+        device_xml = path.glob("*.d/AcqData/Devices.xml")
+        info = device_xml_read_info(next(device_xml))
+    except (
+        StopIteration,
+        FileNotFoundError,
+        ElementTree.ParseError,
+    ):  # pragma: no cover
+        logger.warning("Unable to read info from Devices.xml.")
+        info = {}
+
+    try:
+        batch_xml = path.joinpath(batch_xml_path)
+        info.update(batch_xml_read_info(batch_xml))
+    except (FileNotFoundError, ElementTree.ParseError):  # pragma: no cover
+        logger.warning("Unable to read info from BatchLog.xml.")
+
+    return {k: v for k, v in sorted(info.items()) if v is not None}
 
 
 def load(
