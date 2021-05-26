@@ -4,7 +4,6 @@ Both column and row formats are supported.
 Tested with Thermo iCAP RQ ICP-MS.
 """
 import numpy as np
-import numpy.lib.recfunctions as rfn
 import logging
 from pathlib import Path
 
