@@ -4,9 +4,13 @@ Both column and row formats are supported.
 Tested with Thermo iCAP RQ ICP-MS.
 """
 import numpy as np
+import numpy.lib.recfunctions as rfn
+import logging
 from pathlib import Path
 
 from typing import Generator, TextIO, Tuple, Union
+
+logger = logging.getLogger(__name__)
 
 
 def _icap_csv_columns_read(
@@ -24,7 +28,7 @@ def _icap_csv_columns_read(
         if delimiter is None:
             delimiter = line[0]  # Should be delimiter
         nlines = np.count_nonzero(
-            np.genfromtxt([line], dtype="S1", delimiter=delimiter)
+            np.genfromtxt([line], dtype="U1", delimiter=delimiter)
         )
         if nlines == 0:
             raise ValueError(
@@ -32,17 +36,29 @@ def _icap_csv_columns_read(
             )  # pragma: no cover
 
         dtype = [
-            ("run", "S8"),
+            ("run", "U8"),
             ("scan", int),
-            ("isotope", "S12"),
-            ("type", "S7"),
+            ("name", "U32"),
+            ("type", "U7"),
             ("data", np.float64, nlines),
         ]
-        return np.genfromtxt(
+        data = np.genfromtxt(
             _read_lines(fp, line_type, replace_decimal=comma_decimal),
             dtype=dtype,
             delimiter=delimiter,
         )
+
+        names, idx = np.unique(data["name"], return_index=True)
+        names = names[np.argsort(idx)]
+
+        structured = np.empty(
+            (data["data"].shape[1], np.amax(data["scan"]) + 1),
+            dtype=[(name, np.float64) for name in names],
+        )
+        for name in names:
+            structured[name] = data[data["name"] == name]["data"].T
+
+        return structured
 
 
 def icap_csv_columns_read_data(
@@ -54,23 +70,12 @@ def icap_csv_columns_read_data(
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
-    line_type = "Analog" if use_analog else "Counter"
-    data = _icap_csv_columns_read(
-        path, line_type=line_type, delimiter=delimiter, comma_decimal=comma_decimal
+    return _icap_csv_columns_read(
+        path,
+        line_type="Analog" if use_analog else "Counter",
+        delimiter=delimiter,
+        comma_decimal=comma_decimal,
     )
-    nscans = np.amax(data["scan"]) + 1
-
-    names, idx = np.unique(data["isotope"], return_index=True)
-    names = names[np.argsort(idx)]
-
-    structured = np.empty(
-        (data["data"].shape[1], nscans),
-        dtype=[(name.decode(), np.float64) for name in names],
-    )
-    for name in names:
-        structured[name.decode()] = data[data["isotope"] == name]["data"].T
-
-    return structured
 
 
 def icap_csv_columns_read_params(
@@ -84,10 +89,59 @@ def icap_csv_columns_read_params(
     data = _icap_csv_columns_read(
         path, line_type="Time", delimiter=delimiter, comma_decimal=comma_decimal
     )
-    data = data[data["isotope"] == data["isotope"][0]]["data"]
-    scantime = np.round(np.nanmean(np.diff(data, axis=0)), 4)
+    data = data[data.dtype.names[0]]
+    scantime = np.round(np.nanmean(np.diff(data, axis=1)), 4)
 
     return dict(scantime=scantime)
+
+
+def _icap_csv_rows_read(
+    path: Union[str, Path],
+    col_type: str,
+    delimiter: str = None,
+    comma_decimal: bool = False,
+) -> np.ndarray:
+    def _read_lines(
+        fp: TextIO, replace_decimal: bool = False
+    ) -> Generator[str, None, None]:
+        for line in fp:
+            yield line.replace(",", ".") if replace_decimal else line
+
+    with path.open("r", encoding="utf-8-sig") as fp:
+        line = fp.readline()
+        if delimiter is None:
+            delimiter = line[0]  # Should be delimiter
+
+        run_mask = np.array(line.split(delimiter), dtype="U8") == "MainRuns"
+        if np.count_nonzero(run_mask) == 0:  # pragma: no cover
+            raise ValueError("Invalid iCap export, expected samples in rows.")
+
+        scans = np.array(
+            fp.readline().split(delimiter), dtype="U2"
+        )  # nscans = np.amax(scans) + 1
+        names = np.array(fp.readline().split(delimiter), dtype="U32")
+        type_mask = np.array(fp.readline().split(delimiter), dtype="U7") == col_type
+
+        col_mask = np.logical_and(run_mask, type_mask)
+        scans = scans[col_mask].astype(int)
+        names = names[col_mask]
+
+        data = np.genfromtxt(
+            _read_lines(fp, replace_decimal=comma_decimal),
+            dtype=np.float64,
+            usecols=np.flatnonzero(col_mask),
+            delimiter=delimiter,
+        )
+        unames, idx = np.unique(names, return_index=True)
+        unames = unames[np.argsort(idx)]
+
+        structured = np.empty(
+            (data.shape[0], np.amax(scans) + 1), dtype=[(n, float) for n in unames]
+        )
+        for name in structured.dtype.names:
+            structured[name] = data[:, names == name]
+
+        return structured
 
 
 def icap_csv_rows_read_data(
@@ -96,50 +150,16 @@ def icap_csv_rows_read_data(
     comma_decimal: bool = False,
     use_analog: bool = False,
 ) -> np.ndarray:
-    def _read_lines(
-        fp: TextIO, replace_decimal: bool = False
-    ) -> Generator[str, None, None]:
-        for line in fp:
-            yield line.replace(",", ".") if replace_decimal else line
 
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
-    with path.open("r", encoding="utf-8-sig") as fp:
-        line = fp.readline()
-        if delimiter is None:
-            delimiter = line[0]  # Should be delimiter
-
-        run_mask = np.genfromtxt([line], dtype="S8", delimiter=delimiter) == b"MainRuns"
-        if np.count_nonzero(run_mask) == 0:  # pragma: no cover
-            raise ValueError("Invalid iCap export, expected samples in rows.")
-
-        scans = np.genfromtxt([fp.readline()], dtype=int, delimiter=delimiter)
-        nscans = np.amax(scans) + 1
-        isotopes = np.genfromtxt([fp.readline()], dtype="S12", delimiter=delimiter)
-        dtype = np.genfromtxt([fp.readline()], dtype="S7", delimiter=delimiter)
-
-        cols = np.nonzero(
-            np.logical_and(dtype == (b"Analog" if use_analog else b"Counter"), run_mask)
-        )[0]
-        names, idx = np.unique(isotopes[cols], return_index=True)
-        names = names[np.argsort(idx)]
-
-        data = np.genfromtxt(
-            _read_lines(fp, replace_decimal=comma_decimal),
-            dtype=np.float64,
-            delimiter=delimiter,
-            usecols=cols,
-        )
-
-    structured = np.empty(
-        (data.shape[0], nscans),
-        dtype=[(name.decode(), np.float64) for name in names],
+    return _icap_csv_rows_read(
+        path,
+        "Analog" if use_analog else "Counter",
+        delimiter=delimiter,
+        comma_decimal=comma_decimal,
     )
-    for name in names:
-        structured[name.decode()] = data[:, isotopes[cols] == name]
-
-    return structured
 
 
 def icap_csv_rows_read_params(
@@ -147,43 +167,19 @@ def icap_csv_rows_read_params(
     delimiter: str = None,
     comma_decimal: bool = False,
 ) -> dict:
-    def _read_lines(
-        fp: TextIO, replace_decimal: bool = False
-    ) -> Generator[str, None, None]:
-        for line in fp:
-            yield line.replace(",", ".") if replace_decimal else line
 
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
-    with path.open("r", encoding="utf-8-sig") as fp:
-        line = fp.readline()
-        if delimiter is None:
-            delimiter = line[0]  # Should be delimiter
+    data = _icap_csv_rows_read(
+        path,
+        "Time",
+        delimiter=delimiter,
+        comma_decimal=comma_decimal,
+    )
+    data = data[data.dtype.names[0]]
 
-        run_mask = np.genfromtxt([line], dtype="S8", delimiter=delimiter) == b"MainRuns"
-        if np.count_nonzero(run_mask) == 0:  # pragma: no cover
-            raise ValueError("Invalid iCap export, expected samples in rows.")
-
-        fp.readline()  # scans
-        isotopes = np.genfromtxt([fp.readline()], dtype="S12", delimiter=delimiter)
-        dtype = np.genfromtxt([fp.readline()], dtype="S4", delimiter=delimiter)
-
-        cols = np.nonzero(
-            np.logical_and.reduce((isotopes == isotopes[2], dtype == b"Time", run_mask))
-        )[0]
-        names, idx = np.unique(isotopes[cols], return_index=True)
-        names = names[np.argsort(idx)]
-
-        data = np.genfromtxt(
-            _read_lines(fp, replace_decimal=comma_decimal),
-            dtype=np.float64,
-            delimiter=delimiter,
-            usecols=cols,
-            max_rows=1,
-        )
-
-    scantime = np.round(np.nanmean(np.diff(data, axis=0)), 4)
+    scantime = np.round(np.nanmean(np.diff(data, axis=1)), 4)
 
     return dict(scantime=scantime)
 
@@ -241,16 +237,20 @@ def load(
     sample_format = icap_csv_sample_format(path)
     if sample_format == "rows":
         data = icap_csv_rows_read_data(path)
-        if full:
-            params = icap_csv_rows_read_params(path)
     elif sample_format == "columns":
         data = icap_csv_columns_read_data(path)
-        if full:
-            params = icap_csv_columns_read_params(path)
     else:  # pragma: no cover
         raise ValueError("Unknown iCap CSV format.")
 
     if full:
-        return data, dict(scantime=params["scantime"])
+        try:
+            if sample_format == "rows":
+                params = icap_csv_rows_read_params(path)
+            elif sample_format == "columns":
+                params = icap_csv_columns_read_params(path)
+            return data, params
+        except (IndexError, ValueError):
+            logger.warning(f"Unabled to read params from {path.name}")
+            return data, {}
     else:  # pragma: no cover
         return data
