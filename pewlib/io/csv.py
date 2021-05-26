@@ -95,7 +95,7 @@ class ThermoLDROption(GenericOption):
         super().__init__(
             drop_names=["Time"],
             kw_genfromtxt={"skip_header": 13},
-            regex=r".*_ldr_\d+\.csv",
+            regex=r"\w*_ldr_\d+\.csv",
             drop_nan_rows=True,
             drop_nan_columns=True,
         )
@@ -197,7 +197,9 @@ def load(
     if option.kw_genfromtxt is not None:
         kwargs.update(option.kw_genfromtxt)
 
-    paths = list(p for p in path.glob("*") if p.is_file())
+    paths = list(
+        p for p in path.glob("*") if p.is_file() and not p.name.startswith(".")
+    )
 
     if len(paths) == 0:  # pragma: no cover
         raise ValueError(f"No csv files found with '{option.regex}' in {path.name}!")
@@ -207,12 +209,12 @@ def load(
 
     with ProcessPoolExecutor() as execuctor:
         futures = [execuctor.submit(np.genfromtxt, path, **kwargs) for path in paths]
-        lines = [future.result() for future in futures]
+    lines = [future.result() for future in futures]
 
     length = min(line.size for line in lines)
     data = np.stack([line[:length] for line in lines], axis=0)
 
-    if option.transposed:
+    if option.transposed:  # pragma: no cover
         data = data.T
 
     if option.drop_nan_rows:
