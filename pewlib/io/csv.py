@@ -236,6 +236,3 @@ def load(
         return data, params
     else:  # pragma: no cover
         return data
-
-
-print(load("/home/tom/Downloads/ldr", full=True))
