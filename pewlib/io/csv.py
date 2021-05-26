@@ -11,7 +11,7 @@ import re
 import numpy as np
 import numpy.lib.recfunctions as rfn
 
-from typing import Any, Generator, List, Tuple, Union
+from typing import Any, List, Tuple, Union
 
 
 logger = logging.getLogger(__name__)
@@ -34,10 +34,17 @@ class GenericOption(object):
         drop_names: List[str] = [],
         kw_genfromtxt: dict = None,
         regex: str = r".*\.csv",
+        drop_nan_rows: bool = False,
+        drop_nan_columns: bool = False,
+        transposed: bool = False,
     ):
         self.drop_names = drop_names
         self.kw_genfromtxt = kw_genfromtxt
         self.regex = re.compile(regex, re.IGNORECASE)
+
+        self.drop_nan_rows = drop_nan_rows
+        self.drop_nan_columns = drop_nan_columns
+        self.transposed = transposed
 
     def filter(self, paths: List[Path]) -> List[Path]:
         """Filter non matching paths."""
@@ -88,7 +95,9 @@ class ThermoLDROption(GenericOption):
         super().__init__(
             drop_names=["Time"],
             kw_genfromtxt={"skip_header": 13},
-            regex=r"*_ldr_*\.csv",
+            regex=r".*_ldr_\d+\.csv",
+            drop_nan_rows=True,
+            drop_nan_columns=True,
         )
 
     def readParams(self, data: np.ndarray) -> dict:
@@ -142,7 +151,7 @@ def is_valid_directory(path: Union[str, Path]) -> bool:
 def option_for_path(path: Union[str, Path]) -> GenericOption:
     """Attempts to find the correct type hint for the directory.
     If no specific type hint is found then a GenericOption."""
-    options = [NuOption(), TofwerkOption()]
+    options = [NuOption(), ThermoLDROption(), TofwerkOption()]
 
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
@@ -151,27 +160,6 @@ def option_for_path(path: Union[str, Path]) -> GenericOption:
         (op for op in options if op.validForPath(path)),
         GenericOption(),
     )
-
-
-def read_csv(csv: Path, **kwargs) -> np.ndarray:
-    def clean_lines(
-        csv: Path, delimiter: str = ",", skip_header: int = 0
-    ) -> Generator[bytes, None, None]:
-        byte_delim = delimiter.encode("utf-8")
-        with csv.open("rb") as fp:
-            for i in range(skip_header):
-                fp.readline()
-
-            line = fp.readline()
-            delimiter_count = line.count(byte_delim)
-            yield line
-
-            for line in fp:
-                if line.count(byte_delim) == delimiter_count:
-                    yield line
-
-    skip_header = kwargs.pop("skip_header", 0)
-    return np.genfromtxt(clean_lines(csv, kwargs["delimiter"], skip_header), **kwargs)
 
 
 def load(
@@ -218,20 +206,36 @@ def load(
     paths = option.sort(paths)
 
     with ProcessPoolExecutor() as execuctor:
-        futures = [execuctor.submit(read_csv, path, **kwargs) for path in paths]
+        futures = [execuctor.submit(np.genfromtxt, path, **kwargs) for path in paths]
         lines = [future.result() for future in futures]
-    length = min(line.size for line in lines)
 
+    length = min(line.size for line in lines)
     data = np.stack([line[:length] for line in lines], axis=0)
+
+    if option.transposed:
+        data = data.T
+
+    if option.drop_nan_rows:
+        mask = np.all(np.isnan(rfn.structured_to_unstructured(data)), axis=(0, 2))
+        rows = np.flatnonzero(mask)
+        data = np.delete(data, rows, 1)
+
+    if option.drop_nan_columns:
+        column_drop_names = []
+        for name in data.dtype.names:
+            if np.all(np.isnan(data[name])):
+                column_drop_names.append(name)
+        data = rfn.drop_fields(data, column_drop_names)
 
     if full:
         params = option.readParams(data)
 
-    drop_names = option.drop_names
-
-    data = rfn.drop_fields(data, drop_names)
+    data = rfn.drop_fields(data, option.drop_names)
 
     if full:
         return data, params
     else:  # pragma: no cover
         return data
+
+
+print(load("/home/tom/Downloads/ldr", full=True))
