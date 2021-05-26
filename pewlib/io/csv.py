@@ -11,7 +11,7 @@ import re
 import numpy as np
 import numpy.lib.recfunctions as rfn
 
-from typing import Any, List, Tuple, Union
+from typing import Any, Generator, List, Tuple, Union
 
 
 logger = logging.getLogger(__name__)
@@ -81,6 +81,28 @@ class NuOption(GenericOption):
         return int("".join(filter(str.isdigit, path.stem)) or -1)
 
 
+class ThermoLDROption(GenericOption):
+    """Option for Thermo iCAP LDR data."""
+
+    def __init__(self):
+        super().__init__(
+            drop_names=["Time"],
+            kw_genfromtxt={"skip_header": 13},
+            regex=r"*_ldr_*\.csv",
+        )
+
+    def readParams(self, data: np.ndarray) -> dict:
+        if "Time" in data.dtype.names:
+            return {"scantime": np.round(np.mean(np.diff(data["Time"], axis=1)), 4)}
+        else:  # pragma: no cover
+            logger.warning("Time not found, unable to read scantime.")
+            return super().readParams(data)
+
+    def sortkey(self, path: Path) -> int:
+        """Sorts files numerically."""
+        return int("".join(filter(str.isdigit, path.stem)) or -1)
+
+
 class TofwerkOption(GenericOption):
     """Option for TOFWERK data."""
 
@@ -131,6 +153,27 @@ def option_for_path(path: Union[str, Path]) -> GenericOption:
     )
 
 
+def read_csv(csv: Path, **kwargs) -> np.ndarray:
+    def clean_lines(
+        csv: Path, delimiter: str = ",", skip_header: int = 0
+    ) -> Generator[bytes, None, None]:
+        byte_delim = delimiter.encode("utf-8")
+        with csv.open("rb") as fp:
+            for i in range(skip_header):
+                fp.readline()
+
+            line = fp.readline()
+            delimiter_count = line.count(byte_delim)
+            yield line
+
+            for line in fp:
+                if line.count(byte_delim) == delimiter_count:
+                    yield line
+
+    skip_header = kwargs.pop("skip_header", 0)
+    return np.genfromtxt(clean_lines(csv, kwargs["delimiter"], skip_header), **kwargs)
+
+
 def load(
     path: Union[str, Path],
     option: GenericOption = None,
@@ -175,9 +218,8 @@ def load(
     paths = option.sort(paths)
 
     with ProcessPoolExecutor() as execuctor:
-        futures = [execuctor.submit(np.genfromtxt, path, **kwargs) for path in paths]
-
-    lines = [future.result() for future in futures]
+        futures = [execuctor.submit(read_csv, path, **kwargs) for path in paths]
+        lines = [future.result() for future in futures]
     length = min(line.size for line in lines)
 
     data = np.stack([line[:length] for line in lines], axis=0)
