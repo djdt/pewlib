@@ -153,6 +153,6 @@ def rolling_median(
     median_medians = np.nanmedian(blocks, axis=axes)
 
     # Outliers are n medians from data
-    outliers = np.abs(x - medians) > threshold * median_medians
+    outliers = x_pad[unpads] > threshold * median_medians
 
     return np.where(np.logical_and(outliers, ~np.isnan(medians)), medians, x)
