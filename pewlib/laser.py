@@ -108,6 +108,7 @@ class Laser(object):
         element: str = None,
         calibrate: bool = False,
         extent: Tuple[float, float, float, float] = None,
+        **kwargs,
     ) -> np.ndarray:
         """Get elemental data.
 

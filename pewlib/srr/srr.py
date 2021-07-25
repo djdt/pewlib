@@ -127,6 +127,7 @@ class SRRLaser(Laser):
         extent: Tuple[float, float, float, float] = None,
         flat: bool = False,
         layer: int = None,
+        **kwargs,
     ) -> np.ndarray:
         """Get elemental data.
 
