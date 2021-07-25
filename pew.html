@@ -91,7 +91,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">API Documentation</span></p>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="io.html">IO Module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Line-by-line Lasers</a><ul>
@@ -196,18 +196,29 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pewlib.laser.Laser.add">
-<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isotope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.laser.Laser.add" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.laser.Laser.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a new element.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>isotope</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – element name</p></li>
+<li><p><strong>element</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – element name</p></li>
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>calibration</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#pewlib.calibration.Calibration" title="pewlib.calibration.Calibration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Calibration</span></code></a>]) – calibration for data, optional</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pewlib.laser.Laser.elements">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">elements</span></span><em class="property"><span class="pre">:</span> <span class="pre">Tuple[str,</span> <span class="pre">...]</span></em><a class="headerlink" href="#pewlib.laser.Laser.elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Elements stored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, …]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -225,7 +236,7 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pewlib.laser.Laser.from_list">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isotopes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.laser.Laser.from_list" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.laser.Laser.from_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates class from a list of names and unstructured arrays.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -236,13 +247,13 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pewlib.laser.Laser.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isotope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.laser.Laser.get" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.laser.Laser.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get elemental data.</p>
-<p>If <cite>isotope</cite> is None then all elements are returned in a structured array.</p>
+<p>If <cite>element</cite> is None then all elements are returned in a structured array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>isotope</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – element name, optional</p></li>
+<li><p><strong>element</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – element name, optional</p></li>
 <li><p><strong>calibrate</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – apply calibration</p></li>
 <li><p><strong>extent</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – trim to extent, μm</p></li>
 </ul>
@@ -251,18 +262,7 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>structured if isotope is None else unstructured</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pewlib.laser.Laser.isotopes">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">isotopes</span></span><em class="property"><span class="pre">:</span> <span class="pre">Tuple[str,</span> <span class="pre">...]</span></em><a class="headerlink" href="#pewlib.laser.Laser.isotopes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Elements stored.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, …]</p>
+<dd class="field-odd"><p>structured if element is None else unstructured</p>
 </dd>
 </dl>
 </dd></dl>
@@ -518,7 +518,7 @@ LA-ICP-MS Bioimaging Analytical Chemistry, American Chemical Society (ACS), 2019
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="pewlib.srr.srr.SRRLaser.add">
-<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isotope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.srr.SRRLaser.add" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.srr.SRRLaser.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add an element.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -534,6 +534,17 @@ LA-ICP-MS Bioimaging Analytical Chemistry, American Chemical Society (ACS), 2019
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pewlib.srr.srr.SRRLaser.elements">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">elements</span></span><em class="property"><span class="pre">:</span> <span class="pre">Tuple[str,</span> <span class="pre">...]</span></em><a class="headerlink" href="#pewlib.srr.srr.SRRLaser.elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Elements stored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, …]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -564,7 +575,7 @@ LA-ICP-MS Bioimaging Analytical Chemistry, American Chemical Society (ACS), 2019
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pewlib.srr.srr.SRRLaser.from_list">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isotopes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.srr.SRRLaser.from_list" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.srr.SRRLaser.from_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates class from a list of names and lists of unstructured arrays.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -575,16 +586,16 @@ LA-ICP-MS Bioimaging Analytical Chemistry, American Chemical Society (ACS), 2019
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pewlib.srr.srr.SRRLaser.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isotope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.srr.SRRLaser.get" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.srr.SRRLaser.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get elemental data.</p>
-<p>If <cite>isotope</cite> is None then all elements are returned in a structured array.
+<p>If <cite>element</cite> is None then all elements are returned in a structured array.
 If a 2d array is required then <cite>flat</cite> will flatten the array by calculating
 the mean across the 2nd axis. If a <cite>layer</cite> is given then the layer is extracted
 otherwise SRR is performed and the resulting array returned.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>isotope</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – element name, optional</p></li>
+<li><p><strong>element</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – element name, optional</p></li>
 <li><p><strong>calibrate</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – apply calibration</p></li>
 <li><p><strong>extent</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – trim to extent, μm</p></li>
 <li><p><strong>flat</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – flatten to 2d</p></li>
@@ -595,7 +606,7 @@ otherwise SRR is performed and the resulting array returned.</p>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>structured if isotope is None else unstructured
+<dd class="field-odd"><p>structured if element is None else unstructured
 2d if layer or flat, else 3d</p>
 </dd>
 </dl>
@@ -653,7 +664,7 @@ otherwise SRR is performed and the resulting array returned.</p>
 <li><p><strong>speed</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – laser movement speed, μm/s</p></li>
 <li><p><strong>scantime</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – MS acquisition time, s</p></li>
 <li><p><strong>warmup</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – warmup time in s</p></li>
-<li><p><strong>subpixel_offsets</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – list of offsets of layers, (offset, pixelsize)</p></li>
+<li><p><strong>subpixel_offsets</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]]) – list of offsets of layers, (offset, pixelsize)</p></li>
 </ul>
 </dd>
 </dl>
