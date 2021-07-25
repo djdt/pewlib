@@ -9,49 +9,10 @@ import copy
 from pewlib.calibration import Calibration
 from pewlib.config import Config
 
-from typing import Any, Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 
-class _Laser:
-    """Base class for other laser classes."""
-
-    data: Union[np.ndarray, List[np.ndarray]] = None
-    calibration: Dict[str, Calibration] = None
-    config: Config = None
-    info: Dict[str, str] = None
-
-    @property
-    def extent(self) -> Tuple[float, float, float, float]:
-        return (0.0, 0.0, 0.0, 0.0)
-
-    @property
-    def isotopes(self) -> Tuple[str, ...]:
-        return ()
-
-    @property
-    def layers(self) -> int:
-        return 1
-
-    @property
-    def shape(self) -> Tuple[int, ...]:
-        return (0, 0)
-
-    def add(
-        self, isotope: str, data: Any, calibration: Calibration = None
-    ) -> None:  # pragma: no cover
-        raise NotImplementedError
-
-    def remove(self, names: Union[str, List[str]]) -> None:  # pragma: no cover
-        raise NotImplementedError
-
-    def rename(self, names: Dict[str, str]) -> None:  # pragma: no cover
-        raise NotImplementedError
-
-    def get(self, isotope: str, **kwargs) -> np.ndarray:  # pragma: no cover
-        raise NotImplementedError
-
-
-class Laser(_Laser):
+class Laser(object):
     """Class for line-by-line laser data.
 
     Args:
@@ -72,11 +33,14 @@ class Laser(_Laser):
         info: Dict[str, str] = None,
     ):
         self.data: np.ndarray = data
-        self.calibration = {name: Calibration() for name in self.isotopes}
+        self.calibration = {name: Calibration() for name in self.elements}
         if calibration is not None:
             self.calibration.update(copy.deepcopy(calibration))
 
-        self.config = copy.copy(config) if config is not None else Config()
+        if config is None:
+            self.config = Config()
+        else:
+            self.config = copy.copy(config)
 
         self.info = info or {}
 
@@ -86,7 +50,7 @@ class Laser(_Laser):
         return self.config.data_extent(self.shape[:2])
 
     @property
-    def isotopes(self) -> Tuple[str, ...]:
+    def elements(self) -> Tuple[str, ...]:
         """Elements stored."""
         return self.data.dtype.names
 
@@ -94,28 +58,32 @@ class Laser(_Laser):
     def shape(self) -> Tuple[int, ...]:
         return self.data.shape
 
+    @property
+    def layers(self) -> int:
+        return 1
+
     def add(
-        self, isotope: str, data: np.ndarray, calibration: Calibration = None
+        self, element: str, data: np.ndarray, calibration: Calibration = None
     ) -> None:
         """Adds a new element.
 
         Args:
-            isotope: element name
+            element: element name
             data: array
             calibration: calibration for data, optional
         """
         assert data.shape == self.data.shape
-        new_dtype = self.data.dtype.descr + [(isotope, data.dtype.str)]
+        new_dtype = self.data.dtype.descr + [(element, data.dtype.str)]
 
         new_data = np.empty(self.data.shape, dtype=new_dtype)
         for name in self.data.dtype.names:
             new_data[name] = self.data[name]
-        new_data[isotope] = data
+        new_data[element] = data
         self.data = new_data
 
         if calibration is None:
             calibration = Calibration()
-        self.calibration[isotope] = calibration
+        self.calibration[element] = calibration
 
     def remove(self, names: Union[str, List[str]]) -> None:
         """Remove element(s)."""
@@ -137,27 +105,26 @@ class Laser(_Laser):
 
     def get(
         self,
-        isotope: str = None,
+        element: str = None,
         calibrate: bool = False,
         extent: Tuple[float, float, float, float] = None,
-        **kwargs,
     ) -> np.ndarray:
         """Get elemental data.
 
-        If `isotope` is None then all elements are returned in a structured array.
+        If `element` is None then all elements are returned in a structured array.
 
         Args:
-            isotope: element name, optional
+            element: element name, optional
             calibrate: apply calibration
             extent: trim to extent, μm
 
         Returns:
-            structured if isotope is None else unstructured
+            structured if element is None else unstructured
         """
-        if isotope is None:
+        if element is None:
             data = self.data.copy()
         else:
-            data = self.data[isotope]
+            data = self.data[element]
 
         if extent is not None:
             x0, x1, y0, y1 = extent
@@ -167,28 +134,28 @@ class Laser(_Laser):
             data = data[y0:y1, x0:x1]
 
         if calibrate:
-            if isotope is None:  # Perform calibration on all data
+            if element is None:  # Perform calibration on all data
                 for name in data.dtype.names:
                     data[name] = self.calibration[name].calibrate(data[name])
             else:
-                data = self.calibration[isotope].calibrate(data)
+                data = self.calibration[element].calibrate(data)
 
         return data
 
     @classmethod
     def from_list(
         cls,
-        isotopes: List[str],
+        elements: List[str],
         datas: List[np.ndarray],
         config: Config = None,
         info: Dict[str, str] = {},
     ) -> "Laser":
         """Creates class from a list of names and unstructured arrays."""
-        assert len(isotopes) == len(datas)
-        dtype = [(isotope, float) for isotope in isotopes]
+        assert len(elements) == len(datas)
+        dtype = [(element, float) for element in elements]
 
         structured = np.empty(datas[0].shape, dtype=dtype)
-        for isotope, data in zip(isotopes, datas):
-            structured[isotope] = data
+        for element, data in zip(elements, datas):
+            structured[element] = data
 
         return cls(data=structured, config=config, info=info)

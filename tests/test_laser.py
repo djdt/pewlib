@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from pewlib.laser import _Laser, Laser
+from pewlib.laser import Laser
 from pewlib import Calibration, Config
 
 from typing import List
@@ -15,18 +15,18 @@ def rand_data(names: List[str]) -> np.ndarray:
     return data
 
 
-def test_laser_base():
-    laser = _Laser()
-    assert laser.extent == (0.0, 0.0, 0.0, 0.0)
-    assert laser.isotopes == ()
-    assert laser.layers == 1
-    assert laser.shape == (0, 0)
+# def test_laser_base():
+#     laser = Laser()
+#     assert laser.extent == (0.0, 0.0, 0.0, 0.0)
+#     assert laser.elements == ()
+#     assert laser.layers == 1
+#     assert laser.shape == (0, 0)
 
 
 def test_laser():
     laser = Laser(rand_data(["A", "B"]))
     assert laser.extent == (0, 350, 0, 350)
-    assert laser.isotopes == ("A", "B")
+    assert laser.elements == ("A", "B")
     assert laser.shape == (10, 10)
     assert laser.layers == 1
 
@@ -34,15 +34,15 @@ def test_laser():
         laser.add("C", np.random.random((1, 1)))
 
     laser.add("C", np.random.random((10, 10)))
-    assert laser.isotopes == ("A", "B", "C")
+    assert laser.elements == ("A", "B", "C")
     assert "C" in laser.calibration
 
     laser.remove("A")
-    assert laser.isotopes == ("B", "C")
+    assert laser.elements == ("B", "C")
     assert "A" not in laser.calibration
 
     laser.rename({"B": "D"})
-    assert laser.isotopes == ("D", "C")
+    assert laser.elements == ("D", "C")
     assert "D" in laser.calibration
 
 

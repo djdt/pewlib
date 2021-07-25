@@ -13,7 +13,7 @@ import numpy as np
 import numpy.lib.recfunctions as rfn
 import copy
 
-from pewlib.laser import _Laser, Laser
+from pewlib.laser import Laser
 from pewlib.calibration import Calibration
 
 from pewlib.process.calc import subpixel_offset_equal
@@ -23,7 +23,7 @@ from pewlib.srr.config import SRRConfig
 from typing import Dict, List, Tuple, Union
 
 
-class SRRLaser(_Laser):
+class SRRLaser(Laser):
     """Class for SRR laser data.
 
     Args:
@@ -45,7 +45,7 @@ class SRRLaser(_Laser):
     ):
         assert len(data) > 1
         self.data: List[np.ndarray] = data
-        self.calibration = {name: Calibration() for name in self.isotopes}
+        self.calibration = {name: Calibration() for name in self.elements}
         if calibration is not None:
             self.calibration.update(copy.deepcopy(calibration))
 
@@ -67,7 +67,9 @@ class SRRLaser(_Laser):
         return self.config.data_extent(new_shape)
 
     @property
-    def isotopes(self) -> Tuple[str, ...]:
+    def elements(self) -> Tuple[str, ...]:
+        if len(self.data) == 0:  # pragma: no cover
+            return ()
         return self.data[0].dtype.names
 
     @property
@@ -79,24 +81,24 @@ class SRRLaser(_Laser):
         return (self.data[1].shape[0], self.data[0].shape[0], len(self.data))
 
     def add(
-        self, isotope: str, data: List[np.ndarray], calibration: Calibration = None
+        self, element: str, data: List[np.ndarray], calibration: Calibration = None
     ) -> None:
         """Add an element."""
         assert len(data) == len(self.data)
         for i in range(0, len(self.data)):
             assert data[i].shape == self.data[i].shape
             dtype = self.data[i].dtype
-            new_dtype = dtype.descr + [(isotope, data[i].dtype.str)]
+            new_dtype = dtype.descr + [(element, data[i].dtype.str)]
 
             new_data = np.empty(self.data[i].shape, dtype=new_dtype)
             for name in dtype.names:
                 new_data[name] = self.data[i][name]
-            new_data[isotope] = data[i]
+            new_data[element] = data[i]
             self.data[i] = new_data
 
         if calibration is None:
             calibration = Calibration()
-        self.calibration[isotope] = calibration
+        self.calibration[element] = calibration
 
     def remove(self, names: Union[str, List[str]]) -> None:
         """Remove element(s)."""
@@ -120,29 +122,28 @@ class SRRLaser(_Laser):
 
     def get(
         self,
-        isotope: str = None,
+        element: str = None,
         calibrate: bool = False,
         extent: Tuple[float, float, float, float] = None,
         flat: bool = False,
         layer: int = None,
-        **kwargs,
     ) -> np.ndarray:
         """Get elemental data.
 
-        If `isotope` is None then all elements are returned in a structured array.
+        If `element` is None then all elements are returned in a structured array.
         If a 2d array is required then `flat` will flatten the array by calculating
         the mean across the 2nd axis. If a `layer` is given then the layer is extracted
         otherwise SRR is performed and the resulting array returned.
 
         Args:
-            isotope: element name, optional
+            element: element name, optional
             calibrate: apply calibration
             extent: trim to extent, μm
             flat: flatten to 2d
             layer: extract layer, optional
 
         Returns:
-            structured if isotope is None else unstructured
+            structured if element is None else unstructured
             2d if layer or flat, else 3d
         """
         if layer is not None:
@@ -153,8 +154,8 @@ class SRRLaser(_Laser):
         else:
             data = self.krisskross()
 
-        if isotope is not None:
-            data = data[isotope]
+        if element is not None:
+            data = data[element]
 
         if extent is not None:
             x0, x1, y0, y1 = extent
@@ -169,14 +170,14 @@ class SRRLaser(_Laser):
             data = data[ymax - y1 : ymax - y0, x0:x1]
 
         if calibrate:  # pragma: no cover, covered in laser
-            if isotope is None:  # Perform calibration on all data
+            if element is None:  # Perform calibration on all data
                 for name in data.dtype.names:
                     data[name] = self.calibration[name].calibrate(data[name])
             else:
-                data = self.calibration[isotope].calibrate(data)
+                data = self.calibration[element].calibrate(data)
 
         if flat and data.ndim > 2:
-            if isotope is not None:
+            if element is not None:
                 data = np.mean(data, axis=2)
             else:
                 structured = np.empty(data.shape[:2], data.dtype)
@@ -222,20 +223,20 @@ class SRRLaser(_Laser):
     @classmethod
     def from_list(
         cls,
-        isotopes: List[str],
+        elements: List[str],
         layers: List[List[np.ndarray]],
         config: SRRConfig = None,
         info: Dict[str, str] = None,
     ) -> "SRRLaser":
         """Creates class from a list of names and lists of unstructured arrays."""
-        dtype = [(isotope, float) for isotope in isotopes]
+        dtype = [(element, float) for element in elements]
 
         structured_layers = []
         for datas in layers:
-            assert len(isotopes) == len(datas)
+            assert len(elements) == len(datas)
             structured = np.empty(datas[0].shape, dtype=dtype)
-            for isotope, data in zip(isotopes, datas):
-                structured[isotope] = data
+            for element, data in zip(elements, datas):
+                structured[element] = data
             structured_layers.append(structured)
 
         return cls(data=structured_layers, config=config, info=info)
@@ -246,7 +247,7 @@ class SRRLaser(_Laser):
 
         Calibration and config are taken from the first :class:`Laser`.
         """
-        assert all(lasers[0].isotopes == laser.isotopes for laser in lasers[1:])
+        assert all(lasers[0].elements == laser.elements for laser in lasers[1:])
 
         config = SRRConfig(
             lasers[0].config.spotsize, lasers[0].config.speed, lasers[0].config.scantime

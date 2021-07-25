@@ -73,7 +73,7 @@ def test_io_npz():
     assert laser.config.speed == 2
     assert laser.config.scantime == 3
     # Data
-    assert laser.isotopes == ("A1", "B2")
+    assert laser.elements == ("A1", "B2")
     assert laser.get("A1").shape == (10, 10)
     assert laser.get("A1").sum() == pytest.approx(100)
     # Calibration

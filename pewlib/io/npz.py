@@ -11,7 +11,7 @@ from pewlib import __version__
 from pewlib import Laser, Calibration, Config
 from pewlib.config import SpotConfig
 
-from pewlib.laser import _Laser
+from pewlib.laser import Laser
 from pewlib.srr import SRRLaser, SRRConfig
 
 from typing import Dict, Union
@@ -31,7 +31,7 @@ def unpack_info(info: np.ndarray, sep: str = "\t") -> Dict[str, str]:
     return {key: val for key, val in zip(tokens[::2], tokens[1::2])}
 
 
-def load(path: Union[str, Path]) -> _Laser:
+def load(path: Union[str, Path]) -> Laser:
     """Loads data from '.npz' file.
 
     Loads files created using :func:`pewlib.io.npz.save`.
@@ -91,7 +91,7 @@ def load(path: Union[str, Path]) -> _Laser:
     )
 
 
-def save(path: Union[str, Path], laser: _Laser) -> None:
+def save(path: Union[str, Path], laser: Union[Laser, SRRLaser]) -> None:
     """Saves data to '.npz' file.
 
     Converts a :class:`Laser` or :class:`SRRLaser` to a series of `np.ndarray`
@@ -106,11 +106,17 @@ def save(path: Union[str, Path], laser: _Laser) -> None:
     See Also:
         :func:`numpy.savez_compressed`
     """
-    savedict: dict = {"_version": __version__, "_time": time.time(), "_multiple": False}
-    savedict["_class"] = laser.config._class
-    savedict["data"] = laser.data
-    savedict["info"] = pack_info(laser.info)
-    savedict["config"] = laser.config.to_array()
+    calibrations = {}
     for name in laser.calibration:
-        savedict[f"calibration_{name}"] = laser.calibration[name].to_array()
-    np.savez_compressed(path, **savedict)
+        calibrations[f"calibration_{name}"] = laser.calibration[name].to_array()
+    np.savez_compressed(
+        path,
+        _version=__version__,
+        _time=time.time(),
+        _class=laser.config._class,
+        _multiple=False,
+        data=laser.data,
+        info=pack_info(laser.info),
+        config=laser.config.to_array(),
+        **calibrations,
+    )

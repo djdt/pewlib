@@ -37,11 +37,11 @@ def test_srr():
     # Test adding, removing, renaming datas
     new_data = [np.random.random((20, 20)), np.random.random((20, 20))]
     laser.add("C", new_data)
-    assert laser.isotopes == ("A", "B", "C")
+    assert laser.elements == ("A", "B", "C")
     laser.remove("B")
-    assert laser.isotopes == ("A", "C")
+    assert laser.elements == ("A", "C")
     laser.rename({"C": "B"})
-    assert laser.isotopes == ("A", "B")
+    assert laser.elements == ("A", "B")
 
 
 def test_srr_from_list():

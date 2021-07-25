@@ -2,7 +2,7 @@ import numpy as np
 
 from pewlib.config import Config
 
-from typing import Tuple, List
+from typing import Iterable, Tuple, List
 
 
 class SRRConfig(Config):
@@ -27,7 +27,7 @@ class SRRConfig(Config):
         speed: float = 140.0,
         scantime: float = 0.25,
         warmup: float = 12.5,
-        subpixel_offsets: np.ndarray = ((0, 2), (1, 2)),
+        subpixel_offsets: Iterable[Tuple[int, int]] = ((0, 2), (1, 2)),
     ):
         super().__init__(spotsize=spotsize, speed=speed, scantime=scantime)
         self._warmup = 0
@@ -35,7 +35,7 @@ class SRRConfig(Config):
 
         self._subpixel_size = 0
         self._subpixel_offsets = np.array([], dtype=np.int32)
-        self.subpixel_offsets = subpixel_offsets
+        self.subpixel_offsets = np.array(subpixel_offsets)
 
     @property
     def warmup(self) -> float:
@@ -164,4 +164,4 @@ class SRRConfig(Config):
 
     @classmethod
     def from_array(cls, array: np.ndarray) -> "SRRConfig":
-        return cls(**{name: array[name] for name in array.dtype.names})
+        return cls(**{str(name): array[name] for name in array.dtype.names})
