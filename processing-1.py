@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from pewlib.process import filters
-import numpy as np
-from pewlib.process import filters
 a = np.sin(np.linspace(0, 10, 50))
 a[5::10] +=np.random.choice([-1, 1], size=5)
 b = filters.rolling_mean(a, 3, threshold=3.0)
