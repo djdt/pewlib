@@ -39,7 +39,6 @@ def test_fft_regsiter_images():
 def test_overlap_arrays():
     a = np.arange(9.0).reshape(3, 3)
     b = np.arange(9.0).reshape(3, 3)
-    import matplotlib.pyplot as plt
 
     # Test overlap methods
     c = register.overlap_arrays(a, b, offset=(1, 1), mode="replace")
