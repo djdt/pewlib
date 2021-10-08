@@ -407,6 +407,7 @@ def peaks_from_edges(
     Returns:
         array of peaks, dtype=`pewlib.peakfinding.PEAK_DTYPE`
     """
+    # TODO: This could be done using ufunc.reduceat
     widths = rights - lefts
     indicies = lefts + np.arange(np.amax(widths) + 1)[:, None]
     indicies = np.clip(indicies, 0, x.size - 1)
