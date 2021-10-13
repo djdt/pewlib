@@ -112,11 +112,12 @@ def _icap_csv_rows_read(
             delimiter = line[0]  # Should be delimiter
 
         run_mask = np.array(line.split(delimiter), dtype="U8") == "MainRuns"
+        print(run_mask.shape)
         if np.count_nonzero(run_mask) == 0:  # pragma: no cover
             raise ValueError("Invalid iCap export, expected samples in rows.")
 
         scans = np.array(
-            fp.readline().split(delimiter), dtype="U2"
+            fp.readline().split(delimiter), dtype="U4"
         )  # nscans = np.amax(scans) + 1
         names = np.array(fp.readline().split(delimiter), dtype="U32")
         type_mask = np.array(fp.readline().split(delimiter), dtype="U7") == col_type
@@ -131,12 +132,15 @@ def _icap_csv_rows_read(
             usecols=np.flatnonzero(col_mask),
             delimiter=delimiter,
         )
+        print(col_mask)
         unames, idx = np.unique(names, return_index=True)
         unames = unames[np.argsort(idx)]
 
         structured = np.empty(
             (data.shape[0], np.amax(scans) + 1), dtype=[(n, float) for n in unames]
         )
+        print(np.amax(scans))
+        print(data.shape)
         for name in structured.dtype.names:
             structured[name] = data[:, names == name]
 
