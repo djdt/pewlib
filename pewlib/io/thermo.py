@@ -116,7 +116,7 @@ def _icap_csv_rows_read(
             raise ValueError("Invalid iCap export, expected samples in rows.")
 
         scans = np.array(
-            fp.readline().split(delimiter), dtype="U2"
+            fp.readline().split(delimiter), dtype="U4"
         )  # nscans = np.amax(scans) + 1
         names = np.array(fp.readline().split(delimiter), dtype="U32")
         type_mask = np.array(fp.readline().split(delimiter), dtype="U7") == col_type

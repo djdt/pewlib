@@ -168,3 +168,50 @@ def overlap_structured_arrays(
             )
 
     return c
+
+
+def overlap_lasers(
+    a: Laser, b: Laser, anchor: Union[str, Tuple[int, int]] = "top left"
+) -> Laser:
+    """Merges two arrays by enlarging.
+
+    Coordinates (0, 0) of array 'b' will be at 'anchor' in the new array.
+    Shared names and calibrations in 'a' are overwritten by 'b' where overlap occurs.
+    Valid anchors are 'top left', 'top right', 'bottom left', 'bottom right', 'center' or
+    a tuple of ints sepcififying the coordinates of overlap.
+
+    Args:
+        a: Laser
+        b: Laser
+        anchor: offset
+
+    Returns:
+        new overlapped array
+    """
+    if isinstance(anchor, str):
+        if anchor == "top left":
+            anchor = (0, 0)
+        elif anchor == "top right":
+            anchor = (0, a.shape[1] - b.shape[1])
+        elif anchor == "bottom left":
+            anchor = (a.shape[0] - b.shape[0], 0)
+        elif anchor == "bottom right":
+            anchor = (a.shape[0] - b.shape[0], a.shape[1] - b.shape[1])
+        elif anchor == "center":
+            anchor = (np.array(a.shape, dtype=int) + b.shape) // 2 - b.shape
+        else:
+            raise ValueError("Unknown anchor string.")
+
+    data = overlap_structured_arrays(a.data, b.data, anchor=anchor)
+
+    calibration = {}
+    for name in data.dtype.names:
+        if name in b.elements:
+            calibration[name] = b.calibration[name]
+        elif name in a.elements:
+            calibration[name] = a.calibration[name]
+
+    info = {"Overlap": f"{a.info['Name']}:{b.info['Name']}@{anchor[0],anchor[1]}"}
+    info.update(a.info)
+
+    return Laser(data=data, calibration=calibration, config=a.config, info=info)
