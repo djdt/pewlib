@@ -77,16 +77,14 @@ def weighted_linreg(
        gradient
        intercept
        r²
-       error, S(y,x) the residual standard deviation
+       error, S(y,x) the (unweighted) residual standard deviation
 
     See Also:
         :func:`pewlib.calibration.weighted_rsq`
     """
-    coef, stats = np.polynomial.polynomial.polyfit(
-        x, y, 1, w=w if w is None else np.sqrt(w), full=True
-    )
+    coef = np.polynomial.polynomial.polyfit(x, y, 1, w=w if w is None else np.sqrt(w))
     r2 = weighted_rsq(x, y, w)
-    error = np.sqrt(np.sum(stats[0]) / (x.size - 2)) if x.size > 2 else 0.0
+    error = np.sqrt(np.sum(((coef[0] + x * coef[1]) - y) ** 2) / (x.size - 2))
 
     return coef[1], coef[0], r2, error
 
