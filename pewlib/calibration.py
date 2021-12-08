@@ -84,7 +84,10 @@ def weighted_linreg(
     """
     coef = np.polynomial.polynomial.polyfit(x, y, 1, w=w if w is None else np.sqrt(w))
     r2 = weighted_rsq(x, y, w)
-    error = np.sqrt(np.sum(((coef[0] + x * coef[1]) - y) ** 2) / (x.size - 2))
+    if x.size > 2:
+        error = np.sqrt(np.sum(((coef[0] + x * coef[1]) - y) ** 2) / (x.size - 2))
+    else:
+        error = 0.0
 
     return coef[1], coef[0], r2, error
 

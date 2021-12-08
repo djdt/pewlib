@@ -51,7 +51,7 @@ def test_weighted_linreg():
     assert weighted_linreg(x, y, None) == pytest.approx((1.7, -1.9, 0.830459, 1.402379))
     # Weighted
     assert weighted_linreg(x, y, x) == pytest.approx(
-        (2.085714, -3.314286, 0.865097, 2.296996)
+        (2.085714, -3.314286, 0.865097, 1.603991)
     )
 
 
