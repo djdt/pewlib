@@ -205,47 +205,53 @@ class Calibration(object):
                     x, y, w
                 )
 
-    def to_array(self) -> np.ndarray:
-        points = self.points
-        unit = np.array(self.unit)
-        weights = np.array(self.weights)
-        weighting = np.array(self.weighting)
+    def to_array(self, size: int = None) -> np.ndarray:
+        """Convert to a Numpy array. Points and weights are trimmed or padded with nan to 'size' if passed."""
+        if size is None:
+            size = self.x.shape[0]
+
+        points = np.full((size, 2), np.nan)
+        points[: self.points.shape[0]] = self.points
+        weights = np.full(size, np.nan)
+        weights[: self.weights.shape[0]] = self.weights
+
         return np.array(
             (
                 self.intercept,
                 self.gradient,
-                unit,
+                self.unit,
                 self.rsq,
                 self.error,
                 points,
                 weights,
-                weighting,
+                self.weighting,
             ),
             dtype=[
                 ("intercept", np.float64),
                 ("gradient", np.float64),
-                ("unit", unit.dtype),
+                ("unit", f"U32"),
                 ("rsq", np.float64),
                 ("error", np.float64),
-                ("points", points.dtype, points.shape),
-                ("weights", weights.dtype, weights.shape),
-                ("weighting", weighting.dtype),
+                ("points", np.float64, points.shape),
+                ("weights", np.float64, weights.shape),
+                ("weighting", f"U32"),
             ],
         )
 
     @classmethod
     def from_array(cls, array: np.ndarray) -> "Calibration":
+        nans = np.isnan(array["weights"]) & np.all(np.isnan(array["points"]), axis=1)
         if array["weighting"] in Calibration.KNOWN_WEIGHTING:
             weights = str(array["weighting"])
         else:
-            weights = (str(array["weighting"]), array["weights"])  # type: ignore
+            weights = (str(array["weighting"]), array["weights"][~nans])  # type: ignore
         return cls(
             intercept=float(array["intercept"]),
             gradient=float(array["gradient"]),
             unit=str(array["unit"]),
             rsq=None if np.isnan(array["rsq"]) else float(array["rsq"]),
             error=None if np.isnan(array["error"]) else float(array["error"]),
-            points=array["points"],
+            points=array["points"][~nans],
             weights=weights,
         )
 
