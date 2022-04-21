@@ -592,16 +592,14 @@ def load_info(path: Union[str, Path]) -> Dict[str, str]:
     try:
         device_xml = path.glob("*.d/AcqData/Devices.xml")
         info = device_xml_read_info(next(device_xml))
-    except (
-        StopIteration,
-        FileNotFoundError,
-        ElementTree.ParseError,
-    ):  # pragma: no cover
+    except (StopIteration, ElementTree.ParseError):  # pragma: no cover
         logger.warning("Unable to read info from Devices.xml.")
         info = {}
 
     try:
         batch_xml = path.joinpath(batch_xml_path)
+        if not batch_xml.exists():
+            raise FileNotFoundError
         info.update(batch_xml_read_info(batch_xml))
     except (FileNotFoundError, ElementTree.ParseError):  # pragma: no cover
         logger.warning("Unable to read info from BatchLog.xml.")
