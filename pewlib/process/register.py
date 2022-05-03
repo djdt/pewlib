@@ -2,12 +2,40 @@
 
 import numpy as np
 
-from pewlib.laser import Laser
-
-from typing import Iterable, Union, Tuple
+from typing import Iterable, Tuple
 
 
-def fft_register_images(a: np.ndarray, b: np.ndarray) -> Tuple[int, ...]:
+def anchor_offset(a: np.ndarray, b: np.ndarray, anchor: str) -> Tuple[int, int]:
+    """Return offset of `b` from `a` given a common achor point.
+
+    Both `a` and `b` must be 2d arrays.
+    Valid anchors are 'top left', 'top right', 'bottom left', 'bottom right' or 'center'.
+
+    Args:
+        anchor: anchor poisition
+        a: nd array
+        b: nd array
+
+    Returns:
+        offset of 'b' from 'a' in pixels
+    """
+    assert a.ndim == 2 and b.ndim == 2
+
+    if anchor == "top left":
+        return (0, 0)
+    elif anchor == "top right":
+        return (0, a.shape[1] - b.shape[1])
+    elif anchor == "bottom left":
+        return (a.shape[0] - b.shape[0], 0)
+    elif anchor == "bottom right":
+        return (a.shape[0] - b.shape[0], a.shape[1] - b.shape[1])
+    elif anchor == "center":
+        return tuple((np.array(a.shape, dtype=int) + b.shape) // 2 - b.shape)
+    else:  # pragma: no cover
+        raise ValueError("Unknown anchor string.")
+
+
+def fft_register_offset(a: np.ndarray, b: np.ndarray) -> Tuple[int, ...]:
     """Register two images using FFT correlation.
 
     Arrays are zero-padded to `a.shape` + `b.shape` - 1
@@ -179,50 +207,3 @@ def overlap_structured_arrays(
             )
 
     return c
-
-
-def overlap_lasers(
-    a: Laser, b: Laser, anchor: Union[str, Tuple[int, int]] = "top left"
-) -> Laser:
-    """Merges two arrays by enlarging.
-
-    Coordinates (0, 0) of array 'b' will be at 'anchor' in the new array.
-    Shared names and calibrations in 'a' are overwritten by 'b' where overlap occurs.
-    Valid anchors are 'top left', 'top right', 'bottom left', 'bottom right', 'center' or
-    a tuple of ints sepcififying the coordinates of overlap.
-
-    Args:
-        a: Laser
-        b: Laser
-        anchor: offset
-
-    Returns:
-        new overlapped array
-    """
-    if isinstance(anchor, str):
-        if anchor == "top left":
-            anchor = (0, 0)
-        elif anchor == "top right":
-            anchor = (0, a.shape[1] - b.shape[1])
-        elif anchor == "bottom left":
-            anchor = (a.shape[0] - b.shape[0], 0)
-        elif anchor == "bottom right":
-            anchor = (a.shape[0] - b.shape[0], a.shape[1] - b.shape[1])
-        elif anchor == "center":
-            anchor = (np.array(a.shape, dtype=int) + b.shape) // 2 - b.shape
-        else:
-            raise ValueError("Unknown anchor string.")
-
-    data = overlap_structured_arrays(a.data, b.data, offset=anchor)
-
-    calibration = {}
-    for name in data.dtype.names:
-        if name in b.elements:
-            calibration[name] = b.calibration[name]
-        elif name in a.elements:
-            calibration[name] = a.calibration[name]
-
-    info = {"Overlap": f"{a.info['Name']}:{b.info['Name']}@{anchor[0],anchor[1]}"}
-    info.update(a.info)
-
-    return Laser(data=data, calibration=calibration, config=a.config, info=info)
