@@ -98,7 +98,10 @@ def overlap_arrays(
     bslice = tuple(slice(o, o + s) for o, s in zip(boffset, b.shape))
 
     # size and slice of overlapping area
-    abslice = tuple(slice(max(a.start, b.start), min(a.stop, b.stop), None) for a, b in zip(aslice, bslice))
+    abslice = tuple(
+        slice(max(a.start, b.start), min(a.stop, b.stop), None)
+        for a, b in zip(aslice, bslice)
+    )
     absize = tuple(s.stop - s.start for s in abslice)
     hasoverlap = all(x > 0 for x in absize)
 
@@ -112,9 +115,9 @@ def overlap_arrays(
     if mode == "replace":
         pass
     elif mode == "mean" and hasoverlap:
-        c[abslice] = np.mean([a[asec], b[bsec]], axis=0)
+        c[abslice] = np.nanmean([a[asec], b[bsec]], axis=0)
     elif mode == "sum" and hasoverlap:
-        c[abslice] = np.sum([a[asec], b[bsec]], axis=0)
+        c[abslice] = np.nansum([a[asec], b[bsec]], axis=0)
 
     return c
 
@@ -156,11 +159,19 @@ def overlap_structured_arrays(
     for name in c.dtype.names:
         if name not in b.dtype.names:
             c[name] = overlap_arrays(
-                np.full(b.shape, fill), a[name], offset=-offset, fill=fill, mode=mode
+                np.full(b.shape, fill),
+                a[name],
+                offset=-offset,
+                fill=fill,
+                mode="replace",
             )
         elif name not in a.dtype.names:
             c[name] = overlap_arrays(
-                np.full(a.shape, fill), b[name], offset=offset, fill=fill, mode=mode
+                np.full(a.shape, fill),
+                b[name],
+                offset=offset,
+                fill=fill,
+                mode="replace",
             )
         else:
             c[name] = overlap_arrays(
@@ -202,7 +213,7 @@ def overlap_lasers(
         else:
             raise ValueError("Unknown anchor string.")
 
-    data = overlap_structured_arrays(a.data, b.data, anchor=anchor)
+    data = overlap_structured_arrays(a.data, b.data, offset=anchor)
 
     calibration = {}
     for name in data.dtype.names:

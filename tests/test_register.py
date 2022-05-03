@@ -1,5 +1,6 @@
 import numpy as np
 
+from pewlib.laser import Laser
 from pewlib.process import register
 
 
@@ -66,7 +67,6 @@ def test_overlap_arrays():
     assert np.all(c[:3] == b)
 
 
-
 def test_overlap_structured_arrays():
     a = np.empty((4, 4), dtype=[("a", float), ("c", float)])
     a["a"].flat = np.arange(16.0)
@@ -86,5 +86,48 @@ def test_overlap_structured_arrays():
 
     d = register.overlap_structured_arrays(a, b, offset=(2, 2), mode="mean")
 
-test_overlap_arrays()
-test_overlap_structured_arrays()
+    # Test overlap methods
+    assert np.all(d["c"][2:4, 2:4] == np.mean([a["c"][:2, :2], b["c"][:2, :2]], axis=0))
+
+    d = register.overlap_structured_arrays(a, b, offset=(2, 2), mode="sum")
+    assert np.all(d["c"][2:4, 2:4] == np.sum([a["c"][:2, :2], b["c"][:2, :2]], axis=0))
+
+
+def test_overlap_laser():
+    a = np.empty((3, 3), dtype=[("a", float), ("c", float)])
+    a["a"].flat = np.arange(9.0)
+    a["c"].flat = 1.0
+    b = np.empty((5, 5), dtype=[("b", float), ("c", float)])
+    b["b"].flat = np.arange(25.0)
+    b["c"] = 1.0
+
+    la = Laser(data=a)
+    lb = Laser(data=b)
+
+    lc = register.overlap_lasers(la, lb, anchor="top left")
+    assert np.all(
+        lc.data["c"][~np.isnan(lc.data["c"])]
+        == [
+            [2, 2, 2, 1, 1],
+            [2, 2, 2, 1, 1],
+            [2, 2, 2, 1, 1],
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1],
+        ]
+    )
+    lc = register.overlap_lasers(la, lb, anchor="top right")
+    assert np.all(
+        lc.data["c"][~np.isnan(lc.data["c"])]
+        == [
+            [1, 1, 2, 2, 2],
+            [1, 1, 2, 2, 2],
+            [1, 1, 2, 2, 2],
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1],
+        ]
+    )
+    lc = register.overlap_lasers(la, lb, anchor="bottom left")
+    lc = register.overlap_lasers(la, lb, anchor="bottom right")
+    lc = register.overlap_lasers(la, lb, anchor="center")
+
+test_overlap_laser()
