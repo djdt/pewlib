@@ -148,9 +148,9 @@ def rolling_median(
     x_pad[unpads] = np.abs(x - medians)
 
     # Median of differences
-    median_medians = np.nanmedian(blocks, axis=axes)
+    mad = np.nanmedian(blocks, axis=axes) * 1.4826  # estimate stddev
 
     # Outliers are n medians from data
-    outliers = x_pad[unpads] > threshold * median_medians
+    outliers = x_pad[unpads] > threshold * mad
 
     return np.where(np.logical_and(outliers, ~np.isnan(medians)), medians, x)
