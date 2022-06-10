@@ -181,7 +181,8 @@ def overlap_structured_arrays(
 
     # find the max / min extents of the new array
     new_shape = np.maximum(a.shape, offset + b.shape) - np.minimum(0, offset)
-    new_dtype = list(set(a.dtype.descr + b.dtype.descr))
+    new_dtype = list(a.dtype.descr)
+    new_dtype.extend([x for x in b.dtype.descr if x not in new_dtype])
     c = np.empty(new_shape, dtype=new_dtype)
 
     for name in c.dtype.names:
