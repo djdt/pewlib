@@ -15,9 +15,8 @@ def rolling_mean(
     """Filter an array using rolling mean.
 
     Each value of `x` is compared to the mean of its `block`, the values arround it.
-    If it is `threshold` times the standard deviation *without the central value* then
-    it is considered an outlier. This prevents the value from impacting the stddev.
-    The mean of each block is recalculated outliers set to the new local mean.
+    If it is `threshold` times the standard deviation then it is considered an outlier.
+    Outliers are set to the local mean.
 
     Args:
         x: array
@@ -58,29 +57,20 @@ def rolling_mean(
 
     # Prepare array by padding with nan
     pads = [(b // 2, b // 2) for b in block]
-    x_pad = np.pad(x, pads, constant_values=np.nan)
+    x_pad = np.pad(x, pads, mode="mean", stat_length=pads)
 
     blocks = view_as_blocks(x_pad, block, tuple([1] * x.ndim))
 
     # Calculate means and stds
     axes = tuple(np.arange(x.ndim, x.ndim * 2))
-    means = np.mean(blocks, axis=axes)
 
-    # Don't include the central point in the std calculation
-    # nancenter = np.ones(block, dtype=np.float64)
-    # nancenter[np.array(nancenter.shape) // 2] = np.nan
+    means = np.mean(blocks, axis=axes)
     stds = np.std(blocks, axis=axes)
 
     # Check for outlying values and set as nan
     outliers = np.abs(x - means) > threshold * stds
 
-    unpads = tuple([slice(p[0], -p[1]) for p in pads])
-    x_pad[unpads][outliers] = np.nan
-
-    # As the mean is sensitive to outliers recalculate it
-    means = np.nanmean(blocks, axis=axes)
-
-    return np.where(np.logical_and(outliers, ~np.isnan(means)), means, x)
+    return np.where(outliers, means, x)
 
 
 def rolling_median(
@@ -91,9 +81,8 @@ def rolling_median(
     """Filter an array using rolling median.
 
     Each value of `x` is compared to the median of its `block`, the values arround it.
-    If it is `threshold` times the median distance from the median then
-    it is considered an outlier.
-    The mean of each block is recalculated outliers set to the local median.
+    If it is `threshold` times the stdev from the median then it is considered an outlier.
+    Outliers are set to the local median.
 
     Args:
         x: array
@@ -137,7 +126,7 @@ def rolling_median(
 
     # Prepare array by padding with nan
     pads = [(b // 2, b // 2) for b in block]
-    y = np.pad(x, pads, constant_values=np.nan)
+    y = np.pad(x, pads, mode="median", stat_length=pads)
 
     blocks = view_as_blocks(y, block, tuple([1] * x.ndim))
 
@@ -155,4 +144,4 @@ def rolling_median(
     # Outliers are n medians from data
     outliers = y[unpads] > threshold * mad
 
-    return np.where(np.logical_and(outliers, ~np.isnan(medians)), medians, x)
+    return np.where(outliers, medians, x)
