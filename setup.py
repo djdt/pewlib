@@ -23,6 +23,7 @@ setup(
         "Source": "https://gtihub.com/djdt/pewlib",
     },
     packages=find_packages(include=["pewlib", "pewlib.*"]),
+    entry_points={"console_scripts": ["pewlib=pewlib.__main__:main"]},
     install_requires=["numpy"],
     tests_require=["pytest"],
 )

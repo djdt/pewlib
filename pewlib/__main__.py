@@ -12,18 +12,20 @@ from typing import List
 
 def parse_args(argv: List[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
+        add_help=False,
         description="CLI for reading and processing of LA-ICP-MS data.",
     )
     parser.add_argument(
-        "-v", "--version", action="store_true", help="print version and exit."
+        "input",
+        type=Path,
+        help="path to input file",
     )
-    subparsers = parser.add_subparsers(dest="command")
-
-    convert_parser = subparsers.add_parser("convert", help="batch convert files")
-    convert_parser.add_argument(
-        "files", nargs="+", type=Path, help="path to input file(s)"
+    parser.add_argument(
+        "output",
+        type=Path,
+        help="path to output file, must have the extension '.csv', '.npz' or '.vtk'",
     )
-    convert_parser.add_argument(
+    parser.add_argument(
         "-c",
         "--config",
         type=float,
@@ -32,32 +34,25 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         default=None,
         help="specify the laser parameters to use, defaults to reading the config",
     )
-    convert_parser.add_argument(
-        "-f",
-        "--format",
-        type=str,
-        choices=["csv", "npz", "vtk"],
-        default="npz",
-        help="format to convert to",
+    parser.add_argument(
+        "--elements", nargs="+", type=str, help="limit output to these elements"
     )
-    convert_parser.add_argument(
-        "-o",
-        "--output",
-        default=None,
-        type=Path,
-        help="output directory for converted files, defaults to the input directories",
+    parser.add_argument(
+        "-v", "--version", action="version", version=f"pewlib {__version__}"
     )
 
     args = parser.parse_args(argv)
 
     # convert_parser checks
-    if args.files is not None:
-        for file in args.files:
-            if not file.expanduser().exists():
-                parser.error(f"argument files: file '{file.name}' does not exist")
-    if args.output is not None:
-        if args.output.exists() and not args.output.is_dir():
-            parser.error(f"argument output: path '{args.output}' is not a directory")
+    if not args.input.expanduser().exists():
+        parser.error(f"argument input: file '{args.input.name}' does not exist")
+    if args.output.suffix.lower() not in [".csv", ".npz", ".vtk"]:
+        parser.error(f"argument output: must have extension '.csv', '.npz' or '.vtk'")
+    if args.output.suffix.lower() == ".csv":
+        if args.elements is None or len(args.elements) != 1:
+            parser.error(
+                f"argument elements: '.csv' output requires one element to be specified"
+            )
 
     return args
 
@@ -94,7 +89,7 @@ def load(path: Path) -> Laser:
         elif io.csv.is_valid_directory(path):
             data, params = io.csv.load(path, full=True)
         else:  # pragma: no cover
-            raise ValueError(f"{path.name}: unknown extention '{path.suffix}'")
+            raise ValueError(f"pewlib: {path.name}: unknown extention '{path.suffix}'")
     else:
         if path.suffix.lower() == ".npz":
             laser = io.npz.load(path)
@@ -109,7 +104,7 @@ def load(path: Path) -> Laser:
         elif path.suffix.lower() in [".txt", ".text"]:
             data = io.textimage.load(path, name="_element_")
         else:  # pragma: no cover
-            raise ValueError(f"{path.name}: unknown extention '{path.suffix}'")
+            raise ValueError(f"pewlib: {path.name}: unknown extention '{path.suffix}'")
 
     if "spotsize" in params:
         config.spotsize = params["spotsize"]
@@ -122,7 +117,10 @@ def load(path: Path) -> Laser:
 
 
 def save(laser: Laser, path: Path) -> None:
-    if path.suffix.lower() == ".npz":
+    if path.suffix.lower() == ".csv":
+        name = laser.data.dtype.names[0]
+        io.textimage.save(path, laser.data[name])
+    elif path.suffix.lower() == ".npz":
         io.npz.save(path, laser)
     elif path.suffix.lower() == ".vtk":
         spacing = (
@@ -132,36 +130,29 @@ def save(laser: Laser, path: Path) -> None:
         )
         io.vtk.save(path, laser.data, spacing=spacing)
     else:
-        raise ValueError(f"{path.name}: unable to save as format '{path.suffix}'")
-
-
-# def convert(args: argparse.Namespace) -> int:
-
-#     for file in args.
+        raise ValueError(f"pewlib: {path.name}: unable to save as format '{path.suffix}'")
 
 
 def main() -> int:
     args = parse_args(sys.argv[1:])
 
-    if args.version:
-        print(f"pewlib version: {__version__}")
-        return 0
+    laser = load(args.input)
+    if args.config is not None:
+        laser.config = Config(
+            spotsize=args.config[0],
+            speed=args.config[1],
+            scantime=args.config[2],
+        )
 
-    if args.command == "convert":
-        for file in args.files:
-            laser = load(file)
-            if args.config is not None:
-                laser.config = Config(
-                    spotsize=args.config[0],
-                    speed=args.config[1],
-                    scantime=args.config[2],
-                )
-            if args.output is None:
-                outfile = file.with_suffix(args.format)
-            else:
-                outfile = args.output.joinpath(file.with_suffix(args.format).name)
+    if args.elements is not None:
+        for element in args.elements:
+            if element not in laser.elements:
+                print(f"pewlib: error: element '{element}' not in data, valid choices are '{', '.join(laser.elements)}'")
+                return 2
+        remove = [element for element in laser.elements if element not in args.elements]
+        laser.remove(remove)
 
-            save(laser, outfile)
+    save(laser, args.output)
 
     return 0
 
