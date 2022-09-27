@@ -15,8 +15,8 @@ def rolling_mean(
     """Filter an array using rolling mean.
 
     Each value of `x` is compared to the mean of its `block`, the values arround it.
-    If it is `threshold` times the standard deviation then it is considered an outlier.
-    Outliers are set to the local mean.
+    If it is `threshold` times the standard deviation *with the central value* then
+    it is considered an outlier. Outliers are set to the local mean *without the central value*.
 
     Args:
         x: array
@@ -57,7 +57,7 @@ def rolling_mean(
 
     # Prepare array by padding with nan
     pads = [(b // 2, b // 2) for b in block]
-    x_pad = np.pad(x, pads, mode="mean", stat_length=pads)
+    x_pad = np.pad(x, pads, mode="mean", stat_length=pads)  # type: ignore
 
     blocks = view_as_blocks(x_pad, block, tuple([1] * x.ndim))
 
@@ -65,12 +65,19 @@ def rolling_mean(
     axes = tuple(np.arange(x.ndim, x.ndim * 2))
 
     means = np.mean(blocks, axis=axes)
-    stds = np.std(blocks, axis=axes)
+
+    mask = np.ones(block, dtype=bool)
+    mask[tuple(np.array(block) // 2)] = False
+
+    # Mask out central (tested) value when calculating stddev
+    masked_stds = np.std(blocks, axis=axes, where=mask)
+    # Recalc means without central value
+    masked_means = np.mean(blocks, axis=axes, where=mask)
 
     # Check for outlying values and set as nan
-    outliers = np.abs(x - means) > threshold * stds
+    outliers = np.abs(x - means) > threshold * masked_stds
 
-    return np.where(outliers, means, x)
+    return np.where(outliers, masked_means, x)
 
 
 def rolling_median(
@@ -126,7 +133,7 @@ def rolling_median(
 
     # Prepare array by padding with nan
     pads = [(b // 2, b // 2) for b in block]
-    y = np.pad(x, pads, mode="median", stat_length=pads)
+    y = np.pad(x, pads, mode="median", stat_length=pads)  # type: ignore
 
     blocks = view_as_blocks(y, block, tuple([1] * x.ndim))
 
