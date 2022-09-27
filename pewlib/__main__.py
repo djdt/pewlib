@@ -1,6 +1,5 @@
 import argparse
 from pathlib import Path
-import sys
 import time
 
 from pewlib import io
@@ -10,7 +9,7 @@ from pewlib import __version__
 from typing import List
 
 
-def parse_args(argv: List[str]) -> argparse.Namespace:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         add_help=False,
         description="CLI for reading and processing of LA-ICP-MS data.",
@@ -25,6 +24,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         type=Path,
         help="path to output file, must have the extension '.csv', '.npz' or '.vtk'",
     )
+    args, remainder = parser.parse_known_args()
     parser.add_argument(
         "-c",
         "--config",
@@ -41,7 +41,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         "-v", "--version", action="version", version=f"pewlib {__version__}"
     )
 
-    args = parser.parse_args(argv)
+    args = argparse.Namespace(**vars(args), **vars(parser.parse_intermixed_args(remainder)))
 
     # convert_parser checks
     if not args.input.expanduser().exists():
@@ -54,6 +54,8 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                 f"argument elements: '.csv' output requires one element to be specified"
             )
 
+    print(args)
+    exit()
     return args
 
 
@@ -134,7 +136,7 @@ def save(laser: Laser, path: Path) -> None:
 
 
 def main() -> int:
-    args = parse_args(sys.argv[1:])
+    args = parse_args()
 
     laser = load(args.input)
     if args.config is not None:
