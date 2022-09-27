@@ -9,57 +9,11 @@ from pewlib import __version__
 from typing import List
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        add_help=False,
-        description="CLI for reading and processing of LA-ICP-MS data.",
-    )
-    parser.add_argument(
-        "input",
-        type=Path,
-        help="path to input file",
-    )
-    parser.add_argument(
-        "output",
-        type=Path,
-        help="path to output file, must have the extension '.csv', '.npz' or '.vtk'",
-    )
-    args, remainder = parser.parse_known_args()
-    parser.add_argument(
-        "-c",
-        "--config",
-        type=float,
-        nargs=3,
-        metavar=("SPOTSIZE", "SPEED", "SCANTIME"),
-        default=None,
-        help="specify the laser parameters to use, defaults to reading the config",
-    )
-    parser.add_argument(
-        "--elements", nargs="+", type=str, help="limit output to these elements"
-    )
-    parser.add_argument(
-        "-v", "--version", action="version", version=f"pewlib {__version__}"
-    )
+def load(file: str) -> Laser:
+    path = Path(file)
+    if not path.exists():
+        raise argparse.ArgumentTypeError("path does not exist")
 
-    args = argparse.Namespace(**vars(args), **vars(parser.parse_intermixed_args(remainder)))
-
-    # convert_parser checks
-    if not args.input.expanduser().exists():
-        parser.error(f"argument input: file '{args.input.name}' does not exist")
-    if args.output.suffix.lower() not in [".csv", ".npz", ".vtk"]:
-        parser.error(f"argument output: must have extension '.csv', '.npz' or '.vtk'")
-    if args.output.suffix.lower() == ".csv":
-        if args.elements is None or len(args.elements) != 1:
-            parser.error(
-                f"argument elements: '.csv' output requires one element to be specified"
-            )
-
-    print(args)
-    exit()
-    return args
-
-
-def load(path: Path) -> Laser:
     config = Config()
     info = {
         "Name": path.stem,
@@ -84,14 +38,16 @@ def load(path: Path) -> Laser:
                 except ValueError:
                     pass
             if data is None:
-                raise ValueError(f"Unable to import batch '{path.name}'!")
+                raise argparse.ArgumentTypeError(
+                    f"unable to import batch '{path.name}'"
+                )
         elif io.perkinelmer.is_valid_directory(path):
             data, params = io.perkinelmer.load(path, full=True)
             info["Instrument Vendor"] = "PerkinElemer"
         elif io.csv.is_valid_directory(path):
             data, params = io.csv.load(path, full=True)
         else:  # pragma: no cover
-            raise ValueError(f"pewlib: {path.name}: unknown extention '{path.suffix}'")
+            raise argparse.ArgumentTypeError(f"unknown extention '{path.suffix}'")
     else:
         if path.suffix.lower() == ".npz":
             laser = io.npz.load(path)
@@ -106,7 +62,7 @@ def load(path: Path) -> Laser:
         elif path.suffix.lower() in [".txt", ".text"]:
             data = io.textimage.load(path, name="_element_")
         else:  # pragma: no cover
-            raise ValueError(f"pewlib: {path.name}: unknown extention '{path.suffix}'")
+            raise argparse.ArgumentTypeError(f"unknown extention '{path.suffix}'")
 
     if "spotsize" in params:
         config.spotsize = params["spotsize"]
@@ -116,6 +72,72 @@ def load(path: Path) -> Laser:
         config.scantime = params["scantime"]
 
     return Laser(data=data, config=config, info=info)
+
+
+def create_parser_and_parse_args() -> argparse.Namespace:
+    def path_with_suffix(file: str, suffixes: List[str]) -> Path:
+        path = Path(file)
+        if path.suffix.lower() not in suffixes:
+            raise argparse.ArgumentTypeError(
+                f"must have a suffix in {', '.join(suffixes)}"
+            )
+        return path
+
+    parser = argparse.ArgumentParser(
+        description="CLI for reading and processing of LA-ICP-MS data.",
+    )
+    parser.add_argument("input", type=load, help="path to input file")
+    parser.add_argument(
+        "output",
+        nargs="?",
+        type=lambda s: path_with_suffix(s, [".csv", ".npz", ".vtk"]),
+        help="path to output file, must have the extension '.csv', '.npz' or '.vtk'",
+    )
+
+    parser.add_argument(
+        "-c",
+        "--config",
+        type=float,
+        nargs=3,
+        metavar=("SPOTSIZE", "SPEED", "SCANTIME"),
+        default=None,
+        help="specify the laser parameters to use, defaults to reading the config",
+    )
+    parser.add_argument(
+        "--elements",
+        metavar="NAME",
+        nargs="+",
+        type=str,
+        help="limit output to these elements",
+    )
+
+    parser.add_argument(
+        "-v", "--version", action="version", version=f"pewlib {__version__}"
+    )
+    parser.add_argument(
+        "-l", "--list", action="store_true", help="list element names in input and exit"
+    )
+
+    args = parser.parse_args()
+
+    if args.list:
+        print(", ".join(args.input.elements))
+        exit(0)
+    elif args.output is None:
+        parser.error("the following arguments are required: input output")
+
+    if args.output.suffix.lower() == ".csv":
+        if args.elements is None or len(args.elements) != 1:
+            parser.error(
+                f"argument elements: '.csv' output requires exactly one element to be specified"
+            )
+    for element in args.elements:
+        if element not in args.input.elements:
+            parser.error(
+                f"argument elements: '{element}' not in data, valid names are {', '.join(args.input.elements)}"
+            )
+
+    return args
 
 
 def save(laser: Laser, path: Path) -> None:
@@ -132,29 +154,28 @@ def save(laser: Laser, path: Path) -> None:
         )
         io.vtk.save(path, laser.data, spacing=spacing)
     else:
-        raise ValueError(f"pewlib: {path.name}: unable to save as format '{path.suffix}'")
+        raise ValueError(
+            f"pewlib: {path.name}: unable to save as format '{path.suffix}'"
+        )
 
 
 def main() -> int:
-    args = parse_args()
+    args = create_parser_and_parse_args()
 
-    laser = load(args.input)
     if args.config is not None:
-        laser.config = Config(
+        args.input.config = Config(
             spotsize=args.config[0],
             speed=args.config[1],
             scantime=args.config[2],
         )
 
     if args.elements is not None:
-        for element in args.elements:
-            if element not in laser.elements:
-                print(f"pewlib: error: element '{element}' not in data, valid choices are '{', '.join(laser.elements)}'")
-                return 2
-        remove = [element for element in laser.elements if element not in args.elements]
-        laser.remove(remove)
+        remove = [
+            element for element in args.input.elements if element not in args.elements
+        ]
+        args.input.remove(remove)
 
-    save(laser, args.output)
+    save(args.input, args.output)
 
     return 0
 
