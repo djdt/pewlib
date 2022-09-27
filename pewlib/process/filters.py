@@ -141,14 +141,15 @@ def rolling_median(
     axes = tuple(np.arange(x.ndim, x.ndim * 2))
     medians = np.median(blocks, axis=axes)
 
-    # Remove padding
-    unpads = tuple([slice(p[0], -p[1]) for p in pads])
-    y[unpads] = np.abs(x - medians)
+    # Remove padding and set to differences
+    diff = np.abs(x - medians)
+    diff_pad = np.pad(diff, pads, mode="median", stat_length=pads)  # type: ignore
+    diff_blocks = view_as_blocks(diff_pad, block, tuple([1] * x.ndim))
 
     # Median of differences
-    mad = np.median(blocks, axis=axes) * 1.4826  # estimate stddev
+    mad = np.median(diff_blocks, axis=axes) * 1.4826  # estimate stddev
 
     # Outliers are n medians from data
-    outliers = y[unpads] > threshold * mad
+    outliers = diff > threshold * mad
 
     return np.where(outliers, medians, x)
