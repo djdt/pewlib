@@ -3,17 +3,14 @@ from pathlib import Path
 import time
 
 from pewlib import io
+from pewlib.process import filters
 from pewlib import Laser, Config
 from pewlib import __version__
 
-from typing import List
+from typing import List, Optional
 
 
-def load(file: str) -> Laser:
-    path = Path(file)
-    if not path.exists():
-        raise argparse.ArgumentTypeError("path does not exist")
-
+def load(path: Path) -> Laser:
     config = Config()
     info = {
         "Name": path.stem,
@@ -38,16 +35,14 @@ def load(file: str) -> Laser:
                 except ValueError:
                     pass
             if data is None:
-                raise argparse.ArgumentTypeError(
-                    f"unable to import batch '{path.name}'"
-                )
+                raise ValueError(f"unable to import batch '{path.name}'")
         elif io.perkinelmer.is_valid_directory(path):
             data, params = io.perkinelmer.load(path, full=True)
             info["Instrument Vendor"] = "PerkinElemer"
         elif io.csv.is_valid_directory(path):
             data, params = io.csv.load(path, full=True)
         else:  # pragma: no cover
-            raise argparse.ArgumentTypeError(f"unknown extention '{path.suffix}'")
+            raise ValueError(f"unknown extention '{path.suffix}'")
     else:
         if path.suffix.lower() == ".npz":
             laser = io.npz.load(path)
@@ -62,7 +57,7 @@ def load(file: str) -> Laser:
         elif path.suffix.lower() in [".txt", ".text"]:
             data = io.textimage.load(path, name="_element_")
         else:  # pragma: no cover
-            raise argparse.ArgumentTypeError(f"unknown extention '{path.suffix}'")
+            raise ValueError(f"unknown extention '{path.suffix}'")
 
     if "spotsize" in params:
         config.spotsize = params["spotsize"]
@@ -75,6 +70,12 @@ def load(file: str) -> Laser:
 
 
 def create_parser_and_parse_args() -> argparse.Namespace:
+    def check_exists(file: str) -> Path:
+        path = Path(file)
+        if not path.exists():
+            raise argparse.ArgumentTypeError("path does not exist")
+        return path
+
     def path_with_suffix(file: str, suffixes: List[str]) -> Path:
         path = Path(file)
         if path.suffix.lower() not in suffixes:
@@ -83,10 +84,41 @@ def create_parser_and_parse_args() -> argparse.Namespace:
             )
         return path
 
+    class FilterAction(argparse.Action):
+        def __call__(
+            self,
+            parser: argparse.ArgumentParser,
+            namespace: argparse.Namespace,
+            values: List[str],
+            option_string: Optional[str] = None,
+        ):
+            if len(values) < 3:
+                parser.error("argument filter: missing TYPE, SIZE or THRESHOLD")
+            if values[0] not in ["mean", "median"]:
+                parser.error(
+                    "argument filter: TYPE must be specified as 'mean' or 'median'"
+                )
+            try:
+                size = int(values[1])
+                if size < 2:
+                    raise ValueError
+            except ValueError:
+                parser.error("argument filter: SIZE of rolling window must be int > 1")
+            try:
+                t = float(values[2])
+                if t < 0:
+                    raise ValueError
+            except ValueError:
+                parser.error(
+                    "argument filter: THRESHOLD of rolling window must be float > 0"
+                )
+            setattr(namespace, self.dest, (values[0], size, t, values[3:]))
+
     parser = argparse.ArgumentParser(
         description="CLI for reading and processing of LA-ICP-MS data.",
     )
-    parser.add_argument("input", type=load, help="path to input file")
+
+    parser.add_argument("input", type=check_exists, help="path to input file")
     parser.add_argument(
         "output",
         nargs="?",
@@ -118,7 +150,22 @@ def create_parser_and_parse_args() -> argparse.Namespace:
         "-l", "--list", action="store_true", help="list element names in input and exit"
     )
 
+    proc = parser.add_argument_group("processing commands")
+    proc.add_argument(
+        "--filter",
+        nargs="*",
+        metavar="{mean,median}, SIZE, THRESHOLD, [NAME",
+        action=FilterAction,
+        help="filter named elements with rolling window of SIZE and THRESHOLD,"
+        " defaults to filtering all data",
+    )
+
     args = parser.parse_args()
+
+    try:
+        args.input = load(args.input)
+    except ValueError as e:
+        parser.error(f"argument input: {e}")
 
     if args.list:
         print(", ".join(args.input.elements))
@@ -131,11 +178,18 @@ def create_parser_and_parse_args() -> argparse.Namespace:
             parser.error(
                 f"argument elements: '.csv' output requires exactly one element to be specified"
             )
-    for element in args.elements:
-        if element not in args.input.elements:
-            parser.error(
-                f"argument elements: '{element}' not in data, valid names are {', '.join(args.input.elements)}"
-            )
+    if args.elements is not None:
+        for element in args.elements:
+            if element not in args.input.elements:
+                parser.error(
+                    f"argument elements: '{element}' not in data, valid names are {', '.join(args.input.elements)}"
+                )
+    if args.filter is not None:
+        for element in args.filter[3]:
+            if element not in args.input.elements:
+                parser.error(
+                    f"argument filter: '{element}' not in data, valid names are {', '.join(args.input.elements)}"
+                )
 
     return args
 
@@ -174,6 +228,16 @@ def main() -> int:
             element for element in args.input.elements if element not in args.elements
         ]
         args.input.remove(remove)
+
+    if args.filter is not None:
+        func = (
+            filters.rolling_mean if args.filter[0] == "mean" else filters.rolling_median
+        )
+        elements = args.filter[3] or args.input.elements
+        for element in elements:
+            args.input.data[element] = func(
+                args.input.data[element], args.filter[1], args.filter[2]
+            )
 
     save(args.input, args.output)
 
