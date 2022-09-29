@@ -219,8 +219,8 @@ def create_parser_and_parse_args() -> argparse.Namespace:
 
 def save(laser: Laser, path: Path) -> None:
     if path.suffix.lower() == ".csv":
-        name = laser.data.dtype.names[0]
-        io.textimage.save(path, laser.data[name])
+        for name in laser.data.dtype.names:
+            io.textimage.save(path.with_stem(path.stem + "_" + name), laser.data[name])
     elif path.suffix.lower() == ".npz":
         io.npz.save(path, laser)
     elif path.suffix.lower() == ".vtk":
@@ -239,30 +239,35 @@ def save(laser: Laser, path: Path) -> None:
 def main() -> int:
     args = create_parser_and_parse_args()
 
-    if args.config is not None:
-        args.input.config = Config(
-            spotsize=args.config[0],
-            speed=args.config[1],
-            scantime=args.config[2],
-        )
-
-    if args.elements is not None:
-        remove = [
-            element for element in args.input.elements if element not in args.elements
-        ]
-        args.input.remove(remove)
-
-    if args.filter is not None:
-        func = (
-            filters.rolling_mean if args.filter[0] == "mean" else filters.rolling_median
-        )
-        elements = args.filter[3] or args.input.elements
-        for element in elements:
-            args.input.data[element] = func(
-                args.input.data[element], args.filter[1], args.filter[2]
+    for laser, input, output in zip(args.lasers, args.input, args.output):
+        if args.config is not None:
+            laser.config = Config(
+                spotsize=args.config[0],
+                speed=args.config[1],
+                scantime=args.config[2],
             )
 
-    save(args.input, args.output)
+        if args.elements is not None:
+            remove = [
+                element for element in laser.elements if element not in args.elements
+            ]
+            laser.remove(remove)
+
+            if len(laser.elements) == 0:
+                print(f"skipping {input}: no matching elements")
+                continue
+
+        if args.filter is not None:
+            func = (
+                filters.rolling_mean if args.filter[0] == "mean" else filters.rolling_median
+            )
+            elements = args.filter[3] or laser.elements
+            for element in elements:
+                laser.data[element] = func(
+                    laser.data[element], args.filter[1], args.filter[2]
+                )
+
+        save(laser, output)
 
     return 0
 
