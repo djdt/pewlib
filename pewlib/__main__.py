@@ -114,18 +114,28 @@ def create_parser_and_parse_args() -> argparse.Namespace:
                 )
             setattr(namespace, self.dest, (values[0], size, t, values[3:]))
 
+    valid_formats = [".csv", ".npz", ".vtk"]
+
     parser = argparse.ArgumentParser(
         description="CLI for reading and processing of LA-ICP-MS data.",
     )
 
-    parser.add_argument("input", type=check_exists, help="path to input file")
     parser.add_argument(
-        "output",
-        nargs="?",
-        type=lambda s: path_with_suffix(s, [".csv", ".npz", ".vtk"]),
-        help="path to output file, must have the extension '.csv', '.npz' or '.vtk'",
+        "input", type=check_exists, nargs="+", help="path to input file(s)"
     )
-
+    parser.add_argument(
+        "--format",
+        choices=valid_formats,
+        default=".npz",
+        help="output file format",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="path to output file or directory, defaults to the input directory. "
+        "if file the extension must match the format",
+    )
     parser.add_argument(
         "-c",
         "--config",
@@ -163,32 +173,45 @@ def create_parser_and_parse_args() -> argparse.Namespace:
     args = parser.parse_args()
 
     try:
-        args.input = load(args.input)
+        args.lasers = [load(input) for input in args.input]
     except ValueError as e:
         parser.error(f"argument input: {e}")
 
     if args.list:
-        print(", ".join(args.input.elements))
+        for input, laser in zip(args.input, args.lasers):
+            print(input.name, ":", ", ".join(laser.elements))
         exit(0)
-    elif args.output is None:
-        parser.error("the following arguments are required: input output")
 
-    if args.output.suffix.lower() == ".csv":
-        if args.elements is None or len(args.elements) != 1:
+    if args.output is None:
+        args.output = [input.with_suffix(args.format) for input in args.input]
+    elif not args.output.is_dir():
+        if len(args.input) != 1:
             parser.error(
-                f"argument elements: '.csv' output requires exactly one element to be specified"
+                "argument output: output must be an existing directory when more than one input is passed"
             )
+        elif args.output.suffix.lower() != args.format:
+            parser.error(
+                f"argument output: output file extension does not match format '{args.format}'"
+            )
+        args.output = [args.output]
+    else:
+        args.output = [
+            args.output.joinpath(input.with_suffix(args.format).name)
+            for input in args.input
+        ]
+
+    valid_elements = sorted(set([e for laser in args.lasers for e in laser.elements ]))
     if args.elements is not None:
         for element in args.elements:
-            if element not in args.input.elements:
+            if element not in valid_elements:
                 parser.error(
-                    f"argument elements: '{element}' not in data, valid names are {', '.join(args.input.elements)}"
+                    f"argument elements: '{element}' not in data, valid names are {', '.join(valid_elements)}"
                 )
     if args.filter is not None:
         for element in args.filter[3]:
-            if element not in args.input.elements:
+            if element not in valid_elements:
                 parser.error(
-                    f"argument filter: '{element}' not in data, valid names are {', '.join(args.input.elements)}"
+                    f"argument filter: '{element}' not in data, valid names are {', '.join(valid_elements)}"
                 )
 
     return args
