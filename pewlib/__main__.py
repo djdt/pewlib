@@ -1,6 +1,7 @@
 import argparse
 from pathlib import Path
 import time
+import sys
 
 from pewlib import io
 from pewlib.process import filters
@@ -116,28 +117,32 @@ def create_parser_and_parse_args() -> argparse.Namespace:
 
     valid_formats = [".csv", ".npz", ".vtk"]
 
-    parser = argparse.ArgumentParser(
-        description="CLI for reading and processing of LA-ICP-MS data.",
-    )
-
-    parser.add_argument(
+    ioparser = argparse.ArgumentParser(add_help=False)
+    ioparser.add_argument(
         "input", type=check_exists, nargs="+", help="path to input file(s)"
     )
-    parser.add_argument(
+    output = ioparser.add_argument_group("output arguments")
+    output.add_argument(
         "--format",
         choices=valid_formats,
         default=".npz",
         help="output file format",
     )
-    parser.add_argument(
+    output.add_argument(
         "--output",
         type=Path,
         default=None,
+        metavar="PATH",
         help="path to output file or directory, defaults to the input directory. "
-        "if file the extension must match the format",
+        "if a file then the extension must match the format",
     )
-    parser.add_argument(
-        "-c",
+    parser = argparse.ArgumentParser(
+        description="CLI for reading and processing of LA-ICP-MS data.",
+    )
+    subparsers = parser.add_subparsers(title="command", dest="command", required=True)
+
+    convert = subparsers.add_parser("convert", parents=[ioparser])
+    convert.add_argument(
         "--config",
         type=float,
         nargs=3,
@@ -145,7 +150,7 @@ def create_parser_and_parse_args() -> argparse.Namespace:
         default=None,
         help="specify the laser parameters to use, defaults to reading the config",
     )
-    parser.add_argument(
+    convert.add_argument(
         "--elements",
         metavar="NAME",
         nargs="+",
@@ -153,21 +158,64 @@ def create_parser_and_parse_args() -> argparse.Namespace:
         help="limit output to these elements",
     )
 
-    parser.add_argument(
-        "-v", "--version", action="version", version=f"pewlib {__version__}"
+    filter = subparsers.add_parser(
+        "filter",
+        parents=[ioparser],
+        help="filter data and output",
     )
-    parser.add_argument(
-        "-l", "--list", action="store_true", help="list element names in input and exit"
+    filter.add_argument(
+        "--type",
+        choices=["mean", "median"],
+        dest="filter_type",
+        default="mean",
+        help="type of rolling filter",
+    )
+    filter.add_argument(
+        "--size",
+        type=int,
+        dest="filter_size",
+        metavar="SIZE",
+        default=5,
+        help="window size of filter in pixels",
+    )
+    filter.add_argument(
+        "--threshold",
+        type=float,
+        dest="filter_threshold",
+        metavar="STDDEVS",
+        default=3.0,
+        help="threshold above which to apply filter, in stddev",
+    )
+    filter.add_argument(
+        "--elements",
+        dest="filter_elements",
+        metavar="NAME",
+        type=str,
+        nargs="+",
+        help="limit filtering to these elements",
     )
 
-    proc = parser.add_argument_group("processing commands")
-    proc.add_argument(
-        "--filter",
-        nargs="*",
-        metavar="{mean,median}, SIZE, THRESHOLD, [NAME",
-        action=FilterAction,
-        help="filter named elements with rolling window of SIZE and THRESHOLD,"
-        " defaults to filtering all data",
+    show = subparsers.add_parser(
+        "show", help="output laser elements, size and other information"
+    )
+    show.add_argument(
+        "input", type=check_exists, nargs="+", help="path to input file(s)"
+    )
+    show.add_argument(
+        "--calibration",
+        dest="show_calibration",
+        action="store_true",
+        help="show the laser calibration",
+    )
+    show.add_argument(
+        "--info",
+        dest="show_info",
+        action="store_true",
+        help="show stored laser information",
+    )
+
+    parser.add_argument(
+        "-v", "--version", action="version", version=f"pewlib {__version__}"
     )
 
     args = parser.parse_args()
@@ -176,11 +224,6 @@ def create_parser_and_parse_args() -> argparse.Namespace:
         args.lasers = [load(input) for input in args.input]
     except ValueError as e:
         parser.error(f"argument input: {e}")
-
-    if args.list:
-        for input, laser in zip(args.input, args.lasers):
-            print(input.name, ":", ", ".join(laser.elements))
-        exit(0)
 
     if args.output is None:
         args.output = [input.with_suffix(args.format) for input in args.input]
@@ -200,15 +243,15 @@ def create_parser_and_parse_args() -> argparse.Namespace:
             for input in args.input
         ]
 
-    valid_elements = sorted(set([e for laser in args.lasers for e in laser.elements ]))
-    if args.elements is not None:
+    valid_elements = sorted(set([e for laser in args.lasers for e in laser.elements]))
+    if args.command == "convert" and args.elements is not None:
         for element in args.elements:
             if element not in valid_elements:
                 parser.error(
                     f"argument elements: '{element}' not in data, valid names are {', '.join(valid_elements)}"
                 )
-    if args.filter is not None:
-        for element in args.filter[3]:
+    if args.command == "filter" and args.filter_elements is not None:
+        for element in args.filter_elements:
             if element not in valid_elements:
                 parser.error(
                     f"argument filter: '{element}' not in data, valid names are {', '.join(valid_elements)}"
@@ -240,31 +283,54 @@ def main() -> int:
     args = create_parser_and_parse_args()
 
     for laser, input, output in zip(args.lasers, args.input, args.output):
-        if args.config is not None:
-            laser.config = Config(
-                spotsize=args.config[0],
-                speed=args.config[1],
-                scantime=args.config[2],
-            )
+        if args.command == "show":
+            print(f"{input.name}")
+            print(f"\tshape: {laser.shape}")
+            print(f"\telements: {', '.join(laser.elements)}")
+            print(f"\tspotsize: {laser.config.spotsize}")
+            print(f"\tspeed: {laser.config.speed}")
+            print(f"\tscantime: {laser.config.scantime}")
+            if args.show_calibration:
+                for element in laser.elements:
+                    cal = laser.calibration[element]
+                    if cal.intercept == 0.0 and cal.gradient == 1.0:
+                        continue
+                    print(f"\t{element}: y = {cal.gradient} * x + {cal.intercept}")
+                    print(f"\t\tr2 = {cal.rsq}")
+                    print(f"\t\tno. points = {cal.x.size}")
+                    print(f"\t\tweighting = {cal.weighting}")
+            if args.show_info:
+                for k, v in laser.info.items():
+                    print(f"\t{k}={v}")
+            continue
 
-        if args.elements is not None:
-            remove = [
-                element for element in laser.elements if element not in args.elements
-            ]
-            laser.remove(remove)
+        if args.command == "convert":
+            if args.config is not None:
+                laser.config = Config(
+                    spotsize=args.config[0],
+                    speed=args.config[1],
+                    scantime=args.config[2],
+                )
+            if args.elements is not None:
+                remove = [
+                    element
+                    for element in laser.elements
+                    if element not in args.elements
+                ]
+                laser.remove(remove)
 
-            if len(laser.elements) == 0:
-                print(f"skipping {input}: no matching elements")
-                continue
+                if len(laser.elements) == 0:
+                    print(f"skipping {input}: no matching elements")
+                    continue
 
-        if args.filter is not None:
+        if args.command == "filter":
             func = (
-                filters.rolling_mean if args.filter[0] == "mean" else filters.rolling_median
+                filters.rolling_mean if args.filter_type == "mean" else filters.rolling_median
             )
-            elements = args.filter[3] or laser.elements
+            elements = args.filter_elements or laser.elements
             for element in elements:
                 laser.data[element] = func(
-                    laser.data[element], args.filter[1], args.filter[2]
+                    laser.data[element], args.filter_size, args.filter_threshold
                 )
 
         save(laser, output)
