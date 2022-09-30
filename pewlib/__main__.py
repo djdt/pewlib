@@ -1,14 +1,14 @@
 import argparse
 from pathlib import Path
 import time
-import sys
+import numpy as np
 
 from pewlib import io
 from pewlib.process import filters
 from pewlib import Laser, Config
 from pewlib import __version__
 
-from typing import List, Optional
+from typing import List
 
 
 def load(path: Path) -> Laser:
@@ -100,10 +100,16 @@ def create_parser_and_parse_args() -> argparse.Namespace:
     )
     parser = argparse.ArgumentParser(
         description="CLI for reading and processing of LA-ICP-MS data.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     subparsers = parser.add_subparsers(title="command", dest="command", required=True)
 
-    convert = subparsers.add_parser("convert", parents=[ioparser])
+    convert = subparsers.add_parser(
+        "convert",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        parents=[ioparser],
+        help="convert files to .csv, .npz or .vtk",
+    )
     convert.add_argument(
         "--config",
         type=float,
@@ -123,6 +129,7 @@ def create_parser_and_parse_args() -> argparse.Namespace:
     filter = subparsers.add_parser(
         "filter",
         parents=[ioparser],
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         help="filter data and output",
     )
     filter.add_argument(
@@ -177,6 +184,29 @@ def create_parser_and_parse_args() -> argparse.Namespace:
     )
     # hack as output not used
     show.set_defaults(output=None, format=".npz")
+    stack = subparsers.add_parser(
+        "stack",
+        parents=[ioparser],
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        help="stack multiple images together",
+    )
+    stack.add_argument(
+        "--orientation",
+        choices=["horizontal", "vertical"],
+        default="vertical",
+        help="stack images left to right or top to bottom",
+    )
+    stack.add_argument(
+        "--pad",
+        type=float,
+        default=float("nan"),
+        help="value for missing data",
+    )
+    stack.add_argument(
+        "--calibrate",
+        action="store_true",
+        help="normalise data to fit first files calibration",
+    )
 
     parser.add_argument(
         "-v", "--version", action="version", version=f"pewlib {__version__}"
@@ -189,23 +219,28 @@ def create_parser_and_parse_args() -> argparse.Namespace:
     except ValueError as e:
         parser.error(f"argument input: {e}")
 
-    if args.output is None:
-        args.output = [input.with_suffix(args.format) for input in args.input]
-    elif not args.output.is_dir():
-        if len(args.input) != 1:
+    if args.command == "stack":
+        if args.output is None or args.output.is_dir():
+            parser.error(f"argument output: stack requires a single output file")
+    else:
+        if not args.output.is_dir() and len(args.input) > 1:
             parser.error(
                 "argument output: output must be an existing directory when more than one input is passed"
             )
-        elif args.output.suffix.lower() != args.format:
-            parser.error(
-                f"argument output: output file extension does not match format '{args.format}'"
-            )
-        args.output = [args.output]
-    else:
+
+    if args.output is None:
+        args.output = [input.with_suffix(args.format) for input in args.input]
+    elif args.output.is_dir():
         args.output = [
             args.output.joinpath(input.with_suffix(args.format).name)
             for input in args.input
         ]
+    else:
+        if args.output.suffix.lower() != args.format:
+            parser.error(
+                f"argument output: output file extension does not match format '{args.format}'"
+            )
+        args.output = [args.output]
 
     valid_elements = sorted(set([e for laser in args.lasers for e in laser.elements]))
     if args.command == "convert" and args.elements is not None:
@@ -243,8 +278,54 @@ def save(laser: Laser, path: Path) -> None:
         )
 
 
+def stack(
+        lasers: List[Laser], orientation: str = "vertical", pad: float = np.nan, calibrate: bool = False,
+) -> Laser:
+    datas = [laser.data for laser in lasers]
+
+    if calibrate:
+        raise NotImplementedError
+    #     cal = lasers[0].calibration
+    #     for data in datas:
+    #         for name in data.dtype.names:
+    #             data[name] = (cal.gradient * data[name]) + cal.intercept
+
+    if orientation == "horizontal":
+        max_y = max(d.shape[1] for d in datas)
+        stack = np.concatenate(
+            [
+                np.pad(d, ((0, max_y - d.shape[1]), (0, 0)), constant_values=pad)
+                for d in datas
+            ],
+            axis=1,
+        )
+    elif orientation == "vertical":
+        max_x = max(d.shape[0] for d in datas)
+        stack = np.concatenate(
+            [
+                np.pad(d, ((0, 0), (0, max_x - d.shape[0])), constant_values=pad)
+                for d in datas
+            ],
+            axis=0,
+        )
+    else:
+        raise ValueError(f"invalid orientation '{orientation}'")
+
+    return Laser(
+        stack,
+        config=lasers[0].config,
+        calibration=lasers[0].calibration,
+        info=lasers[0].info,
+    )
+
+
 def main() -> int:
     args = create_parser_and_parse_args()
+
+    if args.command == "stack":
+        laser = stack(args.lasers, args.orientation, args.pad, args.calibrate)
+        save(laser, args.output)
+        return 0
 
     for laser, input, output in zip(args.lasers, args.input, args.output):
         if args.command == "show":
@@ -289,7 +370,9 @@ def main() -> int:
 
         if args.command == "filter":
             func = (
-                filters.rolling_mean if args.filter_type == "mean" else filters.rolling_median
+                filters.rolling_mean
+                if args.filter_type == "mean"
+                else filters.rolling_median
             )
             elements = args.filter_elements or laser.elements
             for element in elements:
