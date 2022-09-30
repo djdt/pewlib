@@ -77,44 +77,6 @@ def create_parser_and_parse_args() -> argparse.Namespace:
             raise argparse.ArgumentTypeError("path does not exist")
         return path
 
-    def path_with_suffix(file: str, suffixes: List[str]) -> Path:
-        path = Path(file)
-        if path.suffix.lower() not in suffixes:
-            raise argparse.ArgumentTypeError(
-                f"must have a suffix in {', '.join(suffixes)}"
-            )
-        return path
-
-    class FilterAction(argparse.Action):
-        def __call__(
-            self,
-            parser: argparse.ArgumentParser,
-            namespace: argparse.Namespace,
-            values: List[str],
-            option_string: Optional[str] = None,
-        ):
-            if len(values) < 3:
-                parser.error("argument filter: missing TYPE, SIZE or THRESHOLD")
-            if values[0] not in ["mean", "median"]:
-                parser.error(
-                    "argument filter: TYPE must be specified as 'mean' or 'median'"
-                )
-            try:
-                size = int(values[1])
-                if size < 2:
-                    raise ValueError
-            except ValueError:
-                parser.error("argument filter: SIZE of rolling window must be int > 1")
-            try:
-                t = float(values[2])
-                if t < 0:
-                    raise ValueError
-            except ValueError:
-                parser.error(
-                    "argument filter: THRESHOLD of rolling window must be float > 0"
-                )
-            setattr(namespace, self.dest, (values[0], size, t, values[3:]))
-
     valid_formats = [".csv", ".npz", ".vtk"]
 
     ioparser = argparse.ArgumentParser(add_help=False)
@@ -213,6 +175,8 @@ def create_parser_and_parse_args() -> argparse.Namespace:
         action="store_true",
         help="show stored laser information",
     )
+    # hack as output not used
+    show.set_defaults(output=None, format=".npz")
 
     parser.add_argument(
         "-v", "--version", action="version", version=f"pewlib {__version__}"
