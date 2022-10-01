@@ -223,7 +223,7 @@ def create_parser_and_parse_args() -> argparse.Namespace:
         if args.output is None or args.output.is_dir():
             parser.error(f"argument output: stack requires a single output file")
     else:
-        if not args.output.is_dir() and len(args.input) > 1:
+        if args.output is not None and not args.output.is_dir() and len(args.input) > 1:
             parser.error(
                 "argument output: output must be an existing directory when more than one input is passed"
             )
