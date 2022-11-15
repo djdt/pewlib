@@ -54,4 +54,6 @@ def save(path: Union[str, Path], data: np.ndarray, header: str = "") -> None:
         data: unstructured array
         header: file header
     """
+    if isinstance(path, str):  # pragma: no cover
+        path = Path(path)
     np.savetxt(path, data, delimiter=",", comments="#", header=header, fmt="%.18g")
