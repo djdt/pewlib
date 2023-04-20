@@ -4,13 +4,12 @@ Both raw binaries and the '.csv' exports are supported.
 Tested with Agilent 7500, 7700 and 8900 ICPs.
 """
 import logging
-from xml.etree import ElementTree
 from pathlib import Path
+from typing import Callable, Dict, Generator, List, Tuple, Union
+from xml.etree import ElementTree
 
 import numpy as np
 import numpy.lib.recfunctions as rfn
-
-from typing import Callable, Dict, Generator, List, Tuple, Union
 
 logger = logging.getLogger(__name__)
 
@@ -162,7 +161,10 @@ def binary_read_datafile(path: Path, masses: List[XSpecificMass]) -> np.ndarray:
     dtype = [(str(mass), np.float64) for mass in masses] + [("Time", np.float64)]
     data = np.empty(offsets.size, dtype=dtype)
     for mass in masses:
-        data[str(mass)] = msprofile[(offsets * len(masses)) + (mass.id - 1)]["Analog"]
+        size = np.minimum(
+            (offsets * len(masses)) + (mass.id - 1), msprofile.shape[0] - 1
+        )
+        data[str(mass)] = msprofile[size]["Analog"]
 
     data["Time"] = msscan["ScanTime"] * 60.0  # ScanTime in minutes
     return data
