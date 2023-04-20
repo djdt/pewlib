@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Line-by-line Lasers &mdash; pew  documentation</title>
@@ -13,9 +13,8 @@
   <![endif]-->
   
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -28,11 +27,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> pew
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pew
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -45,14 +48,76 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="io.html">IO Module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Line-by-line Lasers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.laser">Laser</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.config">Config</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#capewlib-ration">Capewlib.ration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.laser">Laser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.laser.Laser"><code class="docutils literal notranslate"><span class="pre">Laser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.laser.Laser.add"><code class="docutils literal notranslate"><span class="pre">Laser.add()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.laser.Laser.elements"><code class="docutils literal notranslate"><span class="pre">Laser.elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.laser.Laser.extent"><code class="docutils literal notranslate"><span class="pre">Laser.extent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.laser.Laser.from_list"><code class="docutils literal notranslate"><span class="pre">Laser.from_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.laser.Laser.get"><code class="docutils literal notranslate"><span class="pre">Laser.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.laser.Laser.remove"><code class="docutils literal notranslate"><span class="pre">Laser.remove()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.laser.Laser.rename"><code class="docutils literal notranslate"><span class="pre">Laser.rename()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.config">Config</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.config.Config"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.config.Config.data_extent"><code class="docutils literal notranslate"><span class="pre">Config.data_extent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.config.Config.get_pixel_height"><code class="docutils literal notranslate"><span class="pre">Config.get_pixel_height()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.config.Config.get_pixel_width"><code class="docutils literal notranslate"><span class="pre">Config.get_pixel_width()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.config.SpotConfig"><code class="docutils literal notranslate"><span class="pre">SpotConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.config.SpotConfig.get_pixel_height"><code class="docutils literal notranslate"><span class="pre">SpotConfig.get_pixel_height()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.config.SpotConfig.get_pixel_width"><code class="docutils literal notranslate"><span class="pre">SpotConfig.get_pixel_width()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#capewlib-ration">Capewlib.ration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.calibration.Calibration"><code class="docutils literal notranslate"><span class="pre">Calibration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.calibration.Calibration.from_points"><code class="docutils literal notranslate"><span class="pre">Calibration.from_points()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.calibration.weighted_linreg"><code class="docutils literal notranslate"><span class="pre">weighted_linreg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.calibration.weighted_rsq"><code class="docutils literal notranslate"><span class="pre">weighted_rsq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.calibration.weights_from_weighting"><code class="docutils literal notranslate"><span class="pre">weights_from_weighting()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="#srr-lasers">SRR Lasers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.srr.srr">SRRLaser</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.srr.config">SRRConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.srr.srr">SRRLaser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.srr.srr.SRRLaser"><code class="docutils literal notranslate"><span class="pre">SRRLaser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.srr.SRRLaser.add"><code class="docutils literal notranslate"><span class="pre">SRRLaser.add()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.srr.SRRLaser.check_config_valid"><code class="docutils literal notranslate"><span class="pre">SRRLaser.check_config_valid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.srr.SRRLaser.elements"><code class="docutils literal notranslate"><span class="pre">SRRLaser.elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.srr.SRRLaser.extent"><code class="docutils literal notranslate"><span class="pre">SRRLaser.extent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.srr.SRRLaser.from_lasers"><code class="docutils literal notranslate"><span class="pre">SRRLaser.from_lasers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.srr.SRRLaser.from_list"><code class="docutils literal notranslate"><span class="pre">SRRLaser.from_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.srr.SRRLaser.get"><code class="docutils literal notranslate"><span class="pre">SRRLaser.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.srr.SRRLaser.krisskross"><code class="docutils literal notranslate"><span class="pre">SRRLaser.krisskross()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.srr.SRRLaser.remove"><code class="docutils literal notranslate"><span class="pre">SRRLaser.remove()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.srr.SRRLaser.rename"><code class="docutils literal notranslate"><span class="pre">SRRLaser.rename()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.srr.config">SRRConfig</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.srr.config.SRRConfig"><code class="docutils literal notranslate"><span class="pre">SRRConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.config.SRRConfig.data_extent"><code class="docutils literal notranslate"><span class="pre">SRRConfig.data_extent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.config.SRRConfig.get_pixel_height"><code class="docutils literal notranslate"><span class="pre">SRRConfig.get_pixel_height()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.config.SRRConfig.get_pixel_width"><code class="docutils literal notranslate"><span class="pre">SRRConfig.get_pixel_width()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.config.SRRConfig.magnification"><code class="docutils literal notranslate"><span class="pre">SRRConfig.magnification</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.config.SRRConfig.subpixel_offsets"><code class="docutils literal notranslate"><span class="pre">SRRConfig.subpixel_offsets</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.config.SRRConfig.subpixels_per_pixel"><code class="docutils literal notranslate"><span class="pre">SRRConfig.subpixels_per_pixel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.config.SRRConfig.valid_for_data"><code class="docutils literal notranslate"><span class="pre">SRRConfig.valid_for_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.srr.config.SRRConfig.warmup"><code class="docutils literal notranslate"><span class="pre">SRRConfig.warmup</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a></li>
@@ -71,8 +136,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Line-by-line Lasers</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Line-by-line Lasers</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/pew.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -83,9 +148,9 @@
            <div itemprop="articleBody">
              
   <section id="line-by-line-lasers">
-<h1>Line-by-line Lasers<a class="headerlink" href="#line-by-line-lasers" title="Permalink to this headline"></a></h1>
+<h1>Line-by-line Lasers<a class="headerlink" href="#line-by-line-lasers" title="Permalink to this heading"></a></h1>
 <section id="module-pewlib.laser">
-<span id="laser"></span><h2>Laser<a class="headerlink" href="#module-pewlib.laser" title="Permalink to this headline"></a></h2>
+<span id="laser"></span><h2>Laser<a class="headerlink" href="#module-pewlib.laser" title="Permalink to this heading"></a></h2>
 <p>Class for data collected line-by-line.
 Line-by-line data is collected in multiple lines, with each line performed as a
 continuous ablation in one direction. The lines are then stacked to form an image.</p>
@@ -94,7 +159,7 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pewlib.laser.</span></span><span class="sig-name descname"><span class="pre">Laser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.laser.Laser" title="Permalink to this definition"></a></dt>
 <dd><p>Class for line-by-line laser data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – structured array of elemental data</p></li>
 <li><p><strong>calibration</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="#pewlib.calibration.Calibration" title="pewlib.calibration.Calibration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Calibration</span></code></a>]]) – dict mapping elements to calibrations, optional</p></li>
@@ -108,14 +173,14 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 <span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.laser.Laser.add" title="Permalink to this definition"></a></dt>
 <dd><p>Adds a new element.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>element</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – element name</p></li>
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>calibration</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#pewlib.calibration.Calibration" title="pewlib.calibration.Calibration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Calibration</span></code></a>]) – calibration for data, optional</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -125,22 +190,12 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 <dt class="sig sig-object py" id="pewlib.laser.Laser.elements">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">elements</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pewlib.laser.Laser.elements" title="Permalink to this definition"></a></dt>
 <dd><p>Elements stored.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pewlib.laser.Laser.extent">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pewlib.laser.Laser.extent" title="Permalink to this definition"></a></dt>
 <dd><p>Image extent in μm</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -148,7 +203,7 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.laser.Laser.from_list" title="Permalink to this definition"></a></dt>
 <dd><p>Creates class from a list of names and unstructured arrays.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pewlib.laser.Laser" title="pewlib.laser.Laser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code></a></p>
 </dd>
 </dl>
@@ -160,17 +215,17 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 <dd><p>Get elemental data.</p>
 <p>If <cite>element</cite> is None then all elements are returned in a structured array.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>element</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – element name, optional</p></li>
 <li><p><strong>calibrate</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – apply calibration</p></li>
 <li><p><strong>extent</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – trim to extent, μm</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>structured if element is None else unstructured</p>
 </dd>
 </dl>
@@ -181,7 +236,7 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 <span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.laser.Laser.remove" title="Permalink to this definition"></a></dt>
 <dd><p>Remove element(s).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -192,10 +247,10 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 <span class="sig-name descname"><span class="pre">rename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.laser.Laser.rename" title="Permalink to this definition"></a></dt>
 <dd><p>Change the name of element(s).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – dict mapping old to new names</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -205,13 +260,13 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 
 </section>
 <section id="module-pewlib.config">
-<span id="config"></span><h2>Config<a class="headerlink" href="#module-pewlib.config" title="Permalink to this headline"></a></h2>
+<span id="config"></span><h2>Config<a class="headerlink" href="#module-pewlib.config" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pewlib.config.Config">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pewlib.config.</span></span><span class="sig-name descname"><span class="pre">Config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spotsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">35.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">140.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scantime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.config.Config" title="Permalink to this definition"></a></dt>
 <dd><p>Class for the rastered parameters of image.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>spotsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – laser-spot diameter, μm</p></li>
 <li><p><strong>speed</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – laser movement speed, μm/s</p></li>
@@ -224,7 +279,7 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 <span class="sig-name descname"><span class="pre">data_extent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.config.Config.data_extent" title="Permalink to this definition"></a></dt>
 <dd><p>Extent of data in μm.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
 </dd>
 </dl>
@@ -235,7 +290,7 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 <span class="sig-name descname"><span class="pre">get_pixel_height</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.config.Config.get_pixel_height" title="Permalink to this definition"></a></dt>
 <dd><p>Pixel height in μm.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
 </dl>
@@ -246,7 +301,7 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 <span class="sig-name descname"><span class="pre">get_pixel_width</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.config.Config.get_pixel_width" title="Permalink to this definition"></a></dt>
 <dd><p>Pixel width in μm.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
 </dl>
@@ -259,7 +314,7 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pewlib.config.</span></span><span class="sig-name descname"><span class="pre">SpotConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spotsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spotsize_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.config.SpotConfig" title="Permalink to this definition"></a></dt>
 <dd><p>Class for the spotwise parameters of image.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>spotsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – x, y distance between laser-spots, μm</p>
 </dd>
 </dl>
@@ -268,7 +323,7 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 <span class="sig-name descname"><span class="pre">get_pixel_height</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.config.SpotConfig.get_pixel_height" title="Permalink to this definition"></a></dt>
 <dd><p>Pixel height in μm.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
 </dl>
@@ -279,7 +334,7 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 <span class="sig-name descname"><span class="pre">get_pixel_width</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.config.SpotConfig.get_pixel_width" title="Permalink to this definition"></a></dt>
 <dd><p>Pixel width in μm.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
 </dl>
@@ -289,14 +344,14 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 
 </section>
 <section id="capewlib-ration">
-<h2>Capewlib.ration<a class="headerlink" href="#capewlib-ration" title="Permalink to this headline"></a></h2>
+<h2>Capewlib.ration<a class="headerlink" href="#capewlib-ration" title="Permalink to this heading"></a></h2>
 <span class="target" id="module-pewlib.calibration"></span><dl class="py class">
 <dt class="sig sig-object py" id="pewlib.calibration.Calibration">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pewlib.calibration.</span></span><span class="sig-name descname"><span class="pre">Calibration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">intercept</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Equal'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.calibration.Calibration" title="Permalink to this definition"></a></dt>
 <dd><p>Class for calibration storage and calculations.</p>
 <p>Weights can be automatically generated by passing weighting string to weights.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>intercept</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – of line-of-best-fit</p></li>
 <li><p><strong>gradient</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – of line-of-best-fit</p></li>
@@ -315,7 +370,7 @@ or (name, array) of weights for linear-regression, same length as <cite>points</
 <dd><p>Create a <a class="reference internal" href="#pewlib.calibration.Calibration" title="pewlib.calibration.Calibration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Calibration</span></code></a> from points.</p>
 <p>Calulates linear-regression params from <cite>points</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pewlib.calibration.Calibration" title="pewlib.calibration.Calibration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Calibration</span></code></a></p>
 </dd>
 </dl>
@@ -329,17 +384,17 @@ or (name, array) of weights for linear-regression, same length as <cite>points</
 <dd><p>Weighted linear regression.</p>
 <p>Uses polyfit with sqrt(weights) for intercept and gradient.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – 1d-array</p></li>
 <li><p><strong>y</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array, same size as <cite>x</cite></p></li>
 <li><p><strong>w</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]) – weights, same size as <cite>x</cite></p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>gradient
 intercept
 r²
@@ -357,14 +412,14 @@ error, S(y,x) the (unweighted) residual standard deviation</p>
 <span class="sig-prename descclassname"><span class="pre">pewlib.calibration.</span></span><span class="sig-name descname"><span class="pre">weighted_rsq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.calibration.weighted_rsq" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate r² for weighted linear regression.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – 1d-array</p></li>
 <li><p><strong>y</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array, same size as <cite>x</cite></p></li>
 <li><p><strong>w</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]) – weights, same size as <cite>x</cite></p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
 </dl>
@@ -377,17 +432,17 @@ error, S(y,x) the (unweighted) residual standard deviation</p>
 <p>Conveience function for calculating simple weightings. If <cite>safe</cite> then any
 zeros in <cite>x</cite> are replace with the minimum non-zero value.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – 1d-array</p></li>
 <li><p><strong>weighting</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – weighting string {‘Equal’, ‘x’, ‘1/x’, ‘1/(x^2)’}</p></li>
 <li><p><strong>safe</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – replace zeros with minimum</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>weights, same size as x</p>
 </dd>
 </dl>
@@ -396,9 +451,9 @@ zeros in <cite>x</cite> are replace with the minimum non-zero value.</p>
 </section>
 </section>
 <section id="srr-lasers">
-<h1>SRR Lasers<a class="headerlink" href="#srr-lasers" title="Permalink to this headline"></a></h1>
+<h1>SRR Lasers<a class="headerlink" href="#srr-lasers" title="Permalink to this heading"></a></h1>
 <section id="module-pewlib.srr.srr">
-<span id="srrlaser"></span><h2>SRRLaser<a class="headerlink" href="#module-pewlib.srr.srr" title="Permalink to this headline"></a></h2>
+<span id="srrlaser"></span><h2>SRRLaser<a class="headerlink" href="#module-pewlib.srr.srr" title="Permalink to this heading"></a></h2>
 <p>Class for Super-Resolution-Reconstruction (SRR) LA-ICP-MS.
 SRR is performed by ablating layers of a sample in a line-by-line fashion.
 Layers are offset by a faction of the spotsize to increase image resolution.
@@ -412,7 +467,7 @@ LA-ICP-MS Bioimaging Analytical Chemistry, American Chemical Society (ACS), 2019
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pewlib.srr.srr.</span></span><span class="sig-name descname"><span class="pre">SRRLaser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.srr.SRRLaser" title="Permalink to this definition"></a></dt>
 <dd><p>Class for SRR laser data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]) – list of structured arrays</p></li>
 <li><p><strong>calibration</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="#pewlib.calibration.Calibration" title="pewlib.calibration.Calibration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Calibration</span></code></a>]]) – dict mapping elements to calibrations, optional</p></li>
@@ -430,7 +485,7 @@ LA-ICP-MS Bioimaging Analytical Chemistry, American Chemical Society (ACS), 2019
 <span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.srr.SRRLaser.add" title="Permalink to this definition"></a></dt>
 <dd><p>Add an element.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -441,7 +496,7 @@ LA-ICP-MS Bioimaging Analytical Chemistry, American Chemical Society (ACS), 2019
 <span class="sig-name descname"><span class="pre">check_config_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.srr.SRRLaser.check_config_valid" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if SRRConfig is valid for data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
 </dd>
 </dl>
@@ -451,11 +506,6 @@ LA-ICP-MS Bioimaging Analytical Chemistry, American Chemical Society (ACS), 2019
 <dt class="sig sig-object py" id="pewlib.srr.srr.SRRLaser.elements">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">elements</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pewlib.srr.srr.SRRLaser.elements" title="Permalink to this definition"></a></dt>
 <dd><p>Elements stored.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -463,11 +513,6 @@ LA-ICP-MS Bioimaging Analytical Chemistry, American Chemical Society (ACS), 2019
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pewlib.srr.srr.SRRLaser.extent" title="Permalink to this definition"></a></dt>
 <dd><p>Data extent in μm</p>
 <p>This is calculated <em>post</em> SRR.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -476,7 +521,7 @@ LA-ICP-MS Bioimaging Analytical Chemistry, American Chemical Society (ACS), 2019
 <dd><p>Stacks <code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> to form SRR.</p>
 <p>Calibration and config are taken from the first <code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pewlib.srr.srr.SRRLaser" title="pewlib.srr.srr.SRRLaser"><code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code></a></p>
 </dd>
 </dl>
@@ -487,7 +532,7 @@ LA-ICP-MS Bioimaging Analytical Chemistry, American Chemical Society (ACS), 2019
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.srr.SRRLaser.from_list" title="Permalink to this definition"></a></dt>
 <dd><p>Creates class from a list of names and lists of unstructured arrays.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pewlib.srr.srr.SRRLaser" title="pewlib.srr.srr.SRRLaser"><code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code></a></p>
 </dd>
 </dl>
@@ -502,7 +547,7 @@ If a 2d array is required then <cite>flat</cite> will flatten the array by calcu
 the mean across the 2nd axis. If a <cite>layer</cite> is given then the layer is extracted
 otherwise SRR is performed and the resulting array returned.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>element</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – element name, optional</p></li>
 <li><p><strong>calibrate</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – apply calibration</p></li>
@@ -511,10 +556,10 @@ otherwise SRR is performed and the resulting array returned.</p>
 <li><p><strong>layer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – extract layer, optional</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>structured if element is None else unstructured
 2d if layer or flat, else 3d</p>
 </dd>
@@ -526,7 +571,7 @@ otherwise SRR is performed and the resulting array returned.</p>
 <span class="sig-name descname"><span class="pre">krisskross</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.srr.SRRLaser.krisskross" title="Permalink to this definition"></a></dt>
 <dd><p>Perform SRR.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
 </dl>
@@ -537,7 +582,7 @@ otherwise SRR is performed and the resulting array returned.</p>
 <span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.srr.SRRLaser.remove" title="Permalink to this definition"></a></dt>
 <dd><p>Remove element(s).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -548,10 +593,10 @@ otherwise SRR is performed and the resulting array returned.</p>
 <span class="sig-name descname"><span class="pre">rename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.srr.SRRLaser.rename" title="Permalink to this definition"></a></dt>
 <dd><p>Rename element(s).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – dict mapping old to new name</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -561,13 +606,13 @@ otherwise SRR is performed and the resulting array returned.</p>
 
 </section>
 <section id="module-pewlib.srr.config">
-<span id="srrconfig"></span><h2>SRRConfig<a class="headerlink" href="#module-pewlib.srr.config" title="Permalink to this headline"></a></h2>
+<span id="srrconfig"></span><h2>SRRConfig<a class="headerlink" href="#module-pewlib.srr.config" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pewlib.srr.config.SRRConfig">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pewlib.srr.config.</span></span><span class="sig-name descname"><span class="pre">SRRConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spotsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">35.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">140.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scantime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warmup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subpixel_offsets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">((0,</span> <span class="pre">2),</span> <span class="pre">(1,</span> <span class="pre">2))</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.config.SRRConfig" title="Permalink to this definition"></a></dt>
 <dd><p>Class for the super-resolution-reconstruction image parameters.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>spotsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – laser-spot diameter, μm</p></li>
 <li><p><strong>speed</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – laser movement speed, μm/s</p></li>
@@ -586,13 +631,13 @@ otherwise SRR is performed and the resulting array returned.</p>
 <span class="sig-name descname"><span class="pre">data_extent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.config.SRRConfig.data_extent" title="Permalink to this definition"></a></dt>
 <dd><p>Extent of data in μm.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>shape</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]) – data shape</p></li>
 <li><p><strong>layer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – limit calculation to layer</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
 </dd>
 </dl>
@@ -603,10 +648,10 @@ otherwise SRR is performed and the resulting array returned.</p>
 <span class="sig-name descname"><span class="pre">get_pixel_height</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.config.SRRConfig.get_pixel_height" title="Permalink to this definition"></a></dt>
 <dd><p>Pixel height in μm.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>layer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – limit to layer</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
 </dl>
@@ -617,10 +662,10 @@ otherwise SRR is performed and the resulting array returned.</p>
 <span class="sig-name descname"><span class="pre">get_pixel_width</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.config.SRRConfig.get_pixel_width" title="Permalink to this definition"></a></dt>
 <dd><p>Pixel width in μm.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>layer</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – limit to layer</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
 </dl>
@@ -630,33 +675,18 @@ otherwise SRR is performed and the resulting array returned.</p>
 <dt class="sig sig-object py" id="pewlib.srr.config.SRRConfig.magnification">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">magnification</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#pewlib.srr.config.SRRConfig.magnification" title="Permalink to this definition"></a></dt>
 <dd><p>Magnification due to non-equal aspect.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pewlib.srr.config.SRRConfig.subpixel_offsets">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">subpixel_offsets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#pewlib.srr.config.SRRConfig.subpixel_offsets" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">subpixel_offsets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#pewlib.srr.config.SRRConfig.subpixel_offsets" title="Permalink to this definition"></a></dt>
 <dd><p>Layer offsets.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pewlib.srr.config.SRRConfig.subpixels_per_pixel">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">subpixels_per_pixel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pewlib.srr.config.SRRConfig.subpixels_per_pixel" title="Permalink to this definition"></a></dt>
 <dd><p>Pixel width in subpixels.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -664,7 +694,7 @@ otherwise SRR is performed and the resulting array returned.</p>
 <span class="sig-name descname"><span class="pre">valid_for_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.srr.config.SRRConfig.valid_for_data" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if this config is valid for data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
 </dd>
 </dl>
@@ -674,11 +704,6 @@ otherwise SRR is performed and the resulting array returned.</p>
 <dt class="sig sig-object py" id="pewlib.srr.config.SRRConfig.warmup">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">warmup</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#pewlib.srr.config.SRRConfig.warmup" title="Permalink to this definition"></a></dt>
 <dd><p>Laser warmup (time before data recorded) in seconds.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>

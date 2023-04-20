@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Processing &mdash; pew  documentation</title>
@@ -13,9 +13,8 @@
   <![endif]-->
   
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -27,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> pew
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pew
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -46,12 +49,52 @@
 <li class="toctree-l1"><a class="reference internal" href="pew.html">Line-by-line Lasers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pew.html#srr-lasers">SRR Lasers</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Processing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.process.calc">Calculations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.process.colocal">Colocalisation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.process.convolve">Convolution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.process.filters">Filtering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.process.calc">Calculations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.calc.local_maxima"><code class="docutils literal notranslate"><span class="pre">local_maxima()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.calc.normalise"><code class="docutils literal notranslate"><span class="pre">normalise()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.calc.reset_cumsum"><code class="docutils literal notranslate"><span class="pre">reset_cumsum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.calc.shuffle_blocks"><code class="docutils literal notranslate"><span class="pre">shuffle_blocks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.calc.subpixel_offset"><code class="docutils literal notranslate"><span class="pre">subpixel_offset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.calc.subpixel_offset_equal"><code class="docutils literal notranslate"><span class="pre">subpixel_offset_equal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.calc.view_as_blocks"><code class="docutils literal notranslate"><span class="pre">view_as_blocks()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.process.colocal">Colocalisation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.colocal.costes"><code class="docutils literal notranslate"><span class="pre">costes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.colocal.costes_threshold"><code class="docutils literal notranslate"><span class="pre">costes_threshold()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.colocal.li_icq"><code class="docutils literal notranslate"><span class="pre">li_icq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.colocal.manders"><code class="docutils literal notranslate"><span class="pre">manders()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.colocal.pearsonr"><code class="docutils literal notranslate"><span class="pre">pearsonr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.colocal.pearsonr_probablity"><code class="docutils literal notranslate"><span class="pre">pearsonr_probablity()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.process.convolve">Convolution</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.convolve.beta"><code class="docutils literal notranslate"><span class="pre">beta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.convolve.convolve"><code class="docutils literal notranslate"><span class="pre">convolve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.convolve.deconvolve"><code class="docutils literal notranslate"><span class="pre">deconvolve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.convolve.erf"><code class="docutils literal notranslate"><span class="pre">erf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.convolve.erfinv"><code class="docutils literal notranslate"><span class="pre">erfinv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.convolve.exponential"><code class="docutils literal notranslate"><span class="pre">exponential()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.convolve.gamma"><code class="docutils literal notranslate"><span class="pre">gamma()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.convolve.inversegamma"><code class="docutils literal notranslate"><span class="pre">inversegamma()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.convolve.laplace"><code class="docutils literal notranslate"><span class="pre">laplace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.convolve.loglaplace"><code class="docutils literal notranslate"><span class="pre">loglaplace()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.convolve.lognormal"><code class="docutils literal notranslate"><span class="pre">lognormal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.convolve.normal"><code class="docutils literal notranslate"><span class="pre">normal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.convolve.super_gaussian"><code class="docutils literal notranslate"><span class="pre">super_gaussian()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.convolve.triangular"><code class="docutils literal notranslate"><span class="pre">triangular()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.process.filters">Filtering</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.filters.rolling_mean"><code class="docutils literal notranslate"><span class="pre">rolling_mean()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.filters.rolling_median"><code class="docutils literal notranslate"><span class="pre">rolling_median()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#peakfinding">Peakfinding</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.process.threshold">Thresholding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.process.threshold">Thresholding</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.process.threshold.otsu"><code class="docutils literal notranslate"><span class="pre">otsu()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -69,8 +112,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Processing</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Processing</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/processing.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -81,9 +124,9 @@
            <div itemprop="articleBody">
              
   <section id="processing">
-<h1>Processing<a class="headerlink" href="#processing" title="Permalink to this headline"></a></h1>
+<h1>Processing<a class="headerlink" href="#processing" title="Permalink to this heading"></a></h1>
 <section id="module-pewlib.process.calc">
-<span id="calculations"></span><h2>Calculations<a class="headerlink" href="#module-pewlib.process.calc" title="Permalink to this headline"></a></h2>
+<span id="calculations"></span><h2>Calculations<a class="headerlink" href="#module-pewlib.process.calc" title="Permalink to this heading"></a></h2>
 <p>This module contains functions used by other processing modules.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pewlib.process.calc.local_maxima">
@@ -91,13 +134,13 @@
 <dd><p>Indicies of local maxima.</p>
 <p>Maxima are values greater than the 2 values surrounding them.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – 1d array</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>indicies of maxima</p>
 </dd>
 </dl>
@@ -108,17 +151,17 @@
 <span class="sig-prename descclassname"><span class="pre">pewlib.process.calc.</span></span><span class="sig-name descname"><span class="pre">normalise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.calc.normalise" title="Permalink to this definition"></a></dt>
 <dd><p>Normalise an array.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>vmin</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – new minimum</p></li>
 <li><p><strong>vmax</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – new maxmimum</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>ValueError if x is a simgle value</strong> – </p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
 </dl>
@@ -129,13 +172,13 @@
 <span class="sig-prename descclassname"><span class="pre">pewlib.process.calc.</span></span><span class="sig-name descname"><span class="pre">reset_cumsum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.calc.reset_cumsum" title="Permalink to this definition"></a></dt>
 <dd><p>Cumulative sum that resets at the given value.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>reset_value</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Value where the cumsum resets to 0</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
 </dl>
@@ -150,7 +193,7 @@ If <cite>shuffle_partial</cite> then partially masked blocks will be shuffled ot
 only fully masked blocks are. The inplace <cite>mode</cite> is much faster but cannot shuffle
 array edges.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>block</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]) – block shape, same dims as <cite>x</cite></p></li>
@@ -159,10 +202,10 @@ array edges.</p>
 <li><p><strong>shuffle_partial</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – shuffle partially masked blocks</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>new array if pad, view if inplace</p>
 </dd>
 </dl>
@@ -177,16 +220,16 @@ across axis 2 of <cite>x</cite>. If the first offset is not (0, 0) then it is pr
 Given <cite>offsets</cite> of [(0, 0), (1, 1)] and pixelsize of (2, 2) each layer
 will be streched by 2 and every 2nd layer will be shifted by 1 pixel.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>offsets</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]]) – pixel offsets in (x, y)</p></li>
 <li><p><strong>pixelsize</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – enlargement (x, y)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array</p>
 </dd>
 </dl>
@@ -198,16 +241,16 @@ will be streched by 2 and every 2nd layer will be shifted by 1 pixel.</p>
 <dd><p>Offsets layers in a 3d array.</p>
 <p>Special case of ‘subpixel_offset’ where x==y for <cite>offsets</cite> and <cite>pixelsize</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>offsets</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – pixel offsets in (x, y)</p></li>
 <li><p><strong>pixelsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – enlargement (x, y)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array</p>
 </dd>
 </dl>
@@ -223,17 +266,17 @@ will be streched by 2 and every 2nd layer will be shifted by 1 pixel.</p>
 <dd><p>Block view of array</p>
 <p>Can be overlapping if <cite>step</cite> &lt; <cite>block</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>block</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]) – block size, same dims as <cite>x</cite></p></li>
 <li><p><strong>step</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]]) – step, same dims as <cite>x</cite>, defaults to <cite>block</cite></p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>view into array</p>
 </dd>
 </dl>
@@ -245,7 +288,7 @@ will be streched by 2 and every 2nd layer will be shifted by 1 pixel.</p>
 
 </section>
 <section id="module-pewlib.process.colocal">
-<span id="colocalisation"></span><h2>Colocalisation<a class="headerlink" href="#module-pewlib.process.colocal" title="Permalink to this headline"></a></h2>
+<span id="colocalisation"></span><h2>Colocalisation<a class="headerlink" href="#module-pewlib.process.colocal" title="Permalink to this heading"></a></h2>
 <p>Colcalisation can be used to quantify the spacial relationship between
 elements. A few ofthe many available algorithms are implemented in this file.</p>
 <dl class="py function">
@@ -255,17 +298,17 @@ elements. A few ofthe many available algorithms are implemented in this file.</p
 <p>The threshold at which no colocalisation appears (R &lt; 0) is first calculated
 and then used to find Manders M1 and M2.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>y</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array, same shape as <cite>x</cite></p></li>
 <li><p><strong>n_scrambles</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – scrambles for Pearson probability</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Pearson’s R
 probability of Pearson’s R
 Mander’s M1
@@ -295,17 +338,17 @@ Colocalization in Live Cells Biophysical Journal, Elsevier BV,
 threshold. Once the caluclated R value is below <cite>target_r</cite> the thresholds are
 returned. The threshold for <cite>y</cite> equals ‘tx’ * ‘a’ + ‘b’.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>y</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array, same shape as <cite>x</cite></p></li>
 <li><p><strong>target_r</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – value of R at which stop incrementing</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>threshold for x, tx
 slope, a
 intercept, b</p>
@@ -332,16 +375,16 @@ Colocalization in Live Cells Biophysical Journal, Elsevier BV,
 x and y are above or below their means. A value of 0 indicates no correlation,
 below 0 segregation and above 0 colocalisation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>y</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array, same shape as <cite>x</cite></p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>value between -0.5 and 0.5</p>
 </dd>
 </dl>
@@ -358,7 +401,7 @@ Journal of Neuroscience, Society for Neuroscience, 2004, 24, 4070-4081</p>
 <span class="sig-prename descclassname"><span class="pre">pewlib.process.colocal.</span></span><span class="sig-name descname"><span class="pre">manders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.colocal.manders" title="Permalink to this definition"></a></dt>
 <dd><p>Manders’ correlation coefficients.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>y</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array, same shape as <cite>x</cite></p></li>
@@ -366,10 +409,10 @@ Journal of Neuroscience, Society for Neuroscience, 2004, 24, 4070-4081</p>
 <li><p><strong>ty</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – threshold for <cite>y</cite>, defaults to y.min()</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>M1, factional overlap of <cite>x</cite> to <cite>y</cite>
 M2, factional overlap of <cite>y</cite> to <cite>x</cite></p>
 </dd>
@@ -389,16 +432,16 @@ Journal of Microscopy, Wiley, 1993, 169, 375-382</p>
 <p>A value of 0 indicates no correlation, below 0 segregation and above 0
 colocalisation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>y</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array, same shape as <cite>x</cite></p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>value between -1 and 1</p>
 </dd>
 </dl>
@@ -414,7 +457,7 @@ shuffling that are lower than the original R. Args <cite>block</cite>, <cite>mas
 <cite>shuffle_partial</cite> are passed to ‘shuffle_blocks’. Implemented as per
 Costes [1].</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>y</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array, same shape as <cite>x</cite></p></li>
@@ -424,10 +467,10 @@ Costes [1].</p>
 <li><p><strong>n</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – number of shuffles to perform</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Pearsons’s r
 probability, p, of the r</p>
 </dd>
@@ -438,19 +481,20 @@ probability, p, of the r</p>
 <a class="reference internal" href="#pewlib.process.calc.shuffle_blocks" title="pewlib.process.calc.shuffle_blocks"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.process.calc.shuffle_blocks()</span></code></a></p>
 </div>
 <p class="rubric">References</p>
-<dl class="footnote brackets">
-<dt class="label" id="id1"><span class="brackets">1</span></dt>
-<dd><p>Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G.
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id1" role="note">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>Costes, S. V.; Daelemans, D.; Cho, E. H.; Dobbin, Z.; Pavlakis, G.
 &amp; Lockett, S. Automatic and Quantitative Measurement of Protein-Protein
 Colocalization in Live Cells Biophysical Journal, Elsevier BV,
 2004, 86, 3993-4003</p>
-</dd>
-</dl>
+</aside>
+</aside>
 </dd></dl>
 
 </section>
 <section id="module-pewlib.process.convolve">
-<span id="convolution"></span><h2>Convolution<a class="headerlink" href="#module-pewlib.process.convolve" title="Permalink to this headline"></a></h2>
+<span id="convolution"></span><h2>Convolution<a class="headerlink" href="#module-pewlib.process.convolve" title="Permalink to this heading"></a></h2>
 <p>Conv- and deconvolution have many applications in image processing such as
 adding or removing blur. This module contains functions for performing 1-dimensional
 convolutions as well as functions for creating various distributions.</p>
@@ -460,7 +504,7 @@ convolutions as well as functions for creating various distributions.</p>
 <dd><p>Beta distribution.</p>
 <p>Range of 0 to 1. The <cite>scale</cite> and <cite>shift</cite> arguments can be used to change the range.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – size of distribution</p></li>
 <li><p><strong>alpha</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – alpha term, &gt; 0</p></li>
@@ -469,10 +513,10 @@ convolutions as well as functions for creating various distributions.</p>
 <li><p><strong>shift</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – shift x</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array of (x, y) points</p>
 </dd>
 </dl>
@@ -485,23 +529,21 @@ convolutions as well as functions for creating various distributions.</p>
 <p>If <cite>mode</cite> is ‘pad’ then <cite>x</cite> is edge padded to converse size on convolution.
 Other modes are passed directly to <code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.convolve()</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>psf</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – point spread function</p></li>
 <li><p><strong>mode</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – convolution mode {‘pad’, ‘full’, ‘valid’, ‘same’}</p></li>
 </ul>
 </dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.convolve()</span></code></p>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -510,7 +552,7 @@ Other modes are passed directly to <code class="xref py py-func docutils literal
 <dd><p>Inverse of convolution.</p>
 <p>Deconvolution is performed in frequency domain.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>psf</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – point spread function</p></li>
@@ -528,24 +570,25 @@ Other modes are passed directly to <code class="xref py py-func docutils literal
 <dd><p>Error function approximation.</p>
 <p>The maximum error is 5e-4 [1].</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – value</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>approximation of error function</p>
 </dd>
 </dl>
 <p>References:</p>
-<dl class="footnote brackets">
-<dt class="label" id="id2"><span class="brackets">1</span></dt>
-<dd><p>Abramowitz, Milton, and Irene A. Stegun, eds. Handbook of mathematical
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="note">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>Abramowitz, Milton, and Irene A. Stegun, eds. Handbook of mathematical
 functions with formulas, graphs, and mathematical tables.
 Vol. 55. US Government printing office, 1970.</p>
-</dd>
-</dl>
+</aside>
+</aside>
 </dd></dl>
 
 <dl class="py function">
@@ -554,23 +597,24 @@ Vol. 55. US Government printing office, 1970.</p>
 <dd><p>Inverse error function approximation.</p>
 <p>The maximum error is 6e-3 [2].</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – value</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>approximation of inverse error function</p>
 </dd>
 </dl>
 <p class="rubric">References</p>
-<dl class="footnote brackets">
-<dt class="label" id="id3"><span class="brackets">2</span></dt>
-<dd><p>Winitzki, S. A handy approximation for the error function and its inverse
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id3" role="note">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p>Winitzki, S. A handy approximation for the error function and its inverse
 2008</p>
-</dd>
-</dl>
+</aside>
+</aside>
 </dd></dl>
 
 <dl class="py function">
@@ -580,7 +624,7 @@ Vol. 55. US Government printing office, 1970.</p>
 <p>Range of 0 to <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments can be used to change
 the range.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – size of distribution</p></li>
 <li><p><strong>_lambda</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – lambda term, &gt; 0</p></li>
@@ -588,10 +632,10 @@ the range.</p>
 <li><p><strong>shift</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – shift x</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array of (x, y) points</p>
 </dd>
 </dl>
@@ -603,24 +647,25 @@ the range.</p>
 <dd><p>Gamma function approximation.</p>
 <p>Maximum error of 3e-7 [3].</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – value</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>approximation of error function</p>
 </dd>
 </dl>
 <p>References:</p>
-<dl class="footnote brackets">
-<dt class="label" id="id4"><span class="brackets">3</span></dt>
-<dd><p>Abramowitz, Milton, and Irene A. Stegun, eds. Handbook of mathematical
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id4" role="note">
+<span class="label"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></span>
+<p>Abramowitz, Milton, and Irene A. Stegun, eds. Handbook of mathematical
 functions with formulas, graphs, and mathematical tables.
 Vol. 55. US Government printing office, 1970.</p>
-</dd>
-</dl>
+</aside>
+</aside>
 </dd></dl>
 
 <dl class="py function">
@@ -630,7 +675,7 @@ Vol. 55. US Government printing office, 1970.</p>
 <p>Range of 0 to <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments can be used to change
 the range.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – size of distribution</p></li>
 <li><p><strong>alpha</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – alpha term, &gt; 0</p></li>
@@ -639,10 +684,10 @@ the range.</p>
 <li><p><strong>shift</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – shift x</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array of (x, y) points</p>
 </dd>
 </dl>
@@ -655,7 +700,7 @@ the range.</p>
 <p>Range of -0.5 * <cite>size</cite> to 0.5 * <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments
 can be used to change the range.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – size of distribution</p></li>
 <li><p><strong>b</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – scale term, &gt; 0</p></li>
@@ -664,10 +709,10 @@ can be used to change the range.</p>
 <li><p><strong>shift</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – shift x</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array of (x, y) points</p>
 </dd>
 </dl>
@@ -680,7 +725,7 @@ can be used to change the range.</p>
 <p>Range of 0 to <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments can be used to change
 the range.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – size of distribution</p></li>
 <li><p><strong>b</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – scale term, &gt; 0</p></li>
@@ -689,10 +734,10 @@ the range.</p>
 <li><p><strong>shift</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – shift x</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array of (x, y) points</p>
 </dd>
 </dl>
@@ -705,7 +750,7 @@ the range.</p>
 <p>Range of 0 to <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments can be used to change
 the range.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – size of distribution</p></li>
 <li><p><strong>sigma</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – sigma term, &gt; 0</p></li>
@@ -714,10 +759,10 @@ the range.</p>
 <li><p><strong>shift</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – shift x</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array of (x, y) points</p>
 </dd>
 </dl>
@@ -730,7 +775,7 @@ the range.</p>
 <p>Range of -0.5 * <cite>size</cite> to 0.5 * <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments
 can be used to change the range.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – size of distribution</p></li>
 <li><p><strong>sigma</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – sqrt variance, &gt; 0</p></li>
@@ -739,10 +784,10 @@ can be used to change the range.</p>
 <li><p><strong>shift</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – shift x</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array of (x, y) points</p>
 </dd>
 </dl>
@@ -755,7 +800,7 @@ can be used to change the range.</p>
 <p>Range of -0.5 * <cite>size</cite> to 0.5 * <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments
 can be used to change the range.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – size of distribution</p></li>
 <li><p><strong>sigma</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – sqrt variance, &gt; 0</p></li>
@@ -765,10 +810,10 @@ can be used to change the range.</p>
 <li><p><strong>shift</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – shift x</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array of (x, y) points</p>
 </dd>
 </dl>
@@ -781,7 +826,7 @@ can be used to change the range.</p>
 <p>Range of -0.5 * <cite>size</cite> to 0.5 * <cite>size</cite>, the <cite>scale</cite> and <cite>shift</cite> arguments
 can be used to change the range.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – size of distribution</p></li>
 <li><p><strong>a</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – a &lt;= x &lt;= b</p></li>
@@ -791,10 +836,10 @@ can be used to change the range.</p>
 <li><p><strong>shift</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – shift x</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array of (x, y) points</p>
 </dd>
 </dl>
@@ -802,7 +847,7 @@ can be used to change the range.</p>
 
 </section>
 <section id="module-pewlib.process.filters">
-<span id="filtering"></span><h2>Filtering<a class="headerlink" href="#module-pewlib.process.filters" title="Permalink to this headline"></a></h2>
+<span id="filtering"></span><h2>Filtering<a class="headerlink" href="#module-pewlib.process.filters" title="Permalink to this heading"></a></h2>
 <p>Filtering can be used to remove artifacts, such as spikes, from images.
 Care must be taken when using filtering to ensure that legitmate data is not
 also altered.</p>
@@ -815,17 +860,17 @@ If it is <cite>threshold</cite> times the standard deviation <em>without the cen
 it is considered an outlier. This prevents the value from impacting the stddev.
 The mean of each block is recalculated outliers set to the new local mean.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>block</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]]) – size of window, int or same dims as <cite>x</cite></p></li>
 <li><p><strong>threshold</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – number of stddevs away from mean to consider outlier</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array with outliers set to local means</p>
 </dd>
 </dl>
@@ -838,7 +883,7 @@ The mean of each block is recalculated outliers set to the new local mean.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">rolling_mean</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>(<a class="reference external" href=".//processing-1.py">Source code</a>, <a class="reference external" href=".//processing-1.png">png</a>, <a class="reference external" href=".//processing-1.hires.png">hires.png</a>, <a class="reference external" href=".//processing-1.pdf">pdf</a>)</p>
+<p>(<a class="reference download internal" download="" href="_downloads/5cf80be7b322499611a74181ac473ed9/processing-1.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="_downloads/b2b5a62371e9084263d49a273b0d9ead/processing-1.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/1092a4da1b1f8d4d7cb44386b90304c9/processing-1.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/3070caf5ae334ea687a89670cd7e3d45/processing-1.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
 <figure class="align-default">
 <img alt="_images/processing-1.png" class="plot-directive" src="_images/processing-1.png" />
 </figure>
@@ -853,17 +898,17 @@ If it is <cite>threshold</cite> times the median distance from the median then
 it is considered an outlier.
 The mean of each block is recalculated outliers set to the local median.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>block</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]]) – size of window, int or same dims as <cite>x</cite></p></li>
 <li><p><strong>threshold</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – number of median distances away from medians to consider outlier</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array with outliers set to local means</p>
 </dd>
 </dl>
@@ -876,7 +921,7 @@ The mean of each block is recalculated outliers set to the local median.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">rolling_median</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>(<a class="reference external" href=".//processing-2.py">Source code</a>, <a class="reference external" href=".//processing-2.png">png</a>, <a class="reference external" href=".//processing-2.hires.png">hires.png</a>, <a class="reference external" href=".//processing-2.pdf">pdf</a>)</p>
+<p>(<a class="reference download internal" download="" href="_downloads/28993a997cc221e7c7aa4f3dc5c6e717/processing-2.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="_downloads/a8a12fd74d82796e787f1a5c23ed80d4/processing-2.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/8ba2b318e42c47f85b09c42627b1535d/processing-2.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/11b35e78a4c258e3de4ae3ba80ee64d9/processing-2.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
 <figure class="align-default">
 <img alt="_images/processing-2.png" class="plot-directive" src="_images/processing-2.png" />
 </figure>
@@ -884,11 +929,11 @@ The mean of each block is recalculated outliers set to the local median.</p>
 
 </section>
 <section id="peakfinding">
-<h2>Peakfinding<a class="headerlink" href="#peakfinding" title="Permalink to this headline"></a></h2>
+<h2>Peakfinding<a class="headerlink" href="#peakfinding" title="Permalink to this heading"></a></h2>
 <p>This module is under devolopment.</p>
 </section>
 <section id="module-pewlib.process.threshold">
-<span id="thresholding"></span><h2>Thresholding<a class="headerlink" href="#module-pewlib.process.threshold" title="Permalink to this headline"></a></h2>
+<span id="thresholding"></span><h2>Thresholding<a class="headerlink" href="#module-pewlib.process.threshold" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pewlib.process.threshold.otsu">
 <span class="sig-prename descclassname"><span class="pre">pewlib.process.threshold.</span></span><span class="sig-name descname"><span class="pre">otsu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_nan</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.threshold.otsu" title="Permalink to this definition"></a></dt>
@@ -896,22 +941,20 @@ The mean of each block is recalculated outliers set to the local median.</p>
 <p>The Otsu threshold minimises intra-class variance for a two class system.
 If <cite>remove_nan</cite> then all nans are removed before computation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>remove_nan</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – remove nan values</p></li>
 </ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><code class="xref py py-func docutils literal notranslate"><span class="pre">skimage.filters.threshold_otsu()</span></code></p>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
-</dd>
-</dl>
 </dd></dl>
 
 </section>

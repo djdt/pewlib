@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IO Module &mdash; pew  documentation</title>
@@ -13,9 +13,8 @@
   <![endif]-->
   
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -28,11 +27,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> pew
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pew
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -44,12 +47,61 @@
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">IO Module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.agilent">Agilent</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.csv">CSV</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.npz">Numpy NPZ</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.perkinelmer">PerkinElmer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.textimage">Text Image</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.vtk">VTK</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.agilent">Agilent</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.agilent.collect_datafiles"><code class="docutils literal notranslate"><span class="pre">collect_datafiles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.agilent.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.agilent.load_binary"><code class="docutils literal notranslate"><span class="pre">load_binary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.agilent.load_csv"><code class="docutils literal notranslate"><span class="pre">load_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.agilent.load_info"><code class="docutils literal notranslate"><span class="pre">load_info()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.csv">CSV</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.csv.GenericOption"><code class="docutils literal notranslate"><span class="pre">GenericOption</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.io.csv.GenericOption.filter"><code class="docutils literal notranslate"><span class="pre">GenericOption.filter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.io.csv.GenericOption.readParams"><code class="docutils literal notranslate"><span class="pre">GenericOption.readParams()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.io.csv.GenericOption.sort"><code class="docutils literal notranslate"><span class="pre">GenericOption.sort()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.io.csv.GenericOption.validForPath"><code class="docutils literal notranslate"><span class="pre">GenericOption.validForPath()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.csv.NuOption"><code class="docutils literal notranslate"><span class="pre">NuOption</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.io.csv.NuOption.readParams"><code class="docutils literal notranslate"><span class="pre">NuOption.readParams()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.io.csv.NuOption.sortkey"><code class="docutils literal notranslate"><span class="pre">NuOption.sortkey()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.csv.ThermoLDROption"><code class="docutils literal notranslate"><span class="pre">ThermoLDROption</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.io.csv.ThermoLDROption.readParams"><code class="docutils literal notranslate"><span class="pre">ThermoLDROption.readParams()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.io.csv.ThermoLDROption.sortkey"><code class="docutils literal notranslate"><span class="pre">ThermoLDROption.sortkey()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.csv.TofwerkOption"><code class="docutils literal notranslate"><span class="pre">TofwerkOption</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.io.csv.TofwerkOption.readParams"><code class="docutils literal notranslate"><span class="pre">TofwerkOption.readParams()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.io.csv.TofwerkOption.sortkey"><code class="docutils literal notranslate"><span class="pre">TofwerkOption.sortkey()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.csv.is_valid_directory"><code class="docutils literal notranslate"><span class="pre">is_valid_directory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.csv.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.csv.option_for_path"><code class="docutils literal notranslate"><span class="pre">option_for_path()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.npz">Numpy NPZ</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.npz.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.npz.save"><code class="docutils literal notranslate"><span class="pre">save()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.perkinelmer">PerkinElmer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.perkinelmer.is_valid_directory"><code class="docutils literal notranslate"><span class="pre">is_valid_directory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.perkinelmer.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.textimage">Text Image</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.textimage.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.textimage.save"><code class="docutils literal notranslate"><span class="pre">save()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.vtk">VTK</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.vtk.save"><code class="docutils literal notranslate"><span class="pre">save()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pew.html">Line-by-line Lasers</a></li>
@@ -70,8 +122,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>IO Module</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">IO Module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/io.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -82,10 +134,10 @@
            <div itemprop="articleBody">
              
   <section id="io-module">
-<h1>IO Module<a class="headerlink" href="#io-module" title="Permalink to this headline"></a></h1>
+<h1>IO Module<a class="headerlink" href="#io-module" title="Permalink to this heading"></a></h1>
 <p>This module contains the functions pew uses for importing and exporting data.</p>
 <section id="module-pewlib.io.agilent">
-<span id="agilent"></span><h2>Agilent<a class="headerlink" href="#module-pewlib.io.agilent" title="Permalink to this headline"></a></h2>
+<span id="agilent"></span><h2>Agilent<a class="headerlink" href="#module-pewlib.io.agilent" title="Permalink to this heading"></a></h2>
 <p>Import of line-by-line collected Agilent ‘.b’ batches.
 Both raw binaries and the ‘.csv’ exports are supported.
 Tested with Agilent 7500, 7700 and 8900 ICPs.</p>
@@ -96,17 +148,17 @@ Tested with Agilent 7500, 7700 and 8900 ICPs.</p>
 <p>A list of expected datafiles is created for each method in <cite>methods</cite>.
 Methods are tested in order until ones successfully finds ALL expected datafiles.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to directory</p></li>
 <li><p><strong>methods</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – list of methods to try,
 {‘alphabetical’, ‘acq_method_xml’, ‘batch_csv’, ‘batch_xml’}</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A list of datafiles</p>
 </dd>
 </dl>
@@ -118,7 +170,7 @@ Methods are tested in order until ones successfully finds ALL expected datafiles
 <dd><p>Imports an Agilent ‘.b’ batch.</p>
 <p>First attempts a binary import, falling back to importing any ‘.csv’ files.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to batch</p></li>
 <li><p><strong>collection_methods</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – list of datafile collection methods,
@@ -129,10 +181,10 @@ default = [‘batch_xml’, ‘batch_csv’]</p></li>
 <li><p><strong>full</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – also return dict with scantime</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>structured array of data
 dict of params if <cite>full</cite></p>
 </dd>
@@ -153,7 +205,7 @@ dict of params if <cite>full</cite></p>
 ‘MSTS_XSpecific.xml’ document.
 By default <cite>drop_names</cite> drops the ‘Time’ field.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to batch</p></li>
 <li><p><strong>collection_methods</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – list of datafile collection methods,
@@ -163,14 +215,14 @@ default = [‘batch_xml’, ‘batch_csv’]</p></li>
 <li><p><strong>full</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – also return dict with scantime</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>structured array of data
 dict of params if <cite>full</cite></p>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>FileNotFoundError</strong> – ‘MSScan.bin’, ‘MSProfile.bin’ or ‘MSTS_XSpecific.xml’
     not found</p></li>
@@ -193,7 +245,7 @@ If a ‘.csv’ can not be found then all data in the line is set to 0.
 To load properly formatted element names use <cite>use_acq_for_names</cite>.
 By default <cite>drop_names</cite> drops the ‘Time_[Sec]’ field.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to batch</p></li>
 <li><p><strong>collection_methods</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – list of datafile collection methods,
@@ -203,10 +255,10 @@ default = [‘batch_xml’, ‘batch_csv’]</p></li>
 <li><p><strong>full</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – also return dict with scantime</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>structured array of data
 dict of params if <cite>full</cite></p>
 </dd>
@@ -229,13 +281,13 @@ Instrument {Type,Model,Serial,Vendor}</p>
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to batch</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
@@ -243,7 +295,7 @@ Instrument {Type,Model,Serial,Vendor}</p>
 
 </section>
 <section id="module-pewlib.io.csv">
-<span id="csv"></span><h2>CSV<a class="headerlink" href="#module-pewlib.io.csv" title="Permalink to this headline"></a></h2>
+<span id="csv"></span><h2>CSV<a class="headerlink" href="#module-pewlib.io.csv" title="Permalink to this heading"></a></h2>
 <p>Import of line-by-line data stored as a series of .csv files.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pewlib.io.csv.GenericOption">
@@ -252,7 +304,7 @@ Instrument {Type,Model,Serial,Vendor}</p>
 <p>Options are used by <a class="reference internal" href="#pewlib.io.csv.load" title="pewlib.io.csv.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.csv.load()</span></code></a> to filter and sort paths,
 generate data and read parameters from csvs.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>drop_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – columns dropped from imports</p></li>
 <li><p><strong>kw_genfromtxt</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – kwargs for numpy.genfromtxt</p></li>
@@ -265,7 +317,7 @@ generate data and read parameters from csvs.</p>
 <span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.GenericOption.filter" title="Permalink to this definition"></a></dt>
 <dd><p>Filter non matching paths.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]</p>
 </dd>
 </dl>
@@ -276,7 +328,7 @@ generate data and read parameters from csvs.</p>
 <span class="sig-name descname"><span class="pre">readParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.GenericOption.readParams" title="Permalink to this definition"></a></dt>
 <dd><p>Read parameters from data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
 </dd>
 </dl>
@@ -287,7 +339,7 @@ generate data and read parameters from csvs.</p>
 <span class="sig-name descname"><span class="pre">sort</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.GenericOption.sort" title="Permalink to this definition"></a></dt>
 <dd><p>Sort paths using ‘sortkey’.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]</p>
 </dd>
 </dl>
@@ -298,7 +350,7 @@ generate data and read parameters from csvs.</p>
 <span class="sig-name descname"><span class="pre">validForPath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.GenericOption.validForPath" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if option is valid for a file or directory.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
 </dd>
 </dl>
@@ -315,7 +367,7 @@ generate data and read parameters from csvs.</p>
 <span class="sig-name descname"><span class="pre">readParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.NuOption.readParams" title="Permalink to this definition"></a></dt>
 <dd><p>Read parameters from data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
 </dd>
 </dl>
@@ -326,7 +378,7 @@ generate data and read parameters from csvs.</p>
 <span class="sig-name descname"><span class="pre">sortkey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.NuOption.sortkey" title="Permalink to this definition"></a></dt>
 <dd><p>Sorts files numerically.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
 </dd>
 </dl>
@@ -343,7 +395,7 @@ generate data and read parameters from csvs.</p>
 <span class="sig-name descname"><span class="pre">readParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.ThermoLDROption.readParams" title="Permalink to this definition"></a></dt>
 <dd><p>Read parameters from data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
 </dd>
 </dl>
@@ -354,7 +406,7 @@ generate data and read parameters from csvs.</p>
 <span class="sig-name descname"><span class="pre">sortkey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.ThermoLDROption.sortkey" title="Permalink to this definition"></a></dt>
 <dd><p>Sorts files numerically.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
 </dd>
 </dl>
@@ -371,7 +423,7 @@ generate data and read parameters from csvs.</p>
 <span class="sig-name descname"><span class="pre">readParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.TofwerkOption.readParams" title="Permalink to this definition"></a></dt>
 <dd><p>Read parameters from data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
 </dd>
 </dl>
@@ -382,7 +434,7 @@ generate data and read parameters from csvs.</p>
 <span class="sig-name descname"><span class="pre">sortkey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.TofwerkOption.sortkey" title="Permalink to this definition"></a></dt>
 <dd><p>Sorts files using the timestamp in name.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
 </dl>
@@ -395,7 +447,7 @@ generate data and read parameters from csvs.</p>
 <span class="sig-prename descclassname"><span class="pre">pewlib.io.csv.</span></span><span class="sig-name descname"><span class="pre">is_valid_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.csv.is_valid_directory" title="Permalink to this definition"></a></dt>
 <dd><p>Tests if a directory contains at least one csv.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
 </dd>
 </dl>
@@ -408,7 +460,7 @@ generate data and read parameters from csvs.</p>
 <p>Paths are filtered and sorted according to the <cite>option</cite> used, defaulting
 to the value of <a class="reference internal" href="#pewlib.io.csv.option_for_path" title="pewlib.io.csv.option_for_path"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.csv.option_for_path()</span></code></a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – directory</p></li>
 <li><p><strong>hint</strong> – type hint (NuHint, TofwerkHint)</p></li>
@@ -416,10 +468,10 @@ to the value of <a class="reference internal" href="#pewlib.io.csv.option_for_pa
 <li><p><strong>full</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – also return parameters</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>structured array of data
 dict of params if <cite>full</cite></p>
 </dd>
@@ -437,7 +489,7 @@ dict of params if <cite>full</cite></p>
 <dd><p>Attempts to find the correct type hint for the directory.
 If no specific type hint is found then a GenericOption.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pewlib.io.csv.GenericOption" title="pewlib.io.csv.GenericOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenericOption</span></code></a></p>
 </dd>
 </dl>
@@ -445,7 +497,7 @@ If no specific type hint is found then a GenericOption.</p>
 
 </section>
 <section id="module-pewlib.io.npz">
-<span id="numpy-npz"></span><h2>Numpy NPZ<a class="headerlink" href="#module-pewlib.io.npz" title="Permalink to this headline"></a></h2>
+<span id="numpy-npz"></span><h2>Numpy NPZ<a class="headerlink" href="#module-pewlib.io.npz" title="Permalink to this heading"></a></h2>
 <p>Import and export in pew’s custom file format, based on numpy’s compressed ‘.npz’.
 This format svaes image data, laser parameters and calibrations in one file.</p>
 <dl class="py function">
@@ -455,16 +507,16 @@ This format svaes image data, laser parameters and calibrations in one file.</p>
 <p>Loads files created using <a class="reference internal" href="#pewlib.io.npz.save" title="pewlib.io.npz.save"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.npz.save()</span></code></a>.
 On load the a <code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code> is reformed from the saved data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to ‘.npz’</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="pew.html#pewlib.laser.Laser" title="pewlib.laser.Laser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code></a></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code></p>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>ValueError</strong> – incomatible version</p>
 </dd>
 </dl>
@@ -483,27 +535,25 @@ which are then saved to a compressed ‘.npz’ archive. The time and current
 version are also saved. If <cite>path</cite> does not end in ‘.npz’ it is
 appended.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to save to</p></li>
 <li><p><strong>laser</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="pew.html#pewlib.laser.Laser" title="pewlib.laser.Laser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code></a>, <a class="reference internal" href="pew.html#pewlib.srr.srr.SRRLaser" title="pewlib.srr.srr.SRRLaser"><code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code></a>]) – <code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code></p></li>
 </ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.savez_compressed()</span></code></p>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
 </dd></dl>
 
 </section>
 <section id="module-pewlib.io.perkinelmer">
-<span id="perkinelmer"></span><h2>PerkinElmer<a class="headerlink" href="#module-pewlib.io.perkinelmer" title="Permalink to this headline"></a></h2>
+<span id="perkinelmer"></span><h2>PerkinElmer<a class="headerlink" href="#module-pewlib.io.perkinelmer" title="Permalink to this heading"></a></h2>
 <p>Import of line-by-line PerkinElmer ELAN ‘XL’ directories.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pewlib.io.perkinelmer.is_valid_directory">
@@ -511,7 +561,7 @@ appended.</p>
 <dd><p>Tests if a directory contains PerkinElmer data.</p>
 <p>Ensures the path exists, is a directory and contains at least one ‘.xl’ file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
 </dd>
 </dl>
@@ -525,17 +575,17 @@ appended.</p>
 If <cite>import_parameters</cite> and a ‘parameters.conf’ is used then the scantime,
 speed and spotsize can be imported.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to directory</p></li>
 <li><p><strong>import_parameters</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – import params from ‘parameters.conf’</p></li>
 <li><p><strong>full</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – also return dict with params</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>structured array of data
 dict of params if <cite>full</cite></p>
 </dd>
@@ -548,7 +598,7 @@ dict of params if <cite>full</cite></p>
 
 </section>
 <section id="module-pewlib.io.textimage">
-<span id="text-image"></span><h2>Text Image<a class="headerlink" href="#module-pewlib.io.textimage" title="Permalink to this headline"></a></h2>
+<span id="text-image"></span><h2>Text Image<a class="headerlink" href="#module-pewlib.io.textimage" title="Permalink to this heading"></a></h2>
 <p>Import and export of text-images, files where data is stored as delimited text values.
 Data is read in order from the first line.</p>
 <dl class="py function">
@@ -559,7 +609,7 @@ Data is read in order from the first line.</p>
 are converted to ‘,’ before import. If <cite>name</cite> is specified then a single
 field structured array is returned.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to file</p></li>
 <li><p><strong>delimiter</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – file delimiter</p></li>
@@ -567,7 +617,7 @@ field structured array is returned.</p>
 <li><p><strong>name</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – return single <cite>name</cite> field structured array</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
 </dl>
@@ -579,14 +629,14 @@ field structured array is returned.</p>
 <dd><p>Save data to csv.</p>
 <p>See <code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.savetxt()</span></code></p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to file</p></li>
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – unstructured array</p></li>
 <li><p><strong>header</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – file header</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -594,7 +644,7 @@ field structured array is returned.</p>
 
 </section>
 <section id="module-pewlib.io.vtk">
-<span id="vtk"></span><h2>VTK<a class="headerlink" href="#module-pewlib.io.vtk" title="Permalink to this headline"></a></h2>
+<span id="vtk"></span><h2>VTK<a class="headerlink" href="#module-pewlib.io.vtk" title="Permalink to this heading"></a></h2>
 <p>Exports to VTK formats for use in programs such as Paraview.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pewlib.io.vtk.save">
@@ -603,14 +653,14 @@ field structured array is returned.</p>
 <p>Saves an array to a ‘.vti’ file. Data origin is set to (0, 0) and equally
 spaced using x, y, z of <cite>spacing</cite>. If <cite>data</cite> is rasied to 3-dimensonal if lower.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – path to file</p></li>
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>spacing</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – spacing of ‘.vti’</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
