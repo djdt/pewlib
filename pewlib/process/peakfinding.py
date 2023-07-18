@@ -1,9 +1,8 @@
+from typing import Callable
+
 import numpy as np
 
 from pewlib.process.calc import local_maxima, reset_cumsum, view_as_blocks
-
-from typing import Callable
-
 
 PEAK_DTYPE = np.dtype(
     {
@@ -35,12 +34,12 @@ def cwt(
 def ricker_wavelet(size: int, sigma: float) -> np.ndarray:
     """The Ricker wavelet. For use with cwt."""
     x = np.linspace(-size / 2.0, size / 2.0, size)
-    a = 2.0 / (np.sqrt(3.0 * sigma) * np.pi ** 0.25)
-    return a * (1.0 - (x / sigma) ** 2) * np.exp(-(x ** 2 / (2.0 * sigma ** 2)))
+    a = 2.0 / (np.sqrt(3.0 * sigma) * np.pi**0.25)
+    return a * (1.0 - (x / sigma) ** 2) * np.exp(-(x**2 / (2.0 * sigma**2)))
 
 
 def _cwt_identify_ridges(
-    cwt_coef: np.ndarray, windows: np.ndarray, gap_threshold: int = None
+    cwt_coef: np.ndarray, windows: np.ndarray, gap_threshold: int | None = None
 ) -> np.ndarray:
     if gap_threshold is None:
         gap_threshold = len(windows) // 4
@@ -82,9 +81,9 @@ def _cwt_identify_ridges(
 def _cwt_filter_ridges(
     ridges: np.ndarray,
     cwt_coef: np.ndarray,
-    min_length: int = None,
+    min_length: int | None = None,
     noise_window: int = 100,
-    min_noise: float = None,
+    min_noise: float | None = None,
     min_snr: float = 10.0,
 ) -> np.ndarray:
     if min_noise is None:
@@ -149,8 +148,8 @@ def find_peaks_cwt(
     x: np.ndarray,
     min_midth: int,
     max_width: int,
-    ridge_gap_threshold: int = None,
-    ridget_min_length: int = None,
+    ridge_gap_threshold: int | None = None,
+    ridget_min_length: int | None = None,
     ridge_min_snr: float = 9.0,
     width_factor: float = 2.5,
     peak_base_method: str = "baseline",
@@ -331,7 +330,7 @@ def find_peaks_windowed(
 
 def insert_missing_peaks(
     peaks: np.ndarray,
-    distance: float = None,
+    distance: float | None = None,
     param: str = "top",
     missing_peak_area: float = 0.0,
 ) -> np.ndarray:
@@ -392,7 +391,7 @@ def peaks_from_edges(
     rights: np.ndarray,
     base_method: str = "baseline",
     height_method: str = "maxima",
-    baseline: np.ndarray = None,
+    baseline: np.ndarray | None = None,
 ) -> np.ndarray:
     """Creates a peak array from left and right indicies.
 

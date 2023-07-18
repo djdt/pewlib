@@ -3,11 +3,11 @@ elements. A few ofthe many available algorithms are implemented in this file.
 
 """
 
+from typing import Tuple
+
 import numpy as np
 
 from pewlib.process.calc import normalise, shuffle_blocks
-
-from typing import Tuple
 
 
 def li_icq(x: np.ndarray, y: np.ndarray) -> float:
@@ -53,7 +53,7 @@ def pearsonr_probablity(
     x: np.ndarray,
     y: np.ndarray,
     block: int = 3,
-    mask: np.ndarray = None,
+    mask: np.ndarray | None = None,
     shuffle_partial: bool = False,
     n: int = 500,
 ) -> Tuple[float, float]:
@@ -107,7 +107,7 @@ def pearsonr_probablity(
 
 
 def manders(
-    x: np.ndarray, y: np.ndarray, tx: float = None, ty: float = None
+    x: np.ndarray, y: np.ndarray, tx: float | None = None, ty: float | None = None
 ) -> Tuple[float, float]:
     """Manders' correlation coefficients.
 
