@@ -1,8 +1,8 @@
+from typing import Iterable, List, Tuple
+
 import numpy as np
 
 from pewlib.config import Config
-
-from typing import Iterable, Tuple, List
 
 
 class SRRConfig(Config):
@@ -79,7 +79,7 @@ class SRRConfig(Config):
         self._subpixel_offsets = np.arange(0, width, dtype=int)
         self._subpixel_size = width
 
-    def get_pixel_width(self, layer: int = None) -> float:
+    def get_pixel_width(self, layer: int | None = None) -> float:
         """Pixel width in μm.
 
         Args:
@@ -92,7 +92,7 @@ class SRRConfig(Config):
         else:
             return super().get_pixel_height()
 
-    def get_pixel_height(self, layer: int = None) -> float:
+    def get_pixel_height(self, layer: int | None = None) -> float:
         """Pixel height in μm.
 
         Args:
@@ -109,7 +109,7 @@ class SRRConfig(Config):
     def data_extent(
         self,
         shape: Tuple[int, ...],
-        layer: int = None,
+        layer: int | None = None,
     ) -> Tuple[float, float, float, float]:
         """Extent of data in μm.
 

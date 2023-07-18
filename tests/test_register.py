@@ -1,16 +1,28 @@
 import numpy as np
 
+from pewlib.laser import Laser
 from pewlib.process import register
 
 
-def test_fft_regsiter_images():
+def test_anchor_offset():
+    a = np.empty((9, 9))
+    b = np.empty((5, 5))
+
+    assert register.anchor_offset(a, b, "top left") == (0, 0)
+    assert register.anchor_offset(a, b, "top right") == (0, 4)
+    assert register.anchor_offset(a, b, "bottom left") == (4, 0)
+    assert register.anchor_offset(a, b, "bottom right") == (4, 4)
+    assert register.anchor_offset(a, b, "center") == (2, 2)
+
+
+def test_fft_regsiter_offset():
     np.random.seed(940926)
 
     # random no offset
     a = np.random.random((100, 100))
     b = np.random.random((100, 100))
 
-    offset = register.fft_register_images(a, b)
+    offset = register.fft_register_offset(a, b)
     assert np.all(offset == (0, 0))
 
     # perfect overlap circles
@@ -18,9 +30,9 @@ def test_fft_regsiter_images():
     a[(xx - 50) ** 2 + (yy - 75) ** 2 < 50] += 5.0
     b[(xx - 25) ** 2 + (yy - 25) ** 2 < 50] += 5.0
 
-    offset = register.fft_register_images(a, b)
+    offset = register.fft_register_offset(a, b)
     assert np.all(offset == (25, 50))
-    offset = register.fft_register_images(b, a)
+    offset = register.fft_register_offset(b, a)
     assert np.all(offset == (-25, -50))
 
     # bars
@@ -30,9 +42,9 @@ def test_fft_regsiter_images():
     a[10:20] += 5.0
     b[60:70] += 5.0
 
-    offset = register.fft_register_images(a, b)
+    offset = register.fft_register_offset(a, b)
     assert np.all(offset == (-50, 0))
-    offset = register.fft_register_images(b, a)
+    offset = register.fft_register_offset(b, a)
     assert np.all(offset == (50, 0))
 
 
@@ -66,7 +78,6 @@ def test_overlap_arrays():
     assert np.all(c[:3] == b)
 
 
-
 def test_overlap_structured_arrays():
     a = np.empty((4, 4), dtype=[("a", float), ("c", float)])
     a["a"].flat = np.arange(16.0)
@@ -86,5 +97,8 @@ def test_overlap_structured_arrays():
 
     d = register.overlap_structured_arrays(a, b, offset=(2, 2), mode="mean")
 
-test_overlap_arrays()
-test_overlap_structured_arrays()
+    # Test overlap methods
+    assert np.all(d["c"][2:4, 2:4] == np.mean([a["c"][:2, :2], b["c"][:2, :2]], axis=0))
+
+    d = register.overlap_structured_arrays(a, b, offset=(2, 2), mode="sum")
+    assert np.all(d["c"][2:4, 2:4] == np.sum([a["c"][:2, :2], b["c"][:2, :2]], axis=0))

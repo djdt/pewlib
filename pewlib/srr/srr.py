@@ -9,18 +9,16 @@ References:
     & Doble, P. A. Super-Resolution Reconstruction for Two- and Three-Dimensional
     LA-ICP-MS Bioimaging Analytical Chemistry, American Chemical Society (ACS), 2019
 """
+import copy
+from typing import Dict, List, Tuple, Union
+
 import numpy as np
 import numpy.lib.recfunctions as rfn
-import copy
 
-from pewlib.laser import Laser
 from pewlib.calibration import Calibration
-
+from pewlib.laser import Laser
 from pewlib.process.calc import subpixel_offset_equal
-
 from pewlib.srr.config import SRRConfig
-
-from typing import Dict, List, Tuple, Union
 
 
 class SRRLaser(Laser):
@@ -39,9 +37,9 @@ class SRRLaser(Laser):
     def __init__(
         self,
         data: List[np.ndarray],
-        calibration: Dict[str, Calibration] = None,
-        config: SRRConfig = None,
-        info: Dict[str, str] = None,
+        calibration: Dict[str, Calibration] | None = None,
+        config: SRRConfig | None = None,
+        info: Dict[str, str] | None = None,
     ):
         assert len(data) > 1
         self.data: List[np.ndarray] = data
@@ -81,7 +79,10 @@ class SRRLaser(Laser):
         return (self.data[1].shape[0], self.data[0].shape[0], len(self.data))
 
     def add(
-        self, element: str, data: List[np.ndarray], calibration: Calibration = None
+        self,
+        element: str,
+        data: List[np.ndarray],
+        calibration: Calibration | None = None,
     ) -> None:
         """Add an element."""
         assert len(data) == len(self.data)
@@ -122,11 +123,11 @@ class SRRLaser(Laser):
 
     def get(
         self,
-        element: str = None,
+        element: str | None = None,
         calibrate: bool = False,
-        extent: Tuple[float, float, float, float] = None,
+        extent: Tuple[float, float, float, float] | None = None,
         flat: bool = False,
-        layer: int = None,
+        layer: int | None = None,
         **kwargs,
     ) -> np.ndarray:
         """Get elemental data.
@@ -226,8 +227,8 @@ class SRRLaser(Laser):
         cls,
         elements: List[str],
         layers: List[List[np.ndarray]],
-        config: SRRConfig = None,
-        info: Dict[str, str] = None,
+        config: SRRConfig | None = None,
+        info: Dict[str, str] | None = None,
     ) -> "SRRLaser":
         """Creates class from a list of names and lists of unstructured arrays."""
         dtype = [(element, float) for element in elements]

@@ -2,17 +2,15 @@
 Import of line-by-line data stored as a series of .csv files.
 """
 
-from concurrent.futures import ProcessPoolExecutor
 import logging
-from pathlib import Path
-import time
 import re
+import time
+from concurrent.futures import ProcessPoolExecutor
+from pathlib import Path
+from typing import Any, List, Tuple, Union
 
 import numpy as np
 import numpy.lib.recfunctions as rfn
-
-from typing import Any, List, Tuple, Union
-
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +30,7 @@ class GenericOption(object):
     def __init__(
         self,
         drop_names: List[str] = [],
-        kw_genfromtxt: dict = None,
+        kw_genfromtxt: dict | None = None,
         regex: str = r".*\.csv",
         drop_nan_rows: bool = False,
         drop_nan_columns: bool = False,
@@ -164,7 +162,7 @@ def option_for_path(path: Union[str, Path]) -> GenericOption:
 
 def load(
     path: Union[str, Path],
-    option: GenericOption = None,
+    option: GenericOption | None = None,
     full: bool = False,
 ) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
     """Load a directory where lines are stored in separate .csv files.

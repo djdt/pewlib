@@ -3,17 +3,20 @@ Import of line-by-line data exported from Qtegra using the '.csv' export functio
 Both column and row formats are supported.
 Tested with Thermo iCAP RQ ICP-MS.
 """
-import numpy as np
 import logging
 from pathlib import Path
-
 from typing import Generator, TextIO, Tuple, Union
+
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
 
 def _icap_csv_columns_read(
-    path: Path, line_type: str, delimiter: str = None, comma_decimal: bool = False
+    path: Path,
+    line_type: str,
+    delimiter: str | None = None,
+    comma_decimal: bool = False,
 ) -> np.ndarray:
     def _read_lines(
         fp: TextIO, line_type: str, replace_decimal: bool = False
@@ -62,7 +65,7 @@ def _icap_csv_columns_read(
 
 def icap_csv_columns_read_data(
     path: Union[str, Path],
-    delimiter: str = None,
+    delimiter: str | None = None,
     comma_decimal: bool = False,
     use_analog: bool = False,
 ) -> np.ndarray:
@@ -79,7 +82,7 @@ def icap_csv_columns_read_data(
 
 def icap_csv_columns_read_params(
     path: Union[str, Path],
-    delimiter: str = None,
+    delimiter: str | None = None,
     comma_decimal: bool = False,
 ) -> dict:
     if isinstance(path, str):  # pragma: no cover
@@ -97,7 +100,7 @@ def icap_csv_columns_read_params(
 def _icap_csv_rows_read(
     path: Union[str, Path],
     col_type: str,
-    delimiter: str = None,
+    delimiter: str | None = None,
     comma_decimal: bool = False,
 ) -> np.ndarray:
     def _read_lines(
@@ -145,11 +148,10 @@ def _icap_csv_rows_read(
 
 def icap_csv_rows_read_data(
     path: Union[str, Path],
-    delimiter: str = None,
+    delimiter: str | None = None,
     comma_decimal: bool = False,
     use_analog: bool = False,
 ) -> np.ndarray:
-
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 
@@ -163,10 +165,9 @@ def icap_csv_rows_read_data(
 
 def icap_csv_rows_read_params(
     path: Union[str, Path],
-    delimiter: str = None,
+    delimiter: str | None = None,
     comma_decimal: bool = False,
 ) -> dict:
-
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
 

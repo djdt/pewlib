@@ -3,6 +3,7 @@ Import and export in pew's custom file format, based on numpy's compressed '.npz
 This format svaes image data, laser parameters and calibrations in one file.
 """
 import time
+import logging
 from pathlib import Path
 
 import numpy as np
@@ -16,6 +17,8 @@ from pewlib.srr import SRRLaser, SRRConfig
 
 from typing import Dict, Union
 
+logger = logging.getLogger(__name__)
+
 
 def pack_info(info: Dict[str, str], sep: str = "\t") -> np.ndarray:
     string = sep.join(
@@ -26,9 +29,27 @@ def pack_info(info: Dict[str, str], sep: str = "\t") -> np.ndarray:
     return np.array(string)
 
 
-def unpack_info(info: np.ndarray, sep: str = "\t") -> Dict[str, str]:
-    tokens = str(info).split(sep)
+def unpack_info(x: np.ndarray, sep: str = "\t") -> Dict[str, str]:
+    tokens = str(x).split(sep)
     return {key: val for key, val in zip(tokens[::2], tokens[1::2])}
+
+
+def pack_calibration(dict: Dict[str, Calibration]) -> np.ndarray:
+    size = max(v.x.size for v in dict.values())
+    data = np.stack([v.to_array(size=size) for v in dict.values()])
+    elements = np.array([k for k in dict.keys()])
+    # recfunctions.append_fields does not like 0 length, i.e. when no calibration with points
+    packed = np.empty(
+        data.size, dtype=[("element", elements.dtype), ("calibration", data.dtype)]
+    )
+    packed["element"] = elements
+    packed["calibration"] = data
+    return packed
+
+
+def unpack_calibration(x: np.ndarray) -> Dict[str, Calibration]:
+    calibration = {i["element"]: Calibration.from_array(i["calibration"]) for i in x}
+    return calibration
 
 
 def load(path: Union[str, Path]) -> Laser:
@@ -54,39 +75,56 @@ def load(path: Union[str, Path]) -> Laser:
 
     npz = np.load(path)
 
-    if "_version" not in npz.files or npz["_version"] < "0.6.0":  # pragma: no cover
-        raise ValueError("NPZ Version mismatch, only versions >=0.6.0 are supported.")
+    if "header" not in npz.files:
+        if "_version" not in npz.files or npz["_version"] < "0.6.0":  # pragma: no cover
+            raise ValueError(
+                "NPZ Version mismatch, only versions >=0.6.0 are supported."
+            )
+        else:  # < 0.8.0 Prior to use of header
+            header = {"version": npz["_version"], "class": npz["_class"]}
+    else:
+        header = unpack_info(npz["header"])
+
     data = npz["data"]
 
-    calibration = {}
-    for name in data.dtype.names:
-        calibration[name] = Calibration.from_array(npz[f"calibration_{name}"])
+    # Compatibility with old file verions
+    if header["version"] < "0.7.0":  # Prior to use of info dict
+        info = {"Name": str(npz["name"])}
+    else:
+        info = unpack_info(npz["info"])
 
-    if npz["_class"] in ["Laser", "Raster"]:
+    if header["version"] < "0.8.0":  # Prior to use of packed calibrations
+        calibration = {}
+        for name in data.dtype.names:
+            calibration[name] = Calibration.from_array(npz[f"calibration_{name}"])
+    else:
+        calibration = unpack_calibration(npz["calibration"])
+
+    if header["version"] < __version__:
+        logger.info(f"NPZ version of {path} is out of date. {npz['_version']} < 0.8.0.")
+
+    if header["class"] in ["Laser", "Raster"]:
         laser = Laser
         config = Config.from_array(npz["config"])
-    elif npz["_class"] in ["Spot"]:
+    elif header["class"] in ["Spot"]:
         laser = Laser
         config = SpotConfig.from_array(npz["config"])
-    elif npz["_class"] in ["SRRLaser", "SRR"]:
+    elif header["class"] in ["SRRLaser", "SRR"]:
         laser = SRRLaser  # type: ignore
         config = SRRConfig.from_array(npz["config"])
     else:  # pragma: no cover
         raise ValueError("NPZ unable to import laser class {npz['_class']}.")
 
-    if npz["_version"] < "0.7.0":  # Prior to use of info dict
-        info = {"Name": str(npz["name"])}
-    else:
-        info = unpack_info(npz["info"])
 
     # Update the path
     info["Name"] = info.get("Name", path.stem)  # Ensure name
     info["File Path"] = str(path.resolve())
+    info["File Version"] = str(header["version"])
 
     return laser(
         data=data,
         calibration=calibration,
-        config=config,
+        config=config,  # type: ignore
         info=info,
     )
 
@@ -106,17 +144,17 @@ def save(path: Union[str, Path], laser: Union[Laser, SRRLaser]) -> None:
     See Also:
         :func:`numpy.savez_compressed`
     """
-    calibrations = {}
-    for name in laser.calibration:
-        calibrations[f"calibration_{name}"] = laser.calibration[name].to_array()
     np.savez_compressed(
         path,
-        _version=__version__,
-        _time=time.time(),
-        _class=laser.config._class,
-        _multiple=False,
+        header=pack_info(
+            {
+                "version": __version__,
+                "class": str(laser.config._class),
+                "time": str(time.time()),
+            }
+        ),
         data=laser.data,
+        calibration=pack_calibration(laser.calibration),
         info=pack_info(laser.info),
         config=laser.config.to_array(),
-        **calibrations,
     )

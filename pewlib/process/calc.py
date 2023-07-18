@@ -1,8 +1,8 @@
 """This module contains functions used by other processing modules."""
 
-import numpy as np
+from typing import List, Optional, Tuple
 
-from typing import List, Tuple
+import numpy as np
 
 
 def local_maxima(x: np.ndarray) -> np.ndarray:
@@ -56,7 +56,7 @@ def reset_cumsum(x: np.ndarray, reset_value: float = 0.0) -> np.ndarray:
 def shuffle_blocks(
     x: np.ndarray,
     block: Tuple[int, ...],
-    mask: np.ndarray = None,
+    mask: Optional[np.ndarray] | None = None,
     mode: str = "pad",
     shuffle_partial: bool = False,
 ) -> np.ndarray:
@@ -175,7 +175,7 @@ def subpixel_offset_equal(
 
 
 def view_as_blocks(
-    x: np.ndarray, block: Tuple[int, ...], step: Tuple[int, ...] = None
+    x: np.ndarray, block: Tuple[int, ...], step: Optional[Tuple[int, ...]] | None = None
 ) -> np.ndarray:
     """Block view of array
 

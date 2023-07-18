@@ -102,6 +102,13 @@ def test_io_npz():
     assert loaded.calibration["A1"].unit == laser.calibration["A1"].unit
     assert np.all(loaded.calibration["A1"].points == laser.calibration["A1"].points)
 
+    assert loaded.calibration["B2"].gradient == laser.calibration["B2"].gradient
+    assert loaded.calibration["B2"].intercept == laser.calibration["B2"].intercept
+    assert loaded.calibration["B2"].rsq == laser.calibration["B2"].rsq
+    assert loaded.calibration["B2"].weighting == laser.calibration["B2"].weighting
+    assert loaded.calibration["B2"].unit == laser.calibration["B2"].unit
+    assert np.all(loaded.calibration["B2"].points == laser.calibration["B2"].points)
+
 
 def test_io_npz_spot():
     path = Path(__file__).parent.joinpath("data", "npz")

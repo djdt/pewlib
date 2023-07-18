@@ -1,6 +1,6 @@
-import numpy as np
-
 from typing import Tuple
+
+import numpy as np
 
 
 class Config(object):
@@ -62,7 +62,7 @@ class SpotConfig(Config):
 
     _class = "Spot"
 
-    def __init__(self, spotsize: float = 100.0, spotsize_y: float = None):
+    def __init__(self, spotsize: float = 100.0, spotsize_y: float | None = None):
         super().__init__(spotsize=spotsize, speed=0.0, scantime=0.0)
         if spotsize_y is None:
             spotsize_y = spotsize

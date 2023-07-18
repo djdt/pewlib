@@ -62,10 +62,10 @@ def deconvolve(x: np.ndarray, psf: np.ndarray, mode: str = "valid"):
         raise ValueError("Valid modes are 'valid', 'same'.")
 
 
-def erf(x: float) -> float:
+def erf(x: float | np.ndarray) -> float | np.ndarray:
     """Error function approximation.
 
-    The maximum error is 5e-4 [1].
+    The maximum error is 1.5e-7 [1].
 
     Args:
         x: value
@@ -74,16 +74,15 @@ def erf(x: float) -> float:
         approximation of error function
 
     References:
-
-    .. [1] Abramowitz, Milton, and Irene A. Stegun, eds. Handbook of mathematical
-        functions with formulas, graphs, and mathematical tables.
-        Vol. 55. US Government printing office, 1970.
+        .. [1] Abramowitz, Milton, and Irene A. Stegun, eds. Handbook of mathematical
+            functions with formulas, graphs, and mathematical tables.
+            Vol. 55. US Government printing office, 1970.
     """
-    assert x >= 0.0
-    # Maximum error: 2.5e-5
+    sign = np.sign(x)
     a = np.array([0.278393, 0.230389, 0.000972, 0.078108])
-
-    return 1.0 - 1.0 / (1.0 + np.sum(a * np.power(x, [1, 2, 3, 4]))) ** 4
+    p = np.array([[1, 2, 3, 4]]).T
+    sum = np.sum(a * np.power(x, p).T, axis=1)
+    return sign * (1.0 - 1.0 / (1.0 + sum) ** 4)
 
 
 def erfinv(x: float) -> float:
@@ -213,7 +212,7 @@ def exponential(
 
 
 def inversegamma_pdf(x: np.ndarray, alpha: float, beta: float) -> np.ndarray:
-    return ((beta ** alpha) / gamma(alpha)) * x ** (-alpha - 1.0) * np.exp(-beta / x)
+    return ((beta**alpha) / gamma(alpha)) * x ** (-alpha - 1.0) * np.exp(-beta / x)
 
 
 def inversegamma(
