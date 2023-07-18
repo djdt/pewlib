@@ -2,14 +2,14 @@
 Line-by-line data is collected in multiple lines, with each line performed as a
 continuous ablation in one direction. The lines are then stacked to form an image.
 """
+import copy
+from typing import Dict, List, Tuple, Union
+
 import numpy as np
 import numpy.lib.recfunctions as rfn
-import copy
 
 from pewlib.calibration import Calibration
 from pewlib.config import Config
-
-from typing import Dict, List, Tuple, Union
 
 
 class Laser(object):
@@ -28,9 +28,9 @@ class Laser(object):
     def __init__(
         self,
         data: np.ndarray,
-        calibration: Dict[str, Calibration] = None,
-        config: Config = None,
-        info: Dict[str, str] = None,
+        calibration: Dict[str, Calibration] | None = None,
+        config: Config | None = None,
+        info: Dict[str, str] | None = None,
     ):
         self.data: np.ndarray = data
         self.calibration = {name: Calibration() for name in self.elements}
@@ -63,7 +63,7 @@ class Laser(object):
         return 1
 
     def add(
-        self, element: str, data: np.ndarray, calibration: Calibration = None
+        self, element: str, data: np.ndarray, calibration: Calibration | None = None
     ) -> None:
         """Adds a new element.
 
@@ -105,9 +105,9 @@ class Laser(object):
 
     def get(
         self,
-        element: str = None,
-        calibrate: bool = False,
-        extent: Tuple[float, float, float, float] = None,
+        element: str | None = None,
+        calibrate: bool | None = False,
+        extent: Tuple[float, float, float, float] | None = None,
         **kwargs,
     ) -> np.ndarray:
         """Get elemental data.
@@ -148,7 +148,7 @@ class Laser(object):
         cls,
         elements: List[str],
         datas: List[np.ndarray],
-        config: Config = None,
+        config: Config | None = None,
         info: Dict[str, str] = {},
     ) -> "Laser":
         """Creates class from a list of names and unstructured arrays."""

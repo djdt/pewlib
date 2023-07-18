@@ -4,13 +4,12 @@ Both raw binaries and the '.csv' exports are supported.
 Tested with Agilent 7500, 7700 and 8900 ICPs.
 """
 import logging
-from xml.etree import ElementTree
 from pathlib import Path
+from typing import Callable, Dict, Generator, List, Tuple, Union
+from xml.etree import ElementTree
 
 import numpy as np
 import numpy.lib.recfunctions as rfn
-
-from typing import Callable, Dict, Generator, List, Tuple, Union
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +19,9 @@ batch_xml_path = Path("Method", "BatchLog.xml")
 
 
 class XSpecificMass(object):
-    def __init__(self, id: int, name: str, acctime: float, mz: int, mz2: int = None):
+    def __init__(
+        self, id: int, name: str, acctime: float, mz: int, mz2: int | None = None
+    ):
         self.id = id
         self.name = name
         self.acctime = acctime
@@ -321,9 +322,9 @@ def msts_xaddition_xml_read_info(path: Path) -> Tuple[Dict[int, Tuple[int, int]]
 
 def load_binary(
     path: Union[str, Path],
-    collection_methods: List[str] = None,
+    collection_methods: List[str] | None = None,
     counts_per_second: bool = False,
-    drop_names: List[str] = None,
+    drop_names: List[str] | None = None,
     full: bool = False,
 ) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
     """Imports an Agilent '.b' batch.
@@ -454,9 +455,9 @@ def read_datafile_csvs(datafiles: List[Path]) -> Generator[np.ndarray, None, Non
 
 def load_csv(
     path: Union[str, Path],
-    collection_methods: List[str] = None,
+    collection_methods: List[str] | None = None,
     use_acq_for_names: bool = True,
-    drop_names: List[str] = None,
+    drop_names: List[str] | None = None,
     full: bool = False,
 ) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
     """Imports an Agilent '.b' batch.
@@ -611,10 +612,10 @@ def load_info(path: Union[str, Path]) -> Dict[str, str]:
 
 def load(
     path: Union[str, Path],
-    collection_methods: List[str] = None,
+    collection_methods: List[str] | None = None,
     use_acq_for_names: bool = True,
     counts_per_second: bool = False,
-    drop_names: List[str] = None,
+    drop_names: List[str] | None = None,
     full: bool = False,
 ) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
     """Imports an Agilent '.b' batch.

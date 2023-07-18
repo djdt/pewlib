@@ -1,6 +1,6 @@
-import numpy as np
-
 from typing import Tuple, Union
+
+import numpy as np
 
 
 def weights_from_weighting(
@@ -35,12 +35,12 @@ def weights_from_weighting(
     elif weighting == "1/x":
         return 1.0 / x
     elif weighting == "1/(x^2)":
-        return 1.0 / (x ** 2.0)
+        return 1.0 / (x**2.0)
     else:
         raise ValueError(f"Unknown weighting {weighting}.")
 
 
-def weighted_rsq(x: np.ndarray, y: np.ndarray, w: np.ndarray = None) -> float:
+def weighted_rsq(x: np.ndarray, y: np.ndarray, w: np.ndarray | None = None) -> float:
     """Calculate r² for weighted linear regression.
 
     Args:
@@ -62,7 +62,7 @@ def weighted_rsq(x: np.ndarray, y: np.ndarray, w: np.ndarray = None) -> float:
 
 
 def weighted_linreg(
-    x: np.ndarray, y: np.ndarray, w: np.ndarray = None
+    x: np.ndarray, y: np.ndarray, w: np.ndarray | None = None
 ) -> Tuple[float, float, float, float]:
     """Weighted linear regression.
 
@@ -115,9 +115,9 @@ class Calibration(object):
         intercept: float = 0.0,
         gradient: float = 1.0,
         unit: str = "",
-        rsq: float = None,
-        error: float = None,
-        points: np.ndarray = None,
+        rsq: float | None = None,
+        error: float | None = None,
+        points: np.ndarray | None = None,
         weights: Union[str, Tuple[str, np.ndarray]] = "Equal",
     ):
         self.intercept = intercept
@@ -134,7 +134,8 @@ class Calibration(object):
         if points is not None:
             self.points = points
 
-        self.weights = weights
+        # Set weights via property
+        self.weights = weights  # type: ignore
 
     @property
     def x(self) -> np.ndarray:
@@ -205,7 +206,7 @@ class Calibration(object):
                     x, y, w
                 )
 
-    def to_array(self, size: int = None) -> np.ndarray:
+    def to_array(self, size: int | None = None) -> np.ndarray:
         """Convert to a Numpy array. Points and weights are trimmed or padded with nan to 'size' if passed."""
         if size is None:
             size = self.x.shape[0]
@@ -229,12 +230,12 @@ class Calibration(object):
             dtype=[
                 ("intercept", np.float64),
                 ("gradient", np.float64),
-                ("unit", f"U32"),
+                ("unit", "U32"),
                 ("rsq", np.float64),
                 ("error", np.float64),
                 ("points", np.float64, points.shape),
                 ("weights", np.float64, weights.shape),
-                ("weighting", f"U32"),
+                ("weighting", "U32"),
             ],
         )
 
