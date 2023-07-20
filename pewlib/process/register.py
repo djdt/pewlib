@@ -1,8 +1,8 @@
 """Module for registering and merging images."""
 
-import numpy as np
+from typing import Iterable, List, Tuple
 
-from typing import Iterable, Tuple
+import numpy as np
 
 
 def anchor_offset(a: np.ndarray, b: np.ndarray, anchor: str) -> Tuple[int, int]:
@@ -59,9 +59,8 @@ def fft_register_offset(a: np.ndarray, b: np.ndarray) -> Tuple[int, ...]:
 
 
 def overlap_arrays(
-    a: np.ndarray,
-    b: np.ndarray,
-    offset: Iterable[int],
+    arrays: List[np.ndarray],
+    offsets: List[Iterable[int]],
     fill: float = np.nan,
     mode: str = "replace",
 ) -> np.ndarray:
@@ -89,7 +88,7 @@ def overlap_arrays(
     >>> from pewlib.process import register
     >>> a = np.arange(9.0).reshape(3, 3)
     >>> b = np.arange(9.0).reshape(3, 3)
-    >>> c = register.overlap_arrays(a, b, fill=0, mode="sum")
+    >>> c = register.overlap_arrays([a, b], [(0, 0), (2, 2)], fill=0, mode="sum")
 
 
     .. plot::
@@ -97,57 +96,38 @@ def overlap_arrays(
         import numpy as np
         from pewlib.process import register
         import matplotlib.pyplot as plt
-        c = register.overlap_arrays(np.arange(9.0).reshape(3, 3), np.arange(9.0).reshape(3, 3), fill=0, mode="sum")
+        c = register.overlap_arrays(
+            [np.arange(9.0).reshape(3, 3), np.arange(9.0).reshape(3, 3)],
+            [(0, 0), (2, 2)], fill=0, mode="sum"
+        )
 
         plt.imshow(c)
         plt.show()
     """
 
-    if a.ndim != b.ndim:  # pragma: no cover
-        raise ValueError(
-            f"Arrays 'a' and 'b' must have the same dimensions, {a.ndim} != {b.ndim}."
-        )
+    if not all(a.ndim == arrays[0].ndim for a in arrays):  # pragma: no cover
+        raise ValueError("Arrays must have the same dimensions.")
 
-    offset = np.array(offset, dtype=int)
-    if offset.size != a.ndim:  # pragma: no cover
-        raise ValueError("Offset must have same dimensions as arrays.")
-
-    if mode not in ["replace", "mean", "sum"]:  # pragma: no cover
-        raise ValueError("'mode' must be 'replace', 'mean' or 'sum'.")
-
-    # find the max / min extents of the new array
-    new_shape = np.maximum(a.shape, offset + b.shape) - np.minimum(0, offset)
-    c = np.full(new_shape, fill, dtype=a.dtype)
-
-    # offsets for each array
-    aoffset = np.where(offset < 0, -offset, 0)
-    boffset = np.where(offset >= 0, offset, 0)
-    aslice = tuple(slice(o, o + s) for o, s in zip(aoffset, a.shape))
-    bslice = tuple(slice(o, o + s) for o, s in zip(boffset, b.shape))
-
-    # size and slice of overlapping area
-    abslice = tuple(
-        slice(max(a.start, b.start), min(a.stop, b.stop), None)
-        for a, b in zip(aslice, bslice)
+    min_offset = np.amin([offset for offset in offsets])
+    offsets = [(offset - min_offset) for offset in offsets]
+    new_shape = np.amax(
+        [np.array(offset) + a.shape for offset, a in zip(offsets, arrays)]
     )
-    absize = tuple(s.stop - s.start for s in abslice)
-    hasoverlap = all(x > 0 for x in absize)
 
-    # sections of overlap from a, b
-    asec = tuple(slice(o, o + s) for o, s in zip(aoffset, absize))
-    bsec = tuple(slice(o, o + s) for o, s in zip(boffset, absize))
+    overlap = np.full(new_shape, fill, dtype=arrays[0].dtype)
+    for i, (offset, array) in enumerate(zip(offsets, arrays)):
+        slice = tuple(slice(o, o + s) for o, s in zip(offset, array.shape))
+        if mode == "replace":
+            overlap[slice] = array
+        elif mode == "mean":
+            idx = ~np.isnan(overlap[slice])
+            overlap[slice][idx] = np.average(
+                [overlap[slice][idx], array[idx]], weights=[i, 1], axis=0
+            )
+        elif mode == "sum":
+            overlap = np.nansum([overlap[slice], array], axis=0)
 
-    c[aslice] = a
-    c[bslice] = b
-
-    if mode == "replace":
-        pass
-    elif mode == "mean" and hasoverlap:
-        c[abslice] = np.nanmean([a[asec], b[bsec]], axis=0)
-    elif mode == "sum" and hasoverlap:
-        c[abslice] = np.nansum([a[asec], b[bsec]], axis=0)
-
-    return c
+    return overlap
 
 
 def overlap_structured_arrays(
