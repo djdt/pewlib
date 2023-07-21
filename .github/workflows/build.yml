@@ -28,7 +28,7 @@ jobs:
           pytest
       - name: Install doc dependencies
         run: |
-          pip install sphinx sphinx-autodoc-typehints sphinx-rtd-theme matplotlib
+          pip install sphinx sphinx-autodoc-typehints sphinx-rtd-theme>=1.2.0 matplotlib
       - name: Build docs
         run: |
           cd docs
