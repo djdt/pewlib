@@ -68,8 +68,9 @@ def overlap_arrays(
 
     Coordinates (0, 0) of array `b` will be at `offset` in the new array.
     Non-overlapping areas are filled with `fill`.
-    Overlapped values are calculated using `mode`. Mode 'replace' will use values in `b`,
-    'mean' and 'sum' uses the mean and sum of `a` and `b` respectively.
+    Overlapped values are calculated using `mode`. Mode 'replace' will replace
+    values with those last in `array`,
+    'mean' and 'sum' uses the mean and sum of `arrays` respectively.
 
     Args:
         a: ndim array
@@ -108,24 +109,23 @@ def overlap_arrays(
     if not all(a.ndim == arrays[0].ndim for a in arrays):  # pragma: no cover
         raise ValueError("Arrays must have the same dimensions.")
 
-    min_offset = np.amin([offset for offset in offsets])
+    min_offset = np.amin(offsets, axis=0)
     offsets = [(offset - min_offset) for offset in offsets]
     new_shape = np.amax(
-        [np.array(offset) + a.shape for offset, a in zip(offsets, arrays)]
+        [np.array(offset) + a.shape for offset, a in zip(offsets, arrays)], axis=0
     )
 
     overlap = np.full(new_shape, fill, dtype=arrays[0].dtype)
+    visits = np.zeros(new_shape, dtype=int)  # Track idx for mean calc
     for i, (offset, array) in enumerate(zip(offsets, arrays)):
-        slice = tuple(slice(o, o + s) for o, s in zip(offset, array.shape))
+        slice_idx = tuple(slice(o, o + s) for o, s in zip(offset, array.shape))
         if mode == "replace":
-            overlap[slice] = array
-        elif mode == "mean":
-            idx = ~np.isnan(overlap[slice])
-            overlap[slice][idx] = np.average(
-                [overlap[slice][idx], array[idx]], weights=[i, 1], axis=0
-            )
-        elif mode == "sum":
-            overlap = np.nansum([overlap[slice], array], axis=0)
+            overlap[slice_idx] = array
+        elif mode == "mean" or mode == "sum":
+            overlap[slice_idx] = np.nansum([overlap[slice_idx], array], axis=0)
+            visits[slice_idx] += 1
+    if mode == "mean":
+        overlap[visits > 1] /= visits[visits > 1]
 
     return overlap
 

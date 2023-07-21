@@ -49,33 +49,39 @@ def test_fft_regsiter_offset():
 
 
 def test_overlap_arrays():
-    a = np.arange(9.0).reshape(3, 3)
-    b = np.arange(9.0).reshape(3, 3)
+    a = np.ones((2, 2))
+    b = np.ones((2, 2)) * 2
+    c = np.ones((2, 2)) * 3
+
+    offsets = [(0, 0), (-1, 1), (0, 1)]
+    # _   b   b
+    # a   abc bc
+    # a   ac  c
 
     # Test overlap methods
-    c = register.overlap_arrays(a, b, offset=(1, 1), mode="replace")
-    assert c.shape == (4, 4)
-    assert np.isnan(c[0, 3])
-    assert np.isnan(c[3, 0])
-    assert np.all(c[~np.isnan(c)] == [0, 1, 2, 3, 0, 1, 2, 6, 3, 4, 5, 6, 7, 8])
-    c = register.overlap_arrays(a, b, offset=(1, 1), mode="mean")
-    assert np.all(c[~np.isnan(c)] == [0, 1, 2, 3, 2, 3, 2, 6, 5, 6, 5, 6, 7, 8])
-    c = register.overlap_arrays(a, b, offset=(1, 1), mode="sum")
-    assert np.all(c[~np.isnan(c)] == [0, 1, 2, 3, 4, 6, 2, 6, 10, 12, 5, 6, 7, 8])
+    d = register.overlap_arrays([a, b, c], offsets=offsets, mode="replace")
+    assert d.shape == (3, 3)
+    assert np.isnan(d[0][0])
+    assert np.all(d[~np.isnan(d)] == [2, 2, 1, 3, 3, 1, 3, 3])
 
-    # Test various offsets
-    for i in range(-5, 5):
-        for j in range(-5, 5):
-            c = register.overlap_arrays(a, b, offset=(i, j), mode="sum")
-            assert np.nansum(c) == 72.0
+    d = register.overlap_arrays([a, b, c], offsets=offsets, mode="mean")
+    assert np.all(d[~np.isnan(d)] == [2, 2, 1, 2, 2.5, 1, 2, 3])
 
-    # Test non nan fill
-    c = register.overlap_arrays(a, b, offset=(-3, 0), fill=0.0, mode="replace")
-    assert np.all(c[:3] == b)
-    c = register.overlap_arrays(a, b, offset=(-3, 0), fill=0.0, mode="mean")
-    assert np.all(c[:3] == b)
-    c = register.overlap_arrays(a, b, offset=(-3, 0), fill=0.0, mode="sum")
-    assert np.all(c[:3] == b)
+    d = register.overlap_arrays([a, b, c], offsets=offsets, mode="sum")
+    assert np.all(d[~np.isnan(d)] == [2, 2, 1, 6, 5, 1, 4, 3])
+
+    d = register.overlap_arrays([a, b, c], offsets=[(-1, -1), (2, 2), (-2, 2)], fill=10)
+    assert np.all(
+        d
+        == [
+            [10, 10, 10, 3, 3],
+            [1, 1, 10, 3, 3],
+            [1, 1, 10, 10, 10],
+            [10, 10, 10, 10, 10],
+            [10, 10, 10, 2, 2],
+            [10, 10, 10, 2, 2],
+        ]
+    )
 
 
 def test_overlap_structured_arrays():
