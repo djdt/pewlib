@@ -12,6 +12,8 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -78,6 +80,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#capewlib-ration">Capewlib.ration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.calibration.Calibration"><code class="docutils literal notranslate"><span class="pre">Calibration</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#pewlib.calibration.Calibration.from_points"><code class="docutils literal notranslate"><span class="pre">Calibration.from_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pewlib.calibration.Calibration.to_array"><code class="docutils literal notranslate"><span class="pre">Calibration.to_array()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.calibration.weighted_linreg"><code class="docutils literal notranslate"><span class="pre">weighted_linreg()</span></code></a></li>
@@ -218,7 +221,7 @@ continuous ablation in one direction. The lines are then stacked to form an imag
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>element</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – element name, optional</p></li>
-<li><p><strong>calibrate</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – apply calibration</p></li>
+<li><p><strong>calibrate</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]) – apply calibration</p></li>
 <li><p><strong>extent</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – trim to extent, μm</p></li>
 </ul>
 </dd>
@@ -372,6 +375,17 @@ or (name, array) of weights for linear-regression, same length as <cite>points</
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pewlib.calibration.Calibration" title="pewlib.calibration.Calibration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Calibration</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pewlib.calibration.Calibration.to_array">
+<span class="sig-name descname"><span class="pre">to_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.calibration.Calibration.to_array" title="Permalink to this definition"></a></dt>
+<dd><p>Convert to a Numpy array. Points and weights are trimmed or padded with nan to ‘size’ if passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
 </dl>
 </dd></dl>

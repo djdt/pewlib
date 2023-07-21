@@ -12,6 +12,8 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -568,19 +570,19 @@ Other modes are passed directly to <code class="xref py py-func docutils literal
 <dt class="sig sig-object py" id="pewlib.process.convolve.erf">
 <span class="sig-prename descclassname"><span class="pre">pewlib.process.convolve.</span></span><span class="sig-name descname"><span class="pre">erf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.convolve.erf" title="Permalink to this definition"></a></dt>
 <dd><p>Error function approximation.</p>
-<p>The maximum error is 5e-4 [1].</p>
+<p>The maximum error is 1.5e-7 [1].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – value</p>
+<dd class="field-odd"><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – value</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>approximation of error function</p>
 </dd>
 </dl>
-<p>References:</p>
+<p class="rubric">References</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id2" role="note">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
@@ -856,9 +858,8 @@ also altered.</p>
 <span class="sig-prename descclassname"><span class="pre">pewlib.process.filters.</span></span><span class="sig-name descname"><span class="pre">rolling_mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.filters.rolling_mean" title="Permalink to this definition"></a></dt>
 <dd><p>Filter an array using rolling mean.</p>
 <p>Each value of <cite>x</cite> is compared to the mean of its <cite>block</cite>, the values arround it.
-If it is <cite>threshold</cite> times the standard deviation <em>without the central value</em> then
-it is considered an outlier. This prevents the value from impacting the stddev.
-The mean of each block is recalculated outliers set to the new local mean.</p>
+If it is <cite>threshold</cite> times the standard deviation <em>with the central value</em> then
+it is considered an outlier. Outliers are set to the local mean <em>without the central value</em>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -880,7 +881,7 @@ The mean of each block is recalculated outliers set to the new local mean.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pewlib.process</span> <span class="kn">import</span> <span class="n">filters</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">[</span><span class="mi">5</span><span class="p">::</span><span class="mi">10</span><span class="p">]</span> <span class="o">+=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">rolling_mean</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">rolling_mean</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>(<a class="reference download internal" download="" href="_downloads/5cf80be7b322499611a74181ac473ed9/processing-1.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="_downloads/b2b5a62371e9084263d49a273b0d9ead/processing-1.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/1092a4da1b1f8d4d7cb44386b90304c9/processing-1.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/3070caf5ae334ea687a89670cd7e3d45/processing-1.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
@@ -894,15 +895,14 @@ The mean of each block is recalculated outliers set to the new local mean.</p>
 <span class="sig-prename descclassname"><span class="pre">pewlib.process.filters.</span></span><span class="sig-name descname"><span class="pre">rolling_median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.filters.rolling_median" title="Permalink to this definition"></a></dt>
 <dd><p>Filter an array using rolling median.</p>
 <p>Each value of <cite>x</cite> is compared to the median of its <cite>block</cite>, the values arround it.
-If it is <cite>threshold</cite> times the median distance from the median then
-it is considered an outlier.
-The mean of each block is recalculated outliers set to the local median.</p>
+If it is <cite>threshold</cite> times the stdev from the median then it is considered an outlier.
+Outliers are set to the local median.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – array</p></li>
 <li><p><strong>block</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]]) – size of window, int or same dims as <cite>x</cite></p></li>
-<li><p><strong>threshold</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – number of median distances away from medians to consider outlier</p></li>
+<li><p><strong>threshold</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – number of SDs (via MAD) away from median to consider outlier</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
