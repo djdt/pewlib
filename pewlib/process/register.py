@@ -3,6 +3,7 @@
 from typing import Iterable, List, Tuple
 
 import numpy as np
+import numpy.lib.recfunctions as rfn
 
 
 def anchor_offset(a: np.ndarray, b: np.ndarray, anchor: str) -> Tuple[int, int]:
@@ -66,21 +67,20 @@ def overlap_arrays(
 ) -> np.ndarray:
     """Merges two arrays by enlarging.
 
-    Coordinates (0, 0) of array `b` will be at `offset` in the new array.
-    Non-overlapping areas are filled with `fill`.
+    Creates a new array from `arrays` by positioning each array at its respective,
+    simplified offset from `offsets`. Non-overlapping areas are filled with `fill`.
     Overlapped values are calculated using `mode`. Mode 'replace' will replace
-    values with those last in `array`,
-    'mean' and 'sum' uses the mean and sum of `arrays` respectively.
+    values with those last in `array`, 'mean' and 'sum' uses the mean and sum of
+    `arrays` respectively.
 
     Args:
-        a: ndim array
-        b: ndim array
-        offset: offset for 'b', any int
+        arrays: list of arrays
+        offsets: offset for each array
         fill: value for non-overlapping areas
         mode: value for overlapped areas, {'replace', 'mean', 'sum'}
 
     Returns:
-        new overlapped array, same dtype as 'a'
+        new overlapped array, same dtype as arrays[0]
 
     Example
     -------
@@ -120,10 +120,12 @@ def overlap_arrays(
     for i, (offset, array) in enumerate(zip(offsets, arrays)):
         slice_idx = tuple(slice(o, o + s) for o, s in zip(offset, array.shape))
         if mode == "replace":
-            overlap[slice_idx] = array
+            nans = np.isnan(array)
+            overlap[slice_idx][~nans] = array[~nans]
         elif mode == "mean" or mode == "sum":
             overlap[slice_idx] = np.nansum([overlap[slice_idx], array], axis=0)
-            visits[slice_idx] += 1
+        visits[slice_idx][~np.isnan(array)] += 1
+
     if mode == "mean":
         overlap[visits > 1] /= visits[visits > 1]
 
@@ -131,21 +133,18 @@ def overlap_arrays(
 
 
 def overlap_structured_arrays(
-    a: np.ndarray,
-    b: np.ndarray,
-    offset: Iterable[int],
+    arrays: List[np.ndarray],
+    offsets: List[Iterable[int]],
     fill: float = np.nan,
     mode: str = "replace",
 ) -> np.ndarray:
     """Merges two structured arrays by enlarging.
 
-    Coordinates (0, 0) of array `b` will be at `offset` in the new array.
-    Shared names in 'a' and 'b' are calculated using `mode` where overlap occurs.
+    Shared names in `arrays` are calculated using `mode` where overlap occurs.
 
     Args:
-        a: ndim array
-        b: ndim array
-        offset: offset for 'b'
+        arrays: list of arrays
+        offset: offset for each array
         fill: value for non-overlapping areas
         mode: value for overlapped areas, {'replace', 'mean', 'sum'}
 
@@ -155,36 +154,20 @@ def overlap_structured_arrays(
     See Also:
         :func:`pewlib.process.register.overlap_arrays`
     """
-    offset = np.array(offset, dtype=int)
-    if offset.size != a.ndim:  # pragma: no cover
-        raise ValueError("Anchor must have same dimensions as arrays.")
-
-    # find the max / min extents of the new array
-    new_shape = np.maximum(a.shape, offset + b.shape) - np.minimum(0, offset)
-    new_dtype = list(a.dtype.descr)
-    new_dtype.extend([x for x in b.dtype.descr if x not in new_dtype])
+    min_offset = np.amin(offsets, axis=0)
+    offsets = [(offset - min_offset) for offset in offsets]
+    rfn.merge_arrays
+    new_shape = np.amax(
+        [np.array(offset) + a.shape for offset, a in zip(offsets, arrays)], axis=0
+    )
+    new_dtype = list(arrays[0].dtype.descr)
+    for array in arrays[1:]:
+        new_dtype.extend([x for x in array.dtype.descr if x not in new_dtype])
     c = np.empty(new_shape, dtype=new_dtype)
-
     for name in c.dtype.names:
-        if name not in b.dtype.names:
-            c[name] = overlap_arrays(
-                np.full(b.shape, fill),
-                a[name],
-                offset=-offset,
-                fill=fill,
-                mode="replace",
-            )
-        elif name not in a.dtype.names:
-            c[name] = overlap_arrays(
-                np.full(a.shape, fill),
-                b[name],
-                offset=offset,
-                fill=fill,
-                mode="replace",
-            )
-        else:
-            c[name] = overlap_arrays(
-                a[name], b[name], offset=offset, fill=fill, mode=mode
-            )
-
+        name_arrays = [
+            array[name] if name in array.dtype.names else np.full(array.shape, np.nan)
+            for array in arrays
+        ]
+        c[name] = overlap_arrays(name_arrays, offsets, fill=fill, mode=mode)
     return c
