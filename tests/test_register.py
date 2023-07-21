@@ -49,56 +49,81 @@ def test_fft_regsiter_offset():
 
 
 def test_overlap_arrays():
-    a = np.arange(9.0).reshape(3, 3)
-    b = np.arange(9.0).reshape(3, 3)
+    a = np.ones((2, 2))
+    b = np.ones((2, 2)) * 2
+    c = np.ones((2, 2)) * 3
+
+    offsets = [(0, 0), (-1, 1), (0, 1)]
+    # _   b   b
+    # a   abc bc
+    # a   ac  c
 
     # Test overlap methods
-    c = register.overlap_arrays(a, b, offset=(1, 1), mode="replace")
-    assert c.shape == (4, 4)
-    assert np.isnan(c[0, 3])
-    assert np.isnan(c[3, 0])
-    assert np.all(c[~np.isnan(c)] == [0, 1, 2, 3, 0, 1, 2, 6, 3, 4, 5, 6, 7, 8])
-    c = register.overlap_arrays(a, b, offset=(1, 1), mode="mean")
-    assert np.all(c[~np.isnan(c)] == [0, 1, 2, 3, 2, 3, 2, 6, 5, 6, 5, 6, 7, 8])
-    c = register.overlap_arrays(a, b, offset=(1, 1), mode="sum")
-    assert np.all(c[~np.isnan(c)] == [0, 1, 2, 3, 4, 6, 2, 6, 10, 12, 5, 6, 7, 8])
+    d = register.overlap_arrays([a, b, c], offsets=offsets, mode="replace")
+    assert d.shape == (3, 3)
+    assert np.isnan(d[0][0])
+    assert np.all(d[~np.isnan(d)] == [2, 2, 1, 3, 3, 1, 3, 3])
 
-    # Test various offsets
-    for i in range(-5, 5):
-        for j in range(-5, 5):
-            c = register.overlap_arrays(a, b, offset=(i, j), mode="sum")
-            assert np.nansum(c) == 72.0
+    d = register.overlap_arrays([a, b, c], offsets=offsets, mode="mean")
+    assert np.all(d[~np.isnan(d)] == [2, 2, 1, 2, 2.5, 1, 2, 3])
 
-    # Test non nan fill
-    c = register.overlap_arrays(a, b, offset=(-3, 0), fill=0.0, mode="replace")
-    assert np.all(c[:3] == b)
-    c = register.overlap_arrays(a, b, offset=(-3, 0), fill=0.0, mode="mean")
-    assert np.all(c[:3] == b)
-    c = register.overlap_arrays(a, b, offset=(-3, 0), fill=0.0, mode="sum")
-    assert np.all(c[:3] == b)
+    d = register.overlap_arrays([a, b, c], offsets=offsets, mode="sum")
+    assert np.all(d[~np.isnan(d)] == [2, 2, 1, 6, 5, 1, 4, 3])
+
+    d = register.overlap_arrays([a, b, c], offsets=[(-1, -1), (2, 2), (-2, 2)], fill=10)
+    assert np.all(
+        d
+        == [
+            [10, 10, 10, 3, 3],
+            [1, 1, 10, 3, 3],
+            [1, 1, 10, 10, 10],
+            [10, 10, 10, 10, 10],
+            [10, 10, 10, 2, 2],
+            [10, 10, 10, 2, 2],
+        ]
+    )
+
+
+def test_overlap_arrays_nan():
+    a = np.ones((3, 3))
+    b = np.full_like(a, np.nan)
+
+    c = register.overlap_arrays([a, b], offsets=[(0, 0), (0, 0)])
+    assert np.all(c == 1.0)
+    c = register.overlap_arrays([a, b], offsets=[(0, 0), (0, 0)], mode="mean")
+    assert np.all(c == 1.0)
+    c = register.overlap_arrays([a, b], offsets=[(0, 0), (0, 0)], mode="sum")
+    assert np.all(c == 1.0)
 
 
 def test_overlap_structured_arrays():
-    a = np.empty((4, 4), dtype=[("a", float), ("c", float)])
-    a["a"].flat = np.arange(16.0)
-    a["c"].flat = np.arange(16.0)
-    b = np.empty((4, 4), dtype=[("b", float), ("c", float)])
-    b["b"].flat = np.arange(16.0)
-    b["c"] = 1.0
+    a = np.empty((2, 2), dtype=[("a", float), ("c", float)])
+    b = np.empty((2, 2), dtype=[("b", float), ("c", float)])
+    a["a"] = 1
+    a["c"] = 2
+    b["b"] = 3
+    b["c"] = 4
 
-    d = register.overlap_structured_arrays(a, b, offset=(2, 2), mode="replace")
+    c = register.overlap_structured_arrays([a, b], offsets=[(0, 0), (1, 1)])
+    assert c.shape == (3, 3)
+    assert c.dtype.names == ("a", "c", "b")
 
-    # Test overlap methods
-    assert d.shape == (6, 6)
-    assert np.all(d["a"][:4, :4] == a["a"])
-    assert np.all(d["b"][2:, 2:] == b["b"])
-    assert np.all(d["c"][2:, 2:] == 1.0)
-    assert np.all(d["c"][:2, :2] == a["a"][:2, :2])
+    assert np.all(np.nan_to_num(c["a"]) == [[1, 1, 0], [1, 1, 0], [0, 0, 0]])
+    assert np.all(np.nan_to_num(c["b"]) == [[0, 0, 0], [0, 3, 3], [0, 3, 3]])
+    assert np.all(np.nan_to_num(c["c"]) == [[2, 2, 0], [2, 4, 4], [0, 4, 4]])
 
-    d = register.overlap_structured_arrays(a, b, offset=(2, 2), mode="mean")
+    c = register.overlap_structured_arrays(
+        [a, b], offsets=[(0, 0), (1, 1)], mode="mean"
+    )
 
-    # Test overlap methods
-    assert np.all(d["c"][2:4, 2:4] == np.mean([a["c"][:2, :2], b["c"][:2, :2]], axis=0))
+    assert np.all(np.nan_to_num(c["a"]) == [[1, 1, 0], [1, 1, 0], [0, 0, 0]])
+    assert np.all(np.nan_to_num(c["b"]) == [[0, 0, 0], [0, 3, 3], [0, 3, 3]])
+    assert np.all(np.nan_to_num(c["c"]) == [[2, 2, 0], [2, 3, 4], [0, 4, 4]])
 
-    d = register.overlap_structured_arrays(a, b, offset=(2, 2), mode="sum")
-    assert np.all(d["c"][2:4, 2:4] == np.sum([a["c"][:2, :2], b["c"][:2, :2]], axis=0))
+    c = register.overlap_structured_arrays(
+        [a, b], offsets=[(0, 0), (1, 1)], mode="sum"
+    )
+
+    assert np.all(np.nan_to_num(c["a"]) == [[1, 1, 0], [1, 1, 0], [0, 0, 0]])
+    assert np.all(np.nan_to_num(c["b"]) == [[0, 0, 0], [0, 3, 3], [0, 3, 3]])
+    assert np.all(np.nan_to_num(c["c"]) == [[2, 2, 0], [2, 6, 4], [0, 4, 4]])
