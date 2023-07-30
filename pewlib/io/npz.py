@@ -2,20 +2,17 @@
 Import and export in pew's custom file format, based on numpy's compressed '.npz'.
 This format svaes image data, laser parameters and calibrations in one file.
 """
-import time
 import logging
+import time
 from pathlib import Path
+from typing import Dict, Union
 
 import numpy as np
 
-from pewlib import __version__
-from pewlib import Laser, Calibration, Config
+from pewlib import Calibration, Config, Laser, __version__
 from pewlib.config import SpotConfig
-
 from pewlib.laser import Laser
-from pewlib.srr import SRRLaser, SRRConfig
-
-from typing import Dict, Union
+from pewlib.srr import SRRConfig, SRRLaser
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +98,9 @@ def load(path: Union[str, Path]) -> Laser:
         calibration = unpack_calibration(npz["calibration"])
 
     if header["version"] < __version__:
-        logger.info(f"NPZ version of {path} is out of date. {npz['_version']} < 0.8.0.")
+        logger.info(
+            f"NPZ version of {path} is out of date. {header['version']} < 0.8.0."
+        )
 
     if header["class"] in ["Laser", "Raster"]:
         laser = Laser
@@ -114,7 +113,6 @@ def load(path: Union[str, Path]) -> Laser:
         config = SRRConfig.from_array(npz["config"])
     else:  # pragma: no cover
         raise ValueError("NPZ unable to import laser class {npz['_class']}.")
-
 
     # Update the path
     info["Name"] = info.get("Name", path.stem)  # Ensure name
