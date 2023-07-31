@@ -5,23 +5,26 @@ This format svaes image data, laser parameters and calibrations in one file.
 import logging
 import time
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict, List, Union
 
 import numpy as np
 
 from pewlib import Calibration, Config, Laser, __version__
 from pewlib.config import SpotConfig
-from pewlib.laser import Laser
 from pewlib.srr import SRRConfig, SRRLaser
 
 logger = logging.getLogger(__name__)
 
 
-def pack_info(info: Dict[str, str], sep: str = "\t") -> np.ndarray:
+def pack_info(
+    info: Dict[str, str], sep: str = "\t", remove_keys: List[str] | None = None
+) -> np.ndarray:
+    if remove_keys is None:
+        remove_keys = ["File Path"]
     string = sep.join(
         f"{key.replace(sep, ' ')}{sep}{val.replace(sep, ' ')}"
         for key, val in info.items()
-        if key not in ["File Path"]
+        if key not in remove_keys
     )  # Makes no sense to store file path so drop it
     return np.array(string)
 
@@ -35,7 +38,8 @@ def pack_calibration(dict: Dict[str, Calibration]) -> np.ndarray:
     size = max(v.x.size for v in dict.values())
     data = np.stack([v.to_array(size=size) for v in dict.values()])
     elements = np.array([k for k in dict.keys()])
-    # recfunctions.append_fields does not like 0 length, i.e. when no calibration with points
+    # recfunctions.append_fields does not like 0 length,
+    # i.e. when no calibration with points
     packed = np.empty(
         data.size, dtype=[("element", elements.dtype), ("calibration", data.dtype)]
     )
