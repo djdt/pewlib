@@ -29,14 +29,14 @@ class GenericOption(object):
 
     def __init__(
         self,
-        drop_names: List[str] = [],
+        drop_names: List[str] | None = None,
         kw_genfromtxt: dict | None = None,
         regex: str = r".*\.csv",
         drop_nan_rows: bool = False,
         drop_nan_columns: bool = False,
         transposed: bool = False,
     ):
-        self.drop_names = drop_names
+        self.drop_names = drop_names or []
         self.kw_genfromtxt = kw_genfromtxt
         self.regex = re.compile(regex, re.IGNORECASE)
 
@@ -72,14 +72,24 @@ class NuOption(GenericOption):
     """Option for Nu Instruments data."""
 
     def __init__(self):
-        super().__init__(drop_names=["X_(um)", "Y_(um)"], regex=r"acq.*\.csv")
+        super().__init__(
+            pos_names=("x_[um]", "y_[um]"),
+            drop_names=["Cycle time (ms)"],
+            regex=r"line_\d+\.csv",
+        )
 
     def readParams(self, data: np.ndarray) -> dict:
-        if "Y_(um)" in data.dtype.names:
-            return {"spotsize": np.round(np.mean(np.diff(data["Y_(um)"], axis=0)), 2)}
+        params = {}
+        if "Cycle time (ms)" in data.dtype.names:
+            params["scantime"] = np.round(
+                1000.0 * np.mean(np.diff(data["Cycle time (ms)"], axis=1)), 4
+            )
+        if "y_[um]" in data.dtype.names:
+            params["spotsize"] = np.round(np.mean(np.diff(data["y_[um]"], axis=0)), 2)
         else:  # pragma: no cover
-            logger.warning("Y_(um) not found, unable to read spotsize.")
-            return super().readParams(data)
+            logger.warning("y_[um] not found, unable to read spotsize.")
+        return params
+        # return super().readParams(data)
 
     def sortkey(self, path: Path) -> int:
         """Sorts files numerically."""
@@ -126,7 +136,7 @@ class TofwerkOption(GenericOption):
                 "scantime": np.round(np.mean(np.diff(data["t_elapsed_Buf"], axis=1)), 4)
             }
         else:  # pragma: no cover
-            logger.warning("Y_(um) not found, unable to read spotsize.")
+            logger.warning("'t_elapsed_Buf' not found, unable to read scantime.")
             return super().readParams(data)
 
     def sortkey(self, path: Path) -> float:
