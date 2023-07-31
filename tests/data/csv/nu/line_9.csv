@@ -1,0 +1,17 @@
+Timestamp:,2023-01-01T00:00:00.000000
+Laser line number:,9
+Laser line name:,LINE_9
+Laser image name:,LINE
+Starting X:,0.0
+Starting Y:,0.0
+Starting Z:,10.0
+Spot size:,10.0
+Spot spacing:,5.0
+Number of shots:,100
+Direction of ablation:,0,Left to Right
+Cycle time (ms),x [um],y [um],A,B
+2000.0,0.0,0.0,1,0.1
+2010.0,5.0,0.0,2,0.2
+2020.0,10.0,0.0,3,0.3
+2030.0,15.0,0.0,4,0.4
+2040.0,20.0,0.0,5,0.5

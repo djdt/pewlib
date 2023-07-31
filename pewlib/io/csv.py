@@ -73,7 +73,8 @@ class NuOption(GenericOption):
 
     def __init__(self):
         super().__init__(
-            drop_names=["Cycle time (ms)", "x_[um]", "y_[um]"],
+            drop_names=["Cycle_time_(ms)", "x_[um]", "y_[um]"],
+            kw_genfromtxt={"skip_header": 11},
             regex=r"line_\d+\.csv",
         )
 
