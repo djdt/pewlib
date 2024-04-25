@@ -83,9 +83,12 @@ def batch_xml_read_datafiles(path: Path, batch_xml: Path) -> List[Path]:
         if log.findtext("ns:AcqResult", namespaces=ns) == "Pass":
             datafile = log.findtext("ns:DataFileName", namespaces=ns)
             if datafile is not None:
-                datafiles.append(
-                    path.joinpath(datafile[max(map(datafile.rfind, "\\/")) + 1 :])
+                datafile_path = path.joinpath(
+                    datafile[max(map(datafile.rfind, "\\/")) + 1 :]
                 )
+                if datafile_path in datafiles:
+                    datafiles.remove(datafile_path)
+                datafiles.append(datafile_path)
 
     return datafiles
 
