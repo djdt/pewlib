@@ -4,17 +4,15 @@ Data should be imported using the other pewlib.io modules then passed with the l
 parameters file to these functions.
 """
 
+import logging
 from pathlib import Path
 
 import numpy as np
 
+logger = logging.getLogger(__name__)
 
-def sync_data_nwi_laser_log(
-    data: np.ndarray,
-    times: np.ndarray | float,
-    log_path: Path | str,
-    sequence: np.ndarray | int | None = None,
-) -> np.ndarray:
+
+def read_nwi_laser_log(log_path: Path | str) -> np.ndarray:
     log = np.genfromtxt(
         log_path,
         usecols=(0, 1, 2, 4, 5, 6, 10, 11, 13),
@@ -32,6 +30,17 @@ def sync_data_nwi_laser_log(
             ("spotsize", "U16"),
         ],
     )
+    return log
+
+
+def sync_data_nwi_laser_log(
+    data: np.ndarray,
+    times: np.ndarray | float,
+    log: np.ndarray | Path | str,
+    sequence: np.ndarray | int | None = None,
+) -> np.ndarray:
+    if isinstance(log, (Path, str)):
+        log = read_nwi_laser_log(log)
 
     if isinstance(times, float):
         times = np.arange(data.size) * times
@@ -44,6 +53,10 @@ def sync_data_nwi_laser_log(
     start_idx = np.flatnonzero(log["state"] == "On")
     log = log[np.stack((start_idx, start_idx + 1), axis=1).flat]
 
+    # check for inconsistencies and warn
+    if not np.all(log["spotsize"] == log["spotsize"][0]):
+        logger.warning("importing multiple spot sizes")
+
     # get the spotsize, for square or circular spots
     if "x" in log["spotsize"][0]:
         spot_size = np.array([float(x) for x in log["spotsize"][0].split(" x ")])
@@ -52,6 +65,9 @@ def sync_data_nwi_laser_log(
 
     # reshape into (start, end)
     log = np.reshape(log, (-1, 2))
+
+    if not np.all(log["rate"] == log["rate"][0]):
+        logger.warning("importing multiple laser firing rates")
 
     # find the shape of the data
     px = ((log["x"] - np.amin(log["x"])) / spot_size[0]).astype(int)
@@ -72,10 +88,7 @@ def sync_data_nwi_laser_log(
             size = min(x.size, y1 - y0)
             sync[y0:y1, x0][:size] = x[:size]
 
-    import matplotlib.pyplot as plt
-
-    plt.imshow(sync["Ho165"], vmax=np.nanpercentile(sync["Ho165"], 95))  # )
-    plt.show()
+    return sync
 
 
 from pewlib.io import agilent, textimage
