@@ -382,6 +382,7 @@ def load_binary(
     params = {}
     if full:
         if "Time" in data.dtype.names:
+            params["times"] = data["Time"]
             params["scantime"] = np.round(np.mean(np.diff(data["Time"], axis=1)), 4)
         else:  # pragma: no cover
             logger.warning("'Time' field not found, unable to import scantime.")
