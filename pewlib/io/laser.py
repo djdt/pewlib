@@ -99,38 +99,3 @@ def sync_data_nwi_laser_log(
             raise ValueError("unable to import non-vertical or non-horizontal lines.")
 
     return sync
-
-
-from pewlib.io import agilent, textimage
-
-data, params = agilent.load_binary(
-    "/home/tom/Downloads/lasso.b/",
-    full=True,
-)
-# data = np.genfromtxt(
-#     "/home/tom/Downloads/lasso.b/",
-#     delimiter=",",
-#     skip_footer=3,
-#     skip_header=1,
-#     usecols=(0, 1),
-#     names=["times", "Ho165"],
-# )
-# data = textimage.load("/home/tom/Downloads/001.csv", name="Ho165")
-
-if "times" in params:
-    times = params["times"]
-else:
-    times = params["scantime"]
-# times = data["times"]
-# times -= times[0]
-# print(times)
-
-import matplotlib.pyplot as plt
-
-a = sync_data_nwi_laser_log(
-    data,
-    times,
-    "/home/tom/Downloads/LaserLog_24-05-02_13-49-34.csv",
-)
-plt.imshow(a["P31"], vmax=np.nanpercentile(a["P31"], 95))
-plt.show()
