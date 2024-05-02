@@ -81,42 +81,56 @@ def sync_data_nwi_laser_log(
     # read and fill in data
     for line, (t0, t1), (x0, x1), (y0, y1) in zip(log, laser_idx, px, py):
         x = data.flat[t0:t1]
-        if y1 == y0:
+        if y0 == y1:
+            if x0 > x1:  # flip right-to-left
+                x = x[::-1]
+                x0, x1 = x1, x0
+
             size = min(x.size, x1 - x0)
             sync[y0, x0:x1][:size] = x[:size]
-        else:
+        elif x0 == x1:
+            if y0 > y1:  # flip bottom-to-top
+                x = x[::-1]
+                y0, y1 = y1, y0
+
             size = min(x.size, y1 - y0)
             sync[y0:y1, x0][:size] = x[:size]
+        else:
+            raise ValueError("unable to import non-vertical or non-horizontal lines.")
 
     return sync
 
 
 from pewlib.io import agilent, textimage
 
-# data, params = agilent.load(
-#     "/home/tom/Downloads/20240430 laser multi layer raster test/4 layers.b",
-#     full=True,
-# )
-data = np.genfromtxt(
-    "/home/tom/Downloads/001.csv",
-    delimiter=",",
-    skip_footer=3,
-    skip_header=1,
-    usecols=(0, 1),
-    names=["times", "Ho165"],
+data, params = agilent.load_binary(
+    "/home/tom/Downloads/lasso.b/",
+    full=True,
 )
+# data = np.genfromtxt(
+#     "/home/tom/Downloads/lasso.b/",
+#     delimiter=",",
+#     skip_footer=3,
+#     skip_header=1,
+#     usecols=(0, 1),
+#     names=["times", "Ho165"],
+# )
 # data = textimage.load("/home/tom/Downloads/001.csv", name="Ho165")
 
-# if "times" in params:
-#     times = params["times"]
-# else:
-#     times = params["scantime"]
-times = data["times"]
-times -= times[0]
-print(times)
+if "times" in params:
+    times = params["times"]
+else:
+    times = params["scantime"]
+# times = data["times"]
+# times -= times[0]
+# print(times)
 
-sync_data_nwi_laser_log(
+import matplotlib.pyplot as plt
+
+a = sync_data_nwi_laser_log(
     data,
     times,
-    "/home/tom/Downloads/LaserLog_24-04-26_19-26-15.csv",
+    "/home/tom/Downloads/LaserLog_24-05-02_13-49-34.csv",
 )
+plt.imshow(a["P31"], vmax=np.nanpercentile(a["P31"], 95))
+plt.show()
