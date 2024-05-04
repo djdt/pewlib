@@ -38,7 +38,13 @@ def sync_data_nwi_laser_log(
     times: np.ndarray | float,
     log: np.ndarray | Path | str,
     sequence: np.ndarray | int | None = None,
+    squeeze: bool = False,
 ) -> np.ndarray:
+    """
+    Args:
+        squeeze: remove any rows and columns of all NaNs
+    """
+
     if isinstance(log, (Path, str)):
         log = read_nwi_laser_log(log)
 
@@ -53,15 +59,18 @@ def sync_data_nwi_laser_log(
     start_idx = np.flatnonzero(log["state"] == "On")
     log = log[np.stack((start_idx, start_idx + 1), axis=1).flat]
 
+    first_line = log[0]
     # check for inconsistencies and warn
-    if not np.all(log["spotsize"] == log["spotsize"][0]):
+    if not np.all(log["spotsize"] == first_line["spotsize"]):
         logger.warning("importing multiple spot sizes")
 
     # get the spotsize, for square or circular spots
-    if "x" in log["spotsize"][0]:
-        spot_size = np.array([float(x) for x in log["spotsize"][0].split(" x ")])
+    if "x" in first_line["spotsize"]:
+        spot_size = np.array([float(x) for x in first_line["spotsize"].split(" x ")])
     else:
-        spot_size = np.array([float(log["spotsize"][0]), float(log["spotsize"][0])])
+        spot_size = np.array(
+            [float(first_line["spotsize"]), float(first_line["spotsize"])]
+        )
 
     # reshape into (start, end)
     log = np.reshape(log, (-1, 2))
@@ -70,8 +79,9 @@ def sync_data_nwi_laser_log(
         logger.warning("importing multiple laser firing rates")
 
     # find the shape of the data
-    px = ((log["x"] - np.amin(log["x"])) / spot_size[0]).astype(int)
-    py = ((log["y"] - np.amin(log["y"])) / spot_size[1]).astype(int)
+    origin = np.amin(log["x"]), np.amin(log["y"])
+    px = ((log["x"] - origin[0]) / spot_size[0]).astype(int)
+    py = ((log["y"] - origin[1]) / spot_size[1]).astype(int)
     sync = np.full((py.max() + 1, px.max() + 1), np.nan, dtype=data.dtype)
 
     # calculate the indicies for start and end times of lines
@@ -97,5 +107,11 @@ def sync_data_nwi_laser_log(
             sync[y0:y1, x0][:size] = x[:size]
         else:
             raise ValueError("unable to import non-vertical or non-horizontal lines.")
+
+    if squeeze:
+        nan_rows = np.all(np.isnan(sync), axis=0)
+        sync = sync[nan_rows, :]
+        nan_cols = np.all(np.isnan(sync), axis=1)
+        sync = sync[:, nan_cols]
 
     return sync
