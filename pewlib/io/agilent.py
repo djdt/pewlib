@@ -532,7 +532,7 @@ def load_csv(
     params = {}
     if full:
         if "Time_[Sec]" in data.dtype.names:
-            params["times"] = data["Time_[Sec]"]
+            params["times"] = data["Time_[Sec]"][0]
             params["scantime"] = np.round(
                 np.mean(np.diff(data["Time_[Sec]"], axis=1)), 4
             )
