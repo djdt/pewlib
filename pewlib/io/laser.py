@@ -39,26 +39,39 @@ def read_nwi_laser_log(log_path: Path | str) -> np.ndarray:
     return log
 
 
-log = read_nwi_laser_log("/home/tom/Downloads/LaserLog_24-05-02_13-49-34.csv")
-
-
 def sync_data_nwi_laser_log(
     data: np.ndarray,
     times: np.ndarray | float,
     log: np.ndarray | Path | str,
     sequence: np.ndarray | int | None = None,
+    delay: float | None = None,
     squeeze: bool = False,
-) -> np.ndarray:
+) -> tuple[np.ndarray, dict]:
     """
     Args:
+        data: 1d ICP-MS data
+        times: array of times (s) the same size as ``data``, or pixel acquistion time
+        log: log data or path to LaserLog csv
+        sequence: select raster(s) to import, defaults to all
+        delay: delay in s between laser and ICP-MS, default calculates from the TIC
         squeeze: remove any rows and columns of all NaNs
     """
 
-    if isinstance(log, (Path, str)):
+    if isinstance(log, Path) or isinstance(log, str):
         log = read_nwi_laser_log(log)
 
     if isinstance(times, float):
         times = np.arange(data.size) * times
+
+    if delay is None:
+        tic = np.lib.recfunctions.structured_to_unstructured(
+            data[: np.argmax(times > 1.0)]
+        )
+        tic = np.sum(tic, axis=-1)
+        tic = np.diff(tic)
+        delay = times[np.argmax((tic / tic.mean()) > 0.1)]
+
+    times -= delay
 
     # remove patterns that were not selected
     if sequence is not None:
@@ -123,4 +136,17 @@ def sync_data_nwi_laser_log(
         nan_cols = np.all(np.isnan(sync), axis=1)
         sync = sync[:, nan_cols]
 
-    return sync
+    return sync, {"delay": delay, "origin": origin, "spotsize": spot_size}
+
+
+if __name__ == "__main__":
+    log = read_nwi_laser_log("/home/tom/Downloads/LaserLog_24-05-02_13-49-34.csv")
+    from pewlib.io import agilent
+
+    data, params = agilent.load_csv("/home/tom/Downloads/lasso.b/", full=True)
+
+    x, _ = sync_data_nwi_laser_log(data, params["times"], log)
+    import matplotlib.pyplot as plt
+
+    plt.imshow(x["P31"], vmax=np.nanpercentile(x["P31"], 95))
+    plt.show()
