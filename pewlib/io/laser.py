@@ -13,6 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 def read_nwi_laser_log(log_path: Path | str) -> np.ndarray:
+    def fill_ints(x: np.ndarray) -> None:
+        max = np.maximum.accumulate(x)
+        x[x == -1] = max[x == -1]
+
     log = np.genfromtxt(
         log_path,
         usecols=(0, 1, 2, 4, 5, 6, 10, 11, 13),
@@ -30,7 +34,12 @@ def read_nwi_laser_log(log_path: Path | str) -> np.ndarray:
             ("spotsize", "U16"),
         ],
     )
+    fill_ints(log["sequence"])
+    fill_ints(log["subpoint"])
     return log
+
+
+log = read_nwi_laser_log("/home/tom/Downloads/LaserLog_24-05-02_13-49-34.csv")
 
 
 def sync_data_nwi_laser_log(
