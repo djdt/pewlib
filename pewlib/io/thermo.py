@@ -94,7 +94,7 @@ def icap_csv_columns_read_params(
     data = data[data.dtype.names[0]]
     scantime = np.round(np.nanmean(np.diff(data, axis=1)), 4)
 
-    return dict(scantime=scantime)
+    return dict(times=data, scantime=scantime)
 
 
 def _icap_csv_rows_read(
@@ -181,7 +181,7 @@ def icap_csv_rows_read_params(
 
     scantime = np.round(np.nanmean(np.diff(data, axis=1)), 4)
 
-    return dict(scantime=scantime)
+    return dict(times=data, scantime=scantime)
 
 
 def icap_csv_sample_format(path: Union[str, Path]) -> str:
