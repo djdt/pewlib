@@ -2,13 +2,11 @@
 Import of line-by-line PerkinElmer ELAN 'XL' directories.
 """
 import logging
+from pathlib import Path
+from typing import Tuple, Union
 
 import numpy as np
 import numpy.lib.recfunctions
-
-from pathlib import Path
-
-from typing import Tuple, Union
 
 logger = logging.getLogger(__name__)
 
@@ -67,8 +65,8 @@ def load(
         ],
         axis=1,
     )
+    params: dict = {"origin": (0.0, 0.0), "times": data["Time_in_Seconds"]}
     data = numpy.lib.recfunctions.drop_fields(data, "Time_in_Seconds")
-    params: dict = {"origin": (0.0, 0.0)}
 
     if import_parameters:
         parameters = path.joinpath("parameters.conf")
