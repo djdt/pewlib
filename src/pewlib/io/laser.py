@@ -12,6 +12,22 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
+def is_nwi_laser_log(log_path: Path | str) -> bool:
+    log_path = Path(log_path)
+
+    if log_path.suffix.lower() != ".csv":
+        return False
+    with log_path.open("r") as fp:
+        header = fp.readline()
+        if not (
+            header.replace(", ", ",").startswith(
+                "Timestamp,Sequence Number,SubPoint Number,Vertex Number,Comment"
+            )
+        ):
+            return False
+    return True
+
+
 def read_nwi_laser_log(log_path: Path | str) -> np.ndarray:
     def fill_ints(x: np.ndarray) -> None:
         max = np.maximum.accumulate(x)
