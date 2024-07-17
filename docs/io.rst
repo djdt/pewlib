@@ -22,6 +22,12 @@ Numpy NPZ
 .. automodule:: pewlib.io.npz
     :members:
 
+NWI Laser Logs
+--------------
+
+.. automodule:: pewlib.io.laser
+    :members:
+
 PerkinElmer
 -----------
 
@@ -38,10 +44,4 @@ VTK
 ---
 
 .. automodule:: pewlib.io.vtk
-    :members:
-
-NWI Laser Logs
---------------
-
-.. automodule:: pewlib.io.laser
     :members:
