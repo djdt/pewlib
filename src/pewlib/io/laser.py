@@ -87,13 +87,15 @@ def sync_data_nwi_laser_log(
     elif times.ndim > 1:
         logger.warning("times has more than one dimension, flattening")
 
-    times = (times - times.min() + delay).ravel()
+    times = (times - times.min()).ravel()
 
     if delay is None:
         tic = rfn.structured_to_unstructured(data[: np.argmax(times > 1.0)])
         tic = np.sum(tic, axis=-1)
         tic = np.diff(tic)
         delay = times[np.argmax((tic / tic.mean()) > 0.1)]
+
+    times += delay
 
     # remove patterns that were not selected
     if sequence is not None:
