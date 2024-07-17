@@ -84,8 +84,10 @@ def sync_data_nwi_laser_log(
     if isinstance(times, float):
         logger.info(f"generating times with interval {times:.2f}")
         times = np.arange(data.size) * times
+    elif times.ndim > 1:
+        logger.warning("times has more than one dimension, flattening")
 
-    times -= times.min()
+    times = (times - times.min() + delay).ravel()
 
     if delay is None:
         tic = rfn.structured_to_unstructured(data[: np.argmax(times > 1.0)])
@@ -128,7 +130,7 @@ def sync_data_nwi_laser_log(
 
     # calculate the indicies for start and end times of lines
     laser_times = (log["time"] - log["time"][0][0]).astype(float) / 1000.0
-    laser_idx = np.searchsorted(times.flat, laser_times - delay)
+    laser_idx = np.searchsorted(times, laser_times)
 
     # read and fill in data
     for line, (t0, t1), (x0, x1), (y0, y1) in zip(log, laser_idx, px, py):
