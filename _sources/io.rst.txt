@@ -39,3 +39,9 @@ VTK
 
 .. automodule:: pewlib.io.vtk
     :members:
+
+NWI Laser Logs
+--------------
+
+.. automodule:: pewlib.io.laser
+    :members:

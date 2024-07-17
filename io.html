@@ -106,6 +106,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.vtk.save"><code class="docutils literal notranslate"><span class="pre">save()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.laser">NWI Laser Logs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.laser.guess_delay_from_data"><code class="docutils literal notranslate"><span class="pre">guess_delay_from_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.laser.sync_data_nwi_laser_log"><code class="docutils literal notranslate"><span class="pre">sync_data_nwi_laser_log()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pew.html">Line-by-line Lasers</a></li>
@@ -666,6 +671,54 @@ spaced using x, y, z of <cite>spacing</cite>. If <cite>data</cite> is rasied to 
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pewlib.io.laser">
+<span id="nwi-laser-logs"></span><h2>NWI Laser Logs<a class="headerlink" href="#module-pewlib.io.laser" title="Link to this heading"></a></h2>
+<p>Synchronisation of laser parameters (ablation times and locations) with signal data.
+Data should be imported using the other pewlib.io modules then passed with the laser
+parameters file to these functions.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.laser.guess_delay_from_data">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.laser.</span></span><span class="sig-name descname"><span class="pre">guess_delay_from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.laser.guess_delay_from_data" title="Link to this definition"></a></dt>
+<dd><p>Guess delay from laser firing to ICP-MS measurement.</p>
+<p>Looks for a change of &gt; 10% in the TIC, up to 1 second into data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – structured array of signals, flatttend</p></li>
+<li><p><strong>times</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – array of times, same length as data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>delay in ms</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.laser.sync_data_nwi_laser_log">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.laser.</span></span><span class="sig-name descname"><span class="pre">sync_data_nwi_laser_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">squeeze</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.laser.sync_data_nwi_laser_log" title="Link to this definition"></a></dt>
+<dd><p>Syncs ICP-MS data collected as a single line per raster with the laser log file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – 1d ICP-MS data</p></li>
+<li><p><strong>times</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – array of times (s) the same size as <code class="docutils literal notranslate"><span class="pre">data</span></code>, or pixel acquistion time</p></li>
+<li><p><strong>log</strong> – log data or path to LaserLog csv</p></li>
+<li><p><strong>sequence</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – select raster(s) to import, defaults to all</p></li>
+<li><p><strong>delay</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – delay in s between laser and ICP-MS, default calculates from the TIC</p></li>
+<li><p><strong>squeeze</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – remove any rows and columns of all NaNs</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</span></p>
 </dd>
 </dl>
 </dd></dl>
