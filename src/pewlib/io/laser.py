@@ -8,6 +8,7 @@ import logging
 from pathlib import Path
 
 import numpy as np
+import numpy.lib.recfunctions as rfn
 
 logger = logging.getLogger(__name__)
 
@@ -58,12 +59,14 @@ def read_nwi_laser_log(log_path: Path | str) -> np.ndarray:
 def sync_data_nwi_laser_log(
     data: np.ndarray,
     times: np.ndarray | float,
-    log: np.ndarray | Path | str,
+    log_file: np.ndarray | Path | str,
     sequence: np.ndarray | int | None = None,
     delay: float | None = None,
     squeeze: bool = False,
 ) -> tuple[np.ndarray, dict]:
     """
+    Syncs ICP-MS data collected as a single line per raster with the laser log file.
+
     Args:
         data: 1d ICP-MS data
         times: array of times (s) the same size as ``data``, or pixel acquistion time
@@ -73,25 +76,26 @@ def sync_data_nwi_laser_log(
         squeeze: remove any rows and columns of all NaNs
     """
 
-    if isinstance(log, Path) or isinstance(log, str):
-        log = read_nwi_laser_log(log)
+    if isinstance(log_file, (Path, str)):
+        log = read_nwi_laser_log(log_file)
+    else:
+        log = log_file
 
     if isinstance(times, float):
+        logger.info(f"generating times with interval {times:.2f}")
         times = np.arange(data.size) * times
 
+    times -= times.min()
+
     if delay is None:
-        tic = np.lib.recfunctions.structured_to_unstructured(
-            data[: np.argmax(times > 1.0)]
-        )
+        tic = rfn.structured_to_unstructured(data[: np.argmax(times > 1.0)])
         tic = np.sum(tic, axis=-1)
         tic = np.diff(tic)
         delay = times[np.argmax((tic / tic.mean()) > 0.1)]
 
-    times -= delay
-
     # remove patterns that were not selected
     if sequence is not None:
-        log = log[np.in1d(log["sequence"], sequence)]
+        log = log[np.isin(log["sequence"], sequence)]
 
     # Get laser start and end events only
     start_idx = np.flatnonzero(log["state"] == "On")
@@ -123,26 +127,27 @@ def sync_data_nwi_laser_log(
     sync = np.full((py.max() + 1, px.max() + 1), np.nan, dtype=data.dtype)
 
     # calculate the indicies for start and end times of lines
-    laser_times = log["time"] - log["time"][0][0]
-    laser_idx = np.searchsorted(times, laser_times.astype(float) / 1000.0)
+    laser_times = (log["time"] - log["time"][0][0]).astype(float) / 1000.0
+    laser_idx = np.searchsorted(times.flat, laser_times - delay)
 
     # read and fill in data
     for line, (t0, t1), (x0, x1), (y0, y1) in zip(log, laser_idx, px, py):
         x = data.flat[t0:t1]
-        if y0 == y1:
+        if y0 == y1:  # horizontal
+            s0, s1 = -min(x.size, abs(x1 - x0)), None
             if x0 > x1:  # flip right-to-left
                 x = x[::-1]
                 x0, x1 = x1, x0
+                s0, s1 = None, -s0
 
-            size = min(x.size, x1 - x0)
-            sync[y0, x0:x1][:size] = x[:size]
-        elif x0 == x1:
+            sync[y0, x0:x1][s0:s1] = x[s0:s1]
+        elif x0 == x1:  # vertical
+            s0, s1 = -min(x.size, abs(y1 - y0)), None
             if y0 > y1:  # flip bottom-to-top
                 x = x[::-1]
                 y0, y1 = y1, y0
-
-            size = min(x.size, y1 - y0)
-            sync[y0:y1, x0][:size] = x[:size]
+                s0, s1 = None, -s0
+            sync[y0:y1, x0][s0:s1] = x[s0:s1]
         else:
             raise ValueError("unable to import non-vertical or non-horizontal lines.")
 
@@ -153,16 +158,3 @@ def sync_data_nwi_laser_log(
         sync = sync[:, nan_cols]
 
     return sync, {"delay": delay, "origin": origin, "spotsize": spot_size}
-
-
-if __name__ == "__main__":
-    log = read_nwi_laser_log("/home/tom/Downloads/LaserLog_24-05-02_13-49-34.csv")
-    from pewlib.io import agilent
-
-    data, params = agilent.load_csv("/home/tom/Downloads/lasso.b/", full=True)
-
-    x, _ = sync_data_nwi_laser_log(data, params["times"], log)
-    import matplotlib.pyplot as plt
-
-    plt.imshow(x["P31"], vmax=np.nanpercentile(x["P31"], 95))
-    plt.show()
