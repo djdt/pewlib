@@ -56,6 +56,23 @@ def read_nwi_laser_log(log_path: Path | str) -> np.ndarray:
     return log
 
 
+def guess_delay_from_data(data: np.ndarray, times: np.ndarray) -> float:
+    """Guess delay from laser firing to ICP-MS measurement.
+
+    Looks for a change of > 10% in the TIC, up to 1 second into data.
+
+    Args:
+        data: structured array of signals, flatttend
+        times: array of times, same length as data
+
+    Returns:
+        delay in ms"""
+    tic = rfn.structured_to_unstructured(data.flat[: np.searchsorted(times, 1.0)])
+    tic = np.sum(tic, axis=-1)
+    tic = np.diff(tic)
+    return times.flat[np.argmax((tic / tic.mean()) > 0.1)]
+
+
 def sync_data_nwi_laser_log(
     data: np.ndarray,
     times: np.ndarray | float,
@@ -76,24 +93,23 @@ def sync_data_nwi_laser_log(
         squeeze: remove any rows and columns of all NaNs
     """
 
-    if isinstance(log_file, (Path, str)):
+    if isinstance(
+        log_file, (Path, str)
+    ):  # pragma: no cover, tested via read_nwi_laser_log
         log = read_nwi_laser_log(log_file)
     else:
         log = log_file
 
-    if isinstance(times, float):
+    if isinstance(times, float):  # pragma: no cover, warning
         logger.info(f"generating times with interval {times:.2f}")
         times = np.arange(data.size) * times
-    elif times.ndim > 1:
+    elif times.ndim > 1:  # pragma: no cover, warning
         logger.warning("times has more than one dimension, flattening")
 
     times = (times - times.min()).ravel()
 
-    if delay is None:
-        tic = rfn.structured_to_unstructured(data[: np.argmax(times > 1.0)])
-        tic = np.sum(tic, axis=-1)
-        tic = np.diff(tic)
-        delay = times[np.argmax((tic / tic.mean()) > 0.1)]
+    if delay is None:  # pragma: no cover, tested elsewhere
+        delay = guess_delay_from_data(data, times)
 
     times += delay
 
@@ -107,7 +123,9 @@ def sync_data_nwi_laser_log(
 
     first_line = log[0]
     # check for inconsistencies and warn
-    if not np.all(log["spotsize"] == first_line["spotsize"]):
+    if not np.all(
+        log["spotsize"] == first_line["spotsize"]
+    ):  # pragma: no cover, warning
         logger.warning("importing multiple spot sizes")
 
     # get the spotsize, for square or circular spots
@@ -121,7 +139,7 @@ def sync_data_nwi_laser_log(
     # reshape into (start, end)
     log = np.reshape(log, (-1, 2))
 
-    if not np.all(log["rate"] == log["rate"][0]):
+    if not np.all(log["rate"] == log["rate"][0]):  # pragma: no cover, warning
         logger.warning("importing multiple laser firing rates")
 
     # find the shape of the data
@@ -152,13 +170,21 @@ def sync_data_nwi_laser_log(
                 y0, y1 = y1, y0
                 s0, s1 = None, -s0
             sync[y0:y1, x0][s0:s1] = x[s0:s1]
-        else:
+        else:  # pragma: no cover
             raise ValueError("unable to import non-vertical or non-horizontal lines.")
 
     if squeeze:
-        nan_rows = np.all(np.isnan(sync), axis=0)
-        sync = sync[nan_rows, :]
-        nan_cols = np.all(np.isnan(sync), axis=1)
-        sync = sync[:, nan_cols]
+        if sync.dtype.names is not None:
+            nans = np.all([np.isnan(sync[n]) for n in sync.dtype.names], axis=0)
+        else:
+            nans = np.isnan(sync)  # pragma: no cover
+        nan_rows = np.all(nans, axis=1)
+        sync = sync[~nan_rows, :]
+        if sync.dtype.names is not None:
+            nans = np.all([np.isnan(sync[n]) for n in sync.dtype.names], axis=0)
+        else:
+            nans = np.isnan(sync)  # pragma: no cover
+        nan_cols = np.all(nans, axis=0)
+        sync = sync[:, ~nan_cols]
 
     return sync, {"delay": delay, "origin": origin, "spotsize": spot_size}
