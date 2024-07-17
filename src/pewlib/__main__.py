@@ -1,14 +1,13 @@
 import argparse
-from pathlib import Path
 import time
+from importlib.metadata import version
+from pathlib import Path
+from typing import List
+
 import numpy as np
 
-from pewlib import io
+from pewlib import Config, Laser, io
 from pewlib.process import filters
-from pewlib import Laser, Config
-from pewlib import __version__
-
-from typing import List
 
 
 def load(path: Path) -> Laser:
@@ -20,7 +19,7 @@ def load(path: Path) -> Laser:
             "%Y-%m-%dT%H:%M:%S%z", time.localtime(time.time())
         ),
         "Import Path": str(path.resolve()),
-        "Import Version pewlib": __version__,
+        "Import Version pewlib": version("pewlib"),
     }
     params = {}
     if path.is_dir():
@@ -209,7 +208,7 @@ def create_parser_and_parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "-v", "--version", action="version", version=f"pewlib {__version__}"
+        "-v", "--version", action="version", version=f"pewlib {version('pewlib')}"
     )
 
     args = parser.parse_args()
@@ -279,7 +278,10 @@ def save(laser: Laser, path: Path) -> None:
 
 
 def stack(
-        lasers: List[Laser], orientation: str = "vertical", pad: float = np.nan, calibrate: bool = False,
+    lasers: List[Laser],
+    orientation: str = "vertical",
+    pad: float = np.nan,
+    calibrate: bool = False,
 ) -> Laser:
     datas = [laser.data for laser in lasers]
 

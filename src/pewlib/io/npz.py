@@ -4,12 +4,13 @@ This format svaes image data, laser parameters and calibrations in one file.
 """
 import logging
 import time
+from importlib.metadata import version
 from pathlib import Path
 from typing import Dict, List, Union
 
 import numpy as np
 
-from pewlib import Calibration, Config, Laser, __version__
+from pewlib import Calibration, Config, Laser
 from pewlib.config import SpotConfig
 from pewlib.srr import SRRConfig, SRRLaser
 
@@ -101,7 +102,7 @@ def load(path: Union[str, Path]) -> Laser:
     else:
         calibration = unpack_calibration(npz["calibration"])
 
-    if header["version"] < __version__:
+    if header["version"] < version("pewlib"):
         logger.info(
             f"NPZ version of {path} is out of date. {header['version']} < 0.8.0."
         )
@@ -150,7 +151,7 @@ def save(path: Union[str, Path], laser: Union[Laser, SRRLaser]) -> None:
         path,
         header=pack_info(
             {
-                "version": __version__,
+                "version": version("pewlib"),
                 "class": str(laser.config._class),
                 "time": str(time.time()),
             }
