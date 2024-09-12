@@ -306,6 +306,83 @@ def get_all_mz(
     return current_mz
 
 
+class Spectrum(object):
+    def __init__(self, spectrum: ElementTree.Element, scan_number: int = 1):
+        scan = spectrum.find(f"mz:scanList/mz:scan[{scan_number}]", MZML_NS)
+        if scan is None:
+            raise ValueError(f"unable to find scan {scan_number}")
+
+        px = scan.find(f"mz:cvParam[@accession='{CV_SPECTRUM['POSITION_X']}']", MZML_NS)
+        py = scan.find(f"mz:cvParam[@accession='{CV_SPECTRUM['POSITION_Y']}']", MZML_NS)
+        if px is None or py is None:
+            raise ValueError("unable to read position from spectrum")
+
+        self.pos = int(px.get("value", -1)), int(py.get("value", -1))
+
+        self.offsets: dict[str, int] = {}
+        self.lengths: dict[str, int] = {}
+
+        arrays = spectrum.findall("mz:binaryDataArrayList/mz:binaryDataArray", MZML_NS)
+        for array in arrays:
+            key = array.find("mz:referenceableParamGroupRef", MZML_NS)
+            offset = array.find(
+                f"mz:cvParam[@accession='{CV_SPECTRUM['EXTERNAL_OFFSET']}']", MZML_NS
+            )
+            length = array.find(
+                f"mz:cvParam[@accession='{CV_SPECTRUM['EXTERNAL_ARRAY_LENGTH']}']",
+                MZML_NS,
+            )
+            if key is None or offset is None or length is None:
+                raise ValueError("invalid binary data array")
+            self.offsets[key.get("ref", "")] = int(offset.get("value", -1))
+            self.lengths[key.get("ref", "")] = int(length.get("value", -1))
+
+    @property
+    def x(self) -> int:
+        return self.pos[0]
+
+    @property
+    def y(self) -> int:
+        return self.pos[1]
+
+    def get_binary_data(
+        self, reference_id: str, dtype: type, external_binary: Path | str | None = None
+    ) -> np.ndarray:
+        if external_binary is None:
+            raise NotImplementedError("direct read of binary data not supported")
+
+        return np.fromfile(
+            external_binary,
+            count=self.lengths[reference_id],
+            offset=self.offsets[reference_id],
+            dtype=dtype,
+        )
+
+
+class ImzML(object):
+    def __init__(self, imzml: Path | str, external_binary: Path | str | None = None):
+        xml = ElementTree.parse(imzml)
+
+        self.image_size = get_image_size(xml)
+        self.pixel_size = get_image_pixel_size(xml)
+
+        self.mz_reference = get_reference_id(xml, "MZ_ARRAY")
+        self.mz_dtype = get_data_type_for_reference(xml, self.mz_reference)
+        self.intensity_reference = get_reference_id(xml, "INTENSITY_ARRAY")
+        self.intensity_dtype = get_data_type_for_reference(
+            xml, self.intensity_reference
+        )
+
+        self.spectra = [
+            Spectrum(spectrum)
+            for spectrum in xml.findall("mz:run/mz:spectrumList/mz:spectrum", MZML_NS)
+        ]
+        self.spectra_map = {(s.x, s.y): s for s in self.spectra}
+
+    def spectrum_at(self, x: int, y: int) -> Spectrum:
+        return self.spectra_map[(x, y)]
+
+
 def parse_imzml(xml: Path | str) -> ElementTree.ElementTree:
     return ElementTree.parse(xml)
 
@@ -315,8 +392,8 @@ def get_spectrum_at_position(
     xml: ElementTree.ElementTree,
     pos: tuple[int, int],
     scan_number: int = 1,
-    ) -> ElementTree.Element:
-# ) -> Spectrum:
+) -> ElementTree.Element:
+    # ) -> Spectrum:
     """Gets the spectrum element at pos.
 
     Args:
@@ -413,58 +490,68 @@ def load(
         data[pos[0] - 1, pos[1] - 1] = np.add.reduceat(signal_array, idx)[::2]
 
     return data, {"spotsize": pixel_size}
-#
-#
-# import time
-#
-# import matplotlib.pyplot as plt
-#
-# targets = np.array([792.555445])
-# xml = parse_imzml("/home/tom/Downloads/slide 8 at 19%-total ion count.imzML")
-# external_binary = "/home/tom/Downloads/slide 8 at 19%-total ion count.ibd"
-#
-# data, _ = load(
-#     xml,
-#     target_masses=targets,
-#     external_binary=external_binary,
-# )
-# data = np.rot90(data, 1)
-#
-# fig, axes = plt.subplots(2, 1)
-#
-# axes[0].imshow(data)
-#
-# ref_id_mz = get_reference_id(xml, "MZ_ARRAY")
-# dtype_mz = get_data_type_for_reference(xml, ref_id_mz)
-# ref_id_signal = get_reference_id(xml, "INTENSITY_ARRAY")
-# dtype_signal = get_data_type_for_reference(xml, ref_id_signal)
-#
-# t0 = time.time()
-# spec = [Spectrum(s) for s in xml.findall("mz:run/mz:spectrumList/mz:spectrum", MZML_NS)]
-# t1 = time.time()
-# print(t1 - t0)
-#
-#
-# def onclick(event):
-#     x = event.xdata
-#     y = event.ydata
-#
-#     t0 = time.time()
-#     spectrum = get_spectrum_at_position(spec, (int(x), int(y)))
-#     t1 = time.time()
-#     mz = get_binary_data_from_spectrum(spectrum, ref_id_mz, dtype_mz, external_binary)
-#     t2 = time.time()
-#     sig = get_binary_data_from_spectrum(
-#         spectrum, ref_id_signal, dtype_signal, external_binary
-#     )
-#     t3 = time.time()
-#     print("time to find spec", t1 - t0)
-#     print("time to load mz", t2 - t1)
-#     print("time to load sig", t3 - t2)
-#     axes[1].clear()
-#     axes[1].plot(mz, sig)
-#     fig.canvas.draw_idle()
-#
-#
-# fig.canvas.mpl_connect("button_press_event", onclick)
-# plt.show()
+
+
+import time
+
+t0 = time.time()
+ImzML("/home/tom/Downloads/slide 8 at 19%-total ion count.imzML")
+t1 = time.time()
+print("parsing and objects", t1 - t0)
+t0 = time.time()
+parse_imzml("/home/tom/Downloads/slide 8 at 19%-total ion count.imzML")
+t1 = time.time()
+print("parsing", t1 - t0)
+
+exit()
+import matplotlib.pyplot as plt
+
+targets = np.array([792.555445])
+xml = parse_imzml("/home/tom/Downloads/slide 8 at 19%-total ion count.imzML")
+external_binary = "/home/tom/Downloads/slide 8 at 19%-total ion count.ibd"
+
+data, _ = load(
+    xml,
+    target_masses=targets,
+    external_binary=external_binary,
+)
+data = np.rot90(data, 1)
+
+fig, axes = plt.subplots(2, 1)
+
+axes[0].imshow(data)
+
+ref_id_mz = get_reference_id(xml, "MZ_ARRAY")
+dtype_mz = get_data_type_for_reference(xml, ref_id_mz)
+ref_id_signal = get_reference_id(xml, "INTENSITY_ARRAY")
+dtype_signal = get_data_type_for_reference(xml, ref_id_signal)
+
+t0 = time.time()
+spec = [Spectrum(s) for s in xml.findall("mz:run/mz:spectrumList/mz:spectrum", MZML_NS)]
+t1 = time.time()
+print(t1 - t0)
+
+
+def onclick(event):
+    x = event.xdata
+    y = event.ydata
+
+    t0 = time.time()
+    spectrum = get_spectrum_at_position(spec, (int(x), int(y)))
+    t1 = time.time()
+    mz = get_binary_data_from_spectrum(spectrum, ref_id_mz, dtype_mz, external_binary)
+    t2 = time.time()
+    sig = get_binary_data_from_spectrum(
+        spectrum, ref_id_signal, dtype_signal, external_binary
+    )
+    t3 = time.time()
+    print("time to find spec", t1 - t0)
+    print("time to load mz", t2 - t1)
+    print("time to load sig", t3 - t2)
+    axes[1].clear()
+    axes[1].plot(mz, sig)
+    fig.canvas.draw_idle()
+
+
+fig.canvas.mpl_connect("button_press_event", onclick)
+plt.show()
