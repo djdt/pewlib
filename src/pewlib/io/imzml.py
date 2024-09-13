@@ -1,7 +1,7 @@
 from pathlib import Path
+from xml.etree import ElementTree
 
 import numpy as np
-from imzml.etree import ElementTree
 
 CV_PARAMGROUP = {
     "MZ_ARRAY": "MS:1000514",
@@ -143,6 +143,13 @@ class Spectrum(object):
 
         self.pos = int(px.get("value", -1)), int(py.get("value", -1))
 
+        tic = spectrum.find(
+            f"mz:cvParam[@accession='{CV_SPECTRUM['TOTAL_ION_CURRENT']}']", MZML_NS
+        )
+        if tic is None:
+            raise ValueError("unable to read TIC from spectrum")
+        self.tic = float(tic.get("value", 0.0))
+
         self.offsets: dict[str, int] = {}
         self.lengths: dict[str, int] = {}
 
@@ -186,23 +193,21 @@ class Spectrum(object):
 
 class ImzML(object):
     def __init__(self, imzml: Path | str, external_binary: Path | str | None = None):
-        imzml = ElementTree.parse(imzml)
+        et = ElementTree.parse(imzml)
 
         self.external_binary = external_binary
 
-        self.image_size = get_image_size(imzml)
-        self.pixel_size = get_image_pixel_size(imzml)
+        self.image_size = get_image_size(et)
+        self.pixel_size = get_image_pixel_size(et)
 
-        self.mz_reference = get_reference_id(imzml, "MZ_ARRAY")
-        self.mz_dtype = get_data_type_for_reference(imzml, self.mz_reference)
-        self.intensity_reference = get_reference_id(imzml, "INTENSITY_ARRAY")
-        self.intensity_dtype = get_data_type_for_reference(
-            imzml, self.intensity_reference
-        )
+        self.mz_reference = get_reference_id(et, "MZ_ARRAY")
+        self.mz_dtype = get_data_type_for_reference(et, self.mz_reference)
+        self.intensity_reference = get_reference_id(et, "INTENSITY_ARRAY")
+        self.intensity_dtype = get_data_type_for_reference(et, self.intensity_reference)
 
         spectra = (
             Spectrum(s)
-            for s in imzml.iterfind("mz:run/mz:spectrumList/mz:spectrum", MZML_NS)
+            for s in et.iterfind("mz:run/mz:spectrumList/mz:spectrum", MZML_NS)
         )
         self.spectra_map = {(s.x, s.y): s for s in spectra}
 
@@ -218,6 +223,12 @@ class ImzML(object):
             low = min(low, mz_array[0])
             high = max(high, mz_array[-1])
         return low, high
+
+    def extract_tic(self) -> np.ndarray:
+        tic = np.zeros(self.image_size, dtype=float)
+        for (x, y), spec in self.spectra_map.items():
+            tic[x - 1, y - 1] = spec.tic
+        return np.rot90(tic, 1)
 
     def extract_masses(
         self, target_masses: np.ndarray | float, mass_width_ppm: float = 10.0
@@ -244,7 +255,7 @@ class ImzML(object):
             data[spectra.x - 1, spectra.y - 1] = np.add.reduceat(intensity_array, idx)[
                 ::2
             ]
-        return data
+        return np.rot90(data, 1)
 
 
 def load(
@@ -271,38 +282,3 @@ def load(
     return imzml.extract_masses(target_masses, mass_width_ppm), {
         "spotsize": imzml.pixel_size
     }
-
-
-import matplotlib.pyplot as plt
-
-targets = np.array([792.555445])
-external_binary = "/home/tom/Downloads/slide 8 at 19%.ibd"
-
-imzml = ImzML("/home/tom/Downloads/slide 8 at 19%.imzML", external_binary)
-data, _ = load(imzml, target_masses=targets)
-data = np.rot90(data, 1)
-
-fig, axes = plt.subplots(2, 1)
-
-axes[0].imshow(data)
-
-
-def onclick(event):
-    x = event.xdata
-    y = event.ydata
-
-    spec = imzml.spectrum_at(int(x), int(y))
-    mz = spec.get_binary_data(imzml.mz_reference, imzml.mz_dtype, external_binary)
-    sig = spec.get_binary_data(
-        imzml.intensity_reference, imzml.intensity_dtype, external_binary
-    )
-
-    axes[1].clear()
-    axes[1].plot(mz, sig)
-    fig.canvas.draw_idle()
-
-
-#
-
-fig.canvas.mpl_connect("button_press_event", onclick)
-plt.show()
