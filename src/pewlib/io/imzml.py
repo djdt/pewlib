@@ -176,6 +176,8 @@ class ParamGroup(object):
         "BINARY_TYPE_32BIT_FLOAT": np.float32,
         "BINARY_TYPE_64BIT_FLOAT": np.float64,
     }
+    mz_array_cv = CV_PARAMGROUP["MZ_ARRAY"]
+    intensity_array_cv = CV_PARAMGROUP["INTENSITY_ARRAY"]
 
     def __init__(
         self, id: str, dtype: type, compressed: bool = False, external: bool = False
@@ -255,14 +257,14 @@ class ImzML(object):
 
         mz_params = et.find(
             "mz:referenceableParamGroupList/mz:referenceableParamGroup"
-            f"mz:cvParam[@accession='{CV_PARAMGROUP['MZ_ARRAY']}']/..",
+            f"mz:cvParam[@accession='{ParamGroup.mz_array_cv}']/..",
             MZML_NS,
         )
         if mz_params is None:
             raise ValueError("unable to find m/z array parameters")
         intensity_params = et.find(
             "mz:referenceableParamGroupList/mz:referenceableParamGroup"
-            f"mz:cvParam[@accession='{CV_PARAMGROUP['INTENSITY_ARRAY']}']/..",
+            f"mz:cvParam[@accession='{ParamGroup.intensity_array_cv}']/..",
             MZML_NS,
         )
         if intensity_params is None:
@@ -285,55 +287,6 @@ class ImzML(object):
     def from_file(cls, path: Path | str, external_binary: Path | str) -> "ImzML":
         et = ElementTree.parse(path)
         return ImzML.from_etree(et, external_binary)
-
-    @classmethod
-    def from_file_iterative(
-        cls,
-        path: Path | str,
-        external_binary: Path | str,
-        scan_number: int = 1,
-        callback: None = None,
-    ) -> "ImzML":
-        iter = ElementTree.iterparse(path, events=("end",))
-
-        spectra = {}
-
-        for event, elem in iter:
-            if elem.tag == f"{{{MZML_NS['mz']}}}scanSettingsList":
-                scans = elem.findall("mz:scanSettings", MZML_NS)
-                scan_settings = ScanSettings.from_xml_element(scans[scan_number - 1])
-                elem.clear()
-            elif elem.tag == f"{{{MZML_NS['mz']}}}referenceableParamGroup":
-                if (
-                    elem.find(
-                        f"mz:cvParam[@accession='{CV_PARAMGROUP['MZ_ARRAY']}']", MZML_NS
-                    )
-                    is not None
-                ):
-                    mz_group = ParamGroup.from_xml_element(elem)
-                elif (
-                    elem.find(
-                        f"mz:cvParam[@accession='{CV_PARAMGROUP['INTENSITY_ARRAY']}']",
-                        MZML_NS,
-                    )
-                    is not None
-                ):
-                    intensity_group = ParamGroup.from_xml_element(elem)
-                elem.clear()
-            elif elem.tag == f"{{{MZML_NS['mz']}}}spectrum":
-                spectrum = Spectrum.from_xml_element(elem)
-                spectra[(spectrum.x, spectrum.y)] = spectrum
-                elem.clear()
-                if callback is not None:
-                    if callback():
-                        return
-        return cls(
-            scan_settings,
-            mz_group,
-            intensity_group,
-            spectra,
-            external_binary=external_binary,
-        )
 
     def mass_range(self) -> tuple[float, float]:
         low, high = np.inf, -np.inf
