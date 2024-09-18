@@ -251,19 +251,19 @@ class ImzML(object):
         external_binary: Path | str,
         scan_number: int = 1,
     ) -> "ImzML":
-        scans = et.findall("mz:scanSettingsList/mz:scanSettings", MZML_NS)
-        if len(scans) < scan_number:
-            raise ValueError(f"unable to find scan settings for scan {scan_number}")
+        params_list = et.find("mz:referenceableParamGroupList", MZML_NS)
+        if params_list is None:
+            raise ValueError("parameter list not found")
 
-        mz_params = et.find(
-            "mz:referenceableParamGroupList/mz:referenceableParamGroup"
+        mz_params = params_list.find(
+            "mz:referenceableParamGroup/"
             f"mz:cvParam[@accession='{ParamGroup.mz_array_cv}']/..",
             MZML_NS,
         )
         if mz_params is None:
             raise ValueError("unable to find m/z array parameters")
-        intensity_params = et.find(
-            "mz:referenceableParamGroupList/mz:referenceableParamGroup"
+        intensity_params = params_list.find(
+            "mz:referenceableParamGroup/"
             f"mz:cvParam[@accession='{ParamGroup.intensity_array_cv}']/..",
             MZML_NS,
         )
@@ -274,6 +274,10 @@ class ImzML(object):
         for element in et.iterfind("mz:run/mz:spectrumList/mz:spectrum", MZML_NS):
             spectrum = Spectrum.from_xml_element(element)
             spectra[(spectrum.x, spectrum.y)] = spectrum
+
+        scans = et.findall("mz:scanSettingsList/mz:scanSettings", MZML_NS)
+        if len(scans) < scan_number:
+            raise ValueError(f"unable to find scan settings for scan {scan_number}")
 
         return cls(
             ScanSettings.from_xml_element(scans[scan_number - 1]),
