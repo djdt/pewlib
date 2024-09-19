@@ -51,6 +51,20 @@ CV_SPECTRUM = {
 MZML_NS = {"mz": "http://psi.hupo.org/ms/mzml"}
 
 
+def is_imzml(path: Path | str) -> bool:
+    path = Path(path)
+    if path.suffix.lower() in [".imzml", ".imzxml"]:
+        return True
+    return False
+
+
+def is_imzmlbinary_data(path: Path | str) -> bool:
+    path = Path(path)
+    if path.suffix.lower() == ".ibd":
+        return True
+    return False
+
+
 class ScanSettings(object):
     def __init__(self, image_size: tuple[int, int], pixel_size: tuple[float, float]):
         self.image_size = image_size
