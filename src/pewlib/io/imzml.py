@@ -58,7 +58,7 @@ def is_imzml(path: Path | str) -> bool:
     return False
 
 
-def is_imzmlbinary_data(path: Path | str) -> bool:
+def is_imzml_binary_data(path: Path | str) -> bool:
     path = Path(path)
     if path.suffix.lower() == ".ibd":
         return True
