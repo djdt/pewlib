@@ -350,10 +350,38 @@ class ImzML(object):
                 external_binary=self.external_binary,
             )
             idx = np.searchsorted(mz_array, target_windows.flat)
+            idx = np.clip(idx, 0, intensity_array.size - 1)
             data[spectra.x - 1, spectra.y - 1] = np.add.reduceat(intensity_array, idx)[
                 ::2
             ]
         return np.rot90(data, 1)
+
+    def binned_masses(
+        self, mass_width_mz: float = 0.1
+    ) -> tuple[np.ndarray, np.ndarray]:
+        mass_min, mass_max = self.mass_range()
+        bins = np.arange(mass_min, mass_max + mass_width_mz, mass_width_mz)
+
+        data: np.ndarray = np.full(
+            (*self.scan_settings.image_size, len(bins)),
+            np.nan,
+            dtype=self.intensity_params.dtype,
+        )
+        for spectra in self.spectra.values():
+            mz_array = spectra.get_binary_data(
+                self.mz_params.id,
+                self.mz_params.dtype,
+                external_binary=self.external_binary,
+            )
+            intensity_array = spectra.get_binary_data(
+                self.intensity_params.id,
+                self.intensity_params.dtype,
+                external_binary=self.external_binary,
+            )
+            idx = np.searchsorted(mz_array, bins.flat)
+            idx = np.clip(idx, 0, intensity_array.size - 1)
+            data[spectra.x - 1, spectra.y - 1] = np.add.reduceat(intensity_array, idx)
+        return bins, np.rot90(data, 1)
 
 
 def load(
