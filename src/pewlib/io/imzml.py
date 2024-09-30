@@ -319,7 +319,7 @@ class ImzML(object):
         return low, high
 
     def extract_tic(self) -> np.ndarray:
-        tic = np.zeros(self.scan_settings.image_size, dtype=float)
+        tic = np.full(self.scan_settings.image_size, np.nan, dtype=float)
         for (x, y), spec in self.spectra.items():
             tic[x - 1, y - 1] = spec.tic
         return np.rot90(tic, 1)
