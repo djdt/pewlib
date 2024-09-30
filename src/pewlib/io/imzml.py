@@ -307,6 +307,7 @@ class ImzML(object):
         return ImzML.from_etree(et, external_binary)
 
     def mass_range(self) -> tuple[float, float]:
+        """Maximum mass range."""
         low, high = np.inf, -np.inf
         for spectra in self.spectra.values():
             mz_array = spectra.get_binary_data(
@@ -319,6 +320,10 @@ class ImzML(object):
         return low, high
 
     def extract_tic(self) -> np.ndarray:
+        """The total-ion-chromatogram image.
+
+        Extracted from the cvParam MS:1000285.
+        """
         tic = np.full(self.scan_settings.image_size, np.nan, dtype=float)
         for (x, y), spec in self.spectra.items():
             tic[x - 1, y - 1] = spec.tic
@@ -327,8 +332,19 @@ class ImzML(object):
     def extract_masses(
         self, target_masses: np.ndarray | float, mass_width_ppm: float = 10.0
     ) -> np.ndarray:
+        """Extracts image of one or more m/z.
+
+        Data within +/- 0.5 `mass_width_ppm` is summed.
+
+        Args:
+            target_masses: m/z to extract
+            mass_width_ppm: extraction width in ppm
+
+        Returns:
+            array of intensities, shape (X, Y, N)
+        """
         target_masses = np.asanyarray(target_masses)
-        target_widths = target_masses * mass_width_ppm / 1e6
+        target_widths = target_masses * mass_width_ppm / 1e6 / 2.0
         target_windows = np.stack(
             (target_masses - target_widths, target_masses + target_widths), axis=1
         )
@@ -359,6 +375,15 @@ class ImzML(object):
     def binned_masses(
         self, mass_width_mz: float = 0.1
     ) -> tuple[np.ndarray, np.ndarray]:
+        """Summed intensities within a certain width.
+
+        Bins data across the entire mass range, with a bin width of `mass_width_mz`.
+
+        Args:
+            mass_width_mz: width of each bin
+        Returns:
+            array of bins, binned intensity data
+        """
         mass_min, mass_max = self.mass_range()
         bins = np.arange(mass_min, mass_max + mass_width_mz, mass_width_mz)
 
