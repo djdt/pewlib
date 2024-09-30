@@ -94,8 +94,8 @@
         <scanList count="1">
           <cvParam accession="MS:1000795" cvRef="MS" name="no combination"/>
           <scan instrumentConfigurationRef="instrumentConfiguration0">
-            <cvParam accession="IMS:1000050" cvRef="IMS" name="position x" value="0"/>
-            <cvParam accession="IMS:1000051" cvRef="IMS" name="position y" value="1"/>
+            <cvParam accession="IMS:1000050" cvRef="IMS" name="position x" value="1"/>
+            <cvParam accession="IMS:1000051" cvRef="IMS" name="position y" value="2"/>
             <userParam name="3DPositionX" value="2975.788818"/>
             <userParam name="3DPositionY" value="2.993969"/>
             <userParam name="3DPositionZ" value="0.000000"/>
@@ -127,8 +127,8 @@
         <scanList count="1">
           <cvParam accession="MS:1000795" cvRef="MS" name="no combination"/>
           <scan instrumentConfigurationRef="instrumentConfiguration0">
-            <cvParam accession="IMS:1000050" cvRef="IMS" name="position x" value="1"/>
-            <cvParam accession="IMS:1000051" cvRef="IMS" name="position y" value="1"/>
+            <cvParam accession="IMS:1000050" cvRef="IMS" name="position x" value="2"/>
+            <cvParam accession="IMS:1000051" cvRef="IMS" name="position y" value="2"/>
             <userParam name="3DPositionX" value="3005.788818"/>
             <userParam name="3DPositionY" value="2.997159"/>
             <userParam name="3DPositionZ" value="0.000000"/>
@@ -160,8 +160,8 @@
         <scanList count="1">
           <cvParam accession="MS:1000795" cvRef="MS" name="no combination"/>
           <scan instrumentConfigurationRef="instrumentConfiguration0">
-            <cvParam accession="IMS:1000050" cvRef="IMS" name="position x" value="1"/>
-            <cvParam accession="IMS:1000051" cvRef="IMS" name="position y" value="0"/>
+            <cvParam accession="IMS:1000050" cvRef="IMS" name="position x" value="2"/>
+            <cvParam accession="IMS:1000051" cvRef="IMS" name="position y" value="1"/>
             <userParam name="3DPositionX" value="3035.788818"/>
             <userParam name="3DPositionY" value="3.000349"/>
             <userParam name="3DPositionZ" value="0.000000"/>
@@ -193,8 +193,8 @@
         <scanList count="1">
           <cvParam accession="MS:1000795" cvRef="MS" name="no combination"/>
           <scan instrumentConfigurationRef="instrumentConfiguration0">
-            <cvParam accession="IMS:1000050" cvRef="IMS" name="position x" value="0"/>
-            <cvParam accession="IMS:1000051" cvRef="IMS" name="position y" value="0"/>
+            <cvParam accession="IMS:1000050" cvRef="IMS" name="position x" value="1"/>
+            <cvParam accession="IMS:1000051" cvRef="IMS" name="position y" value="1"/>
             <userParam name="3DPositionX" value="3065.788818"/>
             <userParam name="3DPositionY" value="3.003538"/>
             <userParam name="3DPositionZ" value="0.000000"/>
