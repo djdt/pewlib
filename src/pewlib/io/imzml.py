@@ -80,7 +80,7 @@ class ScanSettings(object):
             f"mz:cvParam[@accession='{CV_SCANSETTINGS['MAX_COUNT_OF_PIXEL_Y']}']",
             MZML_NS,
         )
-        if x is None or y is None:
+        if x is None or y is None:  # pragma: no cover
             raise ValueError("unable to read image size")
         image_size = int(x.attrib["value"]), int(y.attrib["value"])
 
@@ -92,7 +92,7 @@ class ScanSettings(object):
             f"mz:cvParam[@accession='{CV_SCANSETTINGS['PIXEL_SIZE_Y']}']",
             MZML_NS,
         )
-        if px is None or py is None:
+        if px is None or py is None:  # pragma: no cover
             raise ValueError("unable to read image pixel size")
         pixel_size = float(px.attrib["value"]), float(py.attrib["value"])
 
@@ -125,7 +125,7 @@ class Spectrum(object):
         cls, element: ElementTree.Element, scan_number: int = 1
     ) -> "Spectrum":
         scans = element.findall("mz:scanList/mz:scan", MZML_NS)
-        if len(scans) < scan_number:
+        if len(scans) < scan_number:  # pragma: no cover
             raise ValueError(f"unable to find scan {scan_number}")
 
         px = scans[scan_number - 1].find(
@@ -134,7 +134,7 @@ class Spectrum(object):
         py = scans[scan_number - 1].find(
             f"mz:cvParam[@accession='{CV_SPECTRUM['POSITION_Y']}']", MZML_NS
         )
-        if px is None or py is None:
+        if px is None or py is None:  # pragma: no cover
             raise ValueError("unable to read position from spectrum")
 
         pos = int(px.get("value", -1)), int(py.get("value", -1))
@@ -142,7 +142,7 @@ class Spectrum(object):
         tic_element = element.find(
             f"mz:cvParam[@accession='{CV_SPECTRUM['TOTAL_ION_CURRENT']}']", MZML_NS
         )
-        if tic_element is None:
+        if tic_element is None:  # pragma: no cover
             raise ValueError("unable to read TIC from spectrum")
         tic = float(tic_element.get("value", 0.0))
 
@@ -160,7 +160,7 @@ class Spectrum(object):
                 f"mz:cvParam[@accession='{CV_SPECTRUM['EXTERNAL_ARRAY_LENGTH']}']",
                 MZML_NS,
             )
-            if key is None or offset is None or length is None:
+            if key is None or offset is None or length is None:  # pragma: no cover
                 raise ValueError("invalid binary data array")
             offsets[key.get("ref", "")] = int(offset.get("value", -1))
             lengths[key.get("ref", "")] = int(length.get("value", -1))
@@ -170,7 +170,7 @@ class Spectrum(object):
     def get_binary_data(
         self, reference_id: str, dtype: type, external_binary: Path | str | None = None
     ) -> np.ndarray:
-        if external_binary is None:
+        if external_binary is None:  # pragma: no cover
             raise NotImplementedError("direct read of binary data not supported")
 
         return np.fromfile(
@@ -204,7 +204,7 @@ class ParamGroup(object):
     @classmethod
     def from_xml_element(cls, element: ElementTree.Element) -> "ParamGroup":
         id = element.get("id", None)
-        if id is None:
+        if id is None:  # pragma: no cover
             raise ValueError(f"invalid param group element {element}")
 
         dtype = None
@@ -213,7 +213,7 @@ class ParamGroup(object):
                 dtype = ParamGroup.type_names[key]
                 break
 
-        if dtype is None:
+        if dtype is None:  # pragma: no cover
             raise ValueError(f"cannot read dtype for param group {id}")
 
         compressed, external = False, False
@@ -223,7 +223,7 @@ class ParamGroup(object):
                 f"mz:cvParam[@accession='{CV_PARAMGROUP['NO_COMPRESSION']}']", MZML_NS
             )
             is not None
-        ):
+        ):  # pragma: no cover
             raise NotImplementedError("reading compressed data not implemented")
 
         if (
@@ -251,7 +251,7 @@ class ImzML(object):
         self.mz_params = mz_params
         self.intensity_params = intensity_params
 
-        if isinstance(spectra, list):
+        if isinstance(spectra, list):  # pragma: no cover, just building dict
             self.spectra = {(s.x, s.y): s for s in spectra}
         else:
             self.spectra = spectra
@@ -266,7 +266,7 @@ class ImzML(object):
         scan_number: int = 1,
     ) -> "ImzML":
         params_list = et.find("mz:referenceableParamGroupList", MZML_NS)
-        if params_list is None:
+        if params_list is None:  # pragma: no cover
             raise ValueError("parameter list not found")
 
         mz_params = params_list.find(
@@ -274,14 +274,14 @@ class ImzML(object):
             f"mz:cvParam[@accession='{ParamGroup.mz_array_cv}']/..",
             MZML_NS,
         )
-        if mz_params is None:
+        if mz_params is None:  # pragma: no cover
             raise ValueError("unable to find m/z array parameters")
         intensity_params = params_list.find(
             "mz:referenceableParamGroup/"
             f"mz:cvParam[@accession='{ParamGroup.intensity_array_cv}']/..",
             MZML_NS,
         )
-        if intensity_params is None:
+        if intensity_params is None:  # pragma: no cover
             raise ValueError("unable to find intensity array parameters")
 
         spectra = {}
@@ -290,7 +290,7 @@ class ImzML(object):
             spectra[(spectrum.x, spectrum.y)] = spectrum
 
         scans = et.findall("mz:scanSettingsList/mz:scanSettings", MZML_NS)
-        if len(scans) < scan_number:
+        if len(scans) < scan_number:  # pragma: no cover
             raise ValueError(f"unable to find scan settings for scan {scan_number}")
 
         return cls(
@@ -389,7 +389,7 @@ def load(
     external_binary: Path | str,
     target_masses: float | np.ndarray,
     mass_width_ppm: float = 10.0,
-) -> tuple[np.ndarray, dict]:
+) -> tuple[np.ndarray, dict]:  # pragma: no cover, tested elsewehere
     """Load data from an imzML.
 
     Args:
