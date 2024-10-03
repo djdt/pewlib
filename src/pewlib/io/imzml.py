@@ -1,7 +1,10 @@
+import logging
 from pathlib import Path
 from xml.etree import ElementTree
 
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 CV_PARAMGROUP = {
     "MZ_ARRAY": "MS:1000514",
@@ -66,7 +69,9 @@ def is_imzml_binary_data(path: Path | str) -> bool:
 
 
 class ScanSettings(object):
-    def __init__(self, image_size: tuple[int, int], pixel_size: tuple[float, float]):
+    def __init__(
+        self, image_size: tuple[int, int] | None, pixel_size: tuple[float, float]
+    ):
         self.image_size = image_size
         self.pixel_size = pixel_size
 
@@ -81,8 +86,10 @@ class ScanSettings(object):
             MZML_NS,
         )
         if x is None or y is None:  # pragma: no cover
-            raise ValueError("unable to read image size")
-        image_size = int(x.attrib["value"]), int(y.attrib["value"])
+            # we can calculate this from the max x, y pos
+            image_size = None
+        else:
+            image_size = int(x.attrib["value"]), int(y.attrib["value"])
 
         px = element.find(
             f"mz:cvParam[@accession='{CV_SCANSETTINGS['PIXEL_SIZE_X']}']",
@@ -103,7 +110,7 @@ class Spectrum(object):
     def __init__(
         self,
         pos: tuple[int, int],
-        tic: float,
+        tic: float | None,
         offsets: dict[str, int],
         lengths: dict[str, int],
     ):
@@ -137,14 +144,15 @@ class Spectrum(object):
         if px is None or py is None:  # pragma: no cover
             raise ValueError("unable to read position from spectrum")
 
-        pos = int(px.get("value", -1)), int(py.get("value", -1))
+        pos = int(px.attrib["value"]), int(py.attrib["value"])
 
         tic_element = element.find(
             f"mz:cvParam[@accession='{CV_SPECTRUM['TOTAL_ION_CURRENT']}']", MZML_NS
         )
-        if tic_element is None:  # pragma: no cover
-            raise ValueError("unable to read TIC from spectrum")
-        tic = float(tic_element.get("value", 0.0))
+        if tic_element is None:
+            tic = None
+        else:
+            tic = float(tic_element.get("value", 0.0))
 
         offsets: dict[str, int] = {}
         lengths: dict[str, int] = {}
@@ -162,8 +170,8 @@ class Spectrum(object):
             )
             if key is None or offset is None or length is None:  # pragma: no cover
                 raise ValueError("invalid binary data array")
-            offsets[key.get("ref", "")] = int(offset.get("value", -1))
-            lengths[key.get("ref", "")] = int(length.get("value", -1))
+            offsets[key.attrib["ref"]] = int(offset.attrib["value"])
+            lengths[key.attrib["ref"]] = int(length.attrib["value"])
 
         return cls(pos, tic, offsets, lengths)
 
@@ -258,6 +266,14 @@ class ImzML(object):
 
         self.external_binary = external_binary
 
+    @property
+    def image_size(self) -> tuple[int, int]:
+        if self.scan_settings.image_size is not None:
+            return self.scan_settings.image_size
+        else:
+            positions = np.array(self.spectra.keys())
+            return np.amax(positions[:, 0]), np.amax(positions[:, 1])
+
     @classmethod
     def from_etree(
         cls,
@@ -324,7 +340,7 @@ class ImzML(object):
 
         Extracted from the cvParam MS:1000285.
         """
-        tic = np.full(self.scan_settings.image_size, np.nan, dtype=float)
+        tic = np.full(self.image_size, np.nan, dtype=float)
         for (x, y), spec in self.spectra.items():
             tic[x - 1, y - 1] = spec.tic
         return np.rot90(tic, 1)
@@ -350,7 +366,7 @@ class ImzML(object):
         )
 
         data: np.ndarray = np.full(
-            (*self.scan_settings.image_size, len(target_masses)),
+            (*self.image_size, len(target_masses)),
             np.nan,
             dtype=self.intensity_params.dtype,
         )
@@ -388,7 +404,7 @@ class ImzML(object):
         bins = np.arange(mass_min, mass_max + mass_width_mz, mass_width_mz)
 
         data: np.ndarray = np.full(
-            (*self.scan_settings.image_size, len(bins)),
+            (*self.image_size, len(bins)),
             np.nan,
             dtype=self.intensity_params.dtype,
         )
