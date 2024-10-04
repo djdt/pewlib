@@ -359,7 +359,7 @@ class ImzML(object):
         Returns:
             array of intensities, shape (X, Y, N)
         """
-        target_masses = np.asanyarray(target_masses)
+        target_masses = np.atleast_1d(target_masses)
         target_widths = target_masses * mass_width_ppm / 1e6 / 2.0
         target_windows = np.stack(
             (target_masses - target_widths, target_masses + target_widths), axis=1
