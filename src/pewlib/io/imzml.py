@@ -1,4 +1,5 @@
 import logging
+from io import BufferedReader
 from pathlib import Path
 from xml.etree import ElementTree
 
@@ -47,6 +48,7 @@ CV_SPECTRUM = {
     "TOTAL_ION_CURRENT": "MS:1000285",
     "EXTERNAL_OFFSET": "IMS:1000102",
     "EXTERNAL_ARRAY_LENGTH": "IMS:1000103",
+    "EXTERNAL_ENCODED_LENGTH": "IMS:1000104",
     "LOWEST_OBSERVED_MZ": "MS:1000528",
     "HIGHEST_OBSERVED_MZ": "MS:1000527",
 }
@@ -165,7 +167,7 @@ class Spectrum(object):
                 f"mz:cvParam[@accession='{CV_SPECTRUM['EXTERNAL_OFFSET']}']", MZML_NS
             )
             length = array.find(
-                f"mz:cvParam[@accession='{CV_SPECTRUM['EXTERNAL_ARRAY_LENGTH']}']",
+                f"mz:cvParam[@accession='{CV_SPECTRUM['EXTERNAL_ENCODED_LENGTH']}']",
                 MZML_NS,
             )
             if key is None or offset is None or length is None:  # pragma: no cover
@@ -176,17 +178,20 @@ class Spectrum(object):
         return cls(pos, tic, offsets, lengths)
 
     def get_binary_data(
-        self, reference_id: str, dtype: type, external_binary: Path | str | None = None
+        self,
+        reference_id: str,
+        dtype: type,
+        external_binary: Path | BufferedReader | None = None,
     ) -> np.ndarray:
         if external_binary is None:  # pragma: no cover
             raise NotImplementedError("direct read of binary data not supported")
 
-        return np.fromfile(
-            external_binary,
-            count=self.lengths[reference_id],
-            offset=self.offsets[reference_id],
-            dtype=dtype,
-        )
+        if not isinstance(external_binary, BufferedReader):
+            external_binary = external_binary.open("rb")
+
+        external_binary.seek(self.offsets[reference_id])
+        buffer = external_binary.read(self.lengths[reference_id])
+        return np.frombuffer(buffer, dtype=dtype)
 
 
 class ParamGroup(object):
@@ -264,7 +269,7 @@ class ImzML(object):
         else:
             self.spectra = spectra
 
-        self.external_binary = external_binary
+        self.external_binary = Path(external_binary)
 
     @property
     def image_size(self) -> tuple[int, int]:
@@ -324,12 +329,15 @@ class ImzML(object):
 
     def mass_range(self) -> tuple[float, float]:
         """Maximum mass range."""
+
+        fp = self.external_binary.open("rb")
+
         low, high = np.inf, -np.inf
         for spectra in self.spectra.values():
             mz_array = spectra.get_binary_data(
                 self.mz_params.id,
                 self.mz_params.dtype,
-                external_binary=self.external_binary,
+                external_binary=fp,
             )
             low = min(low, mz_array[0])
             high = max(high, mz_array[-1])
@@ -365,6 +373,8 @@ class ImzML(object):
             (target_masses - target_widths, target_masses + target_widths), axis=1
         )
 
+        fp = self.external_binary.open("rb")
+
         data: np.ndarray = np.full(
             (*self.image_size, len(target_masses)),
             np.nan,
@@ -372,14 +382,12 @@ class ImzML(object):
         )
         for spectra in self.spectra.values():
             mz_array = spectra.get_binary_data(
-                self.mz_params.id,
-                self.mz_params.dtype,
-                external_binary=self.external_binary,
+                self.mz_params.id, self.mz_params.dtype, external_binary=fp
             )
             intensity_array = spectra.get_binary_data(
                 self.intensity_params.id,
                 self.intensity_params.dtype,
-                external_binary=self.external_binary,
+                external_binary=fp,
             )
             idx = np.searchsorted(mz_array, target_windows.flat)
             idx = np.clip(idx, 0, intensity_array.size - 1)
@@ -403,6 +411,8 @@ class ImzML(object):
         mass_min, mass_max = self.mass_range()
         bins = np.arange(mass_min, mass_max + mass_width_mz, mass_width_mz)
 
+        fp = self.external_binary.open("rb")
+
         data: np.ndarray = np.full(
             (*self.image_size, len(bins)),
             np.nan,
@@ -412,12 +422,12 @@ class ImzML(object):
             mz_array = spectra.get_binary_data(
                 self.mz_params.id,
                 self.mz_params.dtype,
-                external_binary=self.external_binary,
+                external_binary=fp,
             )
             intensity_array = spectra.get_binary_data(
                 self.intensity_params.id,
                 self.intensity_params.dtype,
-                external_binary=self.external_binary,
+                external_binary=fp,
             )
             idx = np.searchsorted(mz_array, bins.flat)
             idx = np.clip(idx, 0, intensity_array.size - 1)
