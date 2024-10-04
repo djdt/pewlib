@@ -390,7 +390,8 @@ class ImzML(object):
                 external_binary=fp,
             )
             idx = np.searchsorted(mz_array, target_windows.flat)
-            idx = np.clip(idx, 0, intensity_array.size - 1)
+            # faster than np.clip
+            idx[idx > intensity_array.size - 1] = intensity_array.size - 1
             data[spectra.x - 1, spectra.y - 1] = np.add.reduceat(intensity_array, idx)[
                 ::2
             ]
@@ -430,7 +431,8 @@ class ImzML(object):
                 external_binary=fp,
             )
             idx = np.searchsorted(mz_array, bins.flat)
-            idx = np.clip(idx, 0, intensity_array.size - 1)
+            # faster than np.clip
+            idx[idx > intensity_array.size - 1] = intensity_array.size - 1
             data[spectra.x - 1, spectra.y - 1] = np.add.reduceat(intensity_array, idx)
         return bins, np.rot90(data, 1)
 
