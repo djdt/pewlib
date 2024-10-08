@@ -323,7 +323,29 @@ class ImzML(object):
         )
 
     @classmethod
-    def from_file(cls, path: Path | str, external_binary: Path | str) -> "ImzML":
+    def from_file(
+        cls, path: Path | str, external_binary: Path | str | None = None
+    ) -> "ImzML":
+        """Create an ImzML object from a file path.
+        If `external_binary` is None, the imzML path with suffix '.ibd' is used.
+
+        Args:
+            path: path to imzML file
+            external_binary: path to .ibd file
+        """
+
+        path = Path(path)
+        if not path.exists():
+            raise FileNotFoundError("imzML file not found")
+
+        if external_binary is None:
+            external_binary = path.with_suffix(".ibd")
+        else:
+            external_binary = Path(external_binary)
+
+        if not external_binary.exists():
+            raise FileNotFoundError("external binary file not found")
+
         et = ElementTree.parse(path)
         return ImzML.from_etree(et, external_binary)
 
