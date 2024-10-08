@@ -375,22 +375,110 @@ class ImzML(object):
             tic[x - 1, y - 1] = spec.tic
         return np.rot90(tic, 1)
 
+    def top_masses(
+        self,
+        num: int = 10,
+        # mass_width_mz: float = 0.001,
+        precision: int = 2,
+        min_pixel_count: int = 10,
+        min_height_fraction: float = 0.1,
+        min_height_absolute: float = 100.0,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Extracts the `num` most abundant masses for each spectra.
+        The `precision` specifies the number of decimal places to use
+        for grouping similar masses.
+
+        Args:
+            num: number of peaks per spectra to test
+            precision: number of  decimals for grouping m/z
+            min_pixel_count: minimum number of pixels a mass must occour in
+            min_height_fraction: minimum peak height as fraction of maximum image signal
+            min_height_absolute: minimum peak height in counts
+
+        Returns:
+            array of extract masses len N, image of size (X, Y, N)
+        """
+
+        mzs: np.ndarray = np.full(
+            (*self.image_size, num),
+            np.nan,
+            dtype=self.mz_params.dtype,
+        )
+        intensities: np.ndarray = np.full(
+            (*self.image_size, num),
+            np.nan,
+            dtype=self.intensity_params.dtype,
+        )
+
+        fp = self.external_binary.open("rb")
+        for spectra in self.spectra.values():
+            mz_array = spectra.get_binary_data(
+                self.mz_params.id, self.mz_params.dtype, external_binary=fp
+            )
+            intensity_array = spectra.get_binary_data(
+                self.intensity_params.id,
+                self.intensity_params.dtype,
+                external_binary=fp,
+            )
+            idx = np.argpartition(intensity_array, -num)[-num:]
+            mzs[spectra.x - 1, spectra.y - 1] = mz_array[idx]
+            intensities[spectra.x - 1, spectra.y - 1] = intensity_array[idx]
+
+        # filter peaks below height minimums
+        max_signal = np.unravel_index(np.nanargmax(intensities), intensities.shape)
+        valid = np.logical_and(
+            intensities > (intensities[max_signal] * min_height_fraction),
+            intensities > min_height_absolute,
+        )
+        mzs[~valid] = np.nan
+        intensities[~valid] = np.nan
+
+        # find unique grouped masses
+        valid = ~np.isnan(mzs)
+        rounded_masses = np.around(mzs[valid], precision)
+        unique_masses, idx, counts = np.unique(
+            rounded_masses, return_inverse=True, return_counts=True
+        )
+        # filter below count minimum
+        valid_idx = np.flatnonzero(counts > min_pixel_count)
+
+        # compute average masses and re-extract
+        avg_masses = np.empty(valid_idx.size)
+        for i in range(len(valid_idx)):
+            avg_masses[i] = np.mean(mzs[valid][idx == valid_idx[i]])
+        data = self.extract_masses(avg_masses, mass_width_mz=1.0**-precision)
+        return avg_masses, data
+
     def extract_masses(
-        self, target_masses: np.ndarray | float, mass_width_ppm: float = 10.0
+        self,
+        target_masses: np.ndarray | float,
+        mass_width_ppm: float | None = 10.0,
+        mass_width_mz: float | None = 0.0,
     ) -> np.ndarray:
         """Extracts image of one or more m/z.
 
-        Data within +/- 0.5 `mass_width_ppm` is summed.
+        Data within +/- 0.5 `mass_width_ppm` or `mass_width_mz` is summed.
 
         Args:
             target_masses: m/z to extract
             mass_width_ppm: extraction width in ppm
+            mass_width_mz: extraction width in m/z (Da)
 
         Returns:
             array of intensities, shape (X, Y, N)
         """
         target_masses = np.atleast_1d(target_masses)
-        target_widths = target_masses * mass_width_ppm / 1e6 / 2.0
+        if mass_width_ppm is not None:
+            target_widths: np.ndarray | float = (
+                target_masses * mass_width_ppm / 1e6 / 2.0
+            )
+        elif mass_width_mz is not None:
+            target_widths = mass_width_mz / 2.0
+        else:
+            raise ValueError(
+                "either 'mass_width_ppm' or 'mass_width_mz' must be supplied."
+            )
+
         target_windows = np.stack(
             (target_masses - target_widths, target_masses + target_widths), axis=1
         )
