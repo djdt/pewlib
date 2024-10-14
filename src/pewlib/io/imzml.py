@@ -151,7 +151,7 @@ class Spectrum(object):
         tic_element = element.find(
             f"mz:cvParam[@accession='{CV_SPECTRUM['TOTAL_ION_CURRENT']}']", MZML_NS
         )
-        if tic_element is None:
+        if tic_element is None:  # pragma: no cover, tic None
             tic = None
         else:
             tic = float(tic_element.get("value", 0.0))

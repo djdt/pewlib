@@ -86,7 +86,7 @@ def batch_xml_read_datafiles(path: Path, batch_xml: Path) -> List[Path]:
                 datafile_path = path.joinpath(
                     datafile[max(map(datafile.rfind, "\\/")) + 1 :]
                 )
-                if datafile_path in datafiles:
+                if datafile_path in datafiles:  # pragma: no cover, bad data formats
                     datafiles.remove(datafile_path)
                 datafiles.append(datafile_path)
 
