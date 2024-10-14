@@ -57,7 +57,8 @@ def test_io_csv_nu_instruments():
     assert np.isclose(np.sum(data["A"]), 120.0)
     assert np.isclose(np.sum(data["B"]), 12.0)
 
-    assert params["spotsize"] == 10.0
+    assert params["spotsize"] == (5.0, 10.0)
+    assert params["scantime"] == 0.01
 
 
 def test_io_csv_tofwerk():
