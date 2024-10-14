@@ -378,7 +378,7 @@ class ImzML(object):
     def extract_masses(
         self,
         target_masses: np.ndarray | float,
-        mass_width_ppm: float | None = 10.0,
+        mass_width_ppm: float | None = None,
         mass_width_mz: float | None = None,
     ) -> np.ndarray:
         """Extracts image of one or more m/z.
@@ -398,11 +398,11 @@ class ImzML(object):
             target_widths: np.ndarray | float = (
                 target_masses * mass_width_ppm / 1e6 / 2.0
             )
-        elif mass_width_mz is not None:
+        elif mass_width_mz is not None and mass_width_ppm is None:
             target_widths = mass_width_mz / 2.0
-        else:  # pragma: no cover
+        else:
             raise ValueError(
-                "either 'mass_width_ppm' or 'mass_width_mz' must be supplied."
+                "one of 'mass_width_ppm' or 'mass_width_mz' must be supplied."
             )
 
         target_windows = np.stack(
