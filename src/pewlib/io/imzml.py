@@ -335,15 +335,15 @@ class ImzML(object):
         """
 
         path = Path(path)
-        if not path.exists():
+        if not path.exists():  # pragma: no cover, bad file
             raise FileNotFoundError("imzML file not found")
 
         if external_binary is None:
             external_binary = path.with_suffix(".ibd")
-        else:
+        else:  # pragma: no cover, supplied file
             external_binary = Path(external_binary)
 
-        if not external_binary.exists():
+        if not external_binary.exists():  # pragma: no cover, bad file
             raise FileNotFoundError("external binary file not found")
 
         et = ElementTree.parse(path)
@@ -379,7 +379,7 @@ class ImzML(object):
         self,
         target_masses: np.ndarray | float,
         mass_width_ppm: float | None = 10.0,
-        mass_width_mz: float | None = 0.0,
+        mass_width_mz: float | None = None,
     ) -> np.ndarray:
         """Extracts image of one or more m/z.
 
@@ -400,7 +400,7 @@ class ImzML(object):
             )
         elif mass_width_mz is not None:
             target_widths = mass_width_mz / 2.0
-        else:
+        else:  # pragma: no cover
             raise ValueError(
                 "either 'mass_width_ppm' or 'mass_width_mz' must be supplied."
             )
