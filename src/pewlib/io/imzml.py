@@ -394,7 +394,7 @@ class ImzML(object):
             array of intensities, shape (X, Y, N)
         """
         target_masses = np.atleast_1d(target_masses)
-        if mass_width_ppm is not None:
+        if mass_width_ppm is not None and mass_width_mz is None:
             target_widths: np.ndarray | float = (
                 target_masses * mass_width_ppm / 1e6 / 2.0
             )
