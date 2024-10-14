@@ -92,9 +92,7 @@ class NuOption(GenericOption):
             )
         else:  # pragma: no cover
             logger.warning("y_[um] not found, unable to read spotsize.")
-        print(params)
         return params
-        # return super().readParams(data)
 
     def sortkey(self, path: Path) -> int:
         """Sorts files numerically."""
