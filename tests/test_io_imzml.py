@@ -64,3 +64,19 @@ def test_io_imzml():
     assert signals.shape[:2] == (2, 2)
     assert len(mzs) == signals.shape[-1]
 
+
+def test_io_imzml_orbi():
+    path = Path(__file__).parent.joinpath("data", "imzml")
+
+    # auto find .ibd
+    imz = imzml.ImzML.from_file(path.joinpath("test_orbi.imzml"))
+
+    assert imz.mz_params.dtype == np.float32
+    assert imz.intensity_params.dtype == np.float32
+
+    assert imz.image_size == (1, 32)
+
+    tic = imz.extract_tic()
+    assert tic[1, 0] == 5.3958265e6  # pixel 1, 31
+
+    imz.extract_masses([420.0], mass_width_ppm=10.0)

@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mzML xmlns="http://psi.hupo.org/ms/mzml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://psi.hupo.org/ms/mzml http://psidev.info/files/ms/mzML/xsd/mzML1.1.0.xsd" id="coronal halfbrain IT150_20240620051735_Recal" version="1.1.0">
+  <cvList count="3">
+    <cv id="MS" fullName="Proteomics Standards Initiative Mass Spectrometry Ontology" version="4.1.117" URI="https://raw.githubusercontent.com/HUPO-PSI/psi-ms-CV/master/psi-ms.obo"/>
+    <cv id="UO" fullName="Unit Ontology" version="09:04:2014" URI="https://raw.githubusercontent.com/bio-ontology-research-group/unit-ontology/master/unit.obo"/>
+    <cv id="IMS" fullName="Mass Spectrometry Imaging Ontology" version="1.1.0" URI="https://raw.githubusercontent.com/imzML/imzML/master/imagingMS.obo"/>
+  </cvList>
+  <fileDescription>
+    <fileContent>
+      <cvParam cvRef="MS" accession="MS:1000579" name="MS1 spectrum" value=""/>
+      <cvParam cvRef="IMS" accession="IMS:1000080" name="universally unique identifier" value="0000000000000000"/>
+      <cvParam cvRef="IMS" accession="IMS:1000091" name="ibd SHA-1" value="00000000000000000000000000000"/>
+      <cvParam cvRef="IMS" accession="IMS:1000031" name="processed" value=""/>
+    </fileContent>
+    <sourceFileList count="1">
+      <sourceFile id="RAW1" name="orbi_test.raw" location="file:///Z:\Fusion\test\">
+        <cvParam cvRef="MS" accession="MS:1000768" name="Thermo nativeID format" value=""/>
+        <cvParam cvRef="MS" accession="MS:1000563" name="Thermo RAW format" value=""/>
+        <cvParam cvRef="MS" accession="MS:1000569" name="SHA-1" value="00000000000000000000000000000"/>
+      </sourceFile>
+    </sourceFileList>
+  </fileDescription>
+  <referenceableParamGroupList count="3">
+    <referenceableParamGroup id="CommonInstrumentParams">
+      <cvParam cvRef="MS" accession="MS:1002416" name="Orbitrap Fusion" value=""/>
+      <cvParam cvRef="MS" accession="MS:1000529" name="instrument serial number" value="FSN00000-0"/>
+    </referenceableParamGroup>
+    <referenceableParamGroup id="mzArray">
+      <cvParam cvRef="MS" accession="MS:1000576" name="no compression" value=""/>
+      <cvParam cvRef="MS" accession="MS:1000514" name="m/z array" value="" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+      <cvParam cvRef="IMS" accession="IMS:1000101" name="external data" value="true"/>
+      <cvParam cvRef="MS" accession="MS:1000521" name="32-bit float" value=""/>
+    </referenceableParamGroup>
+    <referenceableParamGroup id="intensityArray">
+      <cvParam cvRef="MS" accession="MS:1000576" name="no compression" value=""/>
+      <cvParam cvRef="MS" accession="MS:1000515" name="intensity array" value="" unitCvRef="MS" unitAccession="MS:1000131" unitName="number of detector counts"/>
+      <cvParam cvRef="IMS" accession="IMS:1000101" name="external data" value="true"/>
+      <cvParam cvRef="MS" accession="MS:1000521" name="32-bit float" value=""/>
+    </referenceableParamGroup>
+  </referenceableParamGroupList>
+  <softwareList count="3">
+    <software id="Xcalibur" version="3.5.3881.18">
+      <cvParam cvRef="MS" accession="MS:1000532" name="Xcalibur" value=""/>
+    </software>
+    <software id="pwiz" version="3.0.23100">
+      <cvParam cvRef="MS" accession="MS:1000615" name="ProteoWizard software" value=""/>
+    </software>
+    <software id="mtimzml" version="1.0">
+      <cvParam cvRef="MS" accession="MS:1000799" name="custom unreleased software tool" value="MT imzML Converter"/>
+    </software>
+  </softwareList>
+  <scanSettingsList count="1">
+    <scanSettings id="MT_imaging_scan_settings">
+      <cvParam cvRef="IMS" accession="IMS:1000413" name="flyback" value=""/>
+      <cvParam cvRef="IMS" accession="IMS:1000401" name="top down" value=""/>
+      <cvParam cvRef="IMS" accession="IMS:1000480" name="horizontal line scan" value=""/>
+      <cvParam cvRef="IMS" accession="IMS:1000491" name="linescan left right" value=""/>
+      <cvParam cvRef="IMS" accession="IMS:1000042" name="max count of pixels x" value="1"/>
+      <cvParam cvRef="IMS" accession="IMS:1000043" name="max count of pixels y" value="32"/>
+      <cvParam cvRef="IMS" accession="IMS:1000044" name="max dimension x" value="8400" unitCvRef="UO" unitAccession="UO:0000017" unitName="micrometer"/>
+      <cvParam cvRef="IMS" accession="IMS:1000045" name="max dimension y" value="6100" unitCvRef="UO" unitAccession="UO:0000017" unitName="micrometer"/>
+      <cvParam cvRef="IMS" accession="IMS:1000046" name="pixel size (x)" value="100" unitCvRef="UO" unitAccession="UO:0000017" unitName="micrometer"/>
+      <cvParam cvRef="IMS" accession="IMS:1000047" name="pixel size y" value="100" unitCvRef="UO" unitAccession="UO:0000017" unitName="micrometer"/>
+    </scanSettings>
+  </scanSettingsList>
+  <instrumentConfigurationList count="2">
+    <instrumentConfiguration id="IC1">
+      <referenceableParamGroupRef ref="CommonInstrumentParams"/>
+      <componentList count="4">
+        <source order="1">
+          <cvParam cvRef="MS" accession="MS:1000398" name="nanoelectrospray" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000485" name="nanospray inlet" value=""/>
+        </source>
+        <analyzer order="2">
+          <cvParam cvRef="MS" accession="MS:1000081" name="quadrupole" value=""/>
+        </analyzer>
+        <analyzer order="3">
+          <cvParam cvRef="MS" accession="MS:1000484" name="orbitrap" value=""/>
+        </analyzer>
+        <detector order="4">
+          <cvParam cvRef="MS" accession="MS:1000624" name="inductive detector" value=""/>
+        </detector>
+      </componentList>
+      <softwareRef ref="Xcalibur"/>
+    </instrumentConfiguration>
+    <instrumentConfiguration id="IC2">
+      <referenceableParamGroupRef ref="CommonInstrumentParams"/>
+      <componentList count="4">
+        <source order="1">
+          <cvParam cvRef="MS" accession="MS:1000398" name="nanoelectrospray" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000485" name="nanospray inlet" value=""/>
+        </source>
+        <analyzer order="2">
+          <cvParam cvRef="MS" accession="MS:1000081" name="quadrupole" value=""/>
+        </analyzer>
+        <analyzer order="3">
+          <cvParam cvRef="MS" accession="MS:1000083" name="radial ejection linear ion trap" value=""/>
+        </analyzer>
+        <detector order="4">
+          <cvParam cvRef="MS" accession="MS:1000253" name="electron multiplier" value=""/>
+        </detector>
+      </componentList>
+      <softwareRef ref="Xcalibur"/>
+    </instrumentConfiguration>
+  </instrumentConfigurationList>
+  <dataProcessingList count="1">
+    <dataProcessing id="imzml_processing">
+      <processingMethod order="1" softwareRef="mtimzml">
+        <cvParam cvRef="MS" accession="MS:1000530" name="file format conversion" value=""/>
+      </processingMethod>
+    </dataProcessing>
+  </dataProcessingList>
+  <run id="orbi_test" defaultInstrumentConfigurationRef="IC1" startTimeStamp="2024-06-21T04:22:29Z" defaultSourceFileRef="RAW1">
+    <spectrumList count="4113" defaultDataProcessingRef="imzml_processing">
+      <spectrum index="0" id="controllerType=0 controllerNumber=1 scan=2231" defaultArrayLength="0" dataProcessingRef="imzml_processing">
+        <cvParam cvRef="MS" accession="MS:1000579" name="MS1 spectrum" value=""/>
+        <cvParam cvRef="MS" accession="MS:1000511" name="ms level" value="1"/>
+        <cvParam cvRef="MS" accession="MS:1000130" name="positive scan" value=""/>
+        <cvParam cvRef="MS" accession="MS:1000128" name="profile spectrum" value=""/>
+        <cvParam cvRef="MS" accession="MS:1000504" name="base peak m/z" value="420.158599853516" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+        <cvParam cvRef="MS" accession="MS:1000505" name="base peak intensity" value="9.886033125e05" unitCvRef="MS" unitAccession="MS:1000131" unitName="number of detector counts"/>
+        <cvParam cvRef="MS" accession="MS:1000285" name="total ion current" value="5.3958265e06"/>
+        <cvParam cvRef="MS" accession="MS:1000528" name="lowest observed m/z" value="346.525828106141" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+        <cvParam cvRef="MS" accession="MS:1000527" name="highest observed m/z" value="1515.146285860387" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+        <scanList count="1">
+          <cvParam cvRef="MS" accession="MS:1000795" name="no combination" value=""/>
+          <scan>
+            <cvParam cvRef="MS" accession="MS:1000016" name="scan start time" value="18.527831573333" unitCvRef="UO" unitAccession="UO:0000031" unitName="minute"/>
+            <cvParam cvRef="MS" accession="MS:1000512" name="filter string" value="FTMS + p NSI Full ms [350.0000-1500.0000]"/>
+            <cvParam cvRef="MS" accession="MS:1000927" name="ion injection time" value="150.0" unitCvRef="UO" unitAccession="UO:0000028" unitName="millisecond"/>
+            <cvParam cvRef="IMS" accession="IMS:1000050" name="position x" value="1"/>
+            <cvParam cvRef="IMS" accession="IMS:1000051" name="position y" value="31"/>
+            <scanWindowList count="1">
+              <scanWindow>
+                <cvParam cvRef="MS" accession="MS:1000501" name="scan window lower limit" value="350.0" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+                <cvParam cvRef="MS" accession="MS:1000500" name="scan window upper limit" value="1500.0" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+              </scanWindow>
+            </scanWindowList>
+          </scan>
+        </scanList>
+        <binaryDataArrayList count="2">
+          <binaryDataArray encodedLength="0">
+            <referenceableParamGroupRef ref="mzArray"/>
+            <cvParam cvRef="IMS" accession="IMS:1000103" name="external array length" value="17629"/>
+            <cvParam cvRef="IMS" accession="IMS:1000102" name="external offset" value="16"/>
+            <cvParam cvRef="IMS" accession="IMS:1000104" name="external encoded length" value="70516"/>
+            <binary/>
+          </binaryDataArray>
+          <binaryDataArray encodedLength="0">
+            <referenceableParamGroupRef ref="intensityArray"/>
+            <cvParam cvRef="IMS" accession="IMS:1000103" name="external array length" value="17629"/>
+            <cvParam cvRef="IMS" accession="IMS:1000102" name="external offset" value="70532"/>
+            <cvParam cvRef="IMS" accession="IMS:1000104" name="external encoded length" value="70516"/>
+            <binary/>
+          </binaryDataArray>
+        </binaryDataArrayList>
+      </spectrum>
+      <spectrum index="1" id="controllerType=0 controllerNumber=1 scan=2332" defaultArrayLength="0" dataProcessingRef="imzml_processing">
+        <cvParam cvRef="MS" accession="MS:1000579" name="MS1 spectrum" value=""/>
+        <cvParam cvRef="MS" accession="MS:1000511" name="ms level" value="1"/>
+        <cvParam cvRef="MS" accession="MS:1000130" name="positive scan" value=""/>
+        <cvParam cvRef="MS" accession="MS:1000128" name="profile spectrum" value=""/>
+        <cvParam cvRef="MS" accession="MS:1000504" name="base peak m/z" value="420.158660888672" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+        <cvParam cvRef="MS" accession="MS:1000505" name="base peak intensity" value="1.221961375e06" unitCvRef="MS" unitAccession="MS:1000131" unitName="number of detector counts"/>
+        <cvParam cvRef="MS" accession="MS:1000285" name="total ion current" value="4.73254e06"/>
+        <cvParam cvRef="MS" accession="MS:1000528" name="lowest observed m/z" value="346.525828106438" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+        <cvParam cvRef="MS" accession="MS:1000527" name="highest observed m/z" value="1515.146287224899" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+        <scanList count="1">
+          <cvParam cvRef="MS" accession="MS:1000795" name="no combination" value=""/>
+          <scan>
+            <cvParam cvRef="MS" accession="MS:1000016" name="scan start time" value="19.374398333067" unitCvRef="UO" unitAccession="UO:0000031" unitName="minute"/>
+            <cvParam cvRef="MS" accession="MS:1000512" name="filter string" value="FTMS + p NSI Full ms [350.0000-1500.0000]"/>
+            <cvParam cvRef="MS" accession="MS:1000927" name="ion injection time" value="150.0" unitCvRef="UO" unitAccession="UO:0000028" unitName="millisecond"/>
+            <cvParam cvRef="IMS" accession="IMS:1000050" name="position x" value="1"/>
+            <cvParam cvRef="IMS" accession="IMS:1000051" name="position y" value="32"/>
+            <scanWindowList count="1">
+              <scanWindow>
+                <cvParam cvRef="MS" accession="MS:1000501" name="scan window lower limit" value="350.0" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+                <cvParam cvRef="MS" accession="MS:1000500" name="scan window upper limit" value="1500.0" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+              </scanWindow>
+            </scanWindowList>
+          </scan>
+        </scanList>
+        <binaryDataArrayList count="2">
+          <binaryDataArray encodedLength="0">
+            <referenceableParamGroupRef ref="mzArray"/>
+            <cvParam cvRef="IMS" accession="IMS:1000103" name="external array length" value="14787"/>
+            <cvParam cvRef="IMS" accession="IMS:1000102" name="external offset" value="141048"/>
+            <cvParam cvRef="IMS" accession="IMS:1000104" name="external encoded length" value="59148"/>
+            <binary/>
+          </binaryDataArray>
+          <binaryDataArray encodedLength="0">
+            <referenceableParamGroupRef ref="intensityArray"/>
+            <cvParam cvRef="IMS" accession="IMS:1000103" name="external array length" value="14787"/>
+            <cvParam cvRef="IMS" accession="IMS:1000102" name="external offset" value="200196"/>
+            <cvParam cvRef="IMS" accession="IMS:1000104" name="external encoded length" value="59148"/>
+            <binary/>
+          </binaryDataArray>
+        </binaryDataArrayList>
+      </spectrum>
+    </spectrumList>
+  </run>
+</mzML>
