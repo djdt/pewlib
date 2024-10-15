@@ -79,4 +79,5 @@ def test_io_imzml_orbi():
     tic = imz.extract_tic()
     assert tic[1, 0] == 5.3958265e6  # pixel 1, 31
 
-    imz.extract_masses([420.0], mass_width_ppm=10.0)
+    data = imz.extract_masses([420.1603], mass_width_ppm=10.0)
+    assert np.isclose(data[0, 0], 3.126e6, rtol=1e-4)
