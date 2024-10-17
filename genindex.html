@@ -47,7 +47,6 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="io.html">IO Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pew.html">Line-by-line Lasers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pew.html#srr-lasers">SRR Lasers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a></li>
 </ul>
 
@@ -86,7 +85,6 @@
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
- | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
@@ -104,11 +102,7 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pew.html#pewlib.laser.Laser.add">add() (pewlib.laser.Laser method)</a>
-
-      <ul>
-        <li><a href="pew.html#pewlib.srr.srr.SRRLaser.add">(pewlib.srr.srr.SRRLaser method)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -129,14 +123,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pew.html#pewlib.calibration.Calibration">Calibration (class in pewlib.calibration)</a>
 </li>
-      <li><a href="pew.html#pewlib.srr.srr.SRRLaser.check_config_valid">check_config_valid() (pewlib.srr.srr.SRRLaser method)</a>
-</li>
       <li><a href="io.html#pewlib.io.agilent.collect_datafiles">collect_datafiles() (in module pewlib.io.agilent)</a>
+</li>
+      <li><a href="pew.html#pewlib.config.Config">Config (class in pewlib.config)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pew.html#pewlib.config.Config">Config (class in pewlib.config)</a>
-</li>
       <li><a href="processing.html#pewlib.process.convolve.convolve">convolve() (in module pewlib.process.convolve)</a>
 </li>
       <li><a href="processing.html#pewlib.process.colocal.costes">costes() (in module pewlib.process.colocal)</a>
@@ -150,11 +142,7 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pew.html#pewlib.config.Config.data_extent">data_extent() (pewlib.config.Config method)</a>
-
-      <ul>
-        <li><a href="pew.html#pewlib.srr.config.SRRConfig.data_extent">(pewlib.srr.config.SRRConfig method)</a>
 </li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="processing.html#pewlib.process.convolve.deconvolve">deconvolve() (in module pewlib.process.convolve)</a>
@@ -166,11 +154,7 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pew.html#pewlib.laser.Laser.elements">elements (pewlib.laser.Laser property)</a>
-
-      <ul>
-        <li><a href="pew.html#pewlib.srr.srr.SRRLaser.elements">(pewlib.srr.srr.SRRLaser property)</a>
 </li>
-      </ul></li>
       <li><a href="processing.html#pewlib.process.convolve.erf">erf() (in module pewlib.process.convolve)</a>
 </li>
       <li><a href="processing.html#pewlib.process.convolve.erfinv">erfinv() (in module pewlib.process.convolve)</a>
@@ -180,11 +164,7 @@
       <li><a href="processing.html#pewlib.process.convolve.exponential">exponential() (in module pewlib.process.convolve)</a>
 </li>
       <li><a href="pew.html#pewlib.laser.Laser.extent">extent (pewlib.laser.Laser property)</a>
-
-      <ul>
-        <li><a href="pew.html#pewlib.srr.srr.SRRLaser.extent">(pewlib.srr.srr.SRRLaser property)</a>
 </li>
-      </ul></li>
       <li><a href="io.html#pewlib.io.imzml.ImzML.extract_masses">extract_masses() (pewlib.io.imzml.ImzML method)</a>
 </li>
       <li><a href="io.html#pewlib.io.imzml.ImzML.extract_tic">extract_tic() (pewlib.io.imzml.ImzML method)</a>
@@ -201,14 +181,8 @@
 </li>
       <li><a href="io.html#pewlib.io.imzml.ImzML.from_file">from_file() (pewlib.io.imzml.ImzML class method)</a>
 </li>
-      <li><a href="pew.html#pewlib.srr.srr.SRRLaser.from_lasers">from_lasers() (pewlib.srr.srr.SRRLaser class method)</a>
-</li>
       <li><a href="pew.html#pewlib.laser.Laser.from_list">from_list() (pewlib.laser.Laser class method)</a>
-
-      <ul>
-        <li><a href="pew.html#pewlib.srr.srr.SRRLaser.from_list">(pewlib.srr.srr.SRRLaser class method)</a>
 </li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pew.html#pewlib.calibration.Calibration.from_points">from_points() (pewlib.calibration.Calibration class method)</a>
@@ -232,29 +206,21 @@
       <li><a href="io.html#pewlib.io.csv.GenericOption">GenericOption (class in pewlib.io.csv)</a>
 </li>
       <li><a href="pew.html#pewlib.laser.Laser.get">get() (pewlib.laser.Laser method)</a>
-
-      <ul>
-        <li><a href="pew.html#pewlib.srr.srr.SRRLaser.get">(pewlib.srr.srr.SRRLaser method)</a>
 </li>
-      </ul></li>
       <li><a href="io.html#pewlib.io.imzml.Spectrum.get_binary_data">get_binary_data() (pewlib.io.imzml.Spectrum method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pew.html#pewlib.config.Config.get_pixel_height">get_pixel_height() (pewlib.config.Config method)</a>
 
       <ul>
         <li><a href="pew.html#pewlib.config.SpotConfig.get_pixel_height">(pewlib.config.SpotConfig method)</a>
 </li>
-        <li><a href="pew.html#pewlib.srr.config.SRRConfig.get_pixel_height">(pewlib.srr.config.SRRConfig method)</a>
-</li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pew.html#pewlib.config.Config.get_pixel_width">get_pixel_width() (pewlib.config.Config method)</a>
 
       <ul>
         <li><a href="pew.html#pewlib.config.SpotConfig.get_pixel_width">(pewlib.config.SpotConfig method)</a>
-</li>
-        <li><a href="pew.html#pewlib.srr.config.SRRConfig.get_pixel_width">(pewlib.srr.config.SRRConfig method)</a>
 </li>
       </ul></li>
       <li><a href="io.html#pewlib.io.laser.guess_delay_from_data">guess_delay_from_data() (in module pewlib.io.laser)</a>
@@ -277,14 +243,6 @@
         <li><a href="io.html#pewlib.io.perkinelmer.is_valid_directory">(in module pewlib.io.perkinelmer)</a>
 </li>
       </ul></li>
-  </ul></td>
-</tr></table>
-
-<h2 id="K">K</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pew.html#pewlib.srr.srr.SRRLaser.krisskross">krisskross() (pewlib.srr.srr.SRRLaser method)</a>
-</li>
   </ul></td>
 </tr></table>
 
@@ -331,8 +289,6 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pew.html#pewlib.srr.config.SRRConfig.magnification">magnification (pewlib.srr.config.SRRConfig property)</a>
-</li>
       <li><a href="processing.html#pewlib.process.colocal.manders">manders() (in module pewlib.process.colocal)</a>
 </li>
       <li><a href="io.html#pewlib.io.imzml.ImzML.mass_range">mass_range() (pewlib.io.imzml.ImzML method)</a>
@@ -372,10 +328,6 @@
         <li><a href="processing.html#module-pewlib.process.filters">pewlib.process.filters</a>
 </li>
         <li><a href="processing.html#module-pewlib.process.threshold">pewlib.process.threshold</a>
-</li>
-        <li><a href="pew.html#module-pewlib.srr.config">pewlib.srr.config</a>
-</li>
-        <li><a href="pew.html#module-pewlib.srr.srr">pewlib.srr.srr</a>
 </li>
       </ul></li>
   </ul></td>
@@ -465,6 +417,8 @@
         <li><a href="io.html#module-pewlib.io.npz">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     pewlib.io.perkinelmer
 
@@ -472,8 +426,6 @@
         <li><a href="io.html#module-pewlib.io.perkinelmer">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     pewlib.io.textimage
 
@@ -530,20 +482,6 @@
         <li><a href="processing.html#module-pewlib.process.threshold">module</a>
 </li>
       </ul></li>
-      <li>
-    pewlib.srr.config
-
-      <ul>
-        <li><a href="pew.html#module-pewlib.srr.config">module</a>
-</li>
-      </ul></li>
-      <li>
-    pewlib.srr.srr
-
-      <ul>
-        <li><a href="pew.html#module-pewlib.srr.srr">module</a>
-</li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -560,20 +498,12 @@
         <li><a href="io.html#pewlib.io.csv.TofwerkOption.readParams">(pewlib.io.csv.TofwerkOption method)</a>
 </li>
       </ul></li>
-      <li><a href="pew.html#pewlib.laser.Laser.remove">remove() (pewlib.laser.Laser method)</a>
-
-      <ul>
-        <li><a href="pew.html#pewlib.srr.srr.SRRLaser.remove">(pewlib.srr.srr.SRRLaser method)</a>
-</li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pew.html#pewlib.laser.Laser.rename">rename() (pewlib.laser.Laser method)</a>
-
-      <ul>
-        <li><a href="pew.html#pewlib.srr.srr.SRRLaser.rename">(pewlib.srr.srr.SRRLaser method)</a>
+      <li><a href="pew.html#pewlib.laser.Laser.remove">remove() (pewlib.laser.Laser method)</a>
 </li>
-      </ul></li>
+      <li><a href="pew.html#pewlib.laser.Laser.rename">rename() (pewlib.laser.Laser method)</a>
+</li>
       <li><a href="processing.html#pewlib.process.calc.reset_cumsum">reset_cumsum() (in module pewlib.process.calc)</a>
 </li>
       <li><a href="processing.html#pewlib.process.filters.rolling_mean">rolling_mean() (in module pewlib.process.filters)</a>
@@ -614,17 +544,9 @@
 </li>
       <li><a href="pew.html#pewlib.config.SpotConfig">SpotConfig (class in pewlib.config)</a>
 </li>
-      <li><a href="pew.html#pewlib.srr.config.SRRConfig">SRRConfig (class in pewlib.srr.config)</a>
-</li>
-      <li><a href="pew.html#pewlib.srr.srr.SRRLaser">SRRLaser (class in pewlib.srr.srr)</a>
-</li>
       <li><a href="processing.html#pewlib.process.calc.subpixel_offset">subpixel_offset() (in module pewlib.process.calc)</a>
 </li>
       <li><a href="processing.html#pewlib.process.calc.subpixel_offset_equal">subpixel_offset_equal() (in module pewlib.process.calc)</a>
-</li>
-      <li><a href="pew.html#pewlib.srr.config.SRRConfig.subpixel_offsets">subpixel_offsets (pewlib.srr.config.SRRConfig property)</a>
-</li>
-      <li><a href="pew.html#pewlib.srr.config.SRRConfig.subpixels_per_pixel">subpixels_per_pixel (pewlib.srr.config.SRRConfig property)</a>
 </li>
       <li><a href="processing.html#pewlib.process.convolve.super_gaussian">super_gaussian() (in module pewlib.process.convolve)</a>
 </li>
@@ -660,12 +582,10 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pew.html#pewlib.srr.config.SRRConfig.valid_for_data">valid_for_data() (pewlib.srr.config.SRRConfig method)</a>
+      <li><a href="io.html#pewlib.io.csv.GenericOption.validForPath">validForPath() (pewlib.io.csv.GenericOption method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="io.html#pewlib.io.csv.GenericOption.validForPath">validForPath() (pewlib.io.csv.GenericOption method)</a>
-</li>
       <li><a href="processing.html#pewlib.process.calc.view_as_blocks">view_as_blocks() (in module pewlib.process.calc)</a>
 </li>
   </ul></td>
@@ -674,8 +594,6 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pew.html#pewlib.srr.config.SRRConfig.warmup">warmup (pewlib.srr.config.SRRConfig property)</a>
-</li>
       <li><a href="pew.html#pewlib.calibration.weighted_linreg">weighted_linreg() (in module pewlib.calibration)</a>
 </li>
   </ul></td>
