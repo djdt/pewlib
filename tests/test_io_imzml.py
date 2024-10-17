@@ -31,7 +31,7 @@ def test_io_imzml():
 
     tic = imz.extract_tic()
     assert tic.shape == (2, 2)
-    assert np.allclose(tic, [[52676.0, 75608.0], [80436.0, 72098.0]])
+    assert np.allclose(tic, [[80436.0, 72098.0], [52676.0, 75608.0]])
 
     targets = imz.extract_masses([300.0, 600.0, 900.0], mass_width_ppm=10.0)
     assert targets.shape == (2, 2, 3)
