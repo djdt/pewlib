@@ -77,12 +77,12 @@ def test_io_imzml_orbi():
     assert imz.image_size == (1, 32)
 
     tic = imz.extract_tic()
-    assert tic[1, 0] == 5.3958265e6  # pixel 1, 31
+    assert tic[30, 0] == 5.3958265e6  # pixel 1, 31
+    assert tic.shape == (32, 1)
 
     data = imz.extract_masses([420.1603], mass_width_ppm=10.0)
-    assert np.isclose(data[0, 0], 3.126e6, rtol=1e-4)
+    assert np.isclose(data[31, 0], 3.126e6, rtol=1e-4)
 
     # test when size is missing
     imz.scan_settings.image_size = None
     assert imz.image_size == (1, 32)
-
