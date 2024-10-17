@@ -80,16 +80,19 @@ class NuOption(GenericOption):
 
     def readParams(self, data: np.ndarray) -> dict:
         params = {}
-        if "Cycle time (ms)" in data.dtype.names:
+        if "Cycle_time_(ms)" in data.dtype.names:
             params["scantime"] = np.round(
-                1000.0 * np.mean(np.diff(data["Cycle time (ms)"], axis=1)), 4
+                1e-3 * np.median(np.diff(data["Cycle_time_(ms)"].flat)), 4
             )
-        if "y_[um]" in data.dtype.names:
-            params["spotsize"] = np.round(np.mean(np.diff(data["y_[um]"], axis=0)), 2)
+        if "x_[um]" in data.dtype.names and "y_[um]" in data.dtype.names:
+            xd, yd = np.diff(data["x_[um]"].flat), np.diff(data["y_[um]"].flat)
+            params["spotsize"] = (
+                np.abs(np.round(np.median(xd[xd != 0.0]), 2)),
+                np.abs(np.round(np.median(yd[yd != 0.0]), 2)),
+            )
         else:  # pragma: no cover
             logger.warning("y_[um] not found, unable to read spotsize.")
         return params
-        # return super().readParams(data)
 
     def sortkey(self, path: Path) -> int:
         """Sorts files numerically."""
@@ -110,7 +113,7 @@ class ThermoLDROption(GenericOption):
 
     def readParams(self, data: np.ndarray) -> dict:
         if "Time" in data.dtype.names:
-            return {"scantime": np.round(np.mean(np.diff(data["Time"], axis=1)), 4)}
+            return {"scantime": np.round(np.median(np.diff(data["Time"].flat)), 4)}
         else:  # pragma: no cover
             logger.warning("Time not found, unable to read scantime.")
             return super().readParams(data)
@@ -133,7 +136,7 @@ class TofwerkOption(GenericOption):
     def readParams(self, data: np.ndarray) -> dict:
         if "t_elapsed_Buf" in data.dtype.names:
             return {
-                "scantime": np.round(np.mean(np.diff(data["t_elapsed_Buf"], axis=1)), 4)
+                "scantime": np.round(np.median(np.diff(data["t_elapsed_Buf"].flat)), 4)
             }
         else:  # pragma: no cover
             logger.warning("'t_elapsed_Buf' not found, unable to read scantime.")

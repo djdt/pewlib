@@ -161,6 +161,8 @@ def sync_data_nwi_laser_log(
                 x = x[::-1]
                 x0, x1 = x1, x0
                 s0, s1 = None, -s0
+            if s0 == -0:  # pragma: no cover, this corresponds to no data, but errors
+                continue
 
             sync[y0, x0:x1][s0:s1] = x[s0:s1]
         elif x0 == x1:  # vertical

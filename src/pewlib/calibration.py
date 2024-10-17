@@ -21,7 +21,7 @@ def weights_from_weighting(
     """
     if x.size == 0:
         return np.empty(0, dtype=x.dtype)
-    if np.all(np.isnan(x)):
+    if np.all(np.isnan(x)):  # pragma: no cover, empty
         return np.full_like(x, np.nan)
 
     if safe:
