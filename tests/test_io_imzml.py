@@ -81,3 +81,8 @@ def test_io_imzml_orbi():
 
     data = imz.extract_masses([420.1603], mass_width_ppm=10.0)
     assert np.isclose(data[0, 0], 3.126e6, rtol=1e-4)
+
+    # test when size is missing
+    imz.scan_settings.image_size = None
+    assert imz.image_size == (1, 32)
+
