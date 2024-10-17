@@ -2,6 +2,7 @@
 Import and export in pew's custom file format, based on numpy's compressed '.npz'.
 This format svaes image data, laser parameters and calibrations in one file.
 """
+
 import logging
 import time
 from importlib.metadata import version
@@ -15,6 +16,16 @@ from pewlib.config import SpotConfig
 from pewlib.srr import SRRConfig, SRRLaser
 
 logger = logging.getLogger(__name__)
+
+
+def compare_version(va: str, vb: str) -> int:
+
+    for a, b in zip(va.split("."), vb.split(".")):
+        if int(a) > int(b):
+            return 1
+        elif int(a) < int(b):
+            return -1
+    return 0
 
 
 def pack_info(
@@ -78,7 +89,10 @@ def load(path: Union[str, Path]) -> Laser:
     npz = np.load(path)
 
     if "header" not in npz.files:
-        if "_version" not in npz.files or npz["_version"] < "0.6.0":  # pragma: no cover
+        if (
+            "_version" not in npz.files
+            or compare_version(npz["_version"], "0.6.0") == -1
+        ):  # pragma: no cover
             raise ValueError(
                 "NPZ Version mismatch, only versions >=0.6.0 are supported."
             )
@@ -90,22 +104,24 @@ def load(path: Union[str, Path]) -> Laser:
     data = npz["data"]
 
     # Compatibility with old file verions
-    if header["version"] < "0.7.0":  # Prior to use of info dict
+    if compare_version(header["version"], "0.7.0") == -1:  # Prior to use of info dict
         info = {"Name": str(npz["name"])}
     else:
         info = unpack_info(npz["info"])
 
-    if header["version"] < "0.8.0":  # Prior to use of packed calibrations
+    if (
+        compare_version(header["version"], "0.8.0") == -1
+    ):  # Prior to use of packed calibrations
         calibration = {}
         for name in data.dtype.names:
             calibration[name] = Calibration.from_array(npz[f"calibration_{name}"])
     else:
         calibration = unpack_calibration(npz["calibration"])
 
-    if header["version"] < version("pewlib"):
-        logger.info(
-            f"NPZ version of {path} is out of date. {header['version']} < 0.8.0."
-        )
+    # if header["version"] < version("pewlib"):
+    #     logger.info(
+    #         f"NPZ version of {path} is out of date. {header['version']} < 0.8.0."
+    #     )
 
     if header["class"] in ["Laser", "Raster"]:
         laser = Laser
