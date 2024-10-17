@@ -13,7 +13,7 @@ Config
 .. automodule:: pewlib.config
     :members:
 
-Capewlib.ration
+Calibration
 -----------
 
 .. automodule:: pewlib.calibration
