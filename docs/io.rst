@@ -15,6 +15,12 @@ CSV
 .. automodule:: pewlib.io.csv
     :members:
 
+ImzML
+-----
+
+.. automodule:: pewlib.io.imzml
+    :members:
+
 
 Numpy NPZ
 ---------
