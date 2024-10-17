@@ -490,22 +490,22 @@ class ImzML(object):
         otherwise the summed intensities.
 
         Returns:
-            image of tic, shape (X, Y)
+            image of tic, shape (Y, X)
         """
-        tic = np.full(self.image_size, np.nan, dtype=float)
+        tic = np.full((self.image_size[1], self.image_size[0]), np.nan, dtype=float)
 
         fp = self.external_binary.open("rb")
 
         for (x, y), spec in self.spectra.items():
             if spec.tic is None:
-                tic[x - 1, y - 1] = np.sum(
+                tic[y - 1, x - 1] = np.sum(
                     spec.get_binary_data(
                         self.intensity_params.id, self.intensity_params.dtype, fp
                     )
                 )
             else:
-                tic[x - 1, y - 1] = spec.tic
-        return np.rot90(tic, 1)
+                tic[y - 1, x - 1] = spec.tic
+        return tic
 
     def extract_masses(
         self,
@@ -523,7 +523,7 @@ class ImzML(object):
             mass_width_mz: extraction width in m/z (Da)
 
         Returns:
-            array of intensities, shape (X, Y, N)
+            array of intensities, shape (Y, X, N)
         """
         target_masses = np.atleast_1d(target_masses)
         if mass_width_ppm is not None and mass_width_mz is None:
@@ -544,7 +544,7 @@ class ImzML(object):
         fp = self.external_binary.open("rb")
 
         data: np.ndarray = np.full(
-            (*self.image_size, len(target_masses)),
+            (self.image_size[1], self.image_size[0], len(target_masses)),
             np.nan,
             dtype=self.intensity_params.dtype,
         )
@@ -560,10 +560,10 @@ class ImzML(object):
             idx = np.searchsorted(mz_array, target_windows.flat)
             # faster than np.clip
             idx[idx > intensity_array.size - 1] = intensity_array.size - 1
-            data[spectra.x - 1, spectra.y - 1] = np.add.reduceat(intensity_array, idx)[
+            data[spectra.y - 1, spectra.x - 1] = np.add.reduceat(intensity_array, idx)[
                 ::2
             ]
-        return np.rot90(data, 1)
+        return data
 
     def binned_masses(
         self, mass_width_mz: float = 0.1
@@ -576,7 +576,7 @@ class ImzML(object):
             mass_width_mz: width of each bin
 
         Returns:
-            array of bins, binned intensity data
+            array of bins, binned intensity data (Y, X, N)
         """
         mass_min, mass_max = self.mass_range()
         bins = np.arange(mass_min, mass_max + mass_width_mz, mass_width_mz)
@@ -584,7 +584,7 @@ class ImzML(object):
         fp = self.external_binary.open("rb")
 
         data: np.ndarray = np.full(
-            (*self.image_size, len(bins)),
+            (self.image_size[1], self.image_size[0], len(bins)),
             np.nan,
             dtype=self.intensity_params.dtype,
         )
@@ -602,8 +602,8 @@ class ImzML(object):
             idx = np.searchsorted(mz_array, bins.flat)
             # faster than np.clip
             idx[idx > intensity_array.size - 1] = intensity_array.size - 1
-            data[spectra.x - 1, spectra.y - 1] = np.add.reduceat(intensity_array, idx)
-        return bins, np.rot90(data, 1)
+            data[spectra.y - 1, spectra.x - 1] = np.add.reduceat(intensity_array, idx)
+        return bins, data
 
     def untargeted_extraction(
         self,
@@ -624,16 +624,16 @@ class ImzML(object):
             min_height_absolute: minimum peak height in counts
 
         Returns:
-            array of (average) masses len N, image of size (X, Y, N)
+            array of (average) masses len N, image of size (Y, X, N)
         """
 
         mzs: np.ndarray = np.full(
-            (*self.image_size, num),
+            (self.image_size[1], self.image_size[0], num),
             np.nan,
             dtype=self.mz_params.dtype,
         )
         intensities: np.ndarray = np.full(
-            (*self.image_size, num),
+            (self.image_size[1], self.image_size[0], num),
             np.nan,
             dtype=self.intensity_params.dtype,
         )
@@ -649,8 +649,8 @@ class ImzML(object):
                 external_binary=fp,
             )
             idx = np.argpartition(intensity_array, -num)[-num:]
-            mzs[spectra.x - 1, spectra.y - 1] = mz_array[idx]
-            intensities[spectra.x - 1, spectra.y - 1] = intensity_array[idx]
+            mzs[spectra.y - 1, spectra.x - 1] = mz_array[idx]
+            intensities[spectra.y - 1, spectra.x - 1] = intensity_array[idx]
 
         # filter peaks below height minimums
         max_signal = np.unravel_index(np.nanargmax(intensities), intensities.shape)
