@@ -1,12 +1,12 @@
 import filecmp
-import numpy as np
 from pathlib import Path
+
+import numpy as np
 import pytest
-import tempfile
 
 from pewlib import io
 from pewlib.config import SpotConfig
-from pewlib.srr import SRRLaser, SRRConfig
+from pewlib.srr import SRRConfig, SRRLaser
 
 
 def test_io_perkinelmer():
@@ -25,7 +25,7 @@ def test_io_perkinelmer():
     assert params["spotsize"] == 300.0
 
 
-def test_io_textimage():
+def test_io_textimage(tmp_path: Path):
     path = Path(__file__).parent.joinpath("data", "textimage")
     # Test loading
     data = io.textimage.load(path.joinpath("csv.csv"), delimiter=",", name="CSV")
@@ -39,26 +39,22 @@ def test_io_textimage():
     assert np.sum(data) == 85.0
 
     # Test saving
-    temp = tempfile.NamedTemporaryFile()
     data = np.random.random([10, 10])
-    io.textimage.save(temp.name, data)
-    assert np.all(data == io.textimage.load(temp.name))
-    temp.close()
+    io.textimage.save(tmp_path.joinpath("test_io_textimage.csv"), data)
+    assert np.all(data == io.textimage.load(tmp_path.joinpath("test_io_textimage.csv")))
 
 
-def test_io_vtk():
+def test_io_vtk(tmp_path: Path):
     path = Path(__file__).parent.joinpath("data", "vtk")
 
     np.random.seed(12718736)
     data = np.random.random((10, 10, 3))
     data.dtype = [("A1", float)]
-    temp = tempfile.NamedTemporaryFile(suffix=".vti")
-    io.vtk.save(temp.name, data, (1, 1, 1))
-    assert filecmp.cmp(temp.name, path.joinpath("test.vti"))
-    temp.close()
+    io.vtk.save(tmp_path.joinpath("test_io_vtk.vti"), data, (1, 1, 1))
+    assert filecmp.cmp(tmp_path.joinpath("test_io_vtk.vti"), path.joinpath("test.vti"))
 
 
-def test_io_npz():
+def test_io_npz(tmp_path: Path):
     path = Path(__file__).parent.joinpath("data", "npz")
 
     laser = io.npz.load(path.joinpath("test.npz"))
@@ -85,10 +81,8 @@ def test_io_npz():
     assert np.all(calibration.points == np.array([[1, 1], [2, 2], [3, 3]]))
     assert calibration.unit == "test"
     # Saving
-    temp = tempfile.NamedTemporaryFile(suffix=".npz")
-    io.npz.save(temp.name, laser)
-    loaded = io.npz.load(temp.name)
-    temp.close()
+    io.npz.save(tmp_path.joinpath("test_io_npz.npz"), laser)
+    loaded = io.npz.load(tmp_path.joinpath("test_io_npz.npz"))
 
     assert np.all(loaded.data == laser.data)
     assert loaded.config.spotsize == laser.config.spotsize
