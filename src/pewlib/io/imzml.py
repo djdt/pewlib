@@ -276,7 +276,7 @@ class ImzML(object):
         if self.scan_settings.image_size is not None:
             return self.scan_settings.image_size
         else:
-            positions = np.array(self.spectra.keys())
+            positions = np.array(list(self.spectra.keys()))
             return np.amax(positions[:, 0]), np.amax(positions[:, 1])
 
     @classmethod
