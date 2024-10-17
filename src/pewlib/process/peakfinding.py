@@ -446,7 +446,7 @@ def peaks_from_edges(
             "'edge', 'prominence', 'minima', 'zero'."
         )
 
-    area = np.trapz(x[indicies] - bases, indicies, axis=0)
+    area = np.trapezoid(x[indicies] - bases, indicies, axis=0)
 
     peaks = np.empty(tops.shape, dtype=PEAK_DTYPE)
     peaks["area"] = area
