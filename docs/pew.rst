@@ -20,17 +20,17 @@ Calibration
     :members:
 
 
-SRR Lasers
-==========
-
-SRRLaser
---------
-
-.. automodule:: pewlib.srr.srr
-    :members:
-
-SRRConfig
----------
-
-.. automodule:: pewlib.srr.config
-    :members:
+.. SRR Lasers
+.. ==========
+..
+.. SRRLaser
+.. --------
+..
+.. .. automodule:: pewlib.srr.srr
+..     :members:
+..
+.. SRRConfig
+.. ---------
+..
+.. .. automodule:: pewlib.srr.config
+..     :members:
