@@ -91,7 +91,7 @@ def load(path: Union[str, Path]) -> Laser:
     if "header" not in npz.files:
         if (
             "_version" not in npz.files
-            or compare_version(npz["_version"], "0.6.0") == -1
+            or compare_version(str(npz["_version"]), "0.6.0") == -1
         ):  # pragma: no cover
             raise ValueError(
                 "NPZ Version mismatch, only versions >=0.6.0 are supported."
@@ -104,13 +104,15 @@ def load(path: Union[str, Path]) -> Laser:
     data = npz["data"]
 
     # Compatibility with old file verions
-    if compare_version(header["version"], "0.7.0") == -1:  # Prior to use of info dict
+    if (
+        compare_version(str(header["version"]), "0.7.0") == -1
+    ):  # Prior to use of info dict
         info = {"Name": str(npz["name"])}
     else:
         info = unpack_info(npz["info"])
 
     if (
-        compare_version(header["version"], "0.8.0") == -1
+        compare_version(str(header["version"]), "0.8.0") == -1
     ):  # Prior to use of packed calibrations
         calibration = {}
         for name in data.dtype.names:
