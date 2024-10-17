@@ -1,3 +1,8 @@
+"""
+Import of mass-spec imaging data in the imzML format.
+Each imzML file consists of a xml ('.imzML') and external binary ('.ibd')
+"""
+
 import logging
 from io import BufferedReader
 from pathlib import Path
@@ -71,6 +76,16 @@ def is_imzml_binary_data(path: Path | str) -> bool:
 
 
 class ScanSettings(object):
+    """Stores imzML scan settings.
+
+    Generate from a <scanSettings> imzML element using
+    :meth:`pewlib.io.imzml.ScanSettings.from_xml_element`.
+
+    Args:
+        image_size: size in pixels (x, y), or None
+        pixel_size: pixel size in μm (x, y)
+    """
+
     def __init__(
         self, image_size: tuple[int, int] | None, pixel_size: tuple[float, float]
     ):
@@ -79,6 +94,17 @@ class ScanSettings(object):
 
     @classmethod
     def from_xml_element(cls, element: ElementTree.Element) -> "ScanSettings":
+        """Generate ScanSettings from an imzML <scanSettings> element.
+
+        Attempts to read the image and pixel size from the imzML.
+        Image size is absent in some imzML files.
+
+        Args:
+            element: the <scanSettings> element
+
+        Raises:
+            ValueError when pixel size not found
+        """
         x = element.find(
             f"mz:cvParam[@accession='{CV_SCANSETTINGS['MAX_COUNT_OF_PIXEL_X']}']",
             MZML_NS,
@@ -109,6 +135,20 @@ class ScanSettings(object):
 
 
 class Spectrum(object):
+    """Stores an imzML spectrum info.
+
+    Generate from a <spectrum> imzML element using
+    :meth:`pewlib.io.imzml.Spectrum.from_xml_element`.
+
+    Args:
+        pos: pixel pos (x, y)
+        tic: optional total-ion-chromatogram value
+        offsets: dict of {:attr:`pewlib.io.imzml.ParamGroup.id`:
+                          external data offset in bytes}
+        lengths: dict of {:attr:`pewlib.io.imzml.ParamGroup.id`:
+                          external data length in bytes}
+    """
+
     def __init__(
         self,
         pos: tuple[int, int],
@@ -133,6 +173,16 @@ class Spectrum(object):
     def from_xml_element(
         cls, element: ElementTree.Element, scan_number: int = 1
     ) -> "Spectrum":
+        """Generate Spectrum from an imzML <spectrum> element.
+
+        Attempts to read the pos, tic and external data byte offsets and lengths.
+
+        Args:
+            element: the <spectrum> element
+
+        Raises:
+            ValueError when pos, offset or length are found
+        """
         scans = element.findall("mz:scanList/mz:scan", MZML_NS)
         if len(scans) < scan_number:  # pragma: no cover
             raise ValueError(f"unable to find scan {scan_number}")
@@ -183,6 +233,19 @@ class Spectrum(object):
         dtype: type,
         external_binary: Path | BufferedReader | None = None,
     ) -> np.ndarray:
+        """Reads data from external binary.
+
+        For faster access keep a BufferedReader active for all Spectrum reads,
+        limiting the number of times the file is opened.
+
+        Args:
+            reference_id: the :attr:`pewlib.io.imzml.ParamGroup.id` to read.
+            dtype: data type, e.g. `np.float32`
+            external_binary: path or file handle to .ibd
+
+        Returns:
+            array of data
+        """
         if external_binary is None:  # pragma: no cover
             raise NotImplementedError("direct read of binary data not supported")
 
@@ -195,6 +258,20 @@ class Spectrum(object):
 
 
 class ParamGroup(object):
+    """Stores imzML referenceableParamGroup info.
+
+    Generate from an imzML <referenceableParamGroup> using
+    :meth:`pewlib.io.imzml.ParamGroup.from_xml_element`.
+
+    Only un-compressed, external data is supported.
+
+    Args:
+        id: id of the group, e.g. 'mzArray', 'intensities'
+        dtype: type of data referenced, e.g. `np.float32`
+        compressed: is the data compressed
+        external: is data external
+    """
+
     type_names = {
         "BINARY_TYPE_8BIT_INTEGER": np.uint8,
         "BINARY_TYPE_16BIT_INTEGER": np.uint16,
@@ -216,6 +293,17 @@ class ParamGroup(object):
 
     @classmethod
     def from_xml_element(cls, element: ElementTree.Element) -> "ParamGroup":
+        """Generate ParamGroup from an imzML <referenceableParamGroup> element.
+
+        Attempts to read the id, dtype, compression and if data is external.
+
+        Args:
+            element: the <referenceableParamGroup> element
+
+        Raises:
+            ValueError when id, type not found
+            NotImplementedError: when data is compresssed
+        """
         id = element.get("id", None)
         if id is None:  # pragma: no cover
             raise ValueError(f"invalid param group element {element}")
@@ -251,6 +339,19 @@ class ParamGroup(object):
 
 
 class ImzML(object):
+    """Class for storing relevant data parsed from an imzML file.
+
+    To generate from a file use :meth:`pewlib.io.imzml.ImzML.from_file`.
+
+    Args:
+        scan_settings: a :class:`pewlib.io.imzml.ScanSettings`
+        mz_params: a :class:`pewlib.io.imzml.ParamGroup` for mz array
+        intensity_params: a :class:`pewlib.io.imzml.ParamGroup` for intensities
+        spectra: either a list of :class:`pewlib.io.imzml.Spectrum` or a dict mapping
+                 pixel positions to each :class:`pewlib.io.imzml.Spectrum`.
+        external_binary: path to the '.idb' binary
+    """
+
     def __init__(
         self,
         scan_settings: ScanSettings,
@@ -286,6 +387,16 @@ class ImzML(object):
         external_binary: Path | str,
         scan_number: int = 1,
     ) -> "ImzML":
+        """Create an ImzML class from a pre-parsed element tree.
+
+        Args:
+            et: the element tree from parsing
+            external_binary: path to '.idb' file
+            scan_number: scan number to import
+
+        Raises:
+            ValueError: when vital parameters are missing
+        """
         params_list = et.find("mz:referenceableParamGroupList", MZML_NS)
         if params_list is None:  # pragma: no cover
             raise ValueError("parameter list not found")
@@ -332,6 +443,9 @@ class ImzML(object):
         Args:
             path: path to imzML file
             external_binary: path to .ibd file
+
+        Raises:
+            FileNotFoundError: if path or external_binary do not exist
         """
 
         path = Path(path)
@@ -350,7 +464,11 @@ class ImzML(object):
         return ImzML.from_etree(et, external_binary)
 
     def mass_range(self) -> tuple[float, float]:
-        """Maximum mass range."""
+        """Maximum mass range.
+
+        Returns:
+            lowest m/z, highest m/z
+        """
 
         fp = self.external_binary.open("rb")
 
@@ -368,11 +486,25 @@ class ImzML(object):
     def extract_tic(self) -> np.ndarray:
         """The total-ion-chromatogram image.
 
-        Extracted from the cvParam MS:1000285.
+        Extracted from the cvParam MS:1000285 if availble,
+        otherwise the summed intensities.
+
+        Returns:
+            image of tic, shape (X, Y)
         """
         tic = np.full(self.image_size, np.nan, dtype=float)
+
+        fp = self.external_binary.open("rb")
+
         for (x, y), spec in self.spectra.items():
-            tic[x - 1, y - 1] = spec.tic
+            if spec.tic is None:
+                tic[x - 1, y - 1] = np.sum(
+                    spec.get_binary_data(
+                        self.intensity_params.id, self.intensity_params.dtype, fp
+                    )
+                )
+            else:
+                tic[x - 1, y - 1] = spec.tic
         return np.rot90(tic, 1)
 
     def extract_masses(
@@ -442,6 +574,7 @@ class ImzML(object):
 
         Args:
             mass_width_mz: width of each bin
+
         Returns:
             array of bins, binned intensity data
         """
