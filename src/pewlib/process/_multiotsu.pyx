@@ -2,9 +2,7 @@
 
 import numpy as np
 
-from typing import List
-
-def multiotsu(x: np.ndarray, levels: int, nbins: int = 256) -> List[float]:
+def multiotsu(x: np.ndarray, levels: int, nbins: int = 256) -> list[float]:
     p, bin_edges = np.histogram(x.ravel(), bins=nbins, density=True)
 
     cdef float [:, :] H = np.empty((nbins, nbins), dtype=np.float32)

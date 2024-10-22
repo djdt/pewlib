@@ -7,7 +7,6 @@ import logging
 import time
 from importlib.metadata import version
 from pathlib import Path
-from typing import Dict, List, Union
 
 import numpy as np
 
@@ -29,7 +28,7 @@ def compare_version(va: str, vb: str) -> int:
 
 
 def pack_info(
-    info: Dict[str, str], sep: str = "\t", remove_keys: List[str] | None = None
+    info: dict[str, str], sep: str = "\t", remove_keys: list[str] | None = None
 ) -> np.ndarray:
     if remove_keys is None:
         remove_keys = ["File Path"]
@@ -41,12 +40,12 @@ def pack_info(
     return np.array(string)
 
 
-def unpack_info(x: np.ndarray, sep: str = "\t") -> Dict[str, str]:
+def unpack_info(x: np.ndarray, sep: str = "\t") -> dict[str, str]:
     tokens = str(x).split(sep)
     return {key: val for key, val in zip(tokens[::2], tokens[1::2])}
 
 
-def pack_calibration(dict: Dict[str, Calibration]) -> np.ndarray:
+def pack_calibration(dict: dict[str, Calibration]) -> np.ndarray:
     size = max(v.x.size for v in dict.values())
     data = np.stack([v.to_array(size=size) for v in dict.values()])
     elements = np.array([k for k in dict.keys()])
@@ -60,12 +59,12 @@ def pack_calibration(dict: Dict[str, Calibration]) -> np.ndarray:
     return packed
 
 
-def unpack_calibration(x: np.ndarray) -> Dict[str, Calibration]:
+def unpack_calibration(x: np.ndarray) -> dict[str, Calibration]:
     calibration = {i["element"]: Calibration.from_array(i["calibration"]) for i in x}
     return calibration
 
 
-def load(path: Union[str, Path]) -> Laser:
+def load(path: str | Path) -> Laser:
     """Loads data from '.npz' file.
 
     Loads files created using :func:`pewlib.io.npz.save`.
@@ -150,7 +149,7 @@ def load(path: Union[str, Path]) -> Laser:
     )
 
 
-def save(path: Union[str, Path], laser: Union[Laser, SRRLaser]) -> None:
+def save(path: str | Path, laser: Laser | SRRLaser) -> None:
     """Saves data to '.npz' file.
 
     Converts a :class:`Laser` or :class:`SRRLaser` to a series of `np.ndarray`

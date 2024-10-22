@@ -7,7 +7,6 @@ import re
 import time
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-from typing import Any, List, Tuple, Union
 
 import numpy as np
 import numpy.lib.recfunctions as rfn
@@ -29,7 +28,7 @@ class GenericOption(object):
 
     def __init__(
         self,
-        drop_names: List[str] | None = None,
+        drop_names: list[str] | None = None,
         kw_genfromtxt: dict | None = None,
         regex: str = r".*\.csv",
         drop_nan_rows: bool = False,
@@ -44,7 +43,7 @@ class GenericOption(object):
         self.drop_nan_columns = drop_nan_columns
         self.transposed = transposed
 
-    def filter(self, paths: List[Path]) -> List[Path]:
+    def filter(self, paths: list[Path]) -> list[Path]:
         """Filter non matching paths."""
         return [path for path in paths if self.regex.match(path.name) is not None]
 
@@ -60,11 +59,11 @@ class GenericOption(object):
         """Read parameters from data."""
         return {}
 
-    def sort(self, paths: List[Path]) -> List[Path]:
+    def sort(self, paths: list[Path]) -> list[Path]:
         """Sort paths using 'sortkey'."""
         return sorted(paths, key=self.sortkey)  # type: ignore
 
-    def sortkey(self, path: Path) -> Any:
+    def sortkey(self, path: Path):
         return path
 
 
@@ -148,7 +147,7 @@ class TofwerkOption(GenericOption):
         return time.mktime(time.strptime(match.group(1), "%Y.%m.%d-%Hh%Mm%Ss"))
 
 
-def is_valid_directory(path: Union[str, Path]) -> bool:
+def is_valid_directory(path: str | Path) -> bool:
     """Tests if a directory contains at least one csv."""
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
@@ -159,7 +158,7 @@ def is_valid_directory(path: Union[str, Path]) -> bool:
     return len(list(path.glob("*.csv"))) > 0
 
 
-def option_for_path(path: Union[str, Path]) -> GenericOption:
+def option_for_path(path: str | Path) -> GenericOption:
     """Attempts to find the correct type hint for the directory.
     If no specific type hint is found then a GenericOption."""
     options = [NuOption(), ThermoLDROption(), TofwerkOption()]
@@ -174,10 +173,10 @@ def option_for_path(path: Union[str, Path]) -> GenericOption:
 
 
 def load(
-    path: Union[str, Path],
+    path: str | Path,
     option: GenericOption | None = None,
     full: bool = False,
-) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
+) -> np.ndarray | tuple[np.ndarray, dict]:
     """Load a directory where lines are stored in separate .csv files.
 
     Paths are filtered and sorted according to the `option` used, defaulting

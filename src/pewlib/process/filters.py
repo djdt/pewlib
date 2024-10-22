@@ -2,21 +2,21 @@
 Care must be taken when using filtering to ensure that legitmate data is not
 also altered.
 """
+
 import numpy as np
 
 from pewlib.process.calc import view_as_blocks
 
-from typing import Tuple, Union
-
 
 def rolling_mean(
-    x: np.ndarray, block: Union[int, Tuple[int, ...]], threshold: float = 3.0
+    x: np.ndarray, block: int | tuple[int, ...], threshold: float = 3.0
 ) -> np.ndarray:
     """Filter an array using rolling mean.
 
     Each value of `x` is compared to the mean of its `block`, the values arround it.
     If it is `threshold` times the standard deviation *with the central value* then
-    it is considered an outlier. Outliers are set to the local mean *without the central value*.
+    it is considered an outlier. Outliers are set to the local mean *without the
+    central value*.
 
     Args:
         x: array
@@ -82,14 +82,14 @@ def rolling_mean(
 
 def rolling_median(
     x: np.ndarray,
-    block: Union[int, Tuple[int, ...]],
+    block: int | tuple[int, ...],
     threshold: float = 3.0,
 ) -> np.ndarray:
     """Filter an array using rolling median.
 
     Each value of `x` is compared to the median of its `block`, the values arround it.
-    If it is `threshold` times the stdev from the median then it is considered an outlier.
-    Outliers are set to the local median.
+    If it is `threshold` times the stdev from the median then it is considered an
+    outlier. Outliers are set to the local median.
 
     Args:
         x: array

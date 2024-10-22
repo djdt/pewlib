@@ -3,8 +3,6 @@ elements. A few ofthe many available algorithms are implemented in this file.
 
 """
 
-from typing import Tuple
-
 import numpy as np
 
 from pewlib.process.calc import normalise, shuffle_blocks
@@ -56,7 +54,7 @@ def pearsonr_probablity(
     mask: np.ndarray | None = None,
     shuffle_partial: bool = False,
     n: int = 500,
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """Evalulates Probability of Pearson's coefficient.
 
     Calculates Pearson's R of `x` and `y` then shuffles `y` `n` times, retesting
@@ -108,7 +106,7 @@ def pearsonr_probablity(
 
 def manders(
     x: np.ndarray, y: np.ndarray, tx: float | None = None, ty: float | None = None
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """Manders' correlation coefficients.
 
     Args:
@@ -136,7 +134,7 @@ def manders(
 
 def costes_threshold(
     x: np.ndarray, y: np.ndarray, target_r: float = 0.0
-) -> Tuple[float, float, float]:
+) -> tuple[float, float, float]:
     """Calculates Costes thresholds.
 
     Pearson's R is calculated for values of `x` and `y` that are above a decreasing
@@ -178,7 +176,7 @@ def costes_threshold(
 
 def costes(
     x: np.ndarray, y: np.ndarray, n_scrambles: int = 200
-) -> Tuple[float, float, float, float]:  # pragma: no cover, covered in other funcs
+) -> tuple[float, float, float, float]:  # pragma: no cover, covered in other funcs
     """Performs Costes colocalisation.
 
     The threshold at which no colocalisation appears (R < 0) is first calculated

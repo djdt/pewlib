@@ -9,8 +9,8 @@ References:
     & Doble, P. A. Super-Resolution Reconstruction for Two- and Three-Dimensional
     LA-ICP-MS Bioimaging Analytical Chemistry, American Chemical Society (ACS), 2019
 """
+
 import copy
-from typing import Dict, List, Tuple, Union
 
 import numpy as np
 import numpy.lib.recfunctions as rfn
@@ -36,13 +36,13 @@ class SRRLaser(Laser):
 
     def __init__(
         self,
-        data: List[np.ndarray],
-        calibration: Dict[str, Calibration] | None = None,
+        data: list[np.ndarray],
+        calibration: dict[str, Calibration] | None = None,
         config: SRRConfig | None = None,
-        info: Dict[str, str] | None = None,
+        info: dict[str, str] | None = None,
     ):
         assert len(data) > 1
-        self.data: List[np.ndarray] = data
+        self.data: list[np.ndarray] = data
         self.calibration = {name: Calibration() for name in self.elements}
         if calibration is not None:
             self.calibration.update(copy.deepcopy(calibration))
@@ -53,7 +53,7 @@ class SRRLaser(Laser):
         self.info = info or {}
 
     @property
-    def extent(self) -> Tuple[float, float, float, float]:
+    def extent(self) -> tuple[float, float, float, float]:
         """Data extent in μm
 
         This is calculated *post* SRR.
@@ -65,7 +65,7 @@ class SRRLaser(Laser):
         return self.config.data_extent(new_shape)
 
     @property
-    def elements(self) -> Tuple[str, ...]:
+    def elements(self) -> tuple[str, ...]:
         if len(self.data) == 0:  # pragma: no cover
             return ()
         return self.data[0].dtype.names
@@ -75,13 +75,13 @@ class SRRLaser(Laser):
         return len(self.data)
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> tuple[int, ...]:
         return (self.data[1].shape[0], self.data[0].shape[0], len(self.data))
 
     def add(
         self,
         element: str,
-        data: List[np.ndarray],
+        data: list[np.ndarray],
         calibration: Calibration | None = None,
     ) -> None:
         """Add an element."""
@@ -101,7 +101,7 @@ class SRRLaser(Laser):
             calibration = Calibration()
         self.calibration[element] = calibration
 
-    def remove(self, names: Union[str, List[str]]) -> None:
+    def remove(self, names: str | list[str]) -> None:
         """Remove element(s)."""
         if isinstance(names, str):
             names = [names]
@@ -110,7 +110,7 @@ class SRRLaser(Laser):
         for name in names:
             self.calibration.pop(name)
 
-    def rename(self, names: Dict[str, str]) -> None:
+    def rename(self, names: dict[str, str]) -> None:
         """Rename element(s).
 
         Args:
@@ -125,7 +125,7 @@ class SRRLaser(Laser):
         self,
         element: str | None = None,
         calibrate: bool = False,
-        extent: Tuple[float, float, float, float] | None = None,
+        extent: tuple[float, float, float, float] | None = None,
         flat: bool = False,
         layer: int | None = None,
         **kwargs,
@@ -225,10 +225,10 @@ class SRRLaser(Laser):
     @classmethod
     def from_list(
         cls,
-        elements: List[str],
-        layers: List[List[np.ndarray]],
+        elements: list[str],
+        layers: list[list[np.ndarray]],
         config: SRRConfig | None = None,
-        info: Dict[str, str] | None = None,
+        info: dict[str, str] | None = None,
     ) -> "SRRLaser":
         """Creates class from a list of names and lists of unstructured arrays."""
         dtype = [(element, float) for element in elements]
@@ -244,7 +244,7 @@ class SRRLaser(Laser):
         return cls(data=structured_layers, config=config, info=info)
 
     @classmethod
-    def from_lasers(cls, lasers: List[Laser]) -> "SRRLaser":
+    def from_lasers(cls, lasers: list[Laser]) -> "SRRLaser":
         """Stacks :class:`Laser` to form SRR.
 
         Calibration and config are taken from the first :class:`Laser`.

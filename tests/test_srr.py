@@ -4,10 +4,8 @@ import numpy as np
 from pewlib import Laser
 from pewlib.srr import SRRLaser, SRRConfig
 
-from typing import List, Tuple
 
-
-def rand_data(names: List[str], shape: Tuple[int, int]) -> np.ndarray:
+def rand_data(names: list[str], shape: tuple[int, int]) -> np.ndarray:
     dtype = [(name, float) for name in names]
     data = np.empty(shape, dtype=dtype)
     for name in names:

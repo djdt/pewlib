@@ -1,5 +1,3 @@
-from typing import Tuple, Union
-
 import numpy as np
 
 
@@ -65,7 +63,7 @@ def weighted_rsq(x: np.ndarray, y: np.ndarray, w: np.ndarray | None = None) -> f
 
 def weighted_linreg(
     x: np.ndarray, y: np.ndarray, w: np.ndarray | None = None
-) -> Tuple[float, float, float, float]:
+) -> tuple[float, float, float, float]:
     """Weighted linear regression.
 
     Uses polyfit with sqrt(weights) for intercept and gradient.
@@ -120,7 +118,7 @@ class Calibration(object):
         rsq: float | None = None,
         error: float | None = None,
         points: np.ndarray | None = None,
-        weights: Union[str, Tuple[str, np.ndarray]] = "Equal",
+        weights: str | tuple[str, np.ndarray] = "Equal",
     ):
         self.intercept = intercept
         self.gradient = gradient
@@ -168,7 +166,7 @@ class Calibration(object):
         return self._weights
 
     @weights.setter
-    def weights(self, weights: Union[str, Tuple[str, np.ndarray]]) -> None:
+    def weights(self, weights: str | tuple[str, np.ndarray]) -> None:
         if isinstance(weights, str):
             self.weighting = weights
             self._weights = np.empty(0, dtype=np.float64)
@@ -209,7 +207,8 @@ class Calibration(object):
                 )
 
     def to_array(self, size: int | None = None) -> np.ndarray:
-        """Convert to a Numpy array. Points and weights are trimmed or padded with nan to 'size' if passed."""
+        """Convert to a Numpy array. Points and weights are trimmed or padded with nan
+        to 'size' if passed."""
         if size is None:
             size = self.x.shape[0]
 
@@ -263,7 +262,7 @@ class Calibration(object):
         cls,
         points: np.ndarray,
         unit: str = "",
-        weights: Union[str, Tuple[str, np.ndarray]] = "Equal",
+        weights: str | tuple[str, np.ndarray] = "Equal",
     ) -> "Calibration":
         """Create a :class:`Calibration` from points.
 

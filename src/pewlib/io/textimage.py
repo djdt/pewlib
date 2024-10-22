@@ -2,17 +2,17 @@
 Import and export of text-images, files where data is stored as delimited text values.
 Data is read in order from the first line.
 """
+
 from pathlib import Path
-from typing import Union
 
 import numpy as np
 
 
 def load(
-    path: Union[str, Path],
+    path: str | Path,
     delimiter: str | None = None,
     comments: str = "#",
-    name: str = None,
+    name: str | None = None,
 ) -> np.ndarray:
     """Load text-image.
 
@@ -47,7 +47,7 @@ def load(
     return data
 
 
-def save(path: Union[str, Path], data: np.ndarray, header: str = "") -> None:
+def save(path: str | Path, data: np.ndarray, header: str = "") -> None:
     """Save data to csv.
 
     See :func:`numpy.savetxt`

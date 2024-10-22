@@ -1,11 +1,11 @@
 """
 Exports to VTK formats for use in programs such as Paraview.
 """
+
 import sys
 from pathlib import Path
-import numpy as np
 
-from typing import Tuple, Union
+import numpy as np
 
 
 def escape_xml(string: str) -> str:
@@ -16,7 +16,7 @@ def escape_xml(string: str) -> str:
 
 
 def save(
-    path: Union[str, Path], data: np.ndarray, spacing: Tuple[float, float, float]
+    path: str | Path, data: np.ndarray, spacing: tuple[float, float, float]
 ) -> None:
     """Save data as a VTK ImageData XML.
 

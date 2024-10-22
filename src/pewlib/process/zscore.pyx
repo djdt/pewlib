@@ -4,13 +4,11 @@ import numpy as np
 
 from libc.math cimport sqrt
 
-from typing import Tuple
-
 DTYPE = np.byte
 
 def zscore_peaks(
     x: np.ndarray, lag: Py_ssize_t, threshold: float = 3.3, influence: float = 0.5
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     cdef double[:] x_view = x
     cdef char[:] signal = np.zeros(x.size, dtype=DTYPE)
     cdef double[:] filtered = x.copy()
