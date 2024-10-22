@@ -4,10 +4,8 @@ import pytest
 from pewlib.laser import Laser
 from pewlib import Calibration, Config
 
-from typing import List
 
-
-def rand_data(names: List[str]) -> np.ndarray:
+def rand_data(names: list[str]) -> np.ndarray:
     dtype = [(name, float) for name in names]
     data = np.empty((10, 10), dtype=dtype)
     for name in names:

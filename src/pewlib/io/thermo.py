@@ -3,9 +3,11 @@ Import of line-by-line data exported from Qtegra using the '.csv' export functio
 Both column and row formats are supported.
 Tested with Thermo iCAP RQ ICP-MS.
 """
+
 import logging
+from collections.abc import Generator
+from io import TextIOBase
 from pathlib import Path
-from typing import Generator, TextIO, Tuple, Union
 
 import numpy as np
 
@@ -19,7 +21,7 @@ def _icap_csv_columns_read(
     comma_decimal: bool = False,
 ) -> np.ndarray:
     def _read_lines(
-        fp: TextIO, line_type: str, replace_decimal: bool = False
+        fp: TextIOBase, line_type: str, replace_decimal: bool = False
     ) -> Generator[str, None, None]:
         for line in fp:
             if line.startswith("MainRuns") and line_type in line:
@@ -64,7 +66,7 @@ def _icap_csv_columns_read(
 
 
 def icap_csv_columns_read_data(
-    path: Union[str, Path],
+    path: str | Path,
     delimiter: str | None = None,
     comma_decimal: bool = False,
     use_analog: bool = False,
@@ -81,9 +83,7 @@ def icap_csv_columns_read_data(
 
 
 def icap_csv_columns_read_params(
-    path: Union[str, Path],
-    delimiter: str | None = None,
-    comma_decimal: bool = False,
+    path: str | Path, delimiter: str | None = None, comma_decimal: bool = False
 ) -> dict:
     if isinstance(path, str):  # pragma: no cover
         path = Path(path)
@@ -98,13 +98,13 @@ def icap_csv_columns_read_params(
 
 
 def _icap_csv_rows_read(
-    path: Union[str, Path],
+    path: Path,
     col_type: str,
     delimiter: str | None = None,
     comma_decimal: bool = False,
 ) -> np.ndarray:
     def _read_lines(
-        fp: TextIO, replace_decimal: bool = False
+        fp: TextIOBase, replace_decimal: bool = False
     ) -> Generator[str, None, None]:
         for line in fp:
             yield line.replace(",", ".") if replace_decimal else line
@@ -147,7 +147,7 @@ def _icap_csv_rows_read(
 
 
 def icap_csv_rows_read_data(
-    path: Union[str, Path],
+    path: str | Path,
     delimiter: str | None = None,
     comma_decimal: bool = False,
     use_analog: bool = False,
@@ -164,7 +164,7 @@ def icap_csv_rows_read_data(
 
 
 def icap_csv_rows_read_params(
-    path: Union[str, Path],
+    path: str | Path,
     delimiter: str | None = None,
     comma_decimal: bool = False,
 ) -> dict:
@@ -184,7 +184,7 @@ def icap_csv_rows_read_params(
     return dict(times=data, scantime=scantime)
 
 
-def icap_csv_sample_format(path: Union[str, Path]) -> str:
+def icap_csv_sample_format(path: str | Path) -> str:
     """Determines CSVsample format.
 
     Valid formats are 'columns' and 'rows' depending on Qtegra export option.
@@ -209,8 +209,8 @@ def icap_csv_sample_format(path: Union[str, Path]) -> str:
 
 
 def load(
-    path: Union[str, Path], use_analog: bool = False, full: bool = False
-) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:  # pragma: no cover
+    path: str | Path, use_analog: bool = False, full: bool = False
+) -> np.ndarray | tuple[np.ndarray, dict]:  # pragma: no cover
     """Imports iCap CSV export.
 
     Data must be exported from Qtegra using the CSV export option.

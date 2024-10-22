@@ -1,4 +1,4 @@
-from typing import Iterable, List, Tuple
+from collections.abc import Iterable
 
 import numpy as np
 
@@ -27,7 +27,7 @@ class SRRConfig(Config):
         speed: float = 140.0,
         scantime: float = 0.25,
         warmup: float = 12.5,
-        subpixel_offsets: Iterable[Tuple[int, int]] = ((0, 2), (1, 2)),
+        subpixel_offsets: Iterable[tuple[int, int]] = ((0, 2), (1, 2)),
     ):
         super().__init__(spotsize=spotsize, speed=speed, scantime=scantime)
         self._warmup = 0
@@ -107,10 +107,8 @@ class SRRConfig(Config):
 
     # Return without the washout included
     def data_extent(
-        self,
-        shape: Tuple[int, ...],
-        layer: int | None = None,
-    ) -> Tuple[float, float, float, float]:
+        self, shape: tuple[int, ...], layer: int | None = None
+    ) -> tuple[float, float, float, float]:
         """Extent of data in μm.
 
         Args:
@@ -129,7 +127,7 @@ class SRRConfig(Config):
         else:
             return (0.0, px * shape[1], 0.0, py * shape[0])
 
-    def valid_for_data(self, data: List[np.ndarray]) -> bool:
+    def valid_for_data(self, data: list[np.ndarray]) -> bool:
         """Checks if this config is valid for data."""
         if self.warmup < 0:
             return False

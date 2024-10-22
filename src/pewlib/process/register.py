@@ -1,16 +1,17 @@
 """Module for registering and merging images."""
 
-from typing import Iterable, List, Tuple
+from collections.abc import Sequence
 
 import numpy as np
 import numpy.lib.recfunctions as rfn
 
 
-def anchor_offset(a: np.ndarray, b: np.ndarray, anchor: str) -> Tuple[int, int]:
+def anchor_offset(a: np.ndarray, b: np.ndarray, anchor: str) -> tuple[int, int]:
     """Return offset of `b` from `a` given a common achor point.
 
     Both `a` and `b` must be 2d arrays.
-    Valid anchors are 'top left', 'top right', 'bottom left', 'bottom right' or 'center'.
+    Valid anchors are 'top left', 'top right', 'bottom left', 'bottom right' or
+    'center'.
 
     Args:
         anchor: anchor poisition
@@ -36,7 +37,7 @@ def anchor_offset(a: np.ndarray, b: np.ndarray, anchor: str) -> Tuple[int, int]:
         raise ValueError("Unknown anchor string.")
 
 
-def fft_register_offset(a: np.ndarray, b: np.ndarray) -> Tuple[int, ...]:
+def fft_register_offset(a: np.ndarray, b: np.ndarray) -> tuple[int, ...]:
     """Register two images using FFT correlation.
 
     Arrays are zero-padded to `a.shape` + `b.shape` - 1
@@ -60,8 +61,8 @@ def fft_register_offset(a: np.ndarray, b: np.ndarray) -> Tuple[int, ...]:
 
 
 def overlap_arrays(
-    arrays: List[np.ndarray],
-    offsets: List[Iterable[int]],
+    arrays: list[np.ndarray],
+    offsets: list[Sequence[int]],
     fill: float = np.nan,
     mode: str = "replace",
 ) -> np.ndarray:
@@ -133,8 +134,8 @@ def overlap_arrays(
 
 
 def overlap_structured_arrays(
-    arrays: List[np.ndarray],
-    offsets: List[Iterable[int]],
+    arrays: list[np.ndarray],
+    offsets: list[Sequence[int]],
     fill: float = np.nan,
     mode: str = "replace",
 ) -> np.ndarray:

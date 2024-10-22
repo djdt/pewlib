@@ -1,7 +1,5 @@
 """This module contains functions used by other processing modules."""
 
-from typing import List, Optional, Tuple
-
 import numpy as np
 
 
@@ -55,8 +53,8 @@ def reset_cumsum(x: np.ndarray, reset_value: float = 0.0) -> np.ndarray:
 
 def shuffle_blocks(
     x: np.ndarray,
-    block: Tuple[int, ...],
-    mask: Optional[np.ndarray] | None = None,
+    block: tuple[int, ...],
+    mask: np.ndarray | None = None,
     mode: str = "pad",
     shuffle_partial: bool = False,
 ) -> np.ndarray:
@@ -113,7 +111,7 @@ def shuffle_blocks(
 
 
 def subpixel_offset(
-    x: np.ndarray, offsets: List[Tuple[int, int]], pixelsize: Tuple[int, int]
+    x: np.ndarray, offsets: list[tuple[int, int]], pixelsize: tuple[int, int]
 ) -> np.ndarray:
     """Offsets layers in a 3d array.
 
@@ -155,7 +153,7 @@ def subpixel_offset(
 
 
 def subpixel_offset_equal(
-    x: np.ndarray, offsets: List[int], pixelsize: int
+    x: np.ndarray, offsets: list[int], pixelsize: int
 ) -> np.ndarray:
     """Offsets layers in a 3d array.
 
@@ -175,7 +173,7 @@ def subpixel_offset_equal(
 
 
 def view_as_blocks(
-    x: np.ndarray, block: Tuple[int, ...], step: Optional[Tuple[int, ...]] | None = None
+    x: np.ndarray, block: tuple[int, ...], step: tuple[int, ...] | None = None
 ) -> np.ndarray:
     """Block view of array
 

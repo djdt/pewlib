@@ -3,7 +3,6 @@ Import of line-by-line PerkinElmer ELAN 'XL' directories.
 """
 import logging
 from pathlib import Path
-from typing import Tuple, Union
 
 import numpy as np
 import numpy.lib.recfunctions
@@ -11,7 +10,7 @@ import numpy.lib.recfunctions
 logger = logging.getLogger(__name__)
 
 
-def is_valid_directory(path: Union[str, Path]) -> bool:
+def is_valid_directory(path: str | Path) -> bool:
     """Tests if a directory contains PerkinElmer data.
 
     Ensures the path exists, is a directory and contains at least one '.xl' file.
@@ -26,8 +25,8 @@ def is_valid_directory(path: Union[str, Path]) -> bool:
 
 
 def load(
-    path: Union[str, Path], import_parameters: bool = True, full: bool = False
-) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
+    path: str | Path, import_parameters: bool = True, full: bool = False
+) -> np.ndarray| tuple[np.ndarray, dict]:
     """Loads PerkinElmer directory.
 
     Searches the directory `path` for '.xl' files and used them to reconstruct data.

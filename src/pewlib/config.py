@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import numpy as np
 
 
@@ -21,7 +19,7 @@ class Config(object):
         self.speed = speed
         self.scantime = scantime
 
-    def data_extent(self, shape: Tuple[int, ...]) -> Tuple[float, float, float, float]:
+    def data_extent(self, shape: tuple[int, ...]) -> tuple[float, float, float, float]:
         """Extent of data in μm."""
         px, py = self.get_pixel_width(), self.get_pixel_height()
         return (0.0, px * shape[1], 0.0, py * shape[0])

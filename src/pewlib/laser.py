@@ -2,8 +2,8 @@
 Line-by-line data is collected in multiple lines, with each line performed as a
 continuous ablation in one direction. The lines are then stacked to form an image.
 """
+
 import copy
-from typing import Dict, List, Tuple, Union
 
 import numpy as np
 import numpy.lib.recfunctions as rfn
@@ -28,9 +28,9 @@ class Laser(object):
     def __init__(
         self,
         data: np.ndarray,
-        calibration: Dict[str, Calibration] | None = None,
+        calibration: dict[str, Calibration] | None = None,
         config: Config | None = None,
-        info: Dict[str, str] | None = None,
+        info: dict[str, str] | None = None,
     ):
         self.data: np.ndarray = data
         self.calibration = {name: Calibration() for name in self.elements}
@@ -45,17 +45,17 @@ class Laser(object):
         self.info = info or {}
 
     @property
-    def extent(self) -> Tuple[float, float, float, float]:
+    def extent(self) -> tuple[float, float, float, float]:
         """Image extent in μm"""
         return self.config.data_extent(self.shape[:2])
 
     @property
-    def elements(self) -> Tuple[str, ...]:
+    def elements(self) -> tuple[str, ...]:
         """Elements stored."""
         return self.data.dtype.names
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> tuple[int, ...]:
         return self.data.shape
 
     @property
@@ -85,7 +85,7 @@ class Laser(object):
             calibration = Calibration()
         self.calibration[element] = calibration
 
-    def remove(self, names: Union[str, List[str]]) -> None:
+    def remove(self, names: str | list[str]) -> None:
         """Remove element(s)."""
         if isinstance(names, str):
             names = [names]
@@ -93,7 +93,7 @@ class Laser(object):
         for name in names:
             self.calibration.pop(name)
 
-    def rename(self, names: Dict[str, str]) -> None:
+    def rename(self, names: dict[str, str]) -> None:
         """Change the name of element(s).
 
         Args:
@@ -107,7 +107,7 @@ class Laser(object):
         self,
         element: str | None = None,
         calibrate: bool | None = False,
-        extent: Tuple[float, float, float, float] | None = None,
+        extent: tuple[float, float, float, float] | None = None,
         **kwargs,
     ) -> np.ndarray:
         """Get elemental data.
@@ -146,10 +146,10 @@ class Laser(object):
     @classmethod
     def from_list(
         cls,
-        elements: List[str],
-        datas: List[np.ndarray],
+        elements: list[str],
+        datas: list[np.ndarray],
         config: Config | None = None,
-        info: Dict[str, str] = {},
+        info: dict[str, str] = {},
     ) -> "Laser":
         """Creates class from a list of names and unstructured arrays."""
         assert len(elements) == len(datas)

@@ -2,7 +2,6 @@ import argparse
 import time
 from importlib.metadata import version
 from pathlib import Path
-from typing import List
 
 import numpy as np
 
@@ -278,7 +277,7 @@ def save(laser: Laser, path: Path) -> None:
 
 
 def stack(
-    lasers: List[Laser],
+    lasers: list[Laser],
     orientation: str = "vertical",
     pad: float = np.nan,
     calibrate: bool = False,
