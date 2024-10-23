@@ -4,8 +4,10 @@ Each imzML file consists of a xml ('.imzML') and external binary ('.ibd')
 """
 
 import logging
-from io import BufferedReader
+import re
+from io import BufferedReader, TextIOBase
 from pathlib import Path
+from collections.abc import Callable
 from xml.etree import ElementTree
 
 import numpy as np
@@ -435,7 +437,10 @@ class ImzML(object):
 
     @classmethod
     def from_file(
-        cls, path: Path | str, external_binary: Path | str | None = None
+        cls,
+        path: Path | str,
+        external_binary: Path | str | None = None,
+        use_fast_parse: bool = False,
     ) -> "ImzML":
         """Create an ImzML object from a file path.
         If `external_binary` is None, the imzML path with suffix '.ibd' is used.
@@ -460,8 +465,11 @@ class ImzML(object):
         if not external_binary.exists():  # pragma: no cover, bad file
             raise FileNotFoundError("external binary file not found")
 
-        et = ElementTree.parse(path)
-        return ImzML.from_etree(et, external_binary)
+        if use_fast_parse:
+            return fast_parse_imzml(path, external_binary)
+        else:
+            et = ElementTree.parse(path)
+            return ImzML.from_etree(et, external_binary)
 
     def mass_range(self) -> tuple[float, float]:
         """Maximum mass range.
@@ -703,3 +711,153 @@ def load(
     return imzml.extract_masses(target_masses, mass_width_ppm), {
         "spotsize": imzml.scan_settings.pixel_size
     }
+
+
+def fast_parse_imzml(
+    imzml: Path | str,
+    external_binary: Path | str,
+    callback: Callable[[int], bool] | None = None,
+) -> ImzML:
+    """Custom non-xml parser for imzML files.
+
+    Faster than etree.ElementTree.parse but less reliable.
+    The current file position is reported at each <spectrum> import via the
+    optional ``callback`` function. If ``callback`` returns False, the import
+    is cancelled and a UserWarning raised.
+
+    Args:
+        imzml: path to xml
+        external_binary: path to the .ibd
+        callback: optional callback function for progress
+
+    Returns:
+        ImzML class
+
+    Raises:
+        UserWarning: when callback returns False
+    """
+
+    re_accession = re.compile('accession="(I?MS:\\d+)(?:.*value="([\\w.]+)")?')
+
+    def parse_param_group(fp: TextIOBase, line: str, id: str) -> ParamGroup:
+        cvs = {}
+        while not line.startswith("</referenceableParamGroup"):
+            line = fp.readline().strip()
+            m = re_accession.search(line)
+            if m is not None:
+                cvs[m.group(1)] = m.group(2)
+
+        dtype = None
+        for key, val in CV_BINARYDATA.items():
+            if val in cvs:
+                dtype = ParamGroup.type_names[key]
+        if dtype is None:
+            raise ValueError(f"unable to find dtype for group {id}")
+
+        return ParamGroup(
+            id,
+            dtype,
+            compressed=not CV_PARAMGROUP["NO_COMPRESSION"] in cvs,
+            external=CV_PARAMGROUP["EXTERNAL_DATA"] in cvs,
+        )
+
+    def parse_scan_settings(fp: TextIOBase, line: str) -> ScanSettings:
+        cvs: dict[str, str] = {}
+        while not line.startswith("</scanSettings"):
+            line = fp.readline().strip()
+            m = re_accession.search(line)
+            if m is not None:
+                cvs[m.group(1)] = m.group(2)
+        try:
+            size = (
+                int(cvs[CV_SCANSETTINGS["MAX_COUNT_OF_PIXEL_X"]]),
+                int(cvs[CV_SCANSETTINGS["MAX_COUNT_OF_PIXEL_Y"]]),
+            )
+        except KeyError:
+            size = None
+
+        pixel_size = (
+            float(cvs[CV_SCANSETTINGS["PIXEL_SIZE_X"]]),
+            float(cvs[CV_SCANSETTINGS["PIXEL_SIZE_Y"]]),
+        )
+
+        return ScanSettings(size, pixel_size)
+
+    def parse_spectrum(fp: TextIOBase, line: str) -> Spectrum:
+        def parse_binary_data_array(fp: TextIOBase, line: str) -> tuple[str, int, int]:
+            cvs = {}
+            while not line.startswith("</binaryDataArray"):
+                line = fp.readline().strip()
+                m = re_accession.search(line)
+                if m is not None:
+                    cvs[m.group(1)] = m.group(2)
+                elif line.startswith("<referenceableParamGroupRef"):  # faster than re
+                    s = line.find('ref="', len("<referenceableParamGroupRef")) + 5
+                    cvs["id"] = line[s : line.find('"', s)]
+            return (
+                cvs["id"],
+                int(cvs[CV_SPECTRUM["EXTERNAL_OFFSET"]]),
+                int(cvs[CV_SPECTRUM["EXTERNAL_ENCODED_LENGTH"]]),
+            )
+
+        offsets = {}
+        lengths = {}
+        cvs = {}
+        while not line.startswith("</spectrum"):
+            line = fp.readline().strip()
+            m = re_accession.search(line)
+
+            if m is not None:
+                cvs[m.group(1)] = m.group(2)
+            elif line.startswith("<binaryDataArrayList"):
+                while not line.startswith("</binaryDataArrayList"):
+                    line = fp.readline().strip()
+                    if line.startswith("<binaryDataArray"):
+                        id, offset, length = parse_binary_data_array(fp, line)
+                        offsets[id] = offset
+                        lengths[id] = length
+
+        pos = (int(cvs[CV_SPECTRUM["POSITION_X"]]), int(cvs[CV_SPECTRUM["POSITION_Y"]]))
+        tic = None
+        if "TOTAL_ION_CURRENT" in cvs:
+            tic = float(cvs[CV_SPECTRUM["TOTAL_ION_CURRENT"]])
+        return Spectrum(pos, tic, offsets, lengths)
+
+    mz_params = None
+    intensity_params = None
+    scan_settings = []
+    spectra = {}
+    with open(imzml, "r") as fp:
+        line = fp.readline().strip()
+        while line:
+            if line.startswith("<referenceableParamGroupList"):
+                while not line.startswith("</referenceableParamGroupList"):
+                    line = fp.readline().strip()
+                    if line.startswith("<referenceableParamGroup"):
+                        s = line.find('id="', len("<referenceableParamGroup")) + 4
+                        id = line[s : line.find('"', s)]
+                        if id == "mzArray":
+                            mz_params = parse_param_group(fp, line, id)
+                        elif id == "intensities":
+                            intensity_params = parse_param_group(fp, line, id)
+            elif line.startswith("<scanSettingsList"):
+                while not line.startswith("</scanSettingsList"):
+                    line = fp.readline().strip()
+                    if line.startswith("<scanSettings"):
+                        scan_settings.append(parse_scan_settings(fp, line))
+            elif line.startswith("<spectrum"):
+                if callback is not None:
+                    if not callback(fp.tell()):
+                        raise UserWarning("callback returned False")
+                spectrum = parse_spectrum(fp, line)
+                spectra[spectrum.x, spectrum.y] = spectrum
+            line = fp.readline().strip()
+
+    if mz_params is None:
+        raise ValueError("unable to read mzArray group")
+    if intensity_params is None:
+        raise ValueError("unable to read intensities group")
+
+    return ImzML(
+        scan_settings[0], mz_params, intensity_params, spectra, external_binary
+    )
