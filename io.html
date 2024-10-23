@@ -109,6 +109,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#pewlib.io.imzml.Spectrum.get_binary_data"><code class="docutils literal notranslate"><span class="pre">Spectrum.get_binary_data()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.imzml.fast_parse_imzml"><code class="docutils literal notranslate"><span class="pre">fast_parse_imzml()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.imzml.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
 </ul>
 </li>
@@ -629,7 +630,7 @@ otherwise the summed intensities.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pewlib.io.imzml.ImzML.from_file">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">external_binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.imzml.ImzML.from_file" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">external_binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_fast_parse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.imzml.ImzML.from_file" title="Link to this definition"></a></dt>
 <dd><p>Create an ImzML object from a file path.
 If <cite>external_binary</cite> is None, the imzML path with suffix ‘.ibd’ is used.</p>
 <dl class="field-list simple">
@@ -822,6 +823,34 @@ limiting the number of times the file is opened.</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.imzml.fast_parse_imzml">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.imzml.</span></span><span class="sig-name descname"><span class="pre">fast_parse_imzml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imzml</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">external_binary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.imzml.fast_parse_imzml" title="Link to this definition"></a></dt>
+<dd><p>Custom non-xml parser for imzML files.</p>
+<p>Faster than etree.ElementTree.parse but less reliable.
+The current file position is reported at each &lt;spectrum&gt; import via the
+optional <code class="docutils literal notranslate"><span class="pre">callback</span></code> function. If <code class="docutils literal notranslate"><span class="pre">callback</span></code> returns False, the import
+is cancelled and a UserWarning raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imzml</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – path to xml</p></li>
+<li><p><strong>external_binary</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – path to the .ibd</p></li>
+<li><p><strong>callback</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – optional callback function for progress</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pewlib.io.imzml.ImzML" title="pewlib.io.imzml.ImzML"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImzML</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ImzML class</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>UserWarning</strong> – when callback returns False</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
