@@ -819,7 +819,7 @@ def fast_parse_imzml(
 
         pos = (int(cvs[CV_SPECTRUM["POSITION_X"]]), int(cvs[CV_SPECTRUM["POSITION_Y"]]))
         tic = None
-        if "TOTAL_ION_CURRENT" in cvs:
+        if CV_SPECTRUM["TOTAL_ION_CURRENT"] in cvs:
             tic = float(cvs[CV_SPECTRUM["TOTAL_ION_CURRENT"]])
         return Spectrum(pos, tic, offsets, lengths)
 
