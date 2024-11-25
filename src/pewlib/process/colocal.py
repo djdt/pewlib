@@ -101,7 +101,7 @@ def pearsonr_probablity(
         )
         rs[i] = pearsonr(x[mask], shuffled[mask])
 
-    return r, (rs < r).sum() / n
+    return r, (rs > r).sum() / n
 
 
 def manders(
