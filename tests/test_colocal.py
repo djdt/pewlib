@@ -2,12 +2,11 @@ import numpy as np
 
 from pewlib.process import colocal
 
-
 a = np.tile([[0.0, 1.0], [0.0, 1.0]], (10, 10))
 b = np.tile([[0.0, 1.0], [1.0, 0.0]], (10, 10))
 c = np.tile([[1.0, 0.0], [1.0, 0.0]], (10, 10))
-d = np.tile([[1., 2.], [3., 4.]], (10, 10))
-e = np.tile([[1., 2.], [4., 3.]], (10, 10))
+d = np.tile([[1.0, 2.0], [3.0, 4.0]], (10, 10))
+e = np.tile([[1.0, 2.0], [4.0, 3.0]], (10, 10))
 
 
 def test_li_icq():
@@ -27,6 +26,14 @@ def test_pearson_r_probability():
     r, p = colocal.pearsonr_probablity(a, b, block=3, n=500, shuffle_partial=False)
     assert r == 0.0
     assert 0.66 > p > 0.33
+
+    r, p = colocal.pearsonr_probablity(a, a, block=3, n=500, shuffle_partial=False)
+    assert r == 1.0
+
+    r, p = colocal.pearsonr_probablity(
+        a, np.random.random(a.shape), block=3, n=500, shuffle_partial=False
+    )
+    assert p >= 0.9
 
 
 def test_manders():
