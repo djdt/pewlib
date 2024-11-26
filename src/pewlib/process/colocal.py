@@ -137,8 +137,8 @@ def costes_threshold(
 ) -> tuple[float, float, float]:
     """Calculates Costes thresholds.
 
-    Pearson's R is calculated for values of `x` and `y` that are above a decreasing
-    threshold. Once the caluclated R value is below `target_r` the thresholds are
+    Pearson's R is calculated for values of `x` and `y` that are above an increasing
+    threshold. Once the calculated R value is above `target_r` the thresholds are
     returned. The threshold for `y` equals 'tx' * 'a' + 'b'.
 
     Args:
@@ -162,13 +162,13 @@ def costes_threshold(
     """
     b, a = np.polynomial.polynomial.polyfit(x.flat, y.flat, 1)
 
-    thresholds = np.linspace(x.max(), x.min(), 256)
+    thresholds = np.linspace(x.min(), x.max(), 256)
 
     for threshold in thresholds:
         idx = np.logical_or(x <= threshold, y <= (a * threshold + b))
         if np.all(x[idx] == x[idx][0]) or np.all(y[idx] == y[idx][0]):
-            return thresholds[-1], a, b
-        if pearsonr(x[idx], y[idx]) <= target_r:
+            return thresholds[0], a, b
+        if pearsonr(x[idx], y[idx]) > target_r:
             break
 
     return threshold, a, b
@@ -210,6 +210,6 @@ def costes(
     pearson_r, r_prob = pearsonr_probablity(
         x, y, mask=np.logical_and(x > tx, y > ty), n=n_scrambles
     )
-    m1, m2 = manders(x, y, tx, ty)
+    m1, m2 = manders(x, y, ty, tx)  # passed backwards as per paper
 
     return pearson_r, r_prob, m1, m2
