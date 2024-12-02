@@ -210,6 +210,6 @@ def costes(
     pearson_r, r_prob = pearsonr_probablity(
         x, y, mask=np.logical_and(x > tx, y > ty), n=n_scrambles
     )
-    m1, m2 = manders(x, y, ty, tx)  # passed backwards as per paper
+    m1, m2 = np.sum(x, where=x > tx) / x.sum(), np.sum(y, where=y > ty) / y.sum()
 
     return pearson_r, r_prob, m1, m2
