@@ -335,8 +335,8 @@ Colocalization in Live Cells Biophysical Journal, Elsevier BV,
 <dt class="sig sig-object py" id="pewlib.process.colocal.costes_threshold">
 <span class="sig-prename descclassname"><span class="pre">pewlib.process.colocal.</span></span><span class="sig-name descname"><span class="pre">costes_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.process.colocal.costes_threshold" title="Link to this definition"></a></dt>
 <dd><p>Calculates Costes thresholds.</p>
-<p>Pearson’s R is calculated for values of <cite>x</cite> and <cite>y</cite> that are above a decreasing
-threshold. Once the caluclated R value is below <cite>target_r</cite> the thresholds are
+<p>Pearson’s R is calculated for values of <cite>x</cite> and <cite>y</cite> that are above an increasing
+threshold. Once the calculated R value is above <cite>target_r</cite> the thresholds are
 returned. The threshold for <cite>y</cite> equals ‘tx’ * ‘a’ + ‘b’.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
