@@ -102,3 +102,17 @@ def test_sync_data_nwi_laser_log_bottom_to_top(laserlog, laserlog_data):
     )
     assert np.all(sync["Ho165"][:5] < 1e1, where=~np.isnan(sync["Ho165"][:5]))
     assert np.all(sync["Ho165"][-5:] > 1e3, where=~np.isnan(sync["Ho165"][-5:]))
+
+
+def test_zero_size_line_in_vert():
+    log = read_nwi_laser_log(
+        Path(__file__).parent.joinpath(
+            "data", "laser_nwi", "LaserLog_zero_size_vert.csv"
+        )
+    )
+    npz = np.load(
+        Path(__file__).parent.joinpath(
+            "data", "laser_nwi", "laserlog_zero_size_vert.npz"
+        )
+    )
+    sync_data_nwi_laser_log(npz["data"], npz["times"], log, 1)
