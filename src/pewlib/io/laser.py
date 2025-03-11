@@ -171,6 +171,9 @@ def sync_data_nwi_laser_log(
                 x = x[::-1]
                 y0, y1 = y1, y0
                 s0, s1 = None, -s0
+            if s0 == 0:  # pragma: no cover, this corresponds to no data, but errors
+                continue
+
             sync[y0:y1, x0][s0:s1] = x[s0:s1]
         else:  # pragma: no cover
             raise ValueError("unable to import non-vertical or non-horizontal lines.")
