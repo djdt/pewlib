@@ -556,19 +556,15 @@ def load_csv(
 def batch_xml_read_info(path: Path) -> dict[str, str]:
     xml = ElementTree.parse(path)
     ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
-    name = xml.getroot().get("BatchName")
-    acq_path = xml.getroot().get("BatchDataPath") or ""
-    acq_info = {"Acquisition Name": name, "Acquisition Path": acq_path}
     batch_info = xml.find("ns:BatchLogInfo", namespaces=ns)
-    if batch_info is not None:
-        acq_info["Acquisition Date"] = batch_info.findtext(
-            "ns:AcqDateTime", namespaces=ns
-        )
-        acq_info["Acquisition User"] = batch_info.findtext(
-            "ns:OperatorName", namespaces=ns
-        )
-
-    return acq_info
+    if batch_info is None:
+        raise AttributeError("no info in batch.xml")
+    return {
+        "Acquisition Name": str(xml.getroot().get("BatchName")),
+        "Acquisition Path": str(xml.getroot().get("BatchDataPath")),
+        "Acquisition Date": str(batch_info.findtext("ns:AcqDateTime", namespaces=ns)),
+        "Acquisition User": str(batch_info.findtext("ns:OperatorName", namespaces=ns)),
+    }
 
 
 def device_xml_read_info(path: Path) -> dict[str, str]:
@@ -614,7 +610,11 @@ def load_info(path: str | Path) -> dict[str, str]:
         if not batch_xml.exists():
             raise FileNotFoundError
         info.update(batch_xml_read_info(batch_xml))
-    except (FileNotFoundError, ElementTree.ParseError):  # pragma: no cover
+    except (
+        FileNotFoundError,
+        ElementTree.ParseError,
+        AttributeError,
+    ):  # pragma: no cover
         logger.warning("Unable to read info from BatchLog.xml.")
 
     return {k: v for k, v in sorted(info.items()) if v is not None}
