@@ -59,7 +59,7 @@ def batch_csv_read_datafiles(path: Path, batch_csv: Path) -> list[Path]:
     batch_log = np.genfromtxt(
         batch_csv,
         delimiter=",",
-        comments="",
+        comments="<no comment>",
         names=True,
         usecols=(0, 5, 6),
         dtype=[np.uint32, "U264", "U4"],
