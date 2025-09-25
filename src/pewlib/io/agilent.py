@@ -59,7 +59,7 @@ def batch_csv_read_datafiles(path: Path, batch_csv: Path) -> list[Path]:
     batch_log = np.genfromtxt(
         batch_csv,
         delimiter=",",
-        comments=None,
+        comments="",
         names=True,
         usecols=(0, 5, 6),
         dtype=[np.uint32, "U264", "U4"],
@@ -123,6 +123,8 @@ def collect_datafiles(path: str | Path, methods: list[str]) -> list[Path]:
             method_func = acq_method_xml_read_datafiles
         elif method == "alphabetical":
             return find_datafiles_alphabetical(path)
+        else:
+            raise ValueError(f"unknown collection method '{method}'")
 
         if method_path.exists():
             datafiles = method_func(path, method_path)
@@ -316,9 +318,12 @@ def msts_xspecific_xml_read_info(path: Path) -> dict[int, tuple[str, int, float]
 def msts_xaddition_xml_read_info(path: Path) -> tuple[dict[int, tuple[int, int]], str]:
     xml = ElementTree.parse(path)
     xdict = {}
+    scan_type = ""
     for xaddition in xml.iter("MSTS_XAddition"):
-        scan_type = xaddition.findtext("ScanType")
+        scan_type = str(xaddition.findtext("ScanType"))
         indexed_masses = xaddition.find("IndexedMasses")
+        if indexed_masses is None:
+            raise ValueError("could not find IndexedMasses")
         for msts_index in indexed_masses.iter("MSTS_XAddition_IndexedMasses"):
             index = int(msts_index.findtext("Index") or 0)
             precursor = int(msts_index.findtext("PrecursorIonMZ") or 0)
@@ -552,31 +557,29 @@ def batch_xml_read_info(path: Path) -> dict[str, str]:
     xml = ElementTree.parse(path)
     ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
     name = xml.getroot().get("BatchName")
-    path = xml.getroot().get("BatchDataPath")
-    info = xml.find("ns:BatchLogInfo", namespaces=ns)
-    date = info.findtext("ns:AcqDateTime", namespaces=ns)
-    user = info.findtext("ns:OperatorName", namespaces=ns)
+    acq_path = xml.getroot().get("BatchDataPath") or ""
+    acq_info = {"Acquisition Name": name, "Acquisition Path": acq_path}
+    batch_info = xml.find("ns:BatchLogInfo", namespaces=ns)
+    if batch_info is not None:
+        acq_info["Acquisition Date"] = batch_info.findtext(
+            "ns:AcqDateTime", namespaces=ns
+        )
+        acq_info["Acquisition User"] = batch_info.findtext(
+            "ns:OperatorName", namespaces=ns
+        )
 
-    return {
-        "Acquisition Name": name,
-        "Acquisition Path": path,
-        "Acquisition Date": date,
-        "Acquisition User": user,
-    }
+    return acq_info
 
 
 def device_xml_read_info(path: Path) -> dict[str, str]:
     xml = ElementTree.parse(path)
+    device_info = {"Intstrument Vendor": "Agilent"}
     device = xml.find("Device")
-    type = device.findtext("Name")
-    model = device.findtext("ModelNumber")
-    serial = device.findtext("SerialNumber")
-    return {
-        "Instrument Vendor": "Agilent",
-        "Instrument Type": type,
-        "Instrument Model": model,
-        "Instrument Serial": serial,
-    }
+    if device is not None:
+        device_info["Instrument Type"] = str(device.findtext("Name"))
+        device_info["Instrument Model"] = str(device.findtext("ModelNumber"))
+        device_info["Instrument Serial"] = str(device.findtext("SerialNumber"))
+    return device_info
 
 
 def load_info(path: str | Path) -> dict[str, str]:
