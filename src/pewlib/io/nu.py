@@ -382,7 +382,7 @@ def get_masses_from_nu_data(
     return (cal_coef[0] + masses * cal_coef[1]) ** 2
 
 
-def get_times_from_pulse_data(pulse: np.ndarray, run_info: dict) -> np.ndarray:
+def get_times_from_data(data: np.ndarray, run_info: dict) -> np.ndarray:
     times = 0.0
     seg_times = np.array(
         [
@@ -393,10 +393,9 @@ def get_times_from_pulse_data(pulse: np.ndarray, run_info: dict) -> np.ndarray:
     seg_periods = np.array(
         [seg["AcquisitionPeriodNs"] for seg in run_info["SegmentInfo"]]
     )
-    times = np.sum(seg_times) * (pulse["cyc_number"] - 1)
-    times += np.cumsum(np.concatenate([[0], seg_times]))[pulse["seg_number"] - 1]
-    times += pulse["acq_number"] * seg_periods[pulse["seg_number"] - 1]
-
+    times = np.sum(seg_times) * (data["cyc_number"] - 1)
+    times += np.cumsum(np.concatenate([[0], seg_times]))[data["seg_number"] - 1]
+    times += data["acq_number"] * seg_periods[data["seg_number"] - 1]
     return times
 
 
@@ -441,8 +440,8 @@ def read_nu_directory(
         integ_index = json.load(fp)
     with path.joinpath("pulse.index").open("r") as fp:
         pulse_index = json.load(fp)
-    # with path.joinpath("corrections.dat").open("r") as fp:
-    #     corrections = json.load(fp)
+    with path.parent.joinpath("TriggerCorrections.dat").open("r") as fp:
+        corrections = json.load(fp)
 
     if max_integ_files is not None:
         integ_index = integ_index[:max_integ_files]
@@ -462,15 +461,27 @@ def read_nu_directory(
     pulses = np.concatenate(
         collect_nu_pulse_data(path, pulse_index, cyc_number=cycle, seg_number=segment)
     )
-    times = get_times_from_pulse_data(pulses, run_info)
+    # times = get_times_from_pulse_data(pulses, run_info)
+    # print(times)
     # times = apply_trigger_correction(times, corrections)
 
-    print(times)
-    exit()
+    # print(times)
+    #
+    # times = get_times_from_data(integs, run_info)
+    # pulse_times = get_times_from_data(pulses, run_info)
+    # print(pulse_times)
+    # # pulse_times = apply_trigger_correction(pulse_times, corrections)
+    # print(pulse_times)
+    # idx = np.searchsorted(times, pulse_times)
+    idx = np.searchsorted(integs["acq_number"], pulses["acq_number"]) - 1
+    signals = integs["result"]["signal"]
+    # import matplotlib.pyplot as plt
 
-    signals = integs[np.searchsorted(integs["acq_number"], pulses["acq_number"])][
-        "result"
-    ]["signal"]
+    # plt.plot(signals[:, 10])
+    # # idx = np.searchsorted(integs["acq_number"], pulses["acq_number"])
+    # plt.scatter(idx, signals[idx, 10])
+    # plt.show()
+    # exit()
 
     # Get masses from data
     masses = get_masses_from_nu_data(
@@ -496,7 +507,7 @@ def read_nu_directory(
         )
 
     # Account for any missing integ files
-    return masses, signals, pulses, run_info
+    return masses, signals[idx], pulses, run_info
 
 
 def apply_trigger_correction(times: np.ndarray, corrections: dict) -> np.ndarray:
@@ -538,11 +549,15 @@ def read_nu_image(path: Path | str) -> np.ndarray:
         signals_list.append(signals)
         first_line.append(info["FirstLaserLineNumber"])
 
-    signals = np.array(signals_list[0])
-    # signals = np.concatenate(signals_list)
+    # signals = np.array(signals_list[0])
+    # image = np.empty()
+    for signals in signals_list:
+        print(signals.shape)
+    print()
+    signals = np.stack(signals_list, axis=1)
     import matplotlib.pyplot as plt
 
-    plt.plot(np.arange(signals.shape[0]) * dwell, signals)
+    plt.imshow(signals[:,:,0])
     plt.show()
     # print(first_line)
     # signals[: len(laser_info["LaserLineInfo"]) * signals.shape[0]].reshape(
@@ -551,6 +566,6 @@ def read_nu_image(path: Path | str) -> np.ndarray:
 
 
 if __name__ == "__main__":
-    path = Path("/home/tom/Downloads/nulaser/16-18-04 Y366022 1 FLUENCE 1 CUT/")
+    path = Path("/home/tom/Downloads/nulaser/17-05-35 Gelatine stds merck IV")
     assert is_nu_laser_directory(path)
     read_nu_image(path.joinpath("Image001"))
