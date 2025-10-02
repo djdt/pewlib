@@ -5,7 +5,7 @@ Nu Instruments data import.
 import json
 import logging
 from pathlib import Path
-from typing import BinaryIO, Generator
+from typing import BinaryIO, Callable, Generator
 
 import numpy as np
 
@@ -35,7 +35,7 @@ def is_nu_laser_directory(path: Path | str) -> bool:
 
 
 def get_blanking_regions(
-    autob_events: list[np.ndarray],
+    autob_events: np.ndarray,
     num_acc: int,
     start_coef: tuple[float, float],
     end_coef: tuple[float, float],
@@ -61,16 +61,22 @@ def get_blanking_regions(
         elif event["type"] == 1 and start_event is not None:
             regions.append(
                 (
-                    int(start_event["acq_number"][0] // num_acc) - 1,
-                    int(event["acq_number"][0] // num_acc) - 1,
+                    int(start_event["acq_number"] // num_acc) - 1,
+                    int(event["acq_number"] // num_acc) - 1,
                 )
             )
 
             start_masses = (
-                start_coef[0] + start_coef[1] * start_event["edges"][0][::2] * 1.25
+                start_coef[0]
+                + start_coef[1]
+                * start_event["edges"][: start_event["num_edges"]][::2]
+                * 1.25
             ) ** 2
             end_masses = (
-                end_coef[0] + end_coef[1] * start_event["edges"][0][1::2] * 1.25
+                end_coef[0]
+                + end_coef[1]
+                * start_event["edges"][: start_event["num_edges"]][1::2]
+                * 1.25
             ) ** 2
             valid = start_masses < end_masses
             mass_regions.append(
@@ -83,7 +89,7 @@ def get_blanking_regions(
 
 
 def blank_nu_signal_data(
-    autob_events: list[np.ndarray],
+    autob_events: np.ndarray,
     signals: np.ndarray,
     masses: np.ndarray,
     num_acc: int,
@@ -122,37 +128,44 @@ def read_nu_autob_binary(
     first_cyc_number: int | None = None,
     first_seg_number: int | None = None,
     first_acq_number: int | None = None,
-) -> list[np.ndarray]:
-    def autob_dtype(size: int) -> np.dtype:
-        return np.dtype(
-            [
-                ("cyc_number", np.uint32),
-                ("seg_number", np.uint32),
-                ("acq_number", np.uint32),
-                ("trig_start_time", np.uint32),
-                ("trig_end_time", np.uint32),
-                ("type", np.uint8),
-                ("num_edges", np.int32),
-                ("edges", np.uint32, size),
-            ]
-        )
+) -> np.ndarray:
+    data_dtype = np.dtype(
+        [
+            ("cyc_number", np.uint32),
+            ("seg_number", np.uint32),
+            ("acq_number", np.uint32),
+            ("trig_start_time", np.uint32),
+            ("trig_end_time", np.uint32),
+            ("type", np.uint8),
+            ("num_edges", np.int32),
+            ("edges", np.uint32, 12),  # so far 12 is the maximum
+        ]
+    )
 
-    def read_autob_events(fp: BinaryIO) -> Generator[np.ndarray, None, None]:
+    def read_autoblank_events(fp: BinaryIO) -> Generator[np.ndarray, None, None]:
         while fp:
-            data = fp.read(4 + 4 + 4 + 4 + 4 + 1 + 4)
-            if not data:
+            partial = fp.read(25)
+            if len(partial) < 25:
                 return
-            size = int.from_bytes(data[-4:], "little")
-            autob = np.empty(1, dtype=autob_dtype(size))
-            autob.data.cast("B")[: len(data)] = data
-            if size > 0:
-                autob["edges"] = np.frombuffer(fp.read(size * 4), dtype=np.uint32)
+            autob = np.zeros(1, dtype=data_dtype)
+            autob.data.cast("B")[:25] = partial
+            num = autob["num_edges"][0]
+            if num > 0:
+                autob["edges"][:num] = np.frombuffer(fp.read(num * 4), dtype=np.uint32)
             yield autob
 
     with path.open("rb") as fp:
-        autob_events = list(read_autob_events(fp))
+        autob = np.concatenate(list(read_autoblank_events(fp)))
 
-    return autob_events
+    if autob.size > 0:
+        if first_cyc_number is not None and autob[0]["cyc_number"] != first_cyc_number:
+            raise ValueError("read_integ_binary: incorrect FirstCycNum")
+        if first_seg_number is not None and autob[0]["seg_number"] != first_seg_number:
+            raise ValueError("read_integ_binary: incorrect FirstSegNum")
+        if first_acq_number is not None and autob[0]["acq_number"] != first_acq_number:
+            raise ValueError("read_integ_binary: incorrect FirstAcqNum")
+
+    return autob
 
 
 def read_nu_integ_binary(
@@ -212,7 +225,7 @@ def read_nu_pulse_binary(
             ("cyc_number", np.uint32),
             ("seg_number", np.uint32),
             ("acq_number", np.uint32),
-            ("overlfow", np.bool),
+            ("overflow", np.bool),
         ]
     )
     with path.open("rb") as fp:
@@ -229,46 +242,20 @@ def read_nu_pulse_binary(
     return pulse
 
 
-def collect_nu_autob_data(
+def read_binaries_in_index(
     root: Path,
     index: list[dict],
+    binary_ext: str,
+    binary_read_fn: Callable[[Path, int, int, int], np.ndarray],
     cyc_number: int | None = None,
     seg_number: int | None = None,
 ) -> list[np.ndarray]:
-    autobs = []
+    datas = []
     for idx in index:
-        autob_path = root.joinpath(f"{idx['FileNum']}.autob")
-        if autob_path.exists():
-            events = read_nu_autob_binary(
-                autob_path,
-                idx["FirstCycNum"],
-                idx["FirstSegNum"],
-                idx["FirstAcqNum"],
-            )
-            if cyc_number is not None:
-                events = [ev for ev in events if ev["cyc_number"] == cyc_number]
-            if seg_number is not None:
-                events = [ev for ev in events if ev["seg_number"] == seg_number]
-            autobs.extend(events)
-        else:  # pragma: no cover, missing files
-            logger.warning(
-                f"collect_nu_autob_data: missing autob {idx['FileNum']}, skipping"
-            )
-    return autobs
-
-
-def collect_nu_integ_data(
-    root: Path,
-    index: list[dict],
-    cyc_number: int | None = None,
-    seg_number: int | None = None,
-) -> list[np.ndarray]:
-    integs = []
-    for idx in index:
-        integ_path = root.joinpath(f"{idx['FileNum']}.integ")
-        if integ_path.exists():
-            data = read_nu_integ_binary(
-                integ_path,
+        binary_path = root.joinpath(f"{idx['FileNum']}.{binary_ext}")
+        if binary_path.exists():
+            data = binary_read_fn(
+                binary_path,
                 idx["FirstCycNum"],
                 idx["FirstSegNum"],
                 idx["FirstAcqNum"],
@@ -277,42 +264,13 @@ def collect_nu_integ_data(
                 data = data[data["cyc_number"] == cyc_number]
             if seg_number is not None:
                 data = data[data["seg_number"] == seg_number]
-            if data.size > 0:
-                integs.append(data)
+            # if data.size > 0:
+            datas.append(data)
         else:
             logger.warning(  # pragma: no cover, missing files
-                f"collect_nu_integ_data: missing integ {idx['FileNum']}, skipping"
+                f"collect_data_from_index: missing data file {idx['FileNum']}.{binary_ext}, skipping"
             )
-    return integs
-
-
-def collect_nu_pulse_data(
-    root: Path,
-    index: list[dict],
-    cyc_number: int | None = None,
-    seg_number: int | None = None,
-) -> list[np.ndarray]:
-    pulses = []
-    for idx in index:
-        pulse_path = root.joinpath(f"{idx['FileNum']}.pulse")
-        if pulse_path.exists():
-            data = read_nu_pulse_binary(
-                pulse_path,
-                idx["FirstCycNum"],
-                idx["FirstSegNum"],
-                idx["FirstAcqNum"],
-            )
-            if cyc_number is not None:
-                data = data[data["cyc_number"] == cyc_number]
-            if seg_number is not None:
-                data = data[data["seg_number"] == seg_number]
-            if data.size > 0:
-                pulses.append(data)
-        else:
-            logger.warning(  # pragma: no cover, missing files
-                f"collect_nu_pulse_data: missing pulse {idx['FileNum']}, skipping"
-            )
-    return pulses
+    return datas
 
 
 def get_dwelltime_from_info(info: dict) -> float:
@@ -399,9 +357,9 @@ def get_times_from_data(data: np.ndarray, run_info: dict) -> np.ndarray:
     return times
 
 
-def read_nu_directory(
+def read_nu_laser_directory(
     path: str | Path,
-    max_integ_files: int | None = None,
+    line_info: dict,
     autoblank: bool = True,
     cycle: int | None = None,
     segment: int | None = None,
@@ -434,68 +392,82 @@ def read_nu_directory(
 
     with path.joinpath("run.info").open("r") as fp:
         run_info = json.load(fp)
+    # with path.parent.joinpath("TriggerCorrections.dat").open("r") as fp:
+    #     corrections = json.load(fp)
+
+    if run_info["FirstLaserLineNumber"] != line_info[0]["ln"]:
+        raise ValueError(
+            f"run.info laser line differes from laser.info for {path.stem}"
+        )
+
     with path.joinpath("autob.index").open("r") as fp:
         autob_index = json.load(fp)
     with path.joinpath("integrated.index").open("r") as fp:
         integ_index = json.load(fp)
     with path.joinpath("pulse.index").open("r") as fp:
         pulse_index = json.load(fp)
-    with path.parent.joinpath("TriggerCorrections.dat").open("r") as fp:
-        corrections = json.load(fp)
-
-    if max_integ_files is not None:
-        integ_index = integ_index[:max_integ_files]
-
-    segment_delays = {
-        s["Num"]: s["AcquisitionTriggerDelayNs"] for s in run_info["SegmentInfo"]
-    }
-
-    accumulations = run_info["NumAccumulations1"] * run_info["NumAccumulations2"]
 
     # Collect integrated data
     integs = np.concatenate(
-        collect_nu_integ_data(path, integ_index, cyc_number=cycle, seg_number=segment)
+        read_binaries_in_index(
+            path,
+            integ_index,
+            "integ",
+            read_nu_integ_binary,
+            cyc_number=cycle,
+            seg_number=segment,
+        )
     )
 
     # Collect laser trigger data
     pulses = np.concatenate(
-        collect_nu_pulse_data(path, pulse_index, cyc_number=cycle, seg_number=segment)
+        read_binaries_in_index(
+            path,
+            pulse_index,
+            "pulse",
+            read_nu_pulse_binary,
+            cyc_number=cycle,
+            seg_number=segment,
+        ),
     )
-    # times = get_times_from_pulse_data(pulses, run_info)
-    # print(times)
-    # times = apply_trigger_correction(times, corrections)
 
-    # print(times)
-    #
-    # times = get_times_from_data(integs, run_info)
-    # pulse_times = get_times_from_data(pulses, run_info)
-    # print(pulse_times)
-    # # pulse_times = apply_trigger_correction(pulse_times, corrections)
-    # print(pulse_times)
-    # idx = np.searchsorted(times, pulse_times)
-    idx = np.searchsorted(integs["acq_number"], pulses["acq_number"]) - 1
-    signals = integs["result"]["signal"]
-    # import matplotlib.pyplot as plt
+    total_shots = sum(line["ns"] - 1 for line in line_info)
+    if pulses.size != total_shots:
+        logger.warning(
+            f"number of laser trigger events is off, {pulses.size} != {total_shots}"
+        )
 
-    # plt.plot(signals[:, 10])
-    # # idx = np.searchsorted(integs["acq_number"], pulses["acq_number"])
-    # plt.scatter(idx, signals[idx, 10])
-    # plt.show()
-    # exit()
+    shots_per_spot = int(line_info[0]["ss"] / line_info[0]["sp"])
 
     # Get masses from data
+    segment_delays = {
+        s["Num"]: s["AcquisitionTriggerDelayNs"] for s in run_info["SegmentInfo"]
+    }
     masses = get_masses_from_nu_data(
         integs[0], run_info["MassCalCoefficients"], segment_delays
     )[0]
     # signals = get_signals_from_nu_data(integs, accumulations)
+
+    # image = np.full((line_info[0]["ns"] - 1 // shots_per_spot))
+
+    idx = np.searchsorted(integs["acq_number"], pulses["acq_number"][::shots_per_spot])
+    signals = integs["result"]["signal"]
 
     if not raw:
         signals /= run_info["AverageSingleIonArea"]
 
     # Blank out overrange regions
     if autoblank:
-        autobs = collect_nu_autob_data(
-            path, autob_index, cyc_number=cycle, seg_number=segment
+        accumulations = run_info["NumAccumulations1"] * run_info["NumAccumulations2"]
+        autobs = np.concatenate(
+            read_binaries_in_index(
+                path,
+                autob_index,
+                "autob",
+                read_nu_autob_binary,
+                cyc_number=cycle,
+                seg_number=segment,
+            )
         )
         signals = blank_nu_signal_data(
             autobs,
@@ -506,8 +478,33 @@ def read_nu_directory(
             run_info["BlMassCalEndCoef"],
         )
 
-    # Account for any missing integ files
-    return masses, signals[idx], pulses, run_info
+    signals = np.add.reduceat(integs["result"]["signal"], idx, axis=0)
+
+    lines = []
+    current = 0
+    for linfo in line_info:
+        n = int(linfo["ns"]-1 / shots_per_spot)
+        lines.append(
+            np.reshape(
+                # not sure if this is correct
+                np.add.reduceat(signals, idx[current : current + n]),
+                (shots_per_spot, -1, signals.shape[1]),
+            ).sum(axis=0)
+        )  # -2 to skip incorrect reuce
+        current += n + 1
+
+    return masses, lines
+    #
+    # # image = np.full((signals.shape[0] // len(line_info), len(line_info)), np.nan, dtype=np.float32)
+    # # for line in np.arange(len(line_info)):
+    # #     image
+    # signals = np.reshape(
+    #     signals, (signals.shape[0] // len(line_info), len(line_info), signals.shape[1])
+    # )
+    #
+    # logger.debug(f"imported {signals.shape} signals from laser directory {path}")
+    # # Account for any missing integ files
+    # return masses, signals, pulses, run_info
 
 
 def apply_trigger_correction(times: np.ndarray, corrections: dict) -> np.ndarray:
@@ -529,35 +526,55 @@ def read_nu_image(path: Path | str) -> np.ndarray:
     with Path(path.joinpath("TriggerCorrections.dat")).open("r") as fp:
         corrections = json.load(fp)
 
+    lines_per_dir = laser_info["AcquisitionLineGroupSize"]
     masses = None
     dwell = None
+    lines = []
     signals_list = []
     first_line = []
-    for dir in sorted(
+    acqusitions = sorted(
         [d for d in path.iterdir() if d.is_dir()], key=lambda d: int(d.stem)
-    ):
-        _masses, signals, pulses, info = read_nu_directory(dir)
+    )
+    for i, acq_dir in enumerate(acqusitions):
+        _masses, _lines = read_nu_laser_directory(
+            acq_dir,
+            laser_info["LaserLineInfo"][i * lines_per_dir : (i + 1) * lines_per_dir],
+        )
         if masses is None:
             masses = _masses
         elif not np.all(masses == _masses):
             logger.warning("masses differ across laser lines")
-        if dwell is None:
-            dwell = get_dwelltime_from_info(info)
-        elif dwell != get_dwelltime_from_info(info):
-            logger.warning("dwelltime differs across laser lines")
+        # if dwell is None:
+        #     dwell = get_dwelltime_from_info(info)
+        # elif dwell != get_dwelltime_from_info(info):
+        #     logger.warning("dwelltime differs across laser lines")
 
-        signals_list.append(signals)
-        first_line.append(info["FirstLaserLineNumber"])
+        lines.extend(_lines)
+        # signals_list.append(signals)
+        # first_line.append(info["FirstLaserLineNumber"])
 
+    if masses is None:
+        raise ValueError("masses were not read from any laser directory")
     # signals = np.array(signals_list[0])
     # image = np.empty()
-    for signals in signals_list:
-        print(signals.shape)
-    print()
-    signals = np.stack(signals_list, axis=1)
+    # signals = np.concatenate(signals_list, axis=1)
+    # max_len = np.amax([signals.shape[0] for signals in signals_list])
+    # signals = np.full(
+    #     (max_len, len(laser_info["LaserLineInfo"]), masses.size),
+    #     np.nan,
+    #     dtype=np.float32,
+    # )
+    #
+    # for i, signal in enumerate(signals_list):
+    #     signals[: signal.shape[0], i, :] = signal
+
     import matplotlib.pyplot as plt
 
-    plt.imshow(signals[:,:,0])
+    img = np.stack(lines, axis=1)
+    print(img.shape)
+
+    plt.imshow(img[:, :, 0])
+    # plt.imshow(signals[:, :, 0])
     plt.show()
     # print(first_line)
     # signals[: len(laser_info["LaserLineInfo"]) * signals.shape[0]].reshape(
@@ -566,6 +583,9 @@ def read_nu_image(path: Path | str) -> np.ndarray:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+
+    path = Path("/home/tom/Downloads/nulaser/13-54-05 Se&Hg Tuna liver/")
     path = Path("/home/tom/Downloads/nulaser/17-05-35 Gelatine stds merck IV")
     assert is_nu_laser_directory(path)
     read_nu_image(path.joinpath("Image001"))
