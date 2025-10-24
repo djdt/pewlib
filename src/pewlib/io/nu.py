@@ -359,12 +359,11 @@ def get_times_from_data(data: np.ndarray, run_info: dict) -> np.ndarray:
 
 def read_nu_laser_directory(
     path: str | Path,
-    line_info: dict,
     autoblank: bool = True,
     cycle: int | None = None,
     segment: int | None = None,
     raw: bool = False,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict]:
     """Read the Nu Instruments raw data directory, retuning data and run info.
 
     Directory must contain 'run.info', 'integrated.index' and at least one '.integ'
@@ -382,7 +381,8 @@ def read_nu_laser_directory(
     Returns:
         masses from first acquisition
         signals in counts
-        laser pulse data
+        times in s
+        laser pulse data in s
         dict of parameters from run.info
     """
 
@@ -392,13 +392,6 @@ def read_nu_laser_directory(
 
     with path.joinpath("run.info").open("r") as fp:
         run_info = json.load(fp)
-    # with path.parent.joinpath("TriggerCorrections.dat").open("r") as fp:
-    #     corrections = json.load(fp)
-
-    if run_info["FirstLaserLineNumber"] != line_info[0]["ln"]:
-        raise ValueError(
-            f"run.info laser line differes from laser.info for {path.stem}"
-        )
 
     with path.joinpath("autob.index").open("r") as fp:
         autob_index = json.load(fp)
@@ -431,14 +424,6 @@ def read_nu_laser_directory(
         ),
     )
 
-    total_shots = sum(line["ns"] - 1 for line in line_info)
-    if pulses.size != total_shots:
-        logger.warning(
-            f"number of laser trigger events is off, {pulses.size} != {total_shots}"
-        )
-
-    shots_per_spot = int(line_info[0]["ss"] / line_info[0]["sp"])
-
     # Get masses from data
     segment_delays = {
         s["Num"]: s["AcquisitionTriggerDelayNs"] for s in run_info["SegmentInfo"]
@@ -446,11 +431,7 @@ def read_nu_laser_directory(
     masses = get_masses_from_nu_data(
         integs[0], run_info["MassCalCoefficients"], segment_delays
     )[0]
-    # signals = get_signals_from_nu_data(integs, accumulations)
 
-    # image = np.full((line_info[0]["ns"] - 1 // shots_per_spot))
-
-    idx = np.searchsorted(integs["acq_number"], pulses["acq_number"][::shots_per_spot])
     signals = integs["result"]["signal"]
 
     if not raw:
@@ -478,114 +459,65 @@ def read_nu_laser_directory(
             run_info["BlMassCalEndCoef"],
         )
 
-    signals = np.add.reduceat(integs["result"]["signal"], idx, axis=0)
+    pulse_times = get_times_from_data(pulses, run_info) * 1e-9
+    times = get_times_from_data(integs, run_info) * 1e-9
 
-    lines = []
-    current = 0
-    for linfo in line_info:
-        n = int(linfo["ns"]-1 / shots_per_spot)
-        lines.append(
-            np.reshape(
-                # not sure if this is correct
-                np.add.reduceat(signals, idx[current : current + n]),
-                (shots_per_spot, -1, signals.shape[1]),
-            ).sum(axis=0)
-        )  # -2 to skip incorrect reuce
-        current += n + 1
-
-    return masses, lines
-    #
-    # # image = np.full((signals.shape[0] // len(line_info), len(line_info)), np.nan, dtype=np.float32)
-    # # for line in np.arange(len(line_info)):
-    # #     image
-    # signals = np.reshape(
-    #     signals, (signals.shape[0] // len(line_info), len(line_info), signals.shape[1])
-    # )
-    #
-    # logger.debug(f"imported {signals.shape} signals from laser directory {path}")
-    # # Account for any missing integ files
-    # return masses, signals, pulses, run_info
+    return signals, masses, times, pulse_times, run_info
 
 
-def apply_trigger_correction(times: np.ndarray, corrections: dict) -> np.ndarray:
+def apply_trigger_correction(
+    times_seconds: np.ndarray, corrections: dict
+) -> np.ndarray:
     if corrections["CorrectionMode"] == 0:
-        return times * corrections["Transit1Time"]
+        return times_seconds + corrections["Transit1Time"] * 1e-3
     else:
-        c1 = (corrections["Transit2time"] - corrections["Transit1Time"]) / (
-            corrections["Trigger2Time"] - corrections["Trigger1Time"]
+        c1 = (
+            (corrections["Transit2time"] - corrections["Transit1Time"])
+            / (corrections["Trigger2Time"] - corrections["Trigger1Time"])
+            * 1e-3
         )
-        c2 = corrections["Transit1Time"] - (c1 * corrections["Trigger1Time"])
-        return c1 * times + c2
+        c2 = corrections["Transit1Time"] - (c1 * corrections["Trigger1Time"]) * 1e-3
+        return c1 * times_seconds + c2
 
 
-def read_nu_image(path: Path | str) -> np.ndarray:
+def read_nu_image(path: Path | str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     path = Path(path)
 
-    with Path(path.joinpath("laser.info")).open("r") as fp:
-        laser_info = json.load(fp)
+    # with Path(path.joinpath("laser.info")).open("r") as fp:
+    #     laser_info = json.load(fp)
     with Path(path.joinpath("TriggerCorrections.dat")).open("r") as fp:
         corrections = json.load(fp)
 
-    lines_per_dir = laser_info["AcquisitionLineGroupSize"]
     masses = None
-    dwell = None
-    lines = []
     signals_list = []
-    first_line = []
+    times_list = []
     acqusitions = sorted(
         [d for d in path.iterdir() if d.is_dir()], key=lambda d: int(d.stem)
     )
+    initial_pulse = None
     for i, acq_dir in enumerate(acqusitions):
-        _masses, _lines = read_nu_laser_directory(
-            acq_dir,
-            laser_info["LaserLineInfo"][i * lines_per_dir : (i + 1) * lines_per_dir],
-        )
+        _signals, _masses, _times, _pulses, _info = read_nu_laser_directory(acq_dir)
         if masses is None:
             masses = _masses
         elif not np.all(masses == _masses):
             logger.warning("masses differ across laser lines")
-        # if dwell is None:
-        #     dwell = get_dwelltime_from_info(info)
-        # elif dwell != get_dwelltime_from_info(info):
-        #     logger.warning("dwelltime differs across laser lines")
+        if initial_pulse is None:
+            initial_pulse = _pulses[0]
 
-        lines.extend(_lines)
-        # signals_list.append(signals)
-        # first_line.append(info["FirstLaserLineNumber"])
+        signals_list.append(_signals)
+        times_list.append(_times)
 
     if masses is None:
         raise ValueError("masses were not read from any laser directory")
-    # signals = np.array(signals_list[0])
-    # image = np.empty()
-    # signals = np.concatenate(signals_list, axis=1)
-    # max_len = np.amax([signals.shape[0] for signals in signals_list])
-    # signals = np.full(
-    #     (max_len, len(laser_info["LaserLineInfo"]), masses.size),
-    #     np.nan,
-    #     dtype=np.float32,
-    # )
-    #
-    # for i, signal in enumerate(signals_list):
-    #     signals[: signal.shape[0], i, :] = signal
 
-    import matplotlib.pyplot as plt
+    if corrections["CorrectionMode"] != 0:
+        raise NotImplementedError("only correction mode 0 is supported")
 
-    img = np.stack(lines, axis=1)
-    print(img.shape)
+    correction = corrections["Transit1Time"] * 1e-3
 
-    plt.imshow(img[:, :, 0])
-    # plt.imshow(signals[:, :, 0])
-    plt.show()
-    # print(first_line)
-    # signals[: len(laser_info["LaserLineInfo"]) * signals.shape[0]].reshape(
-    #     (len(laser_info["LaserLineInfo"]), 239, signals.shape[1])
-    # )
+    signals = np.concatenate(signals_list, axis=0)
+    times = np.concatenate(times_list)
+    times -= initial_pulse
+    times -= correction
 
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-
-    path = Path("/home/tom/Downloads/nulaser/13-54-05 Se&Hg Tuna liver/")
-    path = Path("/home/tom/Downloads/nulaser/17-05-35 Gelatine stds merck IV")
-    assert is_nu_laser_directory(path)
-    read_nu_image(path.joinpath("Image001"))
+    return signals, masses, times
