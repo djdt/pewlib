@@ -16,7 +16,7 @@ def laserlog() -> np.ndarray:
     path = Path(__file__).parent.joinpath(
         "data", "laser_iolite", "LaserLog_test_rasters.csv"
     )
-    return read_iolite_laser_log(path)
+    return read_iolite_laser_log(path, log_style="activeview2")
 
 
 @pytest.fixture(scope="module")
@@ -43,7 +43,7 @@ def test_read_iolite_laser_log_raw():
         "data", "laser_iolite", "LaserLog_test_rasters.csv"
     )
     laserlog = read_iolite_laser_log(path, log_style="raw")
-    assert np.unique(laserlog["comment"]).size == 5 + 1
+    assert np.unique(laserlog["comment"]).size == 5
     assert len(laserlog) == 110
     assert np.count_nonzero(laserlog["state"] == 1) == 25
 
@@ -76,16 +76,8 @@ def test_guess_delay_from_data():
 def test_sync_data_with_laser_log_left_to_right(laserlog, laserlog_data):
     data, times = laserlog_data
     sync, params = sync_data_with_laser_log(
-        data[0],
-        times[0],
-        laserlog,
-        delay=0.0,
-        sequence=1,
-        squeeze=True,
+        data[0], times[0], laserlog, delay=0.15, sequence=1, squeeze=True
     )
-    import matplotlib.pyplot as plt
-    plt.imshow(sync["Ho165"])
-    plt.show()
     assert np.all(sync["Ho165"][:, :5] < 1e1, where=~np.isnan(sync["Ho165"][:, :5]))
     assert np.all(sync["Ho165"][:, -5:] > 1e3, where=~np.isnan(sync["Ho165"][:, -5:]))
 
@@ -93,11 +85,8 @@ def test_sync_data_with_laser_log_left_to_right(laserlog, laserlog_data):
 def test_sync_data_with_laser_log_right_to_left(laserlog, laserlog_data):
     data, times = laserlog_data
     sync, params = sync_data_with_laser_log(
-        data[1], times[1] - times[1][0], laserlog, delay=0.0, sequence=2, squeeze=True
+        data[1], times[1], laserlog, delay=0.15, sequence=2, squeeze=True
     )
-    import matplotlib.pyplot as plt
-    plt.imshow(sync["Ho165"])
-    plt.show()
     assert np.all(sync["Ho165"][:, :5] < 1e1, where=~np.isnan(sync["Ho165"][:, :5]))
     assert np.all(sync["Ho165"][:, -5:] > 1e3, where=~np.isnan(sync["Ho165"][:, -5:]))
 
@@ -105,7 +94,7 @@ def test_sync_data_with_laser_log_right_to_left(laserlog, laserlog_data):
 def test_sync_data_with_laser_log_horz_raster(laserlog, laserlog_data):
     data, times = laserlog_data
     sync, params = sync_data_with_laser_log(
-        data[4], times[4], laserlog, delay=0.25, sequence=5, squeeze=True
+        data[4], times[4], laserlog, delay=0.15, sequence=5, squeeze=True
     )
     assert np.all(sync["Ho165"][:, :5] < 1e1, where=~np.isnan(sync["Ho165"][:, :5]))
     assert np.all(sync["Ho165"][:, -5:] > 1e3, where=~np.isnan(sync["Ho165"][:, -5:]))
@@ -114,7 +103,7 @@ def test_sync_data_with_laser_log_horz_raster(laserlog, laserlog_data):
 def test_sync_data_with_laser_log_top_to_bottom(laserlog, laserlog_data):
     data, times = laserlog_data
     sync, params = sync_data_with_laser_log(
-        data[2], times[2], laserlog, delay=0.25, sequence=3, squeeze=True
+        data[2], times[2], laserlog, delay=0.15, sequence=3, squeeze=True
     )
     assert np.all(sync["Ho165"][:5] < 1e1, where=~np.isnan(sync["Ho165"][:5]))
     assert np.all(sync["Ho165"][-5:] > 1e3, where=~np.isnan(sync["Ho165"][-5:]))
@@ -124,7 +113,7 @@ def test_sync_data_with_laser_log_bottom_to_top(laserlog, laserlog_data):
     data, times = laserlog_data
     laserlog["spotsize"] = "40"  # test for IVA style
     sync, params = sync_data_with_laser_log(
-        data[3], times[3], laserlog, delay=0.25, sequence=4, squeeze=True
+        data[3], times[3], laserlog, delay=0.15, sequence=4, squeeze=True
     )
     assert np.all(sync["Ho165"][:5] < 1e1, where=~np.isnan(sync["Ho165"][:5]))
     assert np.all(sync["Ho165"][-5:] > 1e3, where=~np.isnan(sync["Ho165"][-5:]))

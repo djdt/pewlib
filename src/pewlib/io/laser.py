@@ -175,55 +175,35 @@ def sync_data_with_laser_log(
     px = ((log["x"] - origin[0]) / spot_size[0]).astype(int)
     py = ((log["y"] - origin[1]) / spot_size[1]).astype(int)
     sync = np.full((py.max() + 1, px.max() + 1), np.nan, dtype=data.dtype)
+    assert sync.dtype.names is not None
 
     # calculate the indicies for start and end times of lines
     laser_times = (log["time"] - log["time"][0][0]).astype(float) / 1000.0
     laser_idx = np.searchsorted(times, laser_times)
+    print(laser_times[0])
 
     # read and fill in data
     for line, (i0, i1), (x0, x1), (y0, y1) in zip(log, laser_idx, px, py):
-        # print(idx)
-        x = data.flat[i0 : i1]
-        # idx = np.clip(idx - idx[0], 0, x.size - 1)
-        # for name in sync.dtype.names:
-        #     # plt.plot(np.add.reduceat(data[name].flat, idx))
-        #     # plt.show()
-        #     sync[y0, x0:x1][name] = np.add.reduceat(x[name], idx)
-        # # # print(line)
-        # # x = data.flat[idx[0]:idx[-1]]
-        # # x = data.flat[t0:t1
-        # # plt.plot(x[x.dtype.names[3]])
-        # # plt.show()
-        # # exit()
-        # if x.size == 0:
-        #     continue
+        x = data.flat[i0:i1]
+        if x.size == 0:
+            continue
         if y0 == y1:  # horizontal
-            # s0, s1 = -min(x.size, abs(x1 - x0)), None
             if x0 > x1:  # flip right-to-left
                 x = x[::-1]
                 x0, x1 = x1, x0
-            #     s0, s1 = None, -s0
-            # if s0 == -0:  # pragma: no cover, this corresponds to no data, but errors
-            #     continue
-            # if t != x then sum along x to bring it to same size
-            # sync[y0, x0:x1][s0:s1] = x[s0:s1]
-            # print(np.linspace(0, t1-t0, x1-x0).astype(int), s0, s1)
             for name in sync.dtype.names:
-                xx = np.add.reduceat(
+                sync[y0, x0:x1][name] = np.add.reduceat(
                     x[name], np.linspace(0, x.size, x1 - x0, endpoint=False).astype(int)
                 )
-                sync[y0, x0:x1][name] = xx
             # sync[y0, x0:x1] = x[np.linspace(0, t1-t0, x1-x0).astype(int)]
         elif x0 == x1:  # vertical
-            s0, s1 = -min(x.size, abs(y1 - y0)), None
             if y0 > y1:  # flip bottom-to-top
                 x = x[::-1]
                 y0, y1 = y1, y0
-                s0, s1 = None, -s0
-            if s0 == 0:  # pragma: no cover, this corresponds to no data, but errors
-                continue
-
-            sync[y0:y1, x0][s0:s1] = x[s0:s1]
+            for name in sync.dtype.names:
+                sync[y0:y1, x0][name] = np.add.reduceat(
+                    x[name], np.linspace(0, x.size, y1 - y0, endpoint=False).astype(int)
+                )
         else:  # pragma: no cover
             raise ValueError("unable to import non-vertical or non-horizontal lines.")
 
