@@ -79,7 +79,7 @@ def test_sync_data_with_laser_log_left_to_right(laserlog, laserlog_data):
         data[0],
         times[0],
         laserlog,
-        delay=0.25,
+        delay=0.0,
         sequence=1,
         squeeze=True,
     )
@@ -93,8 +93,11 @@ def test_sync_data_with_laser_log_left_to_right(laserlog, laserlog_data):
 def test_sync_data_with_laser_log_right_to_left(laserlog, laserlog_data):
     data, times = laserlog_data
     sync, params = sync_data_with_laser_log(
-        data[1], times[1] - times[1][0], laserlog, delay=0.25, sequence=2, squeeze=True
+        data[1], times[1] - times[1][0], laserlog, delay=0.0, sequence=2, squeeze=True
     )
+    import matplotlib.pyplot as plt
+    plt.imshow(sync["Ho165"])
+    plt.show()
     assert np.all(sync["Ho165"][:, :5] < 1e1, where=~np.isnan(sync["Ho165"][:, :5]))
     assert np.all(sync["Ho165"][:, -5:] > 1e3, where=~np.isnan(sync["Ho165"][:, -5:]))
 

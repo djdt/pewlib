@@ -178,34 +178,30 @@ def sync_data_with_laser_log(
 
     # calculate the indicies for start and end times of lines
     laser_times = (log["time"] - log["time"][0][0]).astype(float) / 1000.0
-    # laser_idx = np.searchsorted(times, laser_times)
+    laser_idx = np.searchsorted(times, laser_times)
 
     # read and fill in data
-    for line, (t0, t1), (x0, x1), (y0, y1) in zip(log, laser_times, px, py):
-        print(times[:10], t0, t1, np.linspace(t0, t1, x1 - x0, endpoint=False))
-        idx = np.searchsorted(times, np.linspace(t0, t1, x1 - x0, endpoint=False))
-        if idx.size == 0:
-            continue
-        print(idx)
-        x = data.flat[idx[0] : idx[-1]]
-        idx = np.clip(idx - idx[0], 0, x.size - 1)
-        for name in sync.dtype.names:
-            # plt.plot(np.add.reduceat(data[name].flat, idx))
-            # plt.show()
-            sync[y0, x0:x1][name] = np.add.reduceat(x[name], idx)
-        # # print(line)
-        # x = data.flat[idx[0]:idx[-1]]
-        # x = data.flat[t0:t1
-        # plt.plot(x[x.dtype.names[3]])
-        # plt.show()
-        # exit()
-        if x.size == 0:
-            continue
+    for line, (i0, i1), (x0, x1), (y0, y1) in zip(log, laser_idx, px, py):
+        # print(idx)
+        x = data.flat[i0 : i1]
+        # idx = np.clip(idx - idx[0], 0, x.size - 1)
+        # for name in sync.dtype.names:
+        #     # plt.plot(np.add.reduceat(data[name].flat, idx))
+        #     # plt.show()
+        #     sync[y0, x0:x1][name] = np.add.reduceat(x[name], idx)
+        # # # print(line)
+        # # x = data.flat[idx[0]:idx[-1]]
+        # # x = data.flat[t0:t1
+        # # plt.plot(x[x.dtype.names[3]])
+        # # plt.show()
+        # # exit()
+        # if x.size == 0:
+        #     continue
         if y0 == y1:  # horizontal
             # s0, s1 = -min(x.size, abs(x1 - x0)), None
-            # if x0 > x1:  # flip right-to-left
-            #     x = x[::-1]
-            #     x0, x1 = x1, x0
+            if x0 > x1:  # flip right-to-left
+                x = x[::-1]
+                x0, x1 = x1, x0
             #     s0, s1 = None, -s0
             # if s0 == -0:  # pragma: no cover, this corresponds to no data, but errors
             #     continue
@@ -255,7 +251,7 @@ if __name__ == "__main__":
     )
     log_teledyne = read_iolite_laser_log(
         Path("/home/tom/Downloads/nulaser/12-30-04 20251015areatest/ee.Iolite.csv"),
-        log_style="teledyne_chrom3",
+        log_style="chromium3",
     )
 
     # print(log_nwi[:10])
