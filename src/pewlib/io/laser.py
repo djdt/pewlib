@@ -31,12 +31,14 @@ def is_iolite_laser_log(log_path: Path | str) -> bool:
 
 def read_iolite_laser_log(log_path: Path | str, log_style: str = "raw") -> np.ndarray:
     """Reads an Iolite style log.
-    Different vendors will have slighly different styles of log,
-    the 'log_style' option can be used. Passing 'raw' as a style will prevent processing.
+    Different vendors will have slighly different styles of log, so passing 'log_style'
+    is reccommended to reduce the log to only laser start and end events.
+    Currently NWL ActiveView2 and Teledyne Chromium3 are supported.
+    Passing 'raw' as a style will prevent processing.
 
     Args:
         log_path: path to iolilte
-        log_style: style of log ('nwi_bioimage', 'teledyne_chrom3', 'raw')
+        log_style: style of log ('activeview2', 'chromium3', 'raw')
 
     Returns:
         log as a numpy array, trimmed to useful lines
@@ -45,6 +47,11 @@ def read_iolite_laser_log(log_path: Path | str, log_style: str = "raw") -> np.nd
     def fill_ints(x: np.ndarray) -> None:
         max = np.maximum.accumulate(x)
         x[x == -1] = max[x == -1]
+
+    def fill_strings(x: np.ndarray) -> None:
+        idx = np.cumsum(x != "") - 1
+        strings = x[np.flatnonzero(x != "")]
+        x[:] = strings[idx]
 
     log = np.genfromtxt(
         log_path,
@@ -68,10 +75,12 @@ def read_iolite_laser_log(log_path: Path | str, log_style: str = "raw") -> np.nd
     )
     fill_ints(log["sequence"])
     fill_ints(log["subpoint"])
-    if log_style == "teledyne_chrom3":
+    fill_strings(log["comment"])
+
+    if log_style == "chromium3":
         start_idx = np.flatnonzero(np.logical_and(log["vertix"] > 0, log["state"] == 1))
         log = log[np.stack((start_idx, start_idx + 1), axis=1).flat]
-    elif log_style == "nwi_bioimage":
+    elif log_style == "activeview2":
         log = log[np.argsort(log["time"])]
         start_idx = (
             np.flatnonzero(
@@ -112,6 +121,7 @@ def sync_data_with_laser_log(
 ) -> tuple[np.ndarray, dict]:
     """
     Syncs ICP-MS data collected as a single line per raster with the laser log file.
+    Times in the log are modified to start at 0.
 
     Args:
         data: 1d ICP-MS data
@@ -127,29 +137,17 @@ def sync_data_with_laser_log(
         times = np.arange(data.size) * times
     elif times.ndim > 1:  # pragma: no cover, warning
         logger.warning("times has more than one dimension, flattening")
-
-    # times = (times - times.min()).ravel()
     times = times.ravel()
 
     if delay is None:  # pragma: no cover, tested elsewhere
         delay = guess_delay_from_data(data, times)
 
+    print(delay)
     times += delay
 
     # remove patterns that were not selected
     if sequence is not None:
         log = log[np.isin(log["sequence"], sequence)]
-
-    # Get laser start event, fist firing after 'Off'
-    # start_idx = (
-    #     np.flatnonzero(np.logical_and(log["state"][1:] == 1, log["state"][:-1] == 0))
-    #     + 1
-    # )
-    # Get laser end event, next event after start to be 'Off'
-    # end_idx = start_idx + 1
-    # while np.any(log["state"][end_idx] == 1):
-    #     end_idx[log["state"][end_idx] == 1] += 1
-    # log = log[np.stack((start_idx, end_idx), axis=1).flat]
 
     first_line = log[0]
     # check for inconsistencies and warn
@@ -180,18 +178,21 @@ def sync_data_with_laser_log(
 
     # calculate the indicies for start and end times of lines
     laser_times = (log["time"] - log["time"][0][0]).astype(float) / 1000.0
-    laser_idx = np.searchsorted(times, laser_times)
+    # laser_idx = np.searchsorted(times, laser_times)
 
     # read and fill in data
     for line, (t0, t1), (x0, x1), (y0, y1) in zip(log, laser_times, px, py):
+        print(times[:10], t0, t1, np.linspace(t0, t1, x1 - x0, endpoint=False))
         idx = np.searchsorted(times, np.linspace(t0, t1, x1 - x0, endpoint=False))
+        if idx.size == 0:
+            continue
+        print(idx)
         x = data.flat[idx[0] : idx[-1]]
-        idx = np.clip(idx - idx[0], 0, x.size-1)
+        idx = np.clip(idx - idx[0], 0, x.size - 1)
         for name in sync.dtype.names:
             # plt.plot(np.add.reduceat(data[name].flat, idx))
             # plt.show()
             sync[y0, x0:x1][name] = np.add.reduceat(x[name], idx)
-        continue
         # # print(line)
         # x = data.flat[idx[0]:idx[-1]]
         # x = data.flat[t0:t1
@@ -250,7 +251,7 @@ def sync_data_with_laser_log(
 if __name__ == "__main__":
     log_nwi = read_iolite_laser_log(
         Path("/home/tom/Downloads/nulaser/LaserLog_25-09-15_20-39-17.csv"),
-        log_style="nwi_bioimage",
+        log_style="activeview2",
     )
     log_teledyne = read_iolite_laser_log(
         Path("/home/tom/Downloads/nulaser/12-30-04 20251015areatest/ee.Iolite.csv"),
