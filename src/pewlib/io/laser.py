@@ -195,7 +195,6 @@ def sync_data_with_laser_log(
                 sync[y0, x0:x1][name] = np.add.reduceat(
                     x[name], np.linspace(0, x.size, x1 - x0, endpoint=False).astype(int)
                 )
-            # sync[y0, x0:x1] = x[np.linspace(0, t1-t0, x1-x0).astype(int)]
         elif x0 == x1:  # vertical
             if y0 > y1:  # flip bottom-to-top
                 x = x[::-1]
