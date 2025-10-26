@@ -79,7 +79,7 @@ def read_iolite_laser_log(log_path: Path | str, log_style: str = "raw") -> np.nd
 
     if log_style == "chromium3":
         start_idx = np.flatnonzero(np.logical_and(log["vertix"] > 0, log["state"] == 1))
-        log = log[np.stack((start_idx, start_idx + 1), axis=1).flat]
+        log = log[np.stack((start_idx, start_idx + 2), axis=1).flat]
     elif log_style == "activeview2":
         log = log[np.argsort(log["time"])]
         start_idx = (
@@ -142,7 +142,6 @@ def sync_data_with_laser_log(
     if delay is None:  # pragma: no cover, tested elsewhere
         delay = guess_delay_from_data(data, times)
 
-    print(delay)
     times += delay
 
     # remove patterns that were not selected
@@ -180,7 +179,6 @@ def sync_data_with_laser_log(
     # calculate the indicies for start and end times of lines
     laser_times = (log["time"] - log["time"][0][0]).astype(float) / 1000.0
     laser_idx = np.searchsorted(times, laser_times)
-    print(laser_times[0])
 
     # read and fill in data
     for line, (i0, i1), (x0, x1), (y0, y1) in zip(log, laser_idx, px, py):
@@ -221,53 +219,3 @@ def sync_data_with_laser_log(
         sync = sync[:, ~nan_cols]
 
     return sync, {"delay": delay, "origin": origin, "spotsize": spot_size}
-
-
-if __name__ == "__main__":
-    log_nwi = read_iolite_laser_log(
-        Path("/home/tom/Downloads/nulaser/LaserLog_25-09-15_20-39-17.csv"),
-        log_style="activeview2",
-    )
-    log_teledyne = read_iolite_laser_log(
-        Path("/home/tom/Downloads/nulaser/12-30-04 20251015areatest/ee.Iolite.csv"),
-        log_style="chromium3",
-    )
-
-    # print(log_nwi[:10])
-    # print(log_teledyne)
-
-    from pewlib.io import agilent, nu
-    import matplotlib.pyplot as plt
-
-    x, params = agilent.load(
-        Path(
-            "/home/tom/Downloads/nulaser/2. spleen S008_4wk control_low mass_20 spot 400 speed 200 hz 18 over 0.5 flu.b"
-        ),
-        full=True,
-    )
-    y, _ = sync_data_with_laser_log(x, params["times"], log_nwi, delay=0.0, sequence=7)
-
-    plt.imshow(y[y.dtype.names[1]])
-    plt.show()
-    # exit()
-
-    path = Path("/home/tom/Downloads/nulaser/12-30-04 20251015areatest")
-    s, m, t = nu.read_nu_image(path.joinpath("Image001"))
-    # t+=t.min()
-
-    idx = np.argmax(np.sum(s, axis=0))
-
-    laser_times = (log_teledyne["time"] - log_teledyne["time"][0]).astype(
-        float
-    ) / 1000.0
-    laser_idx = np.searchsorted(t, laser_times)
-
-    # plt.plot(t, s[:, idx], c="k", zorder=0)
-    # plt.scatter(t[laser_idx], s[laser_idx, idx], c='red', zorder=1)
-    # plt.show()
-
-    s = rfn.unstructured_to_structured(s, names=[f"f{i}" for i in range(s.shape[-1])])
-    y, _ = sync_data_with_laser_log(s, t, log_teledyne, delay=0.0)
-
-    plt.imshow(y[y.dtype.names[idx]])
-    plt.show()

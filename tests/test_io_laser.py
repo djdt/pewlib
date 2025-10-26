@@ -12,7 +12,7 @@ from pewlib.io.laser import (
 
 
 @pytest.fixture(scope="module")
-def laserlog() -> np.ndarray:
+def laserlog_activeview2() -> np.ndarray:
     path = Path(__file__).parent.joinpath(
         "data", "laser_iolite", "LaserLog_test_rasters.csv"
     )
@@ -63,6 +63,19 @@ def test_read_iolite_laser_log_nwi():
     assert laserlog[0]["comment"] == "Image Raster1"
     assert laserlog[0]["sequence"] == 1
     assert laserlog[0]["spotsize"] == "40 x 40"
+
+
+def test_read_iolite_laser_log_teledyne():
+    path = Path(__file__).parent.joinpath(
+        "data", "laser_iolite", "chromium3_area.Iolite.csv"
+    )
+    laserlog = read_iolite_laser_log(path, log_style="chromium3")
+    assert len(laserlog) == 50
+    assert np.count_nonzero(laserlog["state"] == 1) == 25
+
+    assert laserlog[0]["comment"] == "Area 1-1"
+    assert laserlog[0]["sequence"] == 1
+    assert laserlog[0]["spotsize"] == "20 x 20"
 
 
 def test_guess_delay_from_data():
