@@ -22,7 +22,7 @@ def is_iolite_laser_log(log_path: Path | str) -> bool:
         header = fp.readline()
         if not (
             header.replace(", ", ",").startswith(
-                "Timestamp,Sequence Number,SubPoint Number,Vertex Number,Comment"
+                "Timestamp,Sequence Number,SubPoint Number,Vert"  # Vertex or Vertix?
             )
         ):
             return False
