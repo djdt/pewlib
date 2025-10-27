@@ -34,7 +34,7 @@ def is_nu_laser_directory(path: Path | str) -> bool:
     return True
 
 
-def get_blanking_regions(
+def blanking_regions_from_autob(
     autob_events: np.ndarray,
     num_acc: int,
     start_coef: tuple[float, float],
@@ -88,7 +88,7 @@ def get_blanking_regions(
     return regions, mass_regions
 
 
-def blank_nu_signal_data(
+def apply_autoblanking(
     autob_events: np.ndarray,
     signals: np.ndarray,
     masses: np.ndarray,
@@ -110,7 +110,7 @@ def blank_nu_signal_data(
     Returns:
         blanked data
     """
-    regions, mass_regions_list = get_blanking_regions(
+    regions, mass_regions_list = blanking_regions_from_autob(
         autob_events, num_acc, start_coef, end_coef
     )
     for region, mass_regions in zip(regions, mass_regions_list):
@@ -123,7 +123,7 @@ def blank_nu_signal_data(
     return signals
 
 
-def read_nu_autob_binary(
+def read_autob_binary(
     path: Path,
     first_cyc_number: int | None = None,
     first_seg_number: int | None = None,
@@ -168,7 +168,7 @@ def read_nu_autob_binary(
     return autob
 
 
-def read_nu_integ_binary(
+def read_integ_binary(
     path: Path,
     first_cyc_number: int | None = None,
     first_seg_number: int | None = None,
@@ -214,7 +214,7 @@ def read_nu_integ_binary(
         return np.frombuffer(fp.read(), dtype=integ_dtype(num_results))
 
 
-def read_nu_pulse_binary(
+def read_pulse_binary(
     path: Path,
     first_cyc_number: int | None = None,
     first_seg_number: int | None = None,
@@ -273,7 +273,7 @@ def read_binaries_in_index(
     return datas
 
 
-def get_dwelltime_from_info(info: dict) -> float:
+def eventtime_from_info(info: dict) -> float:
     """Reads the dwelltime (total acquistion time) from run.info.
     Rounds to the nearest ns.
 
@@ -289,7 +289,7 @@ def get_dwelltime_from_info(info: dict) -> float:
     return np.around(acqtime * accumulations, 9)
 
 
-def get_signals_from_nu_data(
+def signals_from_integs(
     integs: list[np.ndarray], pulses: list[np.ndarray], num_acc: int
 ) -> np.ndarray:
     """Converts signals from integ data to counts.
@@ -316,7 +316,7 @@ def get_signals_from_nu_data(
     return signals
 
 
-def get_masses_from_nu_data(
+def masses_from_integ(
     integ: np.ndarray, cal_coef: tuple[float, float], segment_delays: dict[int, float]
 ) -> np.ndarray:
     """Converts Nu peak centers into masses.
@@ -357,12 +357,13 @@ def get_times_from_data(data: np.ndarray, run_info: dict) -> np.ndarray:
     return times
 
 
-def read_nu_laser_directory(
+def read_laser_directory(
     path: str | Path,
     autoblank: bool = True,
     cycle: int | None = None,
     segment: int | None = None,
     raw: bool = False,
+    max_integs: int | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict]:
     """Read the Nu Instruments raw data directory, retuning data and run info.
 
@@ -400,13 +401,16 @@ def read_nu_laser_directory(
     with path.joinpath("pulse.index").open("r") as fp:
         pulse_index = json.load(fp)
 
+    if max_integs is not None:
+        integ_index = integ_index[:max_integs]
+
     # Collect integrated data
     integs = np.concatenate(
         read_binaries_in_index(
             path,
             integ_index,
             "integ",
-            read_nu_integ_binary,
+            read_integ_binary,
             cyc_number=cycle,
             seg_number=segment,
         )
@@ -418,7 +422,7 @@ def read_nu_laser_directory(
             path,
             pulse_index,
             "pulse",
-            read_nu_pulse_binary,
+            read_pulse_binary,
             cyc_number=cycle,
             seg_number=segment,
         ),
@@ -428,7 +432,7 @@ def read_nu_laser_directory(
     segment_delays = {
         s["Num"]: s["AcquisitionTriggerDelayNs"] for s in run_info["SegmentInfo"]
     }
-    masses = get_masses_from_nu_data(
+    masses = masses_from_integ(
         integs[0], run_info["MassCalCoefficients"], segment_delays
     )[0]
 
@@ -445,12 +449,12 @@ def read_nu_laser_directory(
                 path,
                 autob_index,
                 "autob",
-                read_nu_autob_binary,
+                read_autob_binary,
                 cyc_number=cycle,
                 seg_number=segment,
             )
         )
-        signals = blank_nu_signal_data(
+        signals = apply_autoblanking(
             autobs,
             signals,
             masses,
@@ -480,7 +484,7 @@ def apply_trigger_correction(
         return c1 * times_seconds + c2
 
 
-def read_nu_image(path: Path | str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def read_laser_image(path: Path | str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     path = Path(path)
 
     # with Path(path.joinpath("laser.info")).open("r") as fp:
@@ -492,11 +496,12 @@ def read_nu_image(path: Path | str) -> tuple[np.ndarray, np.ndarray, np.ndarray]
     signals_list = []
     times_list = []
     acqusitions = sorted(
-        [d for d in path.iterdir() if d.is_dir()], key=lambda d: int(d.stem)
+        [d for d in path.iterdir() if d.is_dir() and d.joinpath("run.info").exists()],
+        key=lambda d: int(d.stem),
     )
     initial_pulse = None
     for i, acq_dir in enumerate(acqusitions):
-        _signals, _masses, _times, _pulses, _info = read_nu_laser_directory(acq_dir)
+        _signals, _masses, _times, _pulses, _info = read_laser_directory(acq_dir)
         if masses is None:
             masses = _masses
         elif not np.all(masses == _masses):
