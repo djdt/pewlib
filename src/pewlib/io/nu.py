@@ -380,8 +380,8 @@ def read_laser_directory(
         raw: return raw ADC counts
 
     Returns:
-        masses from first acquisition
         signals in counts
+        masses from first acquisition
         times in s
         laser pulse data in s
         dict of parameters from run.info
