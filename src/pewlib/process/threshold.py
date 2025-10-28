@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def otsu(x: np.ndarray, remove_nan: bool = False) -> float:
+def otsu(x: np.ndarray, remove_nan: bool = True) -> float:
     """Calculates the otsu threshold.
 
     The Otsu threshold minimises intra-class variance for a two class system.
