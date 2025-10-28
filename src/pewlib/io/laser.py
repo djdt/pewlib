@@ -33,12 +33,12 @@ def read_iolite_laser_log(log_path: Path | str, log_style: str = "raw") -> np.nd
     """Reads an Iolite style log.
     Different vendors will have slighly different styles of log, so passing 'log_style'
     is reccommended to reduce the log to only laser start and end events.
-    Currently NWL ActiveView2 and Teledyne Chromium3 are supported.
+    Currently NWL ActiveView2 and Teledyne Chromium2 are supported.
     Passing 'raw' as a style will prevent processing.
 
     Args:
         log_path: path to iolilte
-        log_style: style of log ('activeview2', 'chromium3', 'raw')
+        log_style: style of log ('activeview2', 'chromium2', 'raw')
 
     Returns:
         log as a numpy array, trimmed to useful lines
@@ -77,7 +77,7 @@ def read_iolite_laser_log(log_path: Path | str, log_style: str = "raw") -> np.nd
     fill_ints(log["subpoint"])
     fill_strings(log["comment"])
 
-    if log_style == "chromium3":
+    if log_style == "chromium2":
         start_idx = np.flatnonzero(np.logical_and(log["vertix"] > 0, log["state"] == 1))
         log = log[np.stack((start_idx, start_idx + 2), axis=1).flat]
     elif log_style == "activeview2":
