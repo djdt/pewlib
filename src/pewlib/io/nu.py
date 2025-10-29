@@ -12,7 +12,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-def is_nu_directory(path: Path) -> bool:
+def is_nu_acquisition_directory(path: Path) -> bool:
     """Checks path is directory containing a 'run.info' and 'integrated.index'"""
 
     if not path.is_dir() or not path.exists():
@@ -23,6 +23,13 @@ def is_nu_directory(path: Path) -> bool:
         return False
 
     return True
+
+
+def is_nu_image_directory(path: Path) -> bool:
+    if len(list(path.glob("laser.info"))) == 0:
+        return False
+
+    return any(is_nu_acquisition_directory(dir) for dir in path.iterdir())
 
 
 def is_nu_laser_directory(path: Path | str) -> bool:
@@ -388,7 +395,7 @@ def read_laser_acquisition(
     """
 
     path = Path(path)
-    if not is_nu_directory(path):  # pragma: no cover
+    if not is_nu_acquisition_directory(path):  # pragma: no cover
         raise ValueError("read_nu_directory: missing 'run.info' or 'integrated.index'")
 
     with path.joinpath("run.info").open("r") as fp:
@@ -496,7 +503,7 @@ def read_laser_image(path: Path | str) -> tuple[np.ndarray, np.ndarray, np.ndarr
     signals_list = []
     times_list = []
     acqusitions = sorted(
-        [d for d in path.iterdir() if d.is_dir() and d.joinpath("run.info").exists()],
+        [d for d in path.iterdir() if is_nu_acquisition_directory(d)],
         key=lambda d: int(d.stem),
     )
     initial_pulse = None
