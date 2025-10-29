@@ -357,7 +357,7 @@ def get_times_from_data(data: np.ndarray, run_info: dict) -> np.ndarray:
     return times
 
 
-def read_laser_directory(
+def read_laser_acquisition(
     path: str | Path,
     autoblank: bool = True,
     cycle: int | None = None,
@@ -501,7 +501,7 @@ def read_laser_image(path: Path | str) -> tuple[np.ndarray, np.ndarray, np.ndarr
     )
     initial_pulse = None
     for i, acq_dir in enumerate(acqusitions):
-        _signals, _masses, _times, _pulses, _info = read_laser_directory(acq_dir)
+        _signals, _masses, _times, _pulses, _info = read_laser_acquisition(acq_dir)
         if masses is None:
             masses = _masses
         elif not np.all(masses == _masses):
