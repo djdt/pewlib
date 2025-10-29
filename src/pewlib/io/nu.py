@@ -26,19 +26,20 @@ def is_nu_acquisition_directory(path: Path) -> bool:
 
 
 def is_nu_image_directory(path: Path) -> bool:
+    """Checks if directory has a 'laser.info' file and some acquistions."""
     if len(list(path.glob("laser.info"))) == 0:
         return False
 
     return any(is_nu_acquisition_directory(dir) for dir in path.iterdir())
 
 
-def is_nu_laser_directory(path: Path | str) -> bool:
-    path = Path(path)
-    if len(list(path.glob("*.method"))) == 0:
-        return False
-    if len(list(path.glob("Image*"))) == 0:
-        return False
-    return True
+# def is_nu_laser_directory(path: Path | str) -> bool:
+#     path = Path(path)
+#     if len(list(path.glob("*.method"))) == 0:
+#         return False
+#     if len(list(path.glob("Image*"))) == 0:
+#         return False
+#     return True
 
 
 def blanking_regions_from_autob(
@@ -257,6 +258,19 @@ def read_binaries_in_index(
     cyc_number: int | None = None,
     seg_number: int | None = None,
 ) -> list[np.ndarray]:
+    """Reads Nu binaries listed in an index file.
+
+    Args:
+        root: directory containing files and index
+        index: list of indices from json.loads
+        binary_ext: extension of binary files, e.g. '.integ'
+        binary_read: function to read binary file
+        cyc_number: restrict to cycle
+        seg_number: restrict to segments
+
+    Returns:
+        binary data as a list of arrays
+    """
     datas = []
     for idx in index:
         binary_path = root.joinpath(f"{idx['FileNum']}.{binary_ext}")
@@ -271,7 +285,6 @@ def read_binaries_in_index(
                 data = data[data["cyc_number"] == cyc_number]
             if seg_number is not None:
                 data = data[data["seg_number"] == seg_number]
-            # if data.size > 0:
             datas.append(data)
         else:
             logger.warning(  # pragma: no cover, missing files
@@ -385,6 +398,7 @@ def read_laser_acquisition(
         cycle: limit import to cycle
         segment: limit import to segment
         raw: return raw ADC counts
+        max_integs: only read the first n integ files
 
     Returns:
         signals in counts
@@ -476,11 +490,18 @@ def read_laser_acquisition(
     return signals, masses, times, pulse_times, run_info
 
 
-def apply_trigger_correction(
-    times_seconds: np.ndarray, corrections: dict
-) -> np.ndarray:
+def apply_trigger_correction(times: np.ndarray, corrections: dict) -> np.ndarray:
+    """Return times with trigger time removed.
+
+    Args:
+        times: times in seconds
+        corrections: corrections from TriggerCorrections.dat
+
+    Returns:
+        corrected times
+    """
     if corrections["CorrectionMode"] == 0:
-        return times_seconds + corrections["Transit1Time"] * 1e-3
+        return times + corrections["Transit1Time"] * 1e-3
     else:
         c1 = (
             (corrections["Transit2time"] - corrections["Transit1Time"])
@@ -488,11 +509,30 @@ def apply_trigger_correction(
             * 1e-3
         )
         c2 = corrections["Transit1Time"] - (c1 * corrections["Trigger1Time"]) * 1e-3
-        return c1 * times_seconds + c2
+        return c1 * times + c2
 
 
 def read_laser_image(path: Path | str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Read a laser image from a Nu Vitesse ICP-TOF-MS.
+
+    Calls ``read_laser_acquistion`` on valid sub directories and concatenates.
+
+    Args:
+        path: path to the Image directory
+
+    Returns:
+        signals
+        masses
+        times
+    """
     path = Path(path)
+
+    if not is_nu_image_directory(path):
+        try:
+            path = next(d for d in path.iterdir() if is_nu_image_directory(d))
+            logger.info(f"invalid image path, reading '/{path.stem}")
+        except StopIteration:
+            raise ValueError(f"{path} is not a valid Nu image directory")
 
     # with Path(path.joinpath("laser.info")).open("r") as fp:
     #     laser_info = json.load(fp)
