@@ -85,12 +85,12 @@ def test_read_iolite_laser_log_teledyne():
         "data", "laser_iolite", "area.Iolite.csv"
     )
     laserlog = read_iolite_laser_log(path, log_style="chromium2")
-    assert len(laserlog) == 50
-    assert np.count_nonzero(laserlog["state"] == 1) == 25
+    assert len(laserlog) == 54
+    assert np.count_nonzero(laserlog["state"] == 1) == 27
 
     assert laserlog[0]["comment"] == "Area 1-1"
     assert laserlog[0]["sequence"] == 1
-    assert laserlog[0]["spotsize"] == "20 x 20"
+    assert laserlog[0]["spotsize"] == "20"
 
 
 def test_guess_delay_from_data():
