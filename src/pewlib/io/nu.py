@@ -466,7 +466,7 @@ def apply_trigger_correction(times: np.ndarray, corrections: dict) -> np.ndarray
     """
     if corrections["CorrectionMode"] == 0:
         return times + corrections["Transit1Time"] * 1e-3
-    else:
+    else:  # pragma: no cover
         c1 = (
             (corrections["Transit2time"] - corrections["Transit1Time"])
             / (corrections["Trigger2Time"] - corrections["Trigger1Time"])

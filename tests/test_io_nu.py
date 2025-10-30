@@ -38,7 +38,7 @@ def test_read_acquistion(tmp_path: Path):
     zp.extractall(tmp_path)
 
     signals, masses, times, pulses, info = nu.read_laser_acquisition(
-        tmp_path.joinpath("Image001", "00001")
+        tmp_path.joinpath("Image001", "00001"), cycle=1, segment=1
     )
 
     assert masses.size == 166
