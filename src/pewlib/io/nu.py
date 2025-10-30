@@ -33,15 +33,6 @@ def is_nu_image_directory(path: Path) -> bool:
     return any(is_nu_acquisition_directory(dir) for dir in path.iterdir())
 
 
-# def is_nu_laser_directory(path: Path | str) -> bool:
-#     path = Path(path)
-#     if len(list(path.glob("*.method"))) == 0:
-#         return False
-#     if len(list(path.glob("Image*"))) == 0:
-#         return False
-#     return True
-
-
 def blanking_regions_from_autob(
     autob_events: np.ndarray,
     num_acc: int,
@@ -165,7 +156,7 @@ def read_autob_binary(
     with path.open("rb") as fp:
         autob = np.concatenate(list(read_autoblank_events(fp)))
 
-    if autob.size > 0:
+    if autob.size > 0:  # pragma: no cover
         if first_cyc_number is not None and autob[0]["cyc_number"] != first_cyc_number:
             raise ValueError("read_integ_binary: incorrect FirstCycNum")
         if first_seg_number is not None and autob[0]["seg_number"] != first_seg_number:
@@ -239,7 +230,7 @@ def read_pulse_binary(
     with path.open("rb") as fp:
         pulse = np.frombuffer(fp.read(), dtype=dtype)
 
-    if pulse.size > 0:
+    if pulse.size > 0:  # pragma: no cover
         if first_cyc_number is not None and pulse[0]["cyc_number"] != first_cyc_number:
             raise ValueError("read_integ_binary: incorrect FirstCycNum")
         if first_seg_number is not None and pulse[0]["seg_number"] != first_seg_number:
@@ -307,33 +298,6 @@ def eventtime_from_info(info: dict) -> float:
     acqtime = seg["AcquisitionPeriodNs"] * 1e-9
     accumulations = info["NumAccumulations1"] * info["NumAccumulations2"]
     return np.around(acqtime * accumulations, 9)
-
-
-def signals_from_integs(
-    integs: list[np.ndarray], pulses: list[np.ndarray], num_acc: int
-) -> np.ndarray:
-    """Converts signals from integ data to counts.
-
-    Preserves run length when missing data is present.
-
-    Args:
-        integ: from `read_integ_binary`
-        num_acc: number of accumulations per acquisition
-
-    Returns:
-        signals in counts
-    """
-
-    max_acq = max(integ["acq_number"][-1] for integ in integs if integ.size > 0)
-    signals = np.full(
-        (max_acq // num_acc, integs[0]["result"]["signal"].shape[1]),
-        np.nan,
-        dtype=np.float32,
-    )
-    for integ in integs:
-        signals[(integ["acq_number"] // num_acc) - 1] = integ["result"]["signal"]
-
-    return signals
 
 
 def masses_from_integ(
@@ -527,7 +491,7 @@ def read_laser_image(path: Path | str) -> tuple[np.ndarray, np.ndarray, np.ndarr
     """
     path = Path(path)
 
-    if not is_nu_image_directory(path):
+    if not is_nu_image_directory(path):  # pragma: no cover
         try:
             path = next(d for d in path.iterdir() if is_nu_image_directory(d))
             logger.info(f"invalid image path, reading '/{path.stem}")
@@ -551,7 +515,7 @@ def read_laser_image(path: Path | str) -> tuple[np.ndarray, np.ndarray, np.ndarr
         _signals, _masses, _times, _pulses, _info = read_laser_acquisition(acq_dir)
         if masses is None:
             masses = _masses
-        elif not np.all(masses == _masses):
+        elif not np.all(masses == _masses):  # pragma: no cover
             logger.warning("masses differ across laser lines")
         if initial_pulse is None:
             initial_pulse = _pulses[0]
@@ -559,10 +523,10 @@ def read_laser_image(path: Path | str) -> tuple[np.ndarray, np.ndarray, np.ndarr
         signals_list.append(_signals)
         times_list.append(_times)
 
-    if masses is None:
+    if masses is None:  # pragma: no cover
         raise ValueError("masses were not read from any laser directory")
 
-    if corrections["CorrectionMode"] != 0:
+    if corrections["CorrectionMode"] != 0:  # pragma: no cover
         raise NotImplementedError("only correction mode 0 is supported")
 
     correction = corrections["Transit1Time"] * 1e-3

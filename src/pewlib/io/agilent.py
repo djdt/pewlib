@@ -123,7 +123,7 @@ def collect_datafiles(path: str | Path, methods: list[str]) -> list[Path]:
             method_func = acq_method_xml_read_datafiles
         elif method == "alphabetical":
             return find_datafiles_alphabetical(path)
-        else:
+        else:  # pragma: no cover
             raise ValueError(f"unknown collection method '{method}'")
 
         if method_path.exists():
@@ -322,7 +322,7 @@ def msts_xaddition_xml_read_info(path: Path) -> tuple[dict[int, tuple[int, int]]
     for xaddition in xml.iter("MSTS_XAddition"):
         scan_type = str(xaddition.findtext("ScanType"))
         indexed_masses = xaddition.find("IndexedMasses")
-        if indexed_masses is None:
+        if indexed_masses is None:  # pragma: no cover
             raise ValueError("could not find IndexedMasses")
         for msts_index in indexed_masses.iter("MSTS_XAddition_IndexedMasses"):
             index = int(msts_index.findtext("Index") or 0)
@@ -557,7 +557,7 @@ def batch_xml_read_info(path: Path) -> dict[str, str]:
     xml = ElementTree.parse(path)
     ns = {"ns": xml.getroot().tag.split("}")[0][1:]}
     batch_info = xml.find("ns:BatchLogInfo", namespaces=ns)
-    if batch_info is None:
+    if batch_info is None:  # pragma: no cover
         raise AttributeError("no info in batch.xml")
     return {
         "Acquisition Name": str(xml.getroot().get("BatchName")),

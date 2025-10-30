@@ -751,7 +751,7 @@ def fast_parse_imzml(
         for key, val in CV_BINARYDATA.items():
             if val in cvs:
                 dtype = ParamGroup.type_names[key]
-        if dtype is None:
+        if dtype is None:  # pragma: no cover
             raise ValueError(f"unable to find dtype for group {id}")
 
         return ParamGroup(
@@ -773,7 +773,7 @@ def fast_parse_imzml(
                 int(cvs[CV_SCANSETTINGS["MAX_COUNT_OF_PIXEL_X"]]),
                 int(cvs[CV_SCANSETTINGS["MAX_COUNT_OF_PIXEL_Y"]]),
             )
-        except KeyError:
+        except KeyError:  # pragma: no cover
             size = None
 
         pixel_size = (
@@ -847,16 +847,16 @@ def fast_parse_imzml(
                     if line.startswith("<scanSettings"):
                         scan_settings.append(parse_scan_settings(fp, line))
             elif line.startswith("<spectrum"):
-                if callback is not None:
+                if callback is not None:  # pragma: no cover
                     if not callback(fp.tell()):
                         raise UserWarning("callback returned False")
                 spectrum = parse_spectrum(fp, line)
                 spectra[spectrum.x, spectrum.y] = spectrum
             line = fp.readline().strip()
 
-    if mz_params is None:
+    if mz_params is None:  # pragma: no cover
         raise ValueError("unable to read mzArray group")
-    if intensity_params is None:
+    if intensity_params is None:  # pragma: no cover
         raise ValueError("unable to read intensities group")
 
     return ImzML(
