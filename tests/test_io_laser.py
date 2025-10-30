@@ -82,7 +82,7 @@ def test_read_iolite_laser_log_nwi():
 
 def test_read_iolite_laser_log_teledyne():
     path = Path(__file__).parent.joinpath(
-        "data", "laser_iolite", "chromium3_area.Iolite.csv"
+        "data", "laser_iolite", "area.Iolite.csv"
     )
     laserlog = read_iolite_laser_log(path, log_style="chromium2")
     assert len(laserlog) == 50

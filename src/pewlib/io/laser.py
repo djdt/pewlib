@@ -90,6 +90,8 @@ def read_iolite_laser_log(log_path: Path | str, log_style: str = "raw") -> np.nd
         )
         # Get laser end event, next event after start to be 'Off'
         log = log[np.stack((start_idx, start_idx + 1), axis=1).flat]
+    elif log_style != "raw":  # pragma: no cover
+        raise ValueError(f"invalid log style {log_style}")
 
     return log
 
