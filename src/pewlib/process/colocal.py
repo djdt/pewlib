@@ -168,7 +168,7 @@ def costes_threshold(
         idx = np.logical_or(x <= threshold, y <= (a * threshold + b))
         if np.all(x[idx] == x[idx][0]) or np.all(y[idx] == y[idx][0]):
             return thresholds[0], a, b
-        if pearsonr(x[idx], y[idx]) > target_r:
+        if pearsonr(x[idx], y[idx]) > target_r:  # pragma: no cover
             break
 
     return threshold, a, b

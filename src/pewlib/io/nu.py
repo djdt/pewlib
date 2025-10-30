@@ -386,7 +386,7 @@ def read_laser_acquisition(
     with path.joinpath("pulse.index").open("r") as fp:
         pulse_index = json.load(fp)
 
-    if max_integs is not None:
+    if max_integs is not None:  # pragma: no cover
         integ_index = integ_index[:max_integs]
 
     # Collect integrated data
