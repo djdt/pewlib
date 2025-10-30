@@ -21,17 +21,22 @@ ImzML
 .. automodule:: pewlib.io.imzml
     :members:
 
+Iolite Laser Logs
+--------------
+
+.. automodule:: pewlib.io.laser
+    :members:
+
+Nu Instruments
+--------------
+
+.. automodule:: pewlib.io.nu
+    :members:
 
 Numpy NPZ
 ---------
 
 .. automodule:: pewlib.io.npz
-    :members:
-
-NWI Laser Logs
---------------
-
-.. automodule:: pewlib.io.laser
     :members:
 
 PerkinElmer

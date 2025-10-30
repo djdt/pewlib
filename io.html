@@ -113,15 +113,28 @@
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.imzml.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.npz">Numpy NPZ</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.npz.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.npz.save"><code class="docutils literal notranslate"><span class="pre">save()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.laser">NWI Laser Logs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#iolite-laser-logs">Iolite Laser Logs</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.laser.guess_delay_from_data"><code class="docutils literal notranslate"><span class="pre">guess_delay_from_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.laser.read_iolite_laser_log"><code class="docutils literal notranslate"><span class="pre">read_iolite_laser_log()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.laser.sync_data_with_laser_log"><code class="docutils literal notranslate"><span class="pre">sync_data_with_laser_log()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.nu">Nu Instruments</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.apply_autoblanking"><code class="docutils literal notranslate"><span class="pre">apply_autoblanking()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.apply_trigger_correction"><code class="docutils literal notranslate"><span class="pre">apply_trigger_correction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.blanking_regions_from_autob"><code class="docutils literal notranslate"><span class="pre">blanking_regions_from_autob()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.eventtime_from_info"><code class="docutils literal notranslate"><span class="pre">eventtime_from_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.is_nu_acquisition_directory"><code class="docutils literal notranslate"><span class="pre">is_nu_acquisition_directory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.is_nu_image_directory"><code class="docutils literal notranslate"><span class="pre">is_nu_image_directory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.masses_from_integ"><code class="docutils literal notranslate"><span class="pre">masses_from_integ()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.read_binaries_in_index"><code class="docutils literal notranslate"><span class="pre">read_binaries_in_index()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.read_laser_acquisition"><code class="docutils literal notranslate"><span class="pre">read_laser_acquisition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.read_laser_image"><code class="docutils literal notranslate"><span class="pre">read_laser_image()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.npz">Numpy NPZ</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.npz.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.npz.save"><code class="docutils literal notranslate"><span class="pre">save()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.perkinelmer">PerkinElmer</a><ul>
@@ -878,65 +891,9 @@ is cancelled and a UserWarning raised.</p>
 </dd></dl>
 
 </section>
-<section id="module-pewlib.io.npz">
-<span id="numpy-npz"></span><h2>Numpy NPZ<a class="headerlink" href="#module-pewlib.io.npz" title="Link to this heading"></a></h2>
-<p>Import and export in pew’s custom file format, based on numpy’s compressed ‘.npz’.
-This format svaes image data, laser parameters and calibrations in one file.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="pewlib.io.npz.load">
-<span class="sig-prename descclassname"><span class="pre">pewlib.io.npz.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.npz.load" title="Link to this definition"></a></dt>
-<dd><p>Loads data from ‘.npz’ file.</p>
-<p>Loads files created using <a class="reference internal" href="#pewlib.io.npz.save" title="pewlib.io.npz.save"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.npz.save()</span></code></a>.
-On load the a <code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code> is reformed from the saved data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></span>) – path to ‘.npz’</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="pew.html#pewlib.laser.Laser" title="pewlib.laser.Laser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code></p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – incomatible version</p>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.load()</span></code></p>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pewlib.io.npz.save">
-<span class="sig-prename descclassname"><span class="pre">pewlib.io.npz.</span></span><span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.npz.save" title="Link to this definition"></a></dt>
-<dd><p>Saves data to ‘.npz’ file.</p>
-<p>Converts a <code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code> to a series of <cite>np.ndarray</cite>
-which are then saved to a compressed ‘.npz’ archive. The time and current
-version are also saved. If <cite>path</cite> does not end in ‘.npz’ it is
-appended.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></span>) – path to save to</p></li>
-<li><p><strong>laser</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="pew.html#pewlib.laser.Laser" title="pewlib.laser.Laser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code></span>) – <code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code></p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.savez_compressed()</span></code></p>
-</div>
-</dd></dl>
-
-</section>
-<section id="module-pewlib.io.laser">
-<span id="nwi-laser-logs"></span><h2>NWI Laser Logs<a class="headerlink" href="#module-pewlib.io.laser" title="Link to this heading"></a></h2>
-<p>Synchronisation of laser parameters (ablation times and locations) with signal data.
+<section id="iolite-laser-logs">
+<h2>Iolite Laser Logs<a class="headerlink" href="#iolite-laser-logs" title="Link to this heading"></a></h2>
+<p id="module-pewlib.io.laser">Synchronisation of laser parameters (ablation times and locations) with signal data.
 Data should be imported using the other pewlib.io modules then passed with the laser
 parameters file to these functions.</p>
 <dl class="py function">
@@ -1004,6 +961,270 @@ Times in the log are modified to start at 0.</p>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</span></p>
 </dd>
 </dl>
+</dd></dl>
+
+</section>
+<section id="module-pewlib.io.nu">
+<span id="nu-instruments"></span><h2>Nu Instruments<a class="headerlink" href="#module-pewlib.io.nu" title="Link to this heading"></a></h2>
+<p>Nu Instruments data import.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.apply_autoblanking">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">apply_autoblanking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">autob_events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_acc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_coef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_coef</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.apply_autoblanking" title="Link to this definition"></a></dt>
+<dd><p>Apply the auto-blanking to the integrated data.
+There must be one cycle / segment and no missing acquisitions / data!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>autob</strong> – list of events from <cite>read_nu_autob_binary</cite></p></li>
+<li><p><strong>signals</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – 2d array of signals from <cite>get_signals_from_nu_data</cite></p></li>
+<li><p><strong>masses</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – 1d array of masses, from <cite>get_masses_from_nu_data</cite></p></li>
+<li><p><strong>num_acc</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – number of accumulations per acquisition</p></li>
+<li><p><strong>start_coef</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – blanker open coefs ‘BlMassCalStartCoef’</p></li>
+<li><p><strong>end_coef</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – blanker close coefs ‘BlMassCalEndCoef’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>blanked data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.apply_trigger_correction">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">apply_trigger_correction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrections</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.apply_trigger_correction" title="Link to this definition"></a></dt>
+<dd><p>Return times with trigger time removed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>times</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – times in seconds</p></li>
+<li><p><strong>corrections</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – corrections from TriggerCorrections.dat</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>corrected times</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.blanking_regions_from_autob">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">blanking_regions_from_autob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">autob_events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_acc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_coef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_coef</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.blanking_regions_from_autob" title="Link to this definition"></a></dt>
+<dd><p>Extract blanking regions from autoblank data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>autob</strong> – list of events from <cite>read_nu_autob_binary</cite></p></li>
+<li><p><strong>num_acc</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – number of accumulations per acquisition</p></li>
+<li><p><strong>start_coef</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – blanker open coefs ‘BlMassCalStartCoef’</p></li>
+<li><p><strong>end_coef</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – blanker close coefs ‘BlMassCalEndCoef’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of (start, end) of each region, array of (start, end) masses</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.eventtime_from_info">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">eventtime_from_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.eventtime_from_info" title="Link to this definition"></a></dt>
+<dd><p>Reads the dwelltime (total acquistion time) from run.info.
+Rounds to the nearest ns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>info</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – dict of parameters, as returned by <cite>read_nu_directory</cite></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dwelltime in s</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.is_nu_acquisition_directory">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">is_nu_acquisition_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.is_nu_acquisition_directory" title="Link to this definition"></a></dt>
+<dd><p>Checks path is directory containing a ‘run.info’ and ‘integrated.index’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.is_nu_image_directory">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">is_nu_image_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.is_nu_image_directory" title="Link to this definition"></a></dt>
+<dd><p>Checks if directory has a ‘laser.info’ file and some acquistions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.masses_from_integ">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">masses_from_integ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cal_coef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment_delays</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.masses_from_integ" title="Link to this definition"></a></dt>
+<dd><p>Converts Nu peak centers into masses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>integ</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – from <cite>read_integ_binary</cite></p></li>
+<li><p><strong>cal_coef</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – from run.info ‘MassCalCoefficients’</p></li>
+<li><p><strong>segment_delays</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – dict of segment nums and delays from <cite>SegmentInfo</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>2d array of masses</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.read_binaries_in_index">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">read_binaries_in_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_ext</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_read_fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cyc_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seg_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.read_binaries_in_index" title="Link to this definition"></a></dt>
+<dd><p>Reads Nu binaries listed in an index file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>root</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></span>) – directory containing files and index</p></li>
+<li><p><strong>index</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</span>) – list of indices from json.loads</p></li>
+<li><p><strong>binary_ext</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – extension of binary files, e.g. ‘.integ’</p></li>
+<li><p><strong>binary_read</strong> – function to read binary file</p></li>
+<li><p><strong>cyc_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – restrict to cycle</p></li>
+<li><p><strong>seg_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – restrict to segments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>binary data as a list of arrays</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.read_laser_acquisition">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">read_laser_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autoblank</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cycle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_integs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.read_laser_acquisition" title="Link to this definition"></a></dt>
+<dd><p>Read the Nu Instruments raw data directory, retuning data and run info.</p>
+<p>Directory must contain ‘run.info’, ‘integrated.index’ and at least one ‘.integ’
+file. Data is read from ‘.integ’ files listed in the ‘integrated.index’ and
+are checked for correct starting cycle, segment and acquisition numbers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></span>) – path to data directory</p></li>
+<li><p><strong>max_integ_files</strong> – maximum number of files to read</p></li>
+<li><p><strong>autoblank</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – apply autoblanking to overrange regions</p></li>
+<li><p><strong>cycle</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – limit import to cycle</p></li>
+<li><p><strong>segment</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – limit import to segment</p></li>
+<li><p><strong>raw</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – return raw ADC counts</p></li>
+<li><p><strong>max_integs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – only read the first n integ files</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>signals in counts
+masses from first acquisition
+times in s
+laser pulse data in s
+dict of parameters from run.info</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.read_laser_image">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">read_laser_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.read_laser_image" title="Link to this definition"></a></dt>
+<dd><p>Read a laser image from a Nu Vitesse ICP-TOF-MS.</p>
+<p>Calls <code class="docutils literal notranslate"><span class="pre">read_laser_acquistion</span></code> on valid sub directories and concatenates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – path to the Image directory</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>signals
+masses
+times</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pewlib.io.npz">
+<span id="numpy-npz"></span><h2>Numpy NPZ<a class="headerlink" href="#module-pewlib.io.npz" title="Link to this heading"></a></h2>
+<p>Import and export in pew’s custom file format, based on numpy’s compressed ‘.npz’.
+This format svaes image data, laser parameters and calibrations in one file.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.npz.load">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.npz.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.npz.load" title="Link to this definition"></a></dt>
+<dd><p>Loads data from ‘.npz’ file.</p>
+<p>Loads files created using <a class="reference internal" href="#pewlib.io.npz.save" title="pewlib.io.npz.save"><code class="xref py py-func docutils literal notranslate"><span class="pre">pewlib.io.npz.save()</span></code></a>.
+On load the a <code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code> is reformed from the saved data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></span>) – path to ‘.npz’</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="pew.html#pewlib.laser.Laser" title="pewlib.laser.Laser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – incomatible version</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.load()</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.npz.save">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.npz.</span></span><span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.npz.save" title="Link to this definition"></a></dt>
+<dd><p>Saves data to ‘.npz’ file.</p>
+<p>Converts a <code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code> to a series of <cite>np.ndarray</cite>
+which are then saved to a compressed ‘.npz’ archive. The time and current
+version are also saved. If <cite>path</cite> does not end in ‘.npz’ it is
+appended.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></span>) – path to save to</p></li>
+<li><p><strong>laser</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="pew.html#pewlib.laser.Laser" title="pewlib.laser.Laser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code></span>) – <code class="xref py py-class docutils literal notranslate"><span class="pre">Laser</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">SRRLaser</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.savez_compressed()</span></code></p>
+</div>
 </dd></dl>
 
 </section>
