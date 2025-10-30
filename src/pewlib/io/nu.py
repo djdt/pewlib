@@ -79,7 +79,7 @@ def blanking_regions_from_autob(
             ) ** 2
             valid = start_masses < end_masses
             mass_regions.append(
-                np.stack([start_masses[valid], end_masses[valid]], axis=1)
+                np.stack([start_masses[valid], end_masses[valid]], axis=0)
             )
 
             start_event = None
