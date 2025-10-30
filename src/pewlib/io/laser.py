@@ -13,7 +13,7 @@ import numpy.lib.recfunctions as rfn
 logger = logging.getLogger(__name__)
 
 
-def is_nwi_laser_log(log_path: Path | str) -> bool:
+def is_iolite_laser_log(log_path: Path | str) -> bool:
     log_path = Path(log_path)
 
     if log_path.suffix.lower() != ".csv":
@@ -22,37 +22,77 @@ def is_nwi_laser_log(log_path: Path | str) -> bool:
         header = fp.readline()
         if not (
             header.replace(", ", ",").startswith(
-                "Timestamp,Sequence Number,SubPoint Number,Vertex Number,Comment"
+                "Timestamp,Sequence Number,SubPoint Number,Vert"  # Vertex or Vertix?
             )
         ):
             return False
     return True
 
 
-def read_nwi_laser_log(log_path: Path | str) -> np.ndarray:
+def read_iolite_laser_log(log_path: Path | str, log_style: str = "raw") -> np.ndarray:
+    """Reads an Iolite style log.
+    Different vendors will have slighly different styles of log, so passing 'log_style'
+    is reccommended to reduce the log to only laser start and end events.
+    Currently NWL ActiveView2 and Teledyne Chromium2 are supported.
+    Passing 'raw' as a style will prevent processing.
+
+    Args:
+        log_path: path to iolilte
+        log_style: style of log ('activeview2', 'chromium2', 'raw')
+
+    Returns:
+        log as a numpy array, trimmed to useful lines
+    """
+
     def fill_ints(x: np.ndarray) -> None:
         max = np.maximum.accumulate(x)
         x[x == -1] = max[x == -1]
 
+    def fill_strings(x: np.ndarray) -> None:
+        idx = np.cumsum(x != "") - 1
+        strings = x[np.flatnonzero(x != "")]
+        x[:] = strings[idx]
+
     log = np.genfromtxt(
         log_path,
-        usecols=(0, 1, 2, 4, 5, 6, 10, 11, 13),
+        usecols=(0, 1, 2, 3, 4, 5, 6, 9, 10, 11, 13),
         delimiter=",",
         skip_header=1,
+        converters={10: lambda x: 1 if x == "On" else 0},
         dtype=[
             ("time", "datetime64[ms]"),
             ("sequence", int),
             ("subpoint", int),
+            ("vertix", int),
             ("comment", "U64"),
             ("x", float),
             ("y", float),
-            ("state", "U3"),
+            ("velocity", float),
+            ("state", int),
             ("rate", int),
             ("spotsize", "U16"),
         ],
     )
     fill_ints(log["sequence"])
     fill_ints(log["subpoint"])
+    fill_strings(log["comment"])
+
+    if log_style == "chromium2":
+        start_idx = np.flatnonzero(np.logical_and(log["vertix"] > 0, log["state"] == 1))
+        log = log[np.stack((start_idx, start_idx + 2), axis=1).flat]
+    elif log_style == "activeview2":
+        log = log[np.argsort(log["time"])]
+        start_idx = (
+            np.flatnonzero(
+                np.logical_and(log["state"][1:] == 1, log["state"][:-1] == 0)
+            )
+            + 1
+        )
+        # Get laser end event, next event after start to be 'Off'
+        log = log[np.stack((start_idx, start_idx + 1), axis=1).flat]
+    elif log_style != "raw":  # pragma: no cover
+        raise ValueError(f"invalid log style {log_style}")
+
     return log
 
 
@@ -73,16 +113,17 @@ def guess_delay_from_data(data: np.ndarray, times: np.ndarray) -> float:
     return times.flat[np.argmax((tic / tic.mean()) > 0.1)]
 
 
-def sync_data_nwi_laser_log(
+def sync_data_with_laser_log(
     data: np.ndarray,
     times: np.ndarray | float,
-    log_file: np.ndarray | Path | str,
+    log: np.ndarray,
     sequence: np.ndarray | int | None = None,
     delay: float | None = None,
     squeeze: bool = False,
 ) -> tuple[np.ndarray, dict]:
     """
     Syncs ICP-MS data collected as a single line per raster with the laser log file.
+    Times in the log are modified to start at 0.
 
     Args:
         data: 1d ICP-MS data
@@ -93,20 +134,12 @@ def sync_data_nwi_laser_log(
         squeeze: remove any rows and columns of all NaNs
     """
 
-    if isinstance(
-        log_file, (Path, str)
-    ):  # pragma: no cover, tested via read_nwi_laser_log
-        log = read_nwi_laser_log(log_file)
-    else:
-        log = log_file
-
     if isinstance(times, float):  # pragma: no cover, warning
         logger.info(f"generating times with interval {times:.2f}")
         times = np.arange(data.size) * times
     elif times.ndim > 1:  # pragma: no cover, warning
         logger.warning("times has more than one dimension, flattening")
-
-    times = (times - times.min()).ravel()
+    times = times.ravel()
 
     if delay is None:  # pragma: no cover, tested elsewhere
         delay = guess_delay_from_data(data, times)
@@ -116,10 +149,6 @@ def sync_data_nwi_laser_log(
     # remove patterns that were not selected
     if sequence is not None:
         log = log[np.isin(log["sequence"], sequence)]
-
-    # Get laser start and end events only
-    start_idx = np.flatnonzero(log["state"] == "On")
-    log = log[np.stack((start_idx, start_idx + 1), axis=1).flat]
 
     first_line = log[0]
     # check for inconsistencies and warn
@@ -147,34 +176,33 @@ def sync_data_nwi_laser_log(
     px = ((log["x"] - origin[0]) / spot_size[0]).astype(int)
     py = ((log["y"] - origin[1]) / spot_size[1]).astype(int)
     sync = np.full((py.max() + 1, px.max() + 1), np.nan, dtype=data.dtype)
+    assert sync.dtype.names is not None
 
     # calculate the indicies for start and end times of lines
     laser_times = (log["time"] - log["time"][0][0]).astype(float) / 1000.0
     laser_idx = np.searchsorted(times, laser_times)
 
     # read and fill in data
-    for line, (t0, t1), (x0, x1), (y0, y1) in zip(log, laser_idx, px, py):
-        x = data.flat[t0:t1]
+    for line, (i0, i1), (x0, x1), (y0, y1) in zip(log, laser_idx, px, py):
+        x = data.flat[i0:i1]
+        if x.size == 0:
+            continue
         if y0 == y1:  # horizontal
-            s0, s1 = -min(x.size, abs(x1 - x0)), None
             if x0 > x1:  # flip right-to-left
                 x = x[::-1]
                 x0, x1 = x1, x0
-                s0, s1 = None, -s0
-            if s0 == -0:  # pragma: no cover, this corresponds to no data, but errors
-                continue
-
-            sync[y0, x0:x1][s0:s1] = x[s0:s1]
+            for name in sync.dtype.names:
+                sync[y0, x0:x1][name] = np.add.reduceat(
+                    x[name], np.linspace(0, x.size, x1 - x0, endpoint=False).astype(int)
+                )
         elif x0 == x1:  # vertical
-            s0, s1 = -min(x.size, abs(y1 - y0)), None
             if y0 > y1:  # flip bottom-to-top
                 x = x[::-1]
                 y0, y1 = y1, y0
-                s0, s1 = None, -s0
-            if s0 == 0:  # pragma: no cover, this corresponds to no data, but errors
-                continue
-
-            sync[y0:y1, x0][s0:s1] = x[s0:s1]
+            for name in sync.dtype.names:
+                sync[y0:y1, x0][name] = np.add.reduceat(
+                    x[name], np.linspace(0, x.size, y1 - y0, endpoint=False).astype(int)
+                )
         else:  # pragma: no cover
             raise ValueError("unable to import non-vertical or non-horizontal lines.")
 

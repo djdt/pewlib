@@ -469,7 +469,7 @@ class ImzML(object):
             return fast_parse_imzml(path, external_binary)
         else:
             et = ElementTree.parse(path)
-            return ImzML.from_etree(et, external_binary)
+            return ImzML.from_etree(et, external_binary)  # type: ignore , no None
 
     def mass_range(self) -> tuple[float, float]:
         """Maximum mass range.
@@ -751,13 +751,13 @@ def fast_parse_imzml(
         for key, val in CV_BINARYDATA.items():
             if val in cvs:
                 dtype = ParamGroup.type_names[key]
-        if dtype is None:
+        if dtype is None:  # pragma: no cover
             raise ValueError(f"unable to find dtype for group {id}")
 
         return ParamGroup(
             id,
             dtype,
-            compressed=not CV_PARAMGROUP["NO_COMPRESSION"] in cvs,
+            compressed=CV_PARAMGROUP["NO_COMPRESSION"] not in cvs,
             external=CV_PARAMGROUP["EXTERNAL_DATA"] in cvs,
         )
 
@@ -773,7 +773,7 @@ def fast_parse_imzml(
                 int(cvs[CV_SCANSETTINGS["MAX_COUNT_OF_PIXEL_X"]]),
                 int(cvs[CV_SCANSETTINGS["MAX_COUNT_OF_PIXEL_Y"]]),
             )
-        except KeyError:
+        except KeyError:  # pragma: no cover
             size = None
 
         pixel_size = (
@@ -836,9 +836,10 @@ def fast_parse_imzml(
                     if line.startswith("<referenceableParamGroup"):
                         s = line.find('id="', len("<referenceableParamGroup")) + 4
                         id = line[s : line.find('"', s)]
+                        print(id)
                         if id == "mzArray":
                             mz_params = parse_param_group(fp, line, id)
-                        elif id == "intensities":
+                        elif id in ["intensities", "intensityArray"]:
                             intensity_params = parse_param_group(fp, line, id)
             elif line.startswith("<scanSettingsList"):
                 while not line.startswith("</scanSettingsList"):
@@ -846,16 +847,16 @@ def fast_parse_imzml(
                     if line.startswith("<scanSettings"):
                         scan_settings.append(parse_scan_settings(fp, line))
             elif line.startswith("<spectrum"):
-                if callback is not None:
+                if callback is not None:  # pragma: no cover
                     if not callback(fp.tell()):
                         raise UserWarning("callback returned False")
                 spectrum = parse_spectrum(fp, line)
                 spectra[spectrum.x, spectrum.y] = spectrum
             line = fp.readline().strip()
 
-    if mz_params is None:
+    if mz_params is None:  # pragma: no cover
         raise ValueError("unable to read mzArray group")
-    if intensity_params is None:
+    if intensity_params is None:  # pragma: no cover
         raise ValueError("unable to read intensities group")
 
     return ImzML(
