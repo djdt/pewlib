@@ -86,3 +86,26 @@ def test_io_imzml_orbi():
     # test when size is missing
     imz.scan_settings.image_size = None
     assert imz.image_size == (1, 32)
+
+
+def test_io_imzml_fast_parse():
+    path = Path(__file__).parent.joinpath("data", "imzml")
+
+    # auto find .ibd
+    imz = imzml.ImzML.from_file(path.joinpath("test_orbi.imzml"), use_fast_parse=True)
+
+    assert imz.mz_params.dtype == np.float32
+    assert imz.intensity_params.dtype == np.float32
+
+    assert imz.image_size == (1, 32)
+
+    tic = imz.extract_tic()
+    assert tic[30, 0] == 5.3958265e6  # pixel 1, 31
+    assert tic.shape == (32, 1)
+
+    data = imz.extract_masses([420.1603], mass_width_ppm=10.0)
+    assert np.isclose(data[31, 0], 3.126e6, rtol=1e-4)
+
+    # test when size is missing
+    imz.scan_settings.image_size = None
+    assert imz.image_size == (1, 32)

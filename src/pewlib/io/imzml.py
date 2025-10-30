@@ -469,7 +469,7 @@ class ImzML(object):
             return fast_parse_imzml(path, external_binary)
         else:
             et = ElementTree.parse(path)
-            return ImzML.from_etree(et, external_binary)
+            return ImzML.from_etree(et, external_binary)  # type: ignore , no None
 
     def mass_range(self) -> tuple[float, float]:
         """Maximum mass range.
@@ -757,7 +757,7 @@ def fast_parse_imzml(
         return ParamGroup(
             id,
             dtype,
-            compressed=not CV_PARAMGROUP["NO_COMPRESSION"] in cvs,
+            compressed=CV_PARAMGROUP["NO_COMPRESSION"] not in cvs,
             external=CV_PARAMGROUP["EXTERNAL_DATA"] in cvs,
         )
 
@@ -836,9 +836,10 @@ def fast_parse_imzml(
                     if line.startswith("<referenceableParamGroup"):
                         s = line.find('id="', len("<referenceableParamGroup")) + 4
                         id = line[s : line.find('"', s)]
+                        print(id)
                         if id == "mzArray":
                             mz_params = parse_param_group(fp, line, id)
-                        elif id == "intensities":
+                        elif id in ["intensities", "intensityArray"]:
                             intensity_params = parse_param_group(fp, line, id)
             elif line.startswith("<scanSettingsList"):
                 while not line.startswith("</scanSettingsList"):
