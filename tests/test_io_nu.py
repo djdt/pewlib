@@ -48,6 +48,8 @@ def test_read_acuistion():
     assert info["FirstLaserLineNumber"] == 1
     assert info["Username"] == "engineer"
 
+    assert np.isclose(nu.eventtime_from_info(info), 0.05126)
+
 
 def test_read_laser_image():
     path = Path(__file__).parent.joinpath("data", "nu", "Image001")
