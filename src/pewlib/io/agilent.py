@@ -7,6 +7,7 @@ Tested with Agilent 7500, 7700 and 8900 ICPs.
 import logging
 from collections.abc import Callable, Generator
 from pathlib import Path
+from typing import Any
 from xml.etree import ElementTree
 
 import numpy as np
@@ -386,6 +387,9 @@ def load_binary(
 
     masses = mass_info_datafile(datafiles[0])
     lines = [binary_read_datafile(df, masses) for df in datafiles]
+    sizes = np.array([line.size for line in lines])
+    acq_ends = np.cumsum(sizes)
+    acq_starts = acq_ends - sizes
 
     if flatten:
         data = np.concatenate(lines, axis=0)
@@ -394,11 +398,13 @@ def load_binary(
 
     assert data.dtype.names is not None
 
-    params = {}
+    params: dict[str, Any] = {"acq_starts": acq_starts, "acq_ends": acq_ends}
     if full:
         if "Time" in data.dtype.names:
             params["times"] = data["Time"]
-            params["scantime"] = np.round(np.mean(np.diff(data["Time"], axis=1)), 4)
+            params["scantime"] = np.round(
+                np.mean(np.diff(data["Time"].flat[: sizes[0]])), 4
+            )
         else:  # pragma: no cover
             logger.warning("'Time' field not found, unable to import scantime.")
 
@@ -524,6 +530,9 @@ def load_csv(
             raise FileNotFoundError(f"No data files found in {path.name}!")
 
     lines = list(read_datafile_csvs(datafiles))
+    sizes = np.array([line.size for line in lines])
+    acq_ends = np.cumsum(sizes)
+    acq_starts = acq_ends - sizes
 
     if flatten:
         data = np.concatenate(lines, axis=0)
@@ -543,12 +552,12 @@ def load_csv(
 
     assert data.dtype.names is not None
 
-    params = {}
+    params: dict[str, Any] = {"acq_starts": acq_starts, "acq_ends": acq_ends}
     if full:
         if "Time_[Sec]" in data.dtype.names:
             params["times"] = data["Time_[Sec]"]
             params["scantime"] = np.round(
-                np.mean(np.diff(data["Time_[Sec]"], axis=1)), 4
+                np.mean(np.diff(data["Time_[Sec]"].flat[: sizes[0]])), 4
             )
         else:  # pragma: no cover
             logger.warning("'Time_[Sec]' field not found, unable to import scantime.")
