@@ -337,6 +337,7 @@ def load_binary(
     collection_methods: list[str] | None = None,
     counts_per_second: bool = False,
     drop_names: list[str] | None = None,
+    flatten: bool = False,
     full: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, dict]:
     """Imports an Agilent '.b' batch.
@@ -351,6 +352,7 @@ def load_binary(
             default = ['batch_xml', 'batch_csv']
         counts_per_second: return data in CPS
         drop_names: names to remove from final array
+        flatten: return as a flat array
         full: also return dict with scantime
 
     Returns:
@@ -383,7 +385,14 @@ def load_binary(
             raise FileNotFoundError(f"No data files found in {path.name}!")
 
     masses = mass_info_datafile(datafiles[0])
-    data = np.stack([binary_read_datafile(df, masses) for df in datafiles], axis=0)
+    lines = [binary_read_datafile(df, masses) for df in datafiles]
+
+    if flatten:
+        data = np.concatenate(lines, axis=0)
+    else:
+        data = np.stack(lines, axis=0)
+
+    assert data.dtype.names is not None
 
     params = {}
     if full:
@@ -454,8 +463,7 @@ def read_datafile_csvs(datafiles: list[Path]) -> Generator[np.ndarray, None, Non
         csv = df.joinpath(df.with_suffix(".csv").name)
         logger.debug(f"Looking for csv '{csv}'.")
         if not csv.exists():
-            logger.warning(f"Missing csv '{csv}', line blanked.")
-            yield None
+            logger.warning(f"Missing csv '{csv}', line skipped.")
         else:
             yield np.genfromtxt(
                 csv_valid_lines(csv),
@@ -471,6 +479,7 @@ def load_csv(
     collection_methods: list[str] | None = None,
     use_acq_for_names: bool = True,
     drop_names: list[str] | None = None,
+    flatten: bool = False,
     full: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, dict]:
     """Imports an Agilent '.b' batch.
@@ -486,6 +495,7 @@ def load_csv(
             default = ['batch_xml', 'batch_csv']
         use_acq_for_names: read element names from 'AcqMethod.xml'
         drop_names: names to remove from final array
+        flatten: return as a flat array
         full: also return dict with scantime
 
     Returns:
@@ -515,16 +525,12 @@ def load_csv(
 
     lines = list(read_datafile_csvs(datafiles))
 
-    data_shape = next(line for line in lines if line is not None).shape
-    data_dtype = next(line for line in lines if line is not None).dtype
+    if flatten:
+        data = np.concatenate(lines, axis=0)
+    else:
+        data = np.stack(lines, axis=0)
 
-    data = np.empty((len(datafiles), data_shape[0]), dtype=data_dtype)
-
-    for i, line in enumerate(lines):
-        if line is None:
-            data[i, :] = np.zeros(data_shape[0], dtype=data_dtype)
-        else:
-            data[i, :] = line
+    assert data.dtype.names is not None
 
     if use_acq_for_names:
         if path.joinpath(acq_method_xml_path).exists():
@@ -534,6 +540,8 @@ def load_csv(
             )
         else:  # pragma: no cover
             logger.warning("AcqMethod.xml not found, cannot read names.")
+
+    assert data.dtype.names is not None
 
     params = {}
     if full:
@@ -626,6 +634,7 @@ def load(
     use_acq_for_names: bool = True,
     counts_per_second: bool = False,
     drop_names: list[str] | None = None,
+    flatten: bool = False,
     full: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, dict]:
     """Imports an Agilent '.b' batch.
@@ -639,6 +648,7 @@ def load(
         use_acq_for_names: read element names from 'AcqMethod.xml', only for csv
         counts_per_second: return data in CPS, only for binary
         drop_names: names to remove from final array
+        flatten: flatten into a single line, useful for multi image batches
         full: also return dict with scantime
 
     Returns:
@@ -656,6 +666,7 @@ def load(
             collection_methods,
             counts_per_second=counts_per_second,
             drop_names=drop_names,
+            flatten=flatten,
             full=full,
         )
     except Exception as e:
@@ -666,6 +677,7 @@ def load(
             collection_methods,
             use_acq_for_names=use_acq_for_names,
             drop_names=drop_names,
+            flatten=flatten,
             full=full,
         )
     return result
