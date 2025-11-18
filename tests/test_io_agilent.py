@@ -50,9 +50,7 @@ def test_io_agilent_mass_info():
 def test_io_agilent_load_7700_binary():
     path = Path(__file__).parent.joinpath("data", "agilent", "7700")
 
-    data, params = agilent.load_binary(
-        path.joinpath("test.b"), counts_per_second=True, full=True
-    )
+    data, params = agilent.load_binary(path.joinpath("test.b"), counts_per_second=True)
     assert data.shape == (5, 5)
     assert data.dtype.names == ("P31", "Eu153", "W182")
     for name in data.dtype.names:
@@ -64,7 +62,9 @@ def test_io_agilent_load_7700_binary():
 def test_io_agilent_load_7700_csv():
     path = Path(__file__).parent.joinpath("data", "agilent", "7700")
 
-    data, params = agilent.load_csv(path.joinpath("test.b"), full=True)
+    data, params = agilent.load_csv(
+        path.joinpath("test.b"),
+    )
     assert data.shape == (5, 5)
     assert data.dtype.names == ("P31", "Eu153", "W182")
     for name in data.dtype.names:
@@ -77,7 +77,7 @@ def test_io_agilent_load_8900_binary():
     path = Path(__file__).parent.joinpath("data", "agilent", "8900")
 
     data, params = agilent.load_binary(
-        path.joinpath("test_ms.b"), counts_per_second=True, full=True
+        path.joinpath("test_ms.b"), counts_per_second=True
     )
     assert data.shape == (5, 5)
     assert data.dtype.names == ("P31", "Eu153", "W182")
@@ -87,7 +87,7 @@ def test_io_agilent_load_8900_binary():
     assert np.isclose(params["scantime"], 0.5, rtol=1e-2)
 
     data, params = agilent.load_binary(
-        path.joinpath("test_ms_ms.b"), counts_per_second=True, full=True
+        path.joinpath("test_ms_ms.b"), counts_per_second=True
     )
     assert data.shape == (5, 5)
     assert data.dtype.names == ("P31->47", "Eu153->153", "W182->182")
@@ -100,7 +100,9 @@ def test_io_agilent_load_8900_binary():
 def test_io_agilent_load_8900_csv():
     path = Path(__file__).parent.joinpath("data", "agilent", "8900")
 
-    data, params = agilent.load_csv(path.joinpath("test_ms.b"), full=True)
+    data, params = agilent.load_csv(
+        path.joinpath("test_ms.b"),
+    )
     assert data.shape == (5, 5)
     assert data.dtype.names == ("P31", "Eu153", "W182")
     for name in data.dtype.names:
@@ -108,13 +110,22 @@ def test_io_agilent_load_8900_csv():
 
     assert np.isclose(params["scantime"], 0.5, rtol=1e-2)
 
-    data, params = agilent.load_csv(path.joinpath("test_ms_ms.b"), full=True)
+    data, params = agilent.load_csv(
+        path.joinpath("test_ms_ms.b"),
+    )
     assert data.shape == (5, 5)
     assert data.dtype.names == ("P31->47", "Eu153->153", "W182->182")
     for name in data.dtype.names:
         assert np.isclose(data[name].sum(), sums_8900[name], rtol=1e-4)  # Lowered tol
 
     assert np.isclose(params["scantime"], 0.5, rtol=1e-2)
+
+
+def test_io_agilent_load_flatten():
+    path = Path(__file__).parent.joinpath("data", "agilent", "8900")
+
+    data, params = agilent.load_csv(path.joinpath("test_ms.b"), flatten=True)
+    assert data.shape == (25,)
 
 
 def test_io_agilent_load_missing():
@@ -126,14 +137,13 @@ def test_io_agilent_load_missing():
             use_acq_for_names=False,
             collection_methods=["batch_csv"],  # Missing batch csv
         )
-    data = agilent.load(
+    data, _ = agilent.load(
         path.joinpath("test_ms_missing.b"),
         use_acq_for_names=False,
         collection_methods=["alphabetical"],
     )
     assert isinstance(data, np.ndarray)
-    assert data.shape == (4, 5)
-    assert np.all(data["P31"][3] == 0.0)
+    assert data.shape == (3, 5)
 
 
 def test_io_agilent_load_info_7700():

@@ -7,6 +7,7 @@ Tested with Agilent 7500, 7700 and 8900 ICPs.
 import logging
 from collections.abc import Callable, Generator
 from pathlib import Path
+from typing import Any
 from xml.etree import ElementTree
 
 import numpy as np
@@ -337,8 +338,8 @@ def load_binary(
     collection_methods: list[str] | None = None,
     counts_per_second: bool = False,
     drop_names: list[str] | None = None,
-    full: bool = False,
-) -> np.ndarray | tuple[np.ndarray, dict]:
+    flatten: bool = False,
+) -> tuple[np.ndarray, dict]:
     """Imports an Agilent '.b' batch.
 
     Import is performed using the 'MSScan.bin', 'MSProfile.bin' binaries and
@@ -351,11 +352,10 @@ def load_binary(
             default = ['batch_xml', 'batch_csv']
         counts_per_second: return data in CPS
         drop_names: names to remove from final array
-        full: also return dict with scantime
+        flatten: return as a flat array
 
     Returns:
-        structured array of data
-        dict of params if `full`
+        structured array of data, dict of params
 
     Raises:
         FileNotFoundError: 'MSScan.bin', 'MSProfile.bin' or 'MSTS_XSpecific.xml'
@@ -383,15 +383,26 @@ def load_binary(
             raise FileNotFoundError(f"No data files found in {path.name}!")
 
     masses = mass_info_datafile(datafiles[0])
-    data = np.stack([binary_read_datafile(df, masses) for df in datafiles], axis=0)
+    lines = [binary_read_datafile(df, masses) for df in datafiles]
+    sizes = np.array([line.size for line in lines])
+    acq_ends = np.cumsum(sizes)
+    acq_starts = acq_ends - sizes
 
-    params = {}
-    if full:
-        if "Time" in data.dtype.names:
-            params["times"] = data["Time"]
-            params["scantime"] = np.round(np.mean(np.diff(data["Time"], axis=1)), 4)
-        else:  # pragma: no cover
-            logger.warning("'Time' field not found, unable to import scantime.")
+    if flatten:
+        data = np.concatenate(lines, axis=0)
+    else:
+        data = np.stack(lines, axis=0)
+
+    assert data.dtype.names is not None
+
+    params: dict[str, Any] = {"acq_starts": acq_starts, "acq_ends": acq_ends}
+    if "Time" in data.dtype.names:
+        params["times"] = data["Time"]
+        params["scantime"] = np.round(
+            np.mean(np.diff(data["Time"].flat[: sizes[0]])), 4
+        )
+    else:  # pragma: no cover
+        logger.warning("'Time' field not found, unable to import scantime.")
 
         # Read devices.xml
 
@@ -401,10 +412,7 @@ def load_binary(
 
     data = rfn.drop_fields(data, drop_names)
 
-    if full:
-        return data, params
-    else:  # pragma: no cover
-        return data
+    return data, params
 
 
 # CSV Import
@@ -454,8 +462,7 @@ def read_datafile_csvs(datafiles: list[Path]) -> Generator[np.ndarray, None, Non
         csv = df.joinpath(df.with_suffix(".csv").name)
         logger.debug(f"Looking for csv '{csv}'.")
         if not csv.exists():
-            logger.warning(f"Missing csv '{csv}', line blanked.")
-            yield None
+            logger.warning(f"Missing csv '{csv}', line skipped.")
         else:
             yield np.genfromtxt(
                 csv_valid_lines(csv),
@@ -471,8 +478,8 @@ def load_csv(
     collection_methods: list[str] | None = None,
     use_acq_for_names: bool = True,
     drop_names: list[str] | None = None,
-    full: bool = False,
-) -> np.ndarray | tuple[np.ndarray, dict]:
+    flatten: bool = False,
+) -> tuple[np.ndarray, dict]:
     """Imports an Agilent '.b' batch.
 
     Import is performed using the '.csv' files found in each '.d' datafile.
@@ -486,11 +493,11 @@ def load_csv(
             default = ['batch_xml', 'batch_csv']
         use_acq_for_names: read element names from 'AcqMethod.xml'
         drop_names: names to remove from final array
+        flatten: return as a flat array
         full: also return dict with scantime
 
     Returns:
-        structured array of data
-        dict of params if `full`
+        structured array of data, dict of params
 
     See Also:
         :func:`pewlib.io.agilent.collect_datafiles`
@@ -514,17 +521,16 @@ def load_csv(
             raise FileNotFoundError(f"No data files found in {path.name}!")
 
     lines = list(read_datafile_csvs(datafiles))
+    sizes = np.array([line.size for line in lines])
+    acq_ends = np.cumsum(sizes)
+    acq_starts = acq_ends - sizes
 
-    data_shape = next(line for line in lines if line is not None).shape
-    data_dtype = next(line for line in lines if line is not None).dtype
+    if flatten:
+        data = np.concatenate(lines, axis=0)
+    else:
+        data = np.stack(lines, axis=0)
 
-    data = np.empty((len(datafiles), data_shape[0]), dtype=data_dtype)
-
-    for i, line in enumerate(lines):
-        if line is None:
-            data[i, :] = np.zeros(data_shape[0], dtype=data_dtype)
-        else:
-            data[i, :] = line
+    assert data.dtype.names is not None
 
     if use_acq_for_names:
         if path.joinpath(acq_method_xml_path).exists():
@@ -535,22 +541,20 @@ def load_csv(
         else:  # pragma: no cover
             logger.warning("AcqMethod.xml not found, cannot read names.")
 
-    params = {}
-    if full:
-        if "Time_[Sec]" in data.dtype.names:
-            params["times"] = data["Time_[Sec]"]
-            params["scantime"] = np.round(
-                np.mean(np.diff(data["Time_[Sec]"], axis=1)), 4
-            )
-        else:  # pragma: no cover
-            logger.warning("'Time_[Sec]' field not found, unable to import scantime.")
+    assert data.dtype.names is not None
+
+    params: dict[str, Any] = {"acq_starts": acq_starts, "acq_ends": acq_ends}
+    if "Time_[Sec]" in data.dtype.names:
+        params["times"] = data["Time_[Sec]"]
+        params["scantime"] = np.round(
+            np.mean(np.diff(data["Time_[Sec]"].flat[: sizes[0]])), 4
+        )
+    else:  # pragma: no cover
+        logger.warning("'Time_[Sec]' field not found, unable to import scantime.")
 
     data = rfn.drop_fields(data, drop_names)
 
-    if full:
-        return data, params
-    else:  # pragma: no cover
-        return data
+    return data, params
 
 
 def batch_xml_read_info(path: Path) -> dict[str, str]:
@@ -626,8 +630,8 @@ def load(
     use_acq_for_names: bool = True,
     counts_per_second: bool = False,
     drop_names: list[str] | None = None,
-    full: bool = False,
-) -> np.ndarray | tuple[np.ndarray, dict]:
+    flatten: bool = False,
+) -> tuple[np.ndarray, dict]:
     """Imports an Agilent '.b' batch.
 
     First attempts a binary import, falling back to importing any '.csv' files.
@@ -639,11 +643,10 @@ def load(
         use_acq_for_names: read element names from 'AcqMethod.xml', only for csv
         counts_per_second: return data in CPS, only for binary
         drop_names: names to remove from final array
-        full: also return dict with scantime
+        flatten: flatten into a single line, useful for multi image batches
 
     Returns:
-        structured array of data
-        dict of params if `full`
+        structured array of data, dict of params
 
     See Also:
         :func:`pewlib.io.agilent.collect_datafiles`
@@ -656,7 +659,7 @@ def load(
             collection_methods,
             counts_per_second=counts_per_second,
             drop_names=drop_names,
-            full=full,
+            flatten=flatten,
         )
     except Exception as e:
         logger.info("Unable to import as binary, reverting to CSV import.")
@@ -666,6 +669,6 @@ def load(
             collection_methods,
             use_acq_for_names=use_acq_for_names,
             drop_names=drop_names,
-            full=full,
+            flatten=flatten,
         )
     return result

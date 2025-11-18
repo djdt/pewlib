@@ -476,7 +476,9 @@ def apply_trigger_correction(times: np.ndarray, corrections: dict) -> np.ndarray
         return c1 * times + c2
 
 
-def read_laser_image(path: Path | str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def read_laser_image(
+    path: Path | str,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict]:
     """Read a laser image from a Nu Vitesse ICP-TOF-MS.
 
     Calls ``read_laser_acquistion`` on valid sub directories and concatenates.
@@ -488,6 +490,8 @@ def read_laser_image(path: Path | str) -> tuple[np.ndarray, np.ndarray, np.ndarr
         signals
         masses
         times
+        pulses
+        laser_info
     """
     path = Path(path)
 
@@ -498,30 +502,31 @@ def read_laser_image(path: Path | str) -> tuple[np.ndarray, np.ndarray, np.ndarr
         except StopIteration:
             raise ValueError(f"{path} is not a valid Nu image directory")
 
-    # with Path(path.joinpath("laser.info")).open("r") as fp:
-    #     laser_info = json.load(fp)
+    with Path(path.joinpath("laser.info")).open("r") as fp:
+        laser_info = json.load(fp)
     with Path(path.joinpath("TriggerCorrections.dat")).open("r") as fp:
         corrections = json.load(fp)
 
     masses = None
     signals_list = []
     times_list = []
+    pulse_list = []
+
     acqusitions = sorted(
         [d for d in path.iterdir() if is_nu_acquisition_directory(d)],
         key=lambda d: int(d.stem),
     )
-    initial_pulse = None
+
     for i, acq_dir in enumerate(acqusitions):
         _signals, _masses, _times, _pulses, _info = read_laser_acquisition(acq_dir)
         if masses is None:
             masses = _masses
         elif not np.all(masses == _masses):  # pragma: no cover
             logger.warning("masses differ across laser lines")
-        if initial_pulse is None:
-            initial_pulse = _pulses[0]
 
         signals_list.append(_signals)
         times_list.append(_times)
+        pulse_list.append(_pulses)
 
     if masses is None:  # pragma: no cover
         raise ValueError("masses were not read from any laser directory")
@@ -533,7 +538,7 @@ def read_laser_image(path: Path | str) -> tuple[np.ndarray, np.ndarray, np.ndarr
 
     signals = np.concatenate(signals_list, axis=0)
     times = np.concatenate(times_list)
-    times -= initial_pulse
     times -= correction
+    pulses = np.concatenate(pulse_list)
 
-    return signals, masses, times
+    return signals, masses, times, pulses, laser_info
