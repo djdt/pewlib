@@ -76,7 +76,7 @@ def test_read_acquistion_blanking(autob_path: Path):
 
 
 def test_read_laser_image(image_path: Path):
-    signals, masses, times = nu.read_laser_image(image_path)
+    signals, masses, times, pulses, info = nu.read_laser_image(image_path)
 
     assert masses.size == 166
     assert np.isclose(masses[0], 50.9371, atol=0.001)
@@ -84,4 +84,3 @@ def test_read_laser_image(image_path: Path):
 
     assert signals.shape == (734, 166)
     assert times.shape == (734,)
-    assert times[0] < 0.0  # from subtracting first pulse

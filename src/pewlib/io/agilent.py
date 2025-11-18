@@ -339,8 +339,7 @@ def load_binary(
     counts_per_second: bool = False,
     drop_names: list[str] | None = None,
     flatten: bool = False,
-    full: bool = False,
-) -> np.ndarray | tuple[np.ndarray, dict]:
+) -> tuple[np.ndarray, dict]:
     """Imports an Agilent '.b' batch.
 
     Import is performed using the 'MSScan.bin', 'MSProfile.bin' binaries and
@@ -354,11 +353,9 @@ def load_binary(
         counts_per_second: return data in CPS
         drop_names: names to remove from final array
         flatten: return as a flat array
-        full: also return dict with scantime
 
     Returns:
-        structured array of data
-        dict of params if `full`
+        structured array of data, dict of params
 
     Raises:
         FileNotFoundError: 'MSScan.bin', 'MSProfile.bin' or 'MSTS_XSpecific.xml'
@@ -399,14 +396,13 @@ def load_binary(
     assert data.dtype.names is not None
 
     params: dict[str, Any] = {"acq_starts": acq_starts, "acq_ends": acq_ends}
-    if full:
-        if "Time" in data.dtype.names:
-            params["times"] = data["Time"]
-            params["scantime"] = np.round(
-                np.mean(np.diff(data["Time"].flat[: sizes[0]])), 4
-            )
-        else:  # pragma: no cover
-            logger.warning("'Time' field not found, unable to import scantime.")
+    if "Time" in data.dtype.names:
+        params["times"] = data["Time"]
+        params["scantime"] = np.round(
+            np.mean(np.diff(data["Time"].flat[: sizes[0]])), 4
+        )
+    else:  # pragma: no cover
+        logger.warning("'Time' field not found, unable to import scantime.")
 
         # Read devices.xml
 
@@ -416,10 +412,7 @@ def load_binary(
 
     data = rfn.drop_fields(data, drop_names)
 
-    if full:
-        return data, params
-    else:  # pragma: no cover
-        return data
+    return data, params
 
 
 # CSV Import
@@ -486,8 +479,7 @@ def load_csv(
     use_acq_for_names: bool = True,
     drop_names: list[str] | None = None,
     flatten: bool = False,
-    full: bool = False,
-) -> np.ndarray | tuple[np.ndarray, dict]:
+) -> tuple[np.ndarray, dict]:
     """Imports an Agilent '.b' batch.
 
     Import is performed using the '.csv' files found in each '.d' datafile.
@@ -505,8 +497,7 @@ def load_csv(
         full: also return dict with scantime
 
     Returns:
-        structured array of data
-        dict of params if `full`
+        structured array of data, dict of params
 
     See Also:
         :func:`pewlib.io.agilent.collect_datafiles`
@@ -553,21 +544,17 @@ def load_csv(
     assert data.dtype.names is not None
 
     params: dict[str, Any] = {"acq_starts": acq_starts, "acq_ends": acq_ends}
-    if full:
-        if "Time_[Sec]" in data.dtype.names:
-            params["times"] = data["Time_[Sec]"]
-            params["scantime"] = np.round(
-                np.mean(np.diff(data["Time_[Sec]"].flat[: sizes[0]])), 4
-            )
-        else:  # pragma: no cover
-            logger.warning("'Time_[Sec]' field not found, unable to import scantime.")
+    if "Time_[Sec]" in data.dtype.names:
+        params["times"] = data["Time_[Sec]"]
+        params["scantime"] = np.round(
+            np.mean(np.diff(data["Time_[Sec]"].flat[: sizes[0]])), 4
+        )
+    else:  # pragma: no cover
+        logger.warning("'Time_[Sec]' field not found, unable to import scantime.")
 
     data = rfn.drop_fields(data, drop_names)
 
-    if full:
-        return data, params
-    else:  # pragma: no cover
-        return data
+    return data, params
 
 
 def batch_xml_read_info(path: Path) -> dict[str, str]:
@@ -644,8 +631,7 @@ def load(
     counts_per_second: bool = False,
     drop_names: list[str] | None = None,
     flatten: bool = False,
-    full: bool = False,
-) -> np.ndarray | tuple[np.ndarray, dict]:
+) -> tuple[np.ndarray, dict]:
     """Imports an Agilent '.b' batch.
 
     First attempts a binary import, falling back to importing any '.csv' files.
@@ -658,11 +644,9 @@ def load(
         counts_per_second: return data in CPS, only for binary
         drop_names: names to remove from final array
         flatten: flatten into a single line, useful for multi image batches
-        full: also return dict with scantime
 
     Returns:
-        structured array of data
-        dict of params if `full`
+        structured array of data, dict of params
 
     See Also:
         :func:`pewlib.io.agilent.collect_datafiles`
@@ -676,7 +660,6 @@ def load(
             counts_per_second=counts_per_second,
             drop_names=drop_names,
             flatten=flatten,
-            full=full,
         )
     except Exception as e:
         logger.info("Unable to import as binary, reverting to CSV import.")
@@ -687,6 +670,5 @@ def load(
             use_acq_for_names=use_acq_for_names,
             drop_names=drop_names,
             flatten=flatten,
-            full=full,
         )
     return result
