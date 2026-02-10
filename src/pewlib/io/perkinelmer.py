@@ -39,7 +39,7 @@ def load(
 
     Returns:
         structured array of data
-        dict of params if `full`
+        dict of params
 
     See Also:
         :func:`pewlib.io.perkinelmer.collect_datafiles`
