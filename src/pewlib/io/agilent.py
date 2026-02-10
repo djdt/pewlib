@@ -494,7 +494,6 @@ def load_csv(
         use_acq_for_names: read element names from 'AcqMethod.xml'
         drop_names: names to remove from final array
         flatten: return as a flat array
-        full: also return dict with scantime
 
     Returns:
         structured array of data, dict of params

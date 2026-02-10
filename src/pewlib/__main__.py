@@ -26,9 +26,7 @@ def load(path: Path) -> Laser:
             data = None
             for methods in [["batch_xml", "batch_csv"], ["acq_method_xml"]]:
                 try:
-                    data, params = io.agilent.load(
-                        path, collection_methods=methods, full=True
-                    )
+                    data, params = io.agilent.load(path, collection_methods=methods)
                     info.update(io.agilent.load_info(path))
                     break
                 except ValueError:
@@ -36,10 +34,10 @@ def load(path: Path) -> Laser:
             if data is None:
                 raise ValueError(f"unable to import batch '{path.name}'")
         elif io.perkinelmer.is_valid_directory(path):
-            data, params = io.perkinelmer.load(path, full=True)
+            data, params = io.perkinelmer.load(path)
             info["Instrument Vendor"] = "PerkinElemer"
         elif io.csv.is_valid_directory(path):
-            data, params = io.csv.load(path, full=True)
+            data, params = io.csv.load(path)
         else:  # pragma: no cover
             raise ValueError(f"unknown extention '{path.suffix}'")
     else:
@@ -49,7 +47,7 @@ def load(path: Path) -> Laser:
         if path.suffix.lower() == ".csv":
             sample_format = io.thermo.icap_csv_sample_format(path)
             if sample_format in ["columns", "rows"]:
-                data, params = io.thermo.load(path, full=True)
+                data, params = io.thermo.load(path)
                 info["Instrument Vendor"] = "Thermo"
             else:
                 data = io.textimage.load(path, name="_element_")

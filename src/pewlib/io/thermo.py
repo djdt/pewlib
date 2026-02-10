@@ -209,24 +209,22 @@ def icap_csv_sample_format(path: str | Path) -> str:
 
 
 def load(
-    path: str | Path, use_analog: bool = False, full: bool = False
-) -> np.ndarray | tuple[np.ndarray, dict]:  # pragma: no cover
+    path: str | Path, use_analog: bool = False
+) -> tuple[np.ndarray, dict]:  # pragma: no cover
     """Imports iCap CSV export.
 
     Data must be exported from Qtegra using the CSV export option.
     At a mininmum the 'Counts' column must exported for each element.
     If `use_analog` the 'Analog' channel must be exported.
-    If `full` and the 'Time' column is exported then the scantime can be determined.
+    If the 'Time' column is exported then the scantime can be determined.
     Samples in columns and rows are both supported.
 
     Args:
         path: path to CSV
         use_analog: ues 'Analog' instead of 'Counts'
-        full: also export a dict of params
 
     Returns:
         structured array of data
-        dict of params if `full`
 
     Raises:
         ValueError: unknown or invalid CSV
@@ -242,15 +240,14 @@ def load(
     else:  # pragma: no cover
         raise ValueError("Unknown iCap CSV format.")
 
-    if full:
-        try:
-            if sample_format == "rows":
-                params = icap_csv_rows_read_params(path)
-            elif sample_format == "columns":
-                params = icap_csv_columns_read_params(path)
-            return data, params
-        except (IndexError, ValueError):
-            logger.warning(f"Unabled to read params from {path.name}")
-            return data, {}
-    else:  # pragma: no cover
-        return data
+    try:
+        if sample_format == "rows":
+            params = icap_csv_rows_read_params(path)
+        elif sample_format == "columns":
+            params = icap_csv_columns_read_params(path)
+        else:
+            params = {}
+        return data, params
+    except (IndexError, ValueError):
+        logger.warning(f"Unabled to read params from {path.name}")
+        return data, {}
