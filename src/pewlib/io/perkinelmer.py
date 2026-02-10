@@ -25,8 +25,8 @@ def is_valid_directory(path: str | Path) -> bool:
 
 
 def load(
-    path: str | Path, import_parameters: bool = True, full: bool = False
-) -> np.ndarray| tuple[np.ndarray, dict]:
+    path: str | Path, import_parameters: bool = True
+) -> tuple[np.ndarray, dict]:
     """Loads PerkinElmer directory.
 
     Searches the directory `path` for '.xl' files and used them to reconstruct data.
@@ -91,7 +91,4 @@ def load(
     #         dtype=float,
     #     )
 
-    if full:
-        return data, params
-    else:  # pragma: no cover
-        return data
+    return data, params
