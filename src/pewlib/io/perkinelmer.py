@@ -36,7 +36,6 @@ def load(
     Args:
         path: path to directory
         import_parameters: import params from 'parameters.conf'
-        full: also return dict with params
 
     Returns:
         structured array of data

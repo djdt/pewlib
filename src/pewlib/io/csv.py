@@ -175,8 +175,7 @@ def option_for_path(path: str | Path) -> GenericOption:
 def load(
     path: str | Path,
     option: GenericOption | None = None,
-    full: bool = False,
-) -> np.ndarray | tuple[np.ndarray, dict]:
+) -> tuple[np.ndarray, dict]:
     """Load a directory where lines are stored in separate .csv files.
 
     Paths are filtered and sorted according to the `option` used, defaulting
@@ -186,11 +185,10 @@ def load(
         path: directory
         hint: type hint (NuHint, TofwerkHint)
         genfromtxtkws: kwargs for numpy.genfromtxt
-        full: also return parameters
 
     Returns:
         structured array of data
-        dict of params if `full`
+        dict of params
 
     See Also:
         :class:`pewlib.io.csv.GenericOption`
@@ -239,12 +237,8 @@ def load(
                 column_drop_names.append(name)
         data = rfn.drop_fields(data, column_drop_names)
 
-    if full:
-        params = option.readParams(data)
+    params = option.readParams(data)
 
     data = rfn.drop_fields(data, option.drop_names)
 
-    if full:
-        return data, params
-    else:  # pragma: no cover
-        return data
+    return data, params

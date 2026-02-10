@@ -14,7 +14,7 @@ def test_io_csv_generic():
         io.csv.option_for_path(path.joinpath("1,csv")), io.csv.GenericOption
     )
 
-    data, params = io.csv.load(path, full=True)
+    data, params = io.csv.load(path)
 
     assert data.shape == (3, 5)
     assert data.dtype.names == ("A", "B")
@@ -31,7 +31,7 @@ def test_io_csv_thermo_icap_ldr():
     assert io.csv.is_valid_directory(path)
     assert isinstance(io.csv.option_for_path(path), io.csv.ThermoLDROption)
 
-    data, params = io.csv.load(path, full=True)
+    data, params = io.csv.load(path)
 
     assert data.shape == (5, 5)
     assert data.dtype.names == ("31P", "153Eu", "182W")
@@ -48,7 +48,7 @@ def test_io_csv_nu_instruments():
     assert io.csv.is_valid_directory(path)
     assert isinstance(io.csv.option_for_path(path), io.csv.NuOption)
 
-    data, params = io.csv.load(path, full=True)
+    data, params = io.csv.load(path)
 
     assert data.shape == (3, 5)
     assert data.dtype.names == ("A", "B")
@@ -67,7 +67,7 @@ def test_io_csv_tofwerk():
     assert io.csv.is_valid_directory(path)
     assert isinstance(io.csv.option_for_path(path), io.csv.TofwerkOption)
 
-    data, params = io.csv.load(path, full=True)
+    data, params = io.csv.load(path)
 
     assert data.shape == (3, 5)
     assert data.dtype.names == ("A", "B")

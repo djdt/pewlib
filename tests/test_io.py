@@ -16,7 +16,7 @@ def test_io_perkinelmer():
     assert not io.perkinelmer.is_valid_directory(path.joinpath("fake"))
     assert not io.perkinelmer.is_valid_directory(path)
 
-    data, params = io.perkinelmer.load(path.joinpath("perkinelmer"), full=True)
+    data, params = io.perkinelmer.load(path.joinpath("perkinelmer"))
     assert np.isclose(np.sum(data["A1"]), 12.0)
     assert np.isclose(np.sum(data["B2"]), 15.0)
 
