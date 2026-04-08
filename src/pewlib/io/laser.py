@@ -81,12 +81,8 @@ def read_iolite_laser_log(log_path: Path | str, log_style: str = "raw") -> np.nd
         start_idx = np.flatnonzero(np.logical_and(log["vertix"] > 0, log["state"] == 1))
         log = log[np.stack((start_idx, start_idx + 2), axis=1).flat]
     elif log_style == "activeview2":
-        log = log[np.argsort(log["time"])]
-        start_idx = (
-            np.flatnonzero(
-                np.logical_and(log["state"][1:] == 1, log["state"][:-1] == 0)
-            )
-            + 1
+        start_idx = np.flatnonzero(
+            np.logical_and(log["state"][:-1] == 1, log["state"][1:] == 0)
         )
         # Get laser end event, next event after start to be 'Off'
         log = log[np.stack((start_idx, start_idx + 1), axis=1).flat]
