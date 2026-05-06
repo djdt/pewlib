@@ -715,8 +715,16 @@ def sync_data_with_laser_info(
         for lineinfo in info["LaserLineInfo"][first_line:last_line]:
             pixels = lineinfo["ns"]
             data = sums[pixel_pos : pixel_pos + pixels]
+            if data.size == 0:
+                logger.warning(
+                    f"missing data for line {lineinfo['ln']}: {lineinfo['na']}"
+                )
+                continue
+
             if sum_overlaps:
-                data = data.reshape(-1, overlap, data.shape[1])
+                data = data[: data.shape[0] - data.shape[0] % overlap].reshape(
+                    -1, overlap, data.shape[1]
+                )
                 data = np.sum(data, axis=1)
 
             lines.append(data)
