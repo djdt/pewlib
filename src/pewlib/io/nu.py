@@ -486,13 +486,13 @@ def times_from_data(integs: list[np.ndarray], run_info: dict) -> np.ndarray:
         [seg["AcquisitionPeriodNs"] for seg in run_info["SegmentInfo"]]
     )
 
-    times = np.sum(seg_times) * (np.concatenate([x["cyc_number"] for x in integs]) - 1)
+    times = np.sum(seg_times) * (np.concatenate([x["cyc_number"] - 1 for x in integs]))
     times += np.cumsum(np.concatenate([[0], seg_times]))[
-        np.concatenate([x["seg_number"] for x in integs]) - 1
+        np.concatenate([x["seg_number"] - 1 for x in integs])
     ]
     times += (
         np.concatenate([x["acq_number"] for x in integs])
-        * seg_periods[np.concatenate([x["seg_number"] for x in integs]) - 1]
+        * seg_periods[np.concatenate([x["seg_number"] - 1 for x in integs])]
     )
     return times
 
@@ -651,6 +651,9 @@ def read_laser_image(
     with Path(path.joinpath("TriggerCorrections.dat")).open("r") as fp:
         corrections = json.load(fp)
 
+    if corrections["CorrectionMode"] != 0:  # pragma: no cover
+        raise NotImplementedError("only correction mode 0 is supported")
+
     masses = None
     signals_list = []
     times_list = []
@@ -670,26 +673,20 @@ def read_laser_image(
 
         signals_list.append(_signals)
         times_list.append(_times)
-        pulse_list.append(_pulses)
+        pulse_list.append(apply_trigger_correction(_pulses, corrections))
 
     if masses is None:  # pragma: no cover
         raise ValueError("masses were not read from any laser directory")
-
-    if corrections["CorrectionMode"] != 0:  # pragma: no cover
-        raise NotImplementedError("only correction mode 0 is supported")
-
-    for pulse in pulse_list:
-        apply_trigger_correction(pulse, corrections)
 
     return signals_list, masses, times_list, pulse_list, laser_info
 
 
 def sync_data_with_laser_info(
     signal_list: list[np.ndarray],
-    masses: np.ndarray,
     time_list: list[np.ndarray],
     pulse_list: list[np.ndarray],
     info: dict,
+    sum_overlaps: bool = True,
 ):
     def line_overlap(line: dict) -> int:
         return int(line["ss"] / line["sp"])
@@ -699,23 +696,31 @@ def sync_data_with_laser_info(
         return line["ns"] // overlap
 
     acq_group_size = info["AcquisitionLineGroupSize"]
-    overlap = line_overlap(info["LaserLineInfo"][0])
 
-    if any(line_overlap(li) != overlap for li in info["LaserLineInfo"]):
-        raise ValueError("varying laser spot overlaps detected, aborting")
+    if sum_overlaps:
+        overlap = line_overlap(info["LaserLineInfo"][0])
+        if any(line_overlap(li) != overlap for li in info["LaserLineInfo"]):
+            raise ValueError("varying laser spot overlaps detected, aborting")
 
     lines = []
     for i, (signals, times, pulses) in enumerate(
         zip(signal_list, time_list, pulse_list)
     ):
-        idx = np.searchsorted(times, pulses[::overlap])
-        sums = np.add.reduceat(signals, idx, axis=0)
+        idx = np.searchsorted(times, pulses)
+        sums = np.add.reduceat(signals, idx, axis=0)[:-1]
 
         first_line = i * acq_group_size
         last_line = first_line + acq_group_size
+        pixel_pos = 0
         for lineinfo in info["LaserLineInfo"][first_line:last_line]:
-            pixels = lineinfo["ns"] // overlap
-            lines.append(sums[: pixels - 1])
+            pixels = lineinfo["ns"]
+            data = sums[pixel_pos : pixel_pos + pixels]
+            if sum_overlaps:
+                data = data.reshape(-1, overlap, data.shape[1])
+                data = np.sum(data, axis=1)
+
+            lines.append(data)
+            pixel_pos += pixels - 1
 
     # todo: need to make generic
     min_line_length = min(line.shape[0] for line in lines)
