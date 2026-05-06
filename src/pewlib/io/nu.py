@@ -691,10 +691,6 @@ def sync_data_with_laser_info(
     def line_overlap(line: dict) -> int:
         return int(line["ss"] / line["sp"])
 
-    def pixels_per_line(line: dict) -> int:
-        overlap = int(line["ss"] / line["sp"])
-        return line["ns"] // overlap
-
     acq_group_size = info["AcquisitionLineGroupSize"]
 
     if sum_overlaps:
