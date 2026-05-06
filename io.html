@@ -124,12 +124,18 @@
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.apply_trigger_correction"><code class="docutils literal notranslate"><span class="pre">apply_trigger_correction()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.blanking_regions_from_autob"><code class="docutils literal notranslate"><span class="pre">blanking_regions_from_autob()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.eventtime_from_info"><code class="docutils literal notranslate"><span class="pre">eventtime_from_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.indicies_from_integ"><code class="docutils literal notranslate"><span class="pre">indicies_from_integ()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.is_nu_acquisition_directory"><code class="docutils literal notranslate"><span class="pre">is_nu_acquisition_directory()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.is_nu_image_directory"><code class="docutils literal notranslate"><span class="pre">is_nu_image_directory()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.masses_from_integ"><code class="docutils literal notranslate"><span class="pre">masses_from_integ()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.read_autob_binary"><code class="docutils literal notranslate"><span class="pre">read_autob_binary()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.read_binaries_in_index"><code class="docutils literal notranslate"><span class="pre">read_binaries_in_index()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.read_integ_binary"><code class="docutils literal notranslate"><span class="pre">read_integ_binary()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.read_laser_acquisition"><code class="docutils literal notranslate"><span class="pre">read_laser_acquisition()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.read_laser_image"><code class="docutils literal notranslate"><span class="pre">read_laser_image()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.read_pulse_binary"><code class="docutils literal notranslate"><span class="pre">read_pulse_binary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.signals_from_integs"><code class="docutils literal notranslate"><span class="pre">signals_from_integs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.times_from_data"><code class="docutils literal notranslate"><span class="pre">times_from_data()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pewlib.io.npz">Numpy NPZ</a><ul>
@@ -965,7 +971,7 @@ Times in the log are modified to start at 0.</p>
 <p>Nu Instruments data import.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pewlib.io.nu.apply_autoblanking">
-<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">apply_autoblanking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">autob_events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_acc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_coef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_coef</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.apply_autoblanking" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">apply_autoblanking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">autob_events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blank_all_signals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.apply_autoblanking" title="Link to this definition"></a></dt>
 <dd><p>Apply the auto-blanking to the integrated data.
 There must be one cycle / segment and no missing acquisitions / data!</p>
 <dl class="field-list simple">
@@ -974,9 +980,8 @@ There must be one cycle / segment and no missing acquisitions / data!</p>
 <li><p><strong>autob</strong> – list of events from <cite>read_nu_autob_binary</cite></p></li>
 <li><p><strong>signals</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – 2d array of signals from <cite>get_signals_from_nu_data</cite></p></li>
 <li><p><strong>masses</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – 1d array of masses, from <cite>get_masses_from_nu_data</cite></p></li>
-<li><p><strong>num_acc</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – number of accumulations per acquisition</p></li>
-<li><p><strong>start_coef</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – blanker open coefs ‘BlMassCalStartCoef’</p></li>
-<li><p><strong>end_coef</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – blanker close coefs ‘BlMassCalEndCoef’</p></li>
+<li><p><strong>info</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – dict of parameters, as returned by <cite>read_nu_directory</cite></p></li>
+<li><p><strong>blank_all_signals</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – apply blanking to all data, not just specified regions</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1049,6 +1054,26 @@ Rounds to the nearest ns.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.indicies_from_integ">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">indicies_from_integ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.indicies_from_integ" title="Link to this definition"></a></dt>
+<dd><p>Get the acuisition index from integ files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>integ</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – from <cite>read_integ_binary</cite></p></li>
+<li><p><strong>info</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – dict of parameters, as returned by <cite>read_nu_directory</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of indicies</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pewlib.io.nu.is_nu_acquisition_directory">
 <span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">is_nu_acquisition_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.is_nu_acquisition_directory" title="Link to this definition"></a></dt>
 <dd><p>Checks path is directory containing a ‘run.info’ and ‘integrated.index’</p>
@@ -1072,14 +1097,13 @@ Rounds to the nearest ns.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pewlib.io.nu.masses_from_integ">
-<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">masses_from_integ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cal_coef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment_delays</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.masses_from_integ" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">masses_from_integ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.masses_from_integ" title="Link to this definition"></a></dt>
 <dd><p>Converts Nu peak centers into masses.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>integ</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – from <cite>read_integ_binary</cite></p></li>
-<li><p><strong>cal_coef</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – from run.info ‘MassCalCoefficients’</p></li>
-<li><p><strong>segment_delays</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – dict of segment nums and delays from <cite>SegmentInfo</cite></p></li>
+<li><p><strong>info</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – dict of parameters, as returned by <cite>read_nu_directory</cite></p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1092,18 +1116,47 @@ Rounds to the nearest ns.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.read_autob_binary">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">read_autob_binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_cyc_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_seg_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_acq_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.read_autob_binary" title="Link to this definition"></a></dt>
+<dd><p>Read a Nu Instruments .autob autoblanking binary.</p>
+<p>These files are (unfortunately) not a fixed size, so ‘num_edges’ should be read
+for each array value to determine the true size of ‘edges’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></span>) – Path to the binary</p></li>
+<li><p><strong>first_cyc_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – optional check of first cycle number</p></li>
+<li><p><strong>first_seg_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – optional check of first segment number</p></li>
+<li><p><strong>first_acq_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – optional check of first acquisition number</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>structured array</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError if cyc</strong><strong>, </strong><strong>seg</strong><strong> or </strong><strong>acq number do not match</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pewlib.io.nu.read_binaries_in_index">
-<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">read_binaries_in_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_ext</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_read_fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cyc_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seg_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.read_binaries_in_index" title="Link to this definition"></a></dt>
-<dd><p>Reads Nu binaries listed in an index file.</p>
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">read_binaries_in_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_ext</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_read_fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_read_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cyc_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seg_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.read_binaries_in_index" title="Link to this definition"></a></dt>
+<dd><p>Generic function for reading all Nu binaries stored in an index file.</p>
+<p>This can be used for .integ, .autob, .pulse, etc.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>root</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></span>) – directory containing files and index</p></li>
-<li><p><strong>index</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</span>) – list of indices from json.loads</p></li>
+<li><p><strong>index</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</span>) – list of indices from <cite>json.loads</cite></p></li>
 <li><p><strong>binary_ext</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – extension of binary files, e.g. ‘.integ’</p></li>
-<li><p><strong>binary_read</strong> – function to read binary file</p></li>
-<li><p><strong>cyc_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – restrict to cycle</p></li>
-<li><p><strong>seg_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – restrict to segments</p></li>
+<li><p><strong>binary_read_fn</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span>) – function to read binary file</p></li>
+<li><p><strong>binary_read_kwrags</strong> – keywords to forward to ‘binary_read_fn’</p></li>
+<li><p><strong>cyc_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – restrict to cycle, None for all</p></li>
+<li><p><strong>seg_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – restrict to segments, None for all</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1111,6 +1164,34 @@ Rounds to the nearest ns.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>binary data as a list of arrays</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.read_integ_binary">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">read_integ_binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_cyc_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_seg_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_acq_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.read_integ_binary" title="Link to this definition"></a></dt>
+<dd><p>Read a Nu Instruments .integ binary.</p>
+<p>The data type of returned array will change depending on the value of ‘num_results’.
+From v2.0.11 the .integ may be compressed using gzip.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></span>) – Path to the binary</p></li>
+<li><p><strong>first_cyc_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – optional check of first cycle number</p></li>
+<li><p><strong>first_seg_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – optional check of first segment number</p></li>
+<li><p><strong>first_acq_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – optional check of first acquisition number</p></li>
+<li><p><strong>memmap</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – use memmap instead of reading in data, can’t be used when compressed</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>structured array</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError if cyc</strong><strong>, </strong><strong>seg</strong><strong> or </strong><strong>acq number do not match</strong> – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -1157,14 +1238,82 @@ dict of parameters from run.info</p>
 <dd class="field-odd"><p><strong>path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – path to the Image directory</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>signals
+<dd class="field-odd"><p>list of signals for each acquistion
 masses
-times
-pulses
+list of times for each acquistion
+list of pulses for each acquistion
 laser_info</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.read_pulse_binary">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">read_pulse_binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_cyc_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_seg_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_acq_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.read_pulse_binary" title="Link to this definition"></a></dt>
+<dd><p>Read a Nu Instruments .pulse binary.</p>
+<p>These binaries store the acquistion index of each laser pulse.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></span>) – Path to the binary</p></li>
+<li><p><strong>first_cyc_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – optional check of first cycle number</p></li>
+<li><p><strong>first_seg_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – optional check of first segment number</p></li>
+<li><p><strong>first_acq_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – optional check of first acquisition number</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>structured array</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError if cyc</strong><strong>, </strong><strong>seg</strong><strong> or </strong><strong>acq number do not match</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.signals_from_integs">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">signals_from_integs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.signals_from_integs" title="Link to this definition"></a></dt>
+<dd><p>Converts signals from integ data to counts.</p>
+<p>Inserts nan values for discontinuities in integ index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>integ</strong> – from <cite>read_integ_binary</cite></p></li>
+<li><p><strong>info</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – dict of parameters, as returned by <cite>read_nu_directory</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>signals in counts</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.times_from_data">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">times_from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.times_from_data" title="Link to this definition"></a></dt>
+<dd><p>Get the acquisition times from a list of .integ files.</p>
+<p>Calculates the times using the acquistion, segment and cycle for each result.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>integs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span>) – list of parsed .integ files, from <cite>read_integ_binary</cite></p></li>
+<li><p><strong>run_info</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – dict of the run.info file, from <cite>json.load</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of times for each result in all .integs</p>
 </dd>
 </dl>
 </dd></dl>
