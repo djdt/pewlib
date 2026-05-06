@@ -3,6 +3,7 @@ Nu Instruments data import.
 """
 
 import json
+import gzip
 import logging
 from pathlib import Path
 from typing import BinaryIO, Callable, Generator
@@ -31,6 +32,294 @@ def is_nu_image_directory(path: Path) -> bool:
         return False
 
     return any(is_nu_acquisition_directory(dir) for dir in path.iterdir())
+
+
+def read_autob_binary(
+    path: Path,
+    first_cyc_number: int | None = None,
+    first_seg_number: int | None = None,
+    first_acq_number: int | None = None,
+) -> np.ndarray:
+    """Read a Nu Instruments .autob autoblanking binary.
+
+    These files are (unfortunately) not a fixed size, so 'num_edges' should be read
+    for each array value to determine the true size of 'edges'.
+
+    Args:
+        path: Path to the binary
+        first_cyc_number: optional check of first cycle number
+        first_seg_number: optional check of first segment number
+        first_acq_number: optional check of first acquisition number
+
+    Returns:
+        structured array
+
+    Raises:
+        ValueError if cyc, seg or acq number do not match
+    """
+    data_dtype = np.dtype(
+        [
+            ("cyc_number", np.uint32),
+            ("seg_number", np.uint32),
+            ("acq_number", np.uint32),
+            ("trig_start_time", np.uint32),
+            ("trig_end_time", np.uint32),
+            ("type", np.uint8),
+            ("num_edges", np.int32),
+            ("edges", np.uint32, 12),  # so far 12 is the maximum
+        ]
+    )
+
+    def read_autoblank_events(fp: BinaryIO) -> Generator[np.ndarray, None, None]:
+        while fp:
+            partial = fp.read(25)
+            if len(partial) < 25:
+                return
+            autob = np.zeros(1, dtype=data_dtype)
+            autob.data.cast("B")[:25] = partial
+            num = autob["num_edges"][0]
+            if num > 0:
+                autob["edges"][:num] = np.frombuffer(fp.read(num * 4), dtype=np.uint32)
+            yield autob
+
+    with path.open("rb") as fp:
+        autob = np.concatenate(list(read_autoblank_events(fp)))
+
+    if autob.size > 0:
+        if (
+            first_cyc_number is not None and autob[0]["cyc_number"] != first_cyc_number
+        ):  # pragma: no cover
+            raise ValueError("read_integ_binary: incorrect FirstCycNum")
+        if (
+            first_seg_number is not None and autob[0]["seg_number"] != first_seg_number
+        ):  # pragma: no cover
+            raise ValueError("read_integ_binary: incorrect FirstSegNum")
+        if (
+            first_acq_number is not None and autob[0]["acq_number"] != first_acq_number
+        ):  # pragma: no cover
+            raise ValueError("read_integ_binary: incorrect FirstAcqNum")
+
+    return autob
+
+
+def read_integ_binary(
+    path: Path,
+    first_cyc_number: int | None = None,
+    first_seg_number: int | None = None,
+    first_acq_number: int | None = None,
+    memmap: bool = False,
+) -> np.ndarray:
+    """Read a Nu Instruments .integ binary.
+
+    The data type of returned array will change depending on the value of 'num_results'.
+    From v2.0.11 the .integ may be compressed using gzip.
+
+    Args:
+        path: Path to the binary
+        first_cyc_number: optional check of first cycle number
+        first_seg_number: optional check of first segment number
+        first_acq_number: optional check of first acquisition number
+        memmap: use memmap instead of reading in data, can't be used when compressed
+
+    Returns:
+        structured array
+
+    Raises:
+        ValueError if cyc, seg or acq number do not match
+    """
+
+    def integ_dtype(size: int) -> np.dtype:
+        data_dtype = np.dtype(
+            {
+                "names": ["center", "signal"],
+                "formats": [np.float32, np.float32],
+                "itemsize": 4 + 4 + 4 + 1,  # unused f32, unused i8
+            }
+        )
+        return np.dtype(
+            [
+                ("cyc_number", np.uint32),
+                ("seg_number", np.uint32),
+                ("acq_number", np.uint32),
+                ("num_results", np.uint32),
+                ("result", data_dtype, size),
+            ]
+        )
+
+    fp = path.open("rb")
+
+    if fp.read(2) == b"\x1f\x8b":  # is a gzipped integ
+        fp = gzip.open(path, "rb")
+        if memmap:
+            memmap = False
+            logger.info("compressed, disabling memmory mapping for integ")
+    else:
+        fp.seek(0)
+
+    cyc_number = int.from_bytes(fp.read(4), "little")
+    if (
+        first_cyc_number is not None and cyc_number != first_cyc_number
+    ):  # pragma: no cover
+        raise ValueError("read_integ_binary: incorrect FirstCycNum")
+    seg_number = int.from_bytes(fp.read(4), "little")
+    if (
+        first_seg_number is not None and seg_number != first_seg_number
+    ):  # pragma: no cover
+        raise ValueError("read_integ_binary: incorrect FirstSegNum")
+    acq_number = int.from_bytes(fp.read(4), "little")
+    if (
+        first_acq_number is not None and acq_number != first_acq_number
+    ):  # pragma: no cover
+        raise ValueError("read_integ_binary: incorrect FirstAcqNum")
+    num_results = int.from_bytes(fp.read(4), "little")
+
+    if memmap:
+        return np.memmap(path, dtype=integ_dtype(num_results), mode="r")
+    else:
+        fp.seek(0)
+        return np.frombuffer(fp.read(), dtype=integ_dtype(num_results))
+
+
+def read_pulse_binary(
+    path: Path,
+    first_cyc_number: int | None = None,
+    first_seg_number: int | None = None,
+    first_acq_number: int | None = None,
+) -> np.ndarray:
+    """Read a Nu Instruments .pulse binary.
+
+    These binaries store the acquistion index of each laser pulse.
+
+    Args:
+        path: Path to the binary
+        first_cyc_number: optional check of first cycle number
+        first_seg_number: optional check of first segment number
+        first_acq_number: optional check of first acquisition number
+
+    Returns:
+        structured array
+
+    Raises:
+        ValueError if cyc, seg or acq number do not match
+    """
+    dtype = np.dtype(
+        [
+            ("cyc_number", np.uint32),
+            ("seg_number", np.uint32),
+            ("acq_number", np.uint32),
+            ("overflow", np.bool),
+        ]
+    )
+    with path.open("rb") as fp:
+        pulse = np.frombuffer(fp.read(), dtype=dtype)
+
+    if pulse.size > 0:  # pragma: no cover
+        if (
+            first_cyc_number is not None and pulse[0]["cyc_number"] != first_cyc_number
+        ):  # pragma: no cover
+            raise ValueError("read_integ_binary: incorrect FirstCycNum")
+        if (
+            first_seg_number is not None and pulse[0]["seg_number"] != first_seg_number
+        ):  # pragma: no cover
+            raise ValueError("read_integ_binary: incorrect FirstSegNum")
+        if (
+            first_acq_number is not None and pulse[0]["acq_number"] != first_acq_number
+        ):  # pragma: no cover
+            raise ValueError("read_integ_binary: incorrect FirstAcqNum")
+
+    return pulse
+
+
+def read_binaries_in_index(
+    root: Path,
+    index: list[dict],
+    binary_ext: str,
+    binary_read_fn: Callable[[Path, int, int, int], np.ndarray],
+    binary_read_kwargs: dict | None = None,
+    cyc_number: int | None = None,
+    seg_number: int | None = None,
+) -> list[np.ndarray]:
+    """Generic function for reading all Nu binaries stored in an index file.
+
+    This can be used for .integ, .autob, .pulse, etc.
+
+    Args:
+        root: directory containing files and index
+        index: list of indices from `json.loads`
+        binary_ext: extension of binary files, e.g. '.integ'
+        binary_read_fn: function to read binary file
+        binary_read_kwrags: keywords to forward to 'binary_read_fn'
+        cyc_number: restrict to cycle, None for all
+        seg_number: restrict to segments, None for all
+
+    Returns:
+        binary data as a list of arrays
+    """
+
+    if binary_read_kwargs is None:
+        binary_read_kwargs = {}
+
+    datas = []
+    for idx in index:
+        binary_path = root.joinpath(f"{idx['FileNum']}.{binary_ext}")
+        if binary_path.exists():
+            data = binary_read_fn(
+                binary_path,
+                idx["FirstCycNum"],
+                idx["FirstSegNum"],
+                idx["FirstAcqNum"],
+                **binary_read_kwargs,
+            )
+            if cyc_number is not None:
+                data = data[data["cyc_number"] == cyc_number]
+            if seg_number is not None:
+                data = data[data["seg_number"] == seg_number]
+            datas.append(data)
+        else:
+            logger.warning(  # pragma: no cover, missing files
+                f"collect_data_from_index: missing data file {idx['FileNum']}.{binary_ext}, skipping"
+            )
+    return datas
+
+
+def apply_autoblanking(
+    autob_events: np.ndarray,
+    signals: np.ndarray,
+    masses: np.ndarray,
+    info: dict,
+    blank_all_signals: bool = False,
+) -> np.ndarray:
+    """Apply the auto-blanking to the integrated data.
+    There must be one cycle / segment and no missing acquisitions / data!
+
+    Args:
+        autob: list of events from `read_nu_autob_binary`
+        signals: 2d array of signals from `get_signals_from_nu_data`
+        masses: 1d array of masses, from `get_masses_from_nu_data`
+        info: dict of parameters, as returned by `read_nu_directory`
+        blank_all_signals: apply blanking to all data, not just specified regions
+
+    Returns:
+        blanked data
+    """
+    num_acc = info["NumAccumulations1"] * info["NumAccumulations2"]
+    start_coef = info["BlMassCalStartCoef"]
+    end_coef = info["BlMassCalEndCoef"]
+
+    regions, mass_regions_list = blanking_regions_from_autob(
+        autob_events, num_acc, start_coef, end_coef
+    )
+    for region, mass_regions in zip(regions, mass_regions_list):
+        if blank_all_signals:
+            signals[region[0] : region[1]] = np.nan
+        else:
+            mass_idx = np.searchsorted(masses, mass_regions)
+            # There are a bunch of useless blanking regions
+            mass_idx = mass_idx[mass_idx[:, 0] != mass_idx[:, 1]]
+            for s, e in mass_idx:
+                signals[region[0] : region[1], s:e] = np.nan
+
+    return signals
 
 
 def blanking_regions_from_autob(
@@ -79,209 +368,12 @@ def blanking_regions_from_autob(
             ) ** 2
             valid = start_masses < end_masses
             mass_regions.append(
-                np.stack([start_masses[valid], end_masses[valid]], axis=0)
+                np.stack([start_masses[valid], end_masses[valid]], axis=1)
             )
 
             start_event = None
 
     return regions, mass_regions
-
-
-def apply_autoblanking(
-    autob_events: np.ndarray,
-    signals: np.ndarray,
-    masses: np.ndarray,
-    num_acc: int,
-    start_coef: tuple[float, float],
-    end_coef: tuple[float, float],
-) -> np.ndarray:
-    """Apply the auto-blanking to the integrated data.
-    There must be one cycle / segment and no missing acquisitions / data!
-
-    Args:
-        autob: list of events from `read_nu_autob_binary`
-        signals: 2d array of signals from `get_signals_from_nu_data`
-        masses: 1d array of masses, from `get_masses_from_nu_data`
-        num_acc: number of accumulations per acquisition
-        start_coef: blanker open coefs 'BlMassCalStartCoef'
-        end_coef: blanker close coefs 'BlMassCalEndCoef'
-
-    Returns:
-        blanked data
-    """
-    regions, mass_regions_list = blanking_regions_from_autob(
-        autob_events, num_acc, start_coef, end_coef
-    )
-    for region, mass_regions in zip(regions, mass_regions_list):
-        mass_idx = np.searchsorted(masses, mass_regions)
-        # There are a bunch of useless blanking regions
-        mass_idx = mass_idx[mass_idx[:, 0] != mass_idx[:, 1]]
-        for s, e in mass_idx:
-            signals[region[0] : region[1], s:e] = np.nan
-
-    return signals
-
-
-def read_autob_binary(
-    path: Path,
-    first_cyc_number: int | None = None,
-    first_seg_number: int | None = None,
-    first_acq_number: int | None = None,
-) -> np.ndarray:
-    data_dtype = np.dtype(
-        [
-            ("cyc_number", np.uint32),
-            ("seg_number", np.uint32),
-            ("acq_number", np.uint32),
-            ("trig_start_time", np.uint32),
-            ("trig_end_time", np.uint32),
-            ("type", np.uint8),
-            ("num_edges", np.int32),
-            ("edges", np.uint32, 12),  # so far 12 is the maximum
-        ]
-    )
-
-    def read_autoblank_events(fp: BinaryIO) -> Generator[np.ndarray, None, None]:
-        while fp:
-            partial = fp.read(25)
-            if len(partial) < 25:
-                return
-            autob = np.zeros(1, dtype=data_dtype)
-            autob.data.cast("B")[:25] = partial
-            num = autob["num_edges"][0]
-            if num > 0:
-                autob["edges"][:num] = np.frombuffer(fp.read(num * 4), dtype=np.uint32)
-            yield autob
-
-    with path.open("rb") as fp:
-        autob = np.concatenate(list(read_autoblank_events(fp)))
-
-    if autob.size > 0:  # pragma: no cover
-        if first_cyc_number is not None and autob[0]["cyc_number"] != first_cyc_number:
-            raise ValueError("read_integ_binary: incorrect FirstCycNum")
-        if first_seg_number is not None and autob[0]["seg_number"] != first_seg_number:
-            raise ValueError("read_integ_binary: incorrect FirstSegNum")
-        if first_acq_number is not None and autob[0]["acq_number"] != first_acq_number:
-            raise ValueError("read_integ_binary: incorrect FirstAcqNum")
-
-    return autob
-
-
-def read_integ_binary(
-    path: Path,
-    first_cyc_number: int | None = None,
-    first_seg_number: int | None = None,
-    first_acq_number: int | None = None,
-) -> np.ndarray:
-    def integ_dtype(size: int) -> np.dtype:
-        data_dtype = np.dtype(
-            {
-                "names": ["center", "signal"],
-                "formats": [np.float32, np.float32],
-                "itemsize": 4 + 4 + 4 + 1,  # unused f32, unused i8
-            }
-        )
-        return np.dtype(
-            [
-                ("cyc_number", np.uint32),
-                ("seg_number", np.uint32),
-                ("acq_number", np.uint32),
-                ("num_results", np.uint32),
-                ("result", data_dtype, size),
-            ]
-        )
-
-    with path.open("rb") as fp:
-        cyc_number = int.from_bytes(fp.read(4), "little")
-        if (
-            first_cyc_number is not None and cyc_number != first_cyc_number
-        ):  # pragma: no cover
-            raise ValueError("read_integ_binary: incorrect FirstCycNum")
-        seg_number = int.from_bytes(fp.read(4), "little")
-        if (
-            first_seg_number is not None and seg_number != first_seg_number
-        ):  # pragma: no cover
-            raise ValueError("read_integ_binary: incorrect FirstSegNum")
-        acq_number = int.from_bytes(fp.read(4), "little")
-        if (
-            first_acq_number is not None and acq_number != first_acq_number
-        ):  # pragma: no cover
-            raise ValueError("read_integ_binary: incorrect FirstAcqNum")
-        num_results = int.from_bytes(fp.read(4), "little")
-        fp.seek(0)
-
-        return np.frombuffer(fp.read(), dtype=integ_dtype(num_results))
-
-
-def read_pulse_binary(
-    path: Path,
-    first_cyc_number: int | None = None,
-    first_seg_number: int | None = None,
-    first_acq_number: int | None = None,
-) -> np.ndarray:
-    dtype = np.dtype(
-        [
-            ("cyc_number", np.uint32),
-            ("seg_number", np.uint32),
-            ("acq_number", np.uint32),
-            ("overflow", np.bool),
-        ]
-    )
-    with path.open("rb") as fp:
-        pulse = np.frombuffer(fp.read(), dtype=dtype)
-
-    if pulse.size > 0:  # pragma: no cover
-        if first_cyc_number is not None and pulse[0]["cyc_number"] != first_cyc_number:
-            raise ValueError("read_integ_binary: incorrect FirstCycNum")
-        if first_seg_number is not None and pulse[0]["seg_number"] != first_seg_number:
-            raise ValueError("read_integ_binary: incorrect FirstSegNum")
-        if first_acq_number is not None and pulse[0]["acq_number"] != first_acq_number:
-            raise ValueError("read_integ_binary: incorrect FirstAcqNum")
-
-    return pulse
-
-
-def read_binaries_in_index(
-    root: Path,
-    index: list[dict],
-    binary_ext: str,
-    binary_read_fn: Callable[[Path, int, int, int], np.ndarray],
-    cyc_number: int | None = None,
-    seg_number: int | None = None,
-) -> list[np.ndarray]:
-    """Reads Nu binaries listed in an index file.
-
-    Args:
-        root: directory containing files and index
-        index: list of indices from json.loads
-        binary_ext: extension of binary files, e.g. '.integ'
-        binary_read: function to read binary file
-        cyc_number: restrict to cycle
-        seg_number: restrict to segments
-
-    Returns:
-        binary data as a list of arrays
-    """
-    datas = []
-    for idx in index:
-        binary_path = root.joinpath(f"{idx['FileNum']}.{binary_ext}")
-        if binary_path.exists():
-            data = binary_read_fn(
-                binary_path,
-                idx["FirstCycNum"],
-                idx["FirstSegNum"],
-                idx["FirstAcqNum"],
-            )
-            if cyc_number is not None:
-                data = data[data["cyc_number"] == cyc_number]
-            if seg_number is not None:
-                data = data[data["seg_number"] == seg_number]
-            datas.append(data)
-        else:
-            logger.warning(  # pragma: no cover, missing files
-                f"collect_data_from_index: missing data file {idx['FileNum']}.{binary_ext}, skipping"
-            )
-    return datas
 
 
 def eventtime_from_info(info: dict) -> float:
@@ -300,19 +392,67 @@ def eventtime_from_info(info: dict) -> float:
     return np.around(acqtime * accumulations, 9)
 
 
-def masses_from_integ(
-    integ: np.ndarray, cal_coef: tuple[float, float], segment_delays: dict[int, float]
-) -> np.ndarray:
+def indicies_from_integ(integ: np.ndarray, info: dict) -> np.ndarray:
+    """Get the acuisition index from integ files.
+
+    Args:
+        integ: from `read_integ_binary`
+        info: dict of parameters, as returned by `read_nu_directory`
+
+    Returns:
+        array of indicies
+
+    """
+    num_acc = info["NumAccumulations1"] * info["NumAccumulations2"]
+    segment_acq = np.array([seg["AcquisitionCount"] for seg in info["SegmentInfo"]])
+
+    idx = (integ["cyc_number"] - 1) * segment_acq[integ["seg_number"] - 1]
+    idx += integ["acq_number"]
+    return idx // num_acc
+
+
+def signals_from_integs(integs: list[np.ndarray], info: dict) -> np.ndarray:
+    """Converts signals from integ data to counts.
+
+    Inserts nan values for discontinuities in integ index.
+
+    Args:
+        integ: from `read_integ_binary`
+        info: dict of parameters, as returned by `read_nu_directory`
+
+    Returns:
+        signals in counts
+    """
+
+    signals = np.concatenate([integ["result"]["signal"] for integ in integs], axis=0)
+
+    # prevent joining of any signals across missing integs
+    pos = 0
+    for integ, integ2 in zip(integs[:-1], integs[1:]):
+        pos += integ.size
+        if indicies_from_integ(integ[-1], info) + 1 != indicies_from_integ(
+            integ2[0], info
+        ):
+            signals[pos - 1] = np.nan
+
+    return signals
+
+
+def masses_from_integ(integ: np.ndarray, info: dict) -> np.ndarray:
     """Converts Nu peak centers into masses.
 
     Args:
         integ: from `read_integ_binary`
-        cal_coef: from run.info 'MassCalCoefficients'
-        segment_delays: dict of segment nums and delays from `SegmentInfo`
+        info: dict of parameters, as returned by `read_nu_directory`
 
     Returns:
         2d array of masses
     """
+
+    cal_coef = info["MassCalCoefficients"]
+    segment_delays = {
+        s["Num"]: s["AcquisitionTriggerDelayNs"] for s in info["SegmentInfo"]
+    }
 
     delays = np.zeros(max(segment_delays.keys()))
     for k, v in segment_delays.items():
@@ -324,8 +464,18 @@ def masses_from_integ(
     return (cal_coef[0] + masses * cal_coef[1]) ** 2
 
 
-def get_times_from_data(data: np.ndarray, run_info: dict) -> np.ndarray:
-    times = 0.0
+def times_from_data(integs: list[np.ndarray], run_info: dict) -> np.ndarray:
+    """Get the acquisition times from a list of .integ files.
+
+    Calculates the times using the acquistion, segment and cycle for each result.
+
+    Args:
+        integs: list of parsed .integ files, from `read_integ_binary`
+        run_info: dict of the run.info file, from `json.load`
+
+    Returns:
+        array of times for each result in all .integs
+    """
     seg_times = np.array(
         [
             seg["AcquisitionPeriodNs"] * seg["AcquisitionCount"]
@@ -335,9 +485,15 @@ def get_times_from_data(data: np.ndarray, run_info: dict) -> np.ndarray:
     seg_periods = np.array(
         [seg["AcquisitionPeriodNs"] for seg in run_info["SegmentInfo"]]
     )
-    times = np.sum(seg_times) * (data["cyc_number"] - 1)
-    times += np.cumsum(np.concatenate([[0], seg_times]))[data["seg_number"] - 1]
-    times += data["acq_number"] * seg_periods[data["seg_number"] - 1]
+
+    times = np.sum(seg_times) * (np.concatenate([x["cyc_number"] for x in integs]) - 1)
+    times += np.cumsum(np.concatenate([[0], seg_times]))[
+        np.concatenate([x["seg_number"] for x in integs]) - 1
+    ]
+    times += (
+        np.concatenate([x["acq_number"] for x in integs])
+        * seg_periods[np.concatenate([x["seg_number"] for x in integs]) - 1]
+    )
     return times
 
 
@@ -390,45 +546,34 @@ def read_laser_acquisition(
         integ_index = integ_index[:max_integs]
 
     # Collect integrated data
-    integs = np.concatenate(
-        read_binaries_in_index(
-            path,
-            integ_index,
-            "integ",
-            read_integ_binary,
-            cyc_number=cycle,
-            seg_number=segment,
-        )
+    integs = read_binaries_in_index(
+        path,
+        integ_index,
+        "integ",
+        read_integ_binary,
+        cyc_number=cycle,
+        seg_number=segment,
     )
 
     # Collect laser trigger data
-    pulses = np.concatenate(
-        read_binaries_in_index(
-            path,
-            pulse_index,
-            "pulse",
-            read_pulse_binary,
-            cyc_number=cycle,
-            seg_number=segment,
-        ),
+    pulses = read_binaries_in_index(
+        path,
+        pulse_index,
+        "pulse",
+        read_pulse_binary,
+        cyc_number=cycle,
+        seg_number=segment,
     )
 
     # Get masses from data
-    segment_delays = {
-        s["Num"]: s["AcquisitionTriggerDelayNs"] for s in run_info["SegmentInfo"]
-    }
-    masses = masses_from_integ(
-        integs[0], run_info["MassCalCoefficients"], segment_delays
-    )[0]
-
-    signals = integs["result"]["signal"]
+    masses = masses_from_integ(integs[0], run_info)[0]
+    signals = signals_from_integs(integs, run_info)
 
     if not raw:
         signals /= run_info["AverageSingleIonArea"]
 
     # Blank out overrange regions
     if autoblank:
-        accumulations = run_info["NumAccumulations1"] * run_info["NumAccumulations2"]
         autobs = np.concatenate(
             read_binaries_in_index(
                 path,
@@ -443,13 +588,12 @@ def read_laser_acquisition(
             autobs,
             signals,
             masses,
-            accumulations,
-            run_info["BlMassCalStartCoef"],
-            run_info["BlMassCalEndCoef"],
+            run_info,
+            blank_all_signals=False,
         )
 
-    pulse_times = get_times_from_data(pulses, run_info) * 1e-9
-    times = get_times_from_data(integs, run_info) * 1e-9
+    pulse_times = times_from_data(pulses, run_info) * 1e-9
+    times = times_from_data(integs, run_info) * 1e-9
 
     return signals, masses, times, pulse_times, run_info
 
@@ -478,7 +622,7 @@ def apply_trigger_correction(times: np.ndarray, corrections: dict) -> np.ndarray
 
 def read_laser_image(
     path: Path | str,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict]:
+) -> tuple[list[np.ndarray], np.ndarray, list[np.ndarray], list[np.ndarray], dict]:
     """Read a laser image from a Nu Vitesse ICP-TOF-MS.
 
     Calls ``read_laser_acquistion`` on valid sub directories and concatenates.
@@ -487,10 +631,10 @@ def read_laser_image(
         path: path to the Image directory
 
     Returns:
-        signals
+        list of signals for each acquistion
         masses
-        times
-        pulses
+        list of times for each acquistion
+        list of pulses for each acquistion
         laser_info
     """
     path = Path(path)
@@ -534,11 +678,47 @@ def read_laser_image(
     if corrections["CorrectionMode"] != 0:  # pragma: no cover
         raise NotImplementedError("only correction mode 0 is supported")
 
-    correction = corrections["Transit1Time"] * 1e-3
+    for pulse in pulse_list:
+        apply_trigger_correction(pulse, corrections)
 
-    signals = np.concatenate(signals_list, axis=0)
-    times = np.concatenate(times_list)
-    times -= correction
-    pulses = np.concatenate(pulse_list)
+    return signals_list, masses, times_list, pulse_list, laser_info
 
-    return signals, masses, times, pulses, laser_info
+
+def sync_data_with_laser_info(
+    signal_list: list[np.ndarray],
+    masses: np.ndarray,
+    time_list: list[np.ndarray],
+    pulse_list: list[np.ndarray],
+    info: dict,
+):
+    def line_overlap(line: dict) -> int:
+        return int(line["ss"] / line["sp"])
+
+    def pixels_per_line(line: dict) -> int:
+        overlap = int(line["ss"] / line["sp"])
+        return line["ns"] // overlap
+
+    acq_group_size = info["AcquisitionLineGroupSize"]
+    overlap = line_overlap(info["LaserLineInfo"][0])
+
+    if any(line_overlap(li) != overlap for li in info["LaserLineInfo"]):
+        raise ValueError("varying laser spot overlaps detected, aborting")
+
+    lines = []
+    for i, (signals, times, pulses) in enumerate(
+        zip(signal_list, time_list, pulse_list)
+    ):
+        idx = np.searchsorted(times, pulses[::overlap])
+        sums = np.add.reduceat(signals, idx, axis=0)
+
+        first_line = i * acq_group_size
+        last_line = first_line + acq_group_size
+        for lineinfo in info["LaserLineInfo"][first_line:last_line]:
+            pixels = lineinfo["ns"] // overlap
+            lines.append(sums[: pixels - 1])
+
+    # todo: need to make generic
+    min_line_length = min(line.shape[0] for line in lines)
+    image = np.stack([line[:min_line_length] for line in lines], axis=0)
+
+    return image

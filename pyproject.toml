@@ -10,7 +10,7 @@ dependencies = [
 ]
 description = "Import, processing and export library for LA-ICP-MS data."
 readme = "README.md"
-requires-python = ">= 3.9"
+requires-python = ">= 3.10"
 license = {file = "LICENSE"}
 authors = [{name = "Thomas Lockwood", email = "thomas.lockwood@uts.edu.au"}]
 
