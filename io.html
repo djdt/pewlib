@@ -123,6 +123,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.apply_autoblanking"><code class="docutils literal notranslate"><span class="pre">apply_autoblanking()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.apply_trigger_correction"><code class="docutils literal notranslate"><span class="pre">apply_trigger_correction()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.blanking_regions_from_autob"><code class="docutils literal notranslate"><span class="pre">blanking_regions_from_autob()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.contains_nu_image_directory"><code class="docutils literal notranslate"><span class="pre">contains_nu_image_directory()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.eventtime_from_info"><code class="docutils literal notranslate"><span class="pre">eventtime_from_info()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.indicies_from_integ"><code class="docutils literal notranslate"><span class="pre">indicies_from_integ()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.is_nu_acquisition_directory"><code class="docutils literal notranslate"><span class="pre">is_nu_acquisition_directory()</span></code></a></li>
@@ -135,6 +136,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.read_laser_image"><code class="docutils literal notranslate"><span class="pre">read_laser_image()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.read_pulse_binary"><code class="docutils literal notranslate"><span class="pre">read_pulse_binary()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.signals_from_integs"><code class="docutils literal notranslate"><span class="pre">signals_from_integs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.sync_data_with_laser_info"><code class="docutils literal notranslate"><span class="pre">sync_data_with_laser_info()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pewlib.io.nu.times_from_data"><code class="docutils literal notranslate"><span class="pre">times_from_data()</span></code></a></li>
 </ul>
 </li>
@@ -1036,6 +1038,17 @@ There must be one cycle / segment and no missing acquisitions / data!</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.contains_nu_image_directory">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">contains_nu_image_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.contains_nu_image_directory" title="Link to this definition"></a></dt>
+<dd><p>Checks if directory contains any image directories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pewlib.io.nu.eventtime_from_info">
 <span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">eventtime_from_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.eventtime_from_info" title="Link to this definition"></a></dt>
 <dd><p>Reads the dwelltime (total acquistion time) from run.info.
@@ -1293,6 +1306,29 @@ laser_info</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>signals in counts</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pewlib.io.nu.sync_data_with_laser_info">
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">sync_data_with_laser_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signal_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.sync_data_with_laser_info" title="Link to this definition"></a></dt>
+<dd><p>Create a laser image using the pulse times and laser info file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>signal_list</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span>) – list of signals, per acq group</p></li>
+<li><p><strong>time_list</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span>) – list of times, per acq group</p></li>
+<li><p><strong>pulse_list</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span>) – list of pulses, per acq group</p></li>
+<li><p><strong>info</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – laser info dict</p></li>
+<li><p><strong>overlap</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – spot overlap, pass None to determine automatically</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>image with shape (X, Y, masses), overlap</p>
 </dd>
 </dl>
 </dd></dl>
