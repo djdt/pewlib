@@ -90,12 +90,14 @@ def test_read_laser_image(image_path: Path):
     assert len(times) == 2
     assert times[0].shape == (4273,)
 
-    image = nu.sync_data_with_laser_info(signals, times, pulses, info)
+    image, overlap = nu.sync_data_with_laser_info(signals, times, pulses, info)
 
+    assert overlap == 2
     assert image.shape == (10, 80, 186)
 
-    image = nu.sync_data_with_laser_info(
-        signals, times, pulses, info, sum_overlaps=False
+    image, overlap = nu.sync_data_with_laser_info(
+        signals, times, pulses, info, overlap=1
     )
 
+    assert overlap == 1
     assert image.shape == (10, 160, 186)
