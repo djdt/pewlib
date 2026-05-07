@@ -34,6 +34,11 @@ def is_nu_image_directory(path: Path) -> bool:
     return any(is_nu_acquisition_directory(dir) for dir in path.iterdir())
 
 
+def contains_nu_image_directory(path: Path) -> bool:
+    """Checks if directory contains any image directories."""
+    return any(is_nu_image_directory(dir) for dir in path.iterdir())
+
+
 def read_autob_binary(
     path: Path,
     first_cyc_number: int | None = None,
@@ -686,14 +691,27 @@ def sync_data_with_laser_info(
     time_list: list[np.ndarray],
     pulse_list: list[np.ndarray],
     info: dict,
-    sum_overlaps: bool = True,
-):
+    overlap: int | None = None,
+) -> tuple[np.ndarray, int]:
+    """Create a laser image using the pulse times and laser info file.
+
+    Args:
+        signal_list: list of signals, per acq group
+        time_list: list of times, per acq group
+        pulse_list: list of pulses, per acq group
+        info: laser info dict
+        overlap: spot overlap, pass None to determine automatically
+
+    Returns:
+        image with shape (X, Y, masses), overlap
+    """
+
     def line_overlap(line: dict) -> int:
         return int(line["ss"] / line["sp"])
 
     acq_group_size = info["AcquisitionLineGroupSize"]
 
-    if sum_overlaps:
+    if overlap is None:
         overlap = line_overlap(info["LaserLineInfo"][0])
         if any(line_overlap(li) != overlap for li in info["LaserLineInfo"]):
             raise ValueError("varying laser spot overlaps detected, aborting")
@@ -715,19 +733,18 @@ def sync_data_with_laser_info(
                 logger.warning(
                     f"missing data for line {lineinfo['ln']}: {lineinfo['na']}"
                 )
-                continue
+            else:
+                if overlap != 1:
+                    data = data[: data.shape[0] - data.shape[0] % overlap].reshape(
+                        -1, overlap, data.shape[1]
+                    )
+                    data = np.sum(data, axis=1)
 
-            if sum_overlaps:
-                data = data[: data.shape[0] - data.shape[0] % overlap].reshape(
-                    -1, overlap, data.shape[1]
-                )
-                data = np.sum(data, axis=1)
-
-            lines.append(data)
+                lines.append(data)
             pixel_pos += pixels - 1
 
     # todo: need to make generic
     min_line_length = min(line.shape[0] for line in lines)
     image = np.stack([line[:min_line_length] for line in lines], axis=0)
 
-    return image
+    return image, overlap
