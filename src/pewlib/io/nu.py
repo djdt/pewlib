@@ -722,6 +722,8 @@ def sync_data_with_laser_info(
     ):
         idx = np.searchsorted(times, pulses)
         sums = np.add.reduceat(signals, idx, axis=0)[:-1]
+        counts = np.diff(idx)
+        sums /= counts[:, None]
 
         first_line = i * acq_group_size
         last_line = first_line + acq_group_size
@@ -741,7 +743,7 @@ def sync_data_with_laser_info(
                     data = np.sum(data, axis=1)
 
                 lines.append(data)
-            pixel_pos += pixels - 1
+            pixel_pos += pixels
 
     # todo: need to make generic
     min_line_length = min(line.shape[0] for line in lines)
