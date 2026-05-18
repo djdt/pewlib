@@ -695,6 +695,8 @@ def sync_data_with_laser_info(
 ) -> tuple[np.ndarray, int]:
     """Create a laser image using the pulse times and laser info file.
 
+    Set `overlap` to 1 to import raw acq positions.
+
     Args:
         signal_list: list of signals, per acq group
         time_list: list of times, per acq group
@@ -714,7 +716,16 @@ def sync_data_with_laser_info(
     if overlap is None:
         overlap = line_overlap(info["LaserLineInfo"][0])
         if any(line_overlap(li) != overlap for li in info["LaserLineInfo"]):
-            raise ValueError("varying laser spot overlaps detected, aborting")
+            raise ValueError("varying laser spot overlaps are not supported")
+        if overlap % 1 != 0.0:
+            raise ValueError(f"overlap '{overlap}' is not an integer")
+
+    line_type = info["LaserLineInfo"][0]["lt"]
+    if any(li["lt"] != line_type for li in info["LaserLineInfo"]):
+        raise ValueError("varying laser line types are not supported")
+
+    x0, x1 = min(li["sx"] for li in info["LaserLineInfo"]), max(li["sx"] for li in info["LaserLineInfo"])
+    y0, y1 = min(li["sy"] for li in info["LaserLineInfo"]), max(li["sy"] for li in info["LaserLineInfo"])
 
     lines = []
     for i, (signals, times, pulses) in enumerate(
@@ -723,6 +734,7 @@ def sync_data_with_laser_info(
         idx = np.searchsorted(times, pulses)
         sums = np.add.reduceat(signals, idx, axis=0)[:-1]
         counts = np.diff(idx)
+        print(counts)
         sums /= counts[:, None]
 
         first_line = i * acq_group_size
@@ -735,12 +747,12 @@ def sync_data_with_laser_info(
                 logger.warning(
                     f"missing data for line {lineinfo['ln']}: {lineinfo['na']}"
                 )
-            else:
-                if overlap != 1:
-                    data = data[: data.shape[0] - data.shape[0] % overlap].reshape(
-                        -1, overlap, data.shape[1]
-                    )
-                    data = np.sum(data, axis=1)
+            # else:
+                # if overlap != 1:
+                #     data = data[: data.shape[0] - data.shape[0] % overlap].reshape(
+                #         -1, overlap, data.shape[1]
+                #     )
+                #     data = np.sum(data, axis=1)
 
                 lines.append(data)
             pixel_pos += pixels
