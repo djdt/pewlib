@@ -505,7 +505,7 @@ class ImzML(object):
         fp = self.external_binary.open("rb")
 
         for (x, y), spec in self.spectra.items():
-            if spec.tic is None:
+            if spec.tic is None:  # pragma: no cover, no ImzML file with tic not saved
                 tic[y - 1, x - 1] = np.sum(
                     spec.get_binary_data(
                         self.intensity_params.id, self.intensity_params.dtype, fp

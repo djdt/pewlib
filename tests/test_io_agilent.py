@@ -97,6 +97,15 @@ def test_io_agilent_load_8900_binary():
     assert np.isclose(params["scantime"], 0.5, rtol=1e-2)
 
 
+def test_io_agilent_load_8900_binary_flat():
+    path = Path(__file__).parent.joinpath("data", "agilent", "8900")
+
+    data, params = agilent.load_binary(
+        path.joinpath("test_ms.b"), counts_per_second=True, flatten=True
+    )
+    assert data.shape == (25,)
+
+
 def test_io_agilent_load_8900_csv():
     path = Path(__file__).parent.joinpath("data", "agilent", "8900")
 
