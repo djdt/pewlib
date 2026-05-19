@@ -691,74 +691,145 @@ def sync_data_with_laser_info(
     time_list: list[np.ndarray],
     pulse_list: list[np.ndarray],
     info: dict,
-    overlap: int | None = None,
-) -> tuple[np.ndarray, int]:
+    apply_overlap: bool = True,
+    trim_last_row: bool = True,
+) -> tuple[np.ndarray, tuple[float, float]]:
     """Create a laser image using the pulse times and laser info file.
 
-    Set `overlap` to 1 to import raw acq positions.
+    If `apply_overlap` is false then the pixel size in the direection of ablation will
+    equal the spot spacing, if true the it will equal the spot size. The pixel size in
+    the other direction is always equal to the line spacing.
 
     Args:
         signal_list: list of signals, per acq group
         time_list: list of times, per acq group
         pulse_list: list of pulses, per acq group
         info: laser info dict
-        overlap: spot overlap, pass None to determine automatically
+        apply_overlap: merge overlapping ablation events to the spot size
+        trim_last_row: trims the last row as it often contains NaNs
 
     Returns:
-        image with shape (X, Y, masses), overlap
+        image with shape (X, Y, masses)
+        origin (top left corner) of image in µm
+
+    See Also:
+        ``pewlib.io.nu.read_laser_image``, to produce the required arguments
     """
 
     def line_overlap(line: dict) -> int:
         return int(line["ss"] / line["sp"])
 
+    def line_ends(line: dict) -> tuple[tuple[float, float], tuple[float, float]]:
+        x0, y0 = line["sx"], line["sy"]
+        length = line["sp"] * line["ns"]
+        if line["lt"] == 0:
+            return (x0, y0), (x0 + length, y0)
+        elif line["lt"] == 1:
+            return (x0, y0), (x0 - length, y0)
+        elif line["lt"] == 2:
+            return (x0, y0), (x0, y0 + length)
+        else:
+            return (x0, y0), (x0, y0 - length)
+
     acq_group_size = info["AcquisitionLineGroupSize"]
+    n_lines = len(info["LaserLineInfo"])
+    first_line = info["LaserLineInfo"][0]
 
-    if overlap is None:
-        overlap = line_overlap(info["LaserLineInfo"][0])
-        if any(line_overlap(li) != overlap for li in info["LaserLineInfo"]):
-            raise ValueError("varying laser spot overlaps are not supported")
-        if overlap % 1 != 0.0:
-            raise ValueError(f"overlap '{overlap}' is not an integer")
+    # check info is consistent
+    spot_spacing, spot_size, line_dir = (
+        first_line["sp"],
+        first_line["ss"],
+        first_line["lt"],
+    )
+    for line in info["LaserLineInfo"][1:]:
+        if line["sp"] != spot_spacing:
+            raise ValueError("varying spot spacing is not supported")
+        if line["ss"] != spot_size:
+            raise ValueError("varying spot sizes are not supported")
+        if line["lt"] != line_dir:
+            raise ValueError("varying line directions are not supported")
 
-    line_type = info["LaserLineInfo"][0]["lt"]
-    if any(li["lt"] != line_type for li in info["LaserLineInfo"]):
-        raise ValueError("varying laser line types are not supported")
+    overlap = spot_size / spot_spacing
+    if apply_overlap and overlap % 1 != 0.0:
+        raise ValueError(f"not integer overlaps ({overlap}) are not supported")
+    overlap = int(overlap)
 
-    x0, x1 = min(li["sx"] for li in info["LaserLineInfo"]), max(li["sx"] for li in info["LaserLineInfo"])
-    y0, y1 = min(li["sy"] for li in info["LaserLineInfo"]), max(li["sy"] for li in info["LaserLineInfo"])
+    # find the laser start and end positions, not all are required but who knows
+    line_start_pos = np.array(
+        [(line["sx"], line["sy"]) for line in info["LaserLineInfo"]]
+    )
+    line_lengths = np.array([line["ns"] * line["sp"] for line in info["LaserLineInfo"]])
+    line_end_pos = line_start_pos.copy()
+    if line_dir == 0:
+        line_end_pos[:, 0] += line_lengths
+    elif line_dir == 1:
+        line_end_pos[:, 0] -= line_lengths
+    elif line_dir == 2:
+        line_end_pos[:, 1] += line_lengths
+    elif line_dir == 3:
+        line_end_pos[:, 1] -= line_lengths
+    else:
+        raise ValueError(f"unknown line type '{line_dir}', should [0 - 3]")
 
-    lines = []
+    # origin (top left)
+    origin = (
+        np.amin((line_start_pos[:, 0], line_end_pos[:, 0])),
+        np.amin((line_start_pos[:, 1], line_end_pos[:, 1])),
+    )
+    # remove offset
+    line_start_pos -= origin
+    line_end_pos -= origin
+
+    # calcalate the start and end idx for pixels
+    line_start_idx = (line_start_pos / spot_spacing).astype(int)
+    line_end_idx = (line_end_pos / spot_spacing).astype(int)
+
+    # convert vertical lines to horizintal, they are rotated later
+    if line_dir >= 2:  # vertical:
+        line_start_idx = np.roll(line_start_idx, 1, 1)
+        line_end_idx = np.roll(line_end_idx, 1, 1)
+
+    data = np.full(
+        (n_lines, np.amax((line_start_idx, line_end_idx)), signal_list[0].shape[1]),
+        np.nan,
+    )
+
     for i, (signals, times, pulses) in enumerate(
         zip(signal_list, time_list, pulse_list)
     ):
         idx = np.searchsorted(times, pulses)
-        sums = np.add.reduceat(signals, idx, axis=0)[:-1]
+        means = np.add.reduceat(signals, idx, axis=0)[:-1]
         counts = np.diff(idx)
-        print(counts)
-        sums /= counts[:, None]
+        means /= counts[:, None]
 
-        first_line = i * acq_group_size
-        last_line = first_line + acq_group_size
         pixel_pos = 0
-        for lineinfo in info["LaserLineInfo"][first_line:last_line]:
-            pixels = lineinfo["ns"]
-            data = sums[pixel_pos : pixel_pos + pixels]
-            if data.size == 0:
-                logger.warning(
-                    f"missing data for line {lineinfo['ln']}: {lineinfo['na']}"
-                )
-            # else:
-                # if overlap != 1:
-                #     data = data[: data.shape[0] - data.shape[0] % overlap].reshape(
-                #         -1, overlap, data.shape[1]
-                #     )
-                #     data = np.sum(data, axis=1)
+        for line_no in range(i * acq_group_size, (i + 1) * acq_group_size):
+            if line_no >= len(info["LaserLineInfo"]):
+                break
+            line = info["LaserLineInfo"][line_no]
 
-                lines.append(data)
-            pixel_pos += pixels
+            pixels = means[pixel_pos : pixel_pos + line["ns"]]
+            if pixels.size == 0:
+                logger.warning(f"missing data for line {line['ln']}: {line['na']}")
+                continue
 
-    # todo: need to make generic
-    min_line_length = min(line.shape[0] for line in lines)
-    image = np.stack([line[:min_line_length] for line in lines], axis=0)
+            x0, _ = line_start_idx[line_no]
+            x1, _ = line_end_idx[line_no]
+            if x0 > x1:
+                pixels = pixels[::-1]
+                x0, x1 = x1, x0
 
-    return image, overlap
+            data[line_no, x0 : x0 + pixels.shape[0], :] = pixels
+            pixel_pos += line["ns"]
+
+    if apply_overlap:
+        idx = np.arange(0, data.shape[1], overlap)
+        data = np.add.reduceat(data, idx, axis=1)
+
+    if trim_last_row:
+        data = data[:, :-1]
+
+    if line_dir >= 2:  # vertical:
+        data = np.rot90(data)
+
+    return data, origin
