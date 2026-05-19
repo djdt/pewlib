@@ -8,13 +8,6 @@ import numpy as np
 from pewlib.io import nu
 
 
-# @pytest.fixture(scope="module")
-# def image_path(tmp_path_factory) -> Path:
-#     zp = zipfile.ZipFile(path)
-#     tmp_path = tmp_path_factory.mktemp("TestImage")
-#     zp.extractall(tmp_path)
-#     return tmp_path.joinpath("TestImage")
-
 
 @pytest.fixture(scope="module")
 def image_path(tmp_path_factory, request) -> Path:
@@ -23,15 +16,6 @@ def image_path(tmp_path_factory, request) -> Path:
     tmp_path = tmp_path_factory.mktemp("TestImage")
     zp.extractall(tmp_path)
     return tmp_path.joinpath(request.param)
-
-
-# @pytest.fixture(scope="module")
-# def autob_path(tmp_path_factory) -> Path:
-#     path = Path(__file__).parent.joinpath("data", "nu", "autob.zip")
-#     zp = zipfile.ZipFile(path)
-#     tmp_path = tmp_path_factory.mktemp("Image001")
-#     zp.extractall(tmp_path)
-#     return tmp_path.joinpath("Image001")
 
 
 @pytest.mark.parametrize("image_path", ["TestImage"], indirect=True)
@@ -45,6 +29,11 @@ def test_is_nu_acquisition_directory(image_path: Path):
 def test_is_nu_image_directory(image_path: Path):
     assert nu.is_nu_image_directory(image_path)
     assert not nu.is_nu_image_directory(image_path.parent)
+
+@pytest.mark.parametrize("image_path", ["TestImage"], indirect=True)
+def test_contains_nu_image_directory(image_path: Path):
+    assert not nu.contains_nu_image_directory(image_path)
+    assert nu.contains_nu_image_directory(image_path.parent)
 
 
 @pytest.mark.parametrize("image_path", ["TestImage"], indirect=True)

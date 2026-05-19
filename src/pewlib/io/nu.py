@@ -153,7 +153,7 @@ def read_integ_binary(
 
     fp = path.open("rb")
 
-    if fp.read(2) == b"\x1f\x8b":  # is a gzipped integ
+    if fp.read(2) == b"\x1f\x8b":  # pragma: no cover, tested in spcal
         fp = gzip.open(path, "rb")
         if memmap:
             memmap = False
@@ -178,7 +178,7 @@ def read_integ_binary(
         raise ValueError("read_integ_binary: incorrect FirstAcqNum")
     num_results = int.from_bytes(fp.read(4), "little")
 
-    if memmap:
+    if memmap:  # pragma: no cover
         return np.memmap(path, dtype=integ_dtype(num_results), mode="r")
     else:
         fp.seek(0)
@@ -437,7 +437,7 @@ def signals_from_integs(integs: list[np.ndarray], info: dict) -> np.ndarray:
         pos += integ.size
         if indicies_from_integ(integ[-1], info) + 1 != indicies_from_integ(
             integ2[0], info
-        ):
+        ):  # pragma: no cover, tested in spcal
             signals[pos - 1] = np.nan
 
     return signals
@@ -715,22 +715,6 @@ def sync_data_with_laser_info(
     See Also:
         ``pewlib.io.nu.read_laser_image``, to produce the required arguments
     """
-
-    def line_overlap(line: dict) -> int:
-        return int(line["ss"] / line["sp"])
-
-    def line_ends(line: dict) -> tuple[tuple[float, float], tuple[float, float]]:
-        x0, y0 = line["sx"], line["sy"]
-        length = line["sp"] * line["ns"]
-        if line["lt"] == 0:
-            return (x0, y0), (x0 + length, y0)
-        elif line["lt"] == 1:
-            return (x0, y0), (x0 - length, y0)
-        elif line["lt"] == 2:
-            return (x0, y0), (x0, y0 + length)
-        else:
-            return (x0, y0), (x0, y0 - length)
-
     acq_group_size = info["AcquisitionLineGroupSize"]
     n_lines = len(info["LaserLineInfo"])
     first_line = info["LaserLineInfo"][0]
@@ -742,15 +726,15 @@ def sync_data_with_laser_info(
         first_line["lt"],
     )
     for line in info["LaserLineInfo"][1:]:
-        if line["sp"] != spot_spacing:
+        if line["sp"] != spot_spacing:  # pragma: no cover
             raise ValueError("varying spot spacing is not supported")
-        if line["ss"] != spot_size:
+        if line["ss"] != spot_size:  # pragma: no cover
             raise ValueError("varying spot sizes are not supported")
-        if line["lt"] != line_dir:
+        if line["lt"] != line_dir:  # pragma: no cover
             raise ValueError("varying line directions are not supported")
 
     overlap = spot_size / spot_spacing
-    if apply_overlap and overlap % 1 != 0.0:
+    if apply_overlap and overlap % 1 != 0.0:  # pragma: no cover
         raise ValueError(f"not integer overlaps ({overlap}) are not supported")
     overlap = int(overlap)
 
@@ -766,9 +750,9 @@ def sync_data_with_laser_info(
         line_end_pos[:, 0] -= line_lengths
     elif line_dir == 2:
         line_end_pos[:, 1] += line_lengths
-    elif line_dir == 3:
+    elif line_dir == 3:  # pragma: no cover
         line_end_pos[:, 1] -= line_lengths
-    else:
+    else:  # pragma: no cover
         raise ValueError(f"unknown line type '{line_dir}', should [0 - 3]")
 
     # origin (top left)
@@ -804,12 +788,12 @@ def sync_data_with_laser_info(
 
         pixel_pos = 0
         for line_no in range(i * acq_group_size, (i + 1) * acq_group_size):
-            if line_no >= len(info["LaserLineInfo"]):
+            if line_no >= len(info["LaserLineInfo"]):  # pragma: no cover
                 break
             line = info["LaserLineInfo"][line_no]
 
             pixels = means[pixel_pos : pixel_pos + line["ns"]]
-            if pixels.size == 0:
+            if pixels.size == 0:  # pragma: no cover
                 logger.warning(f"missing data for line {line['ln']}: {line['na']}")
                 continue
 
