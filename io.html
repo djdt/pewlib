@@ -1312,8 +1312,11 @@ laser_info</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pewlib.io.nu.sync_data_with_laser_info">
-<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">sync_data_with_laser_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signal_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.sync_data_with_laser_info" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pewlib.io.nu.</span></span><span class="sig-name descname"><span class="pre">sync_data_with_laser_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signal_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim_last_row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pewlib.io.nu.sync_data_with_laser_info" title="Link to this definition"></a></dt>
 <dd><p>Create a laser image using the pulse times and laser info file.</p>
+<p>If <cite>apply_overlap</cite> is false then the pixel size in the direection of ablation will
+equal the spot spacing, if true the it will equal the spot size. The pixel size in
+the other direction is always equal to the line spacing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1321,16 +1324,22 @@ laser_info</p>
 <li><p><strong>time_list</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span>) – list of times, per acq group</p></li>
 <li><p><strong>pulse_list</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span>) – list of pulses, per acq group</p></li>
 <li><p><strong>info</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – laser info dict</p></li>
-<li><p><strong>overlap</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – spot overlap, pass None to determine automatically</p></li>
+<li><p><strong>apply_overlap</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – merge overlapping ablation events to the spot size</p></li>
+<li><p><strong>trim_last_row</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – trims the last row as it often contains NaNs</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>image with shape (X, Y, masses), overlap</p>
+<dd class="field-odd"><p>image with shape (X, Y, masses)
+origin (top left corner) of image in µm</p>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="docutils literal notranslate"><span class="pre">pewlib.io.nu.read_laser_image</span></code>, to produce the required arguments</p>
+</div>
 </dd></dl>
 
 <dl class="py function">
