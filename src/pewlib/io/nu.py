@@ -28,7 +28,9 @@ def is_nu_acquisition_directory(path: Path) -> bool:
 
 def is_nu_image_directory(path: Path) -> bool:
     """Checks if directory has a 'laser.info' file and some acquistions."""
-    if len(list(path.glob("laser.info"))) == 0:
+    if not path.is_dir() or not path.exists():
+        return False
+    if not path.joinpath("laser.info").exists():
         return False
 
     return any(is_nu_acquisition_directory(dir) for dir in path.iterdir())
@@ -36,6 +38,8 @@ def is_nu_image_directory(path: Path) -> bool:
 
 def contains_nu_image_directory(path: Path) -> bool:
     """Checks if directory contains any image directories."""
+    if not path.is_dir() or not path.exists():
+        return False
     return any(is_nu_image_directory(dir) for dir in path.iterdir())
 
 
