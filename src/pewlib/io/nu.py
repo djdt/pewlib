@@ -574,6 +574,9 @@ def read_laser_acquisition(
         seg_number=segment,
     )
 
+    if len(integs) == 0 or integs[0].size == 0:
+        raise ValueError("read_nu_directory: no data in directory")
+
     # Get masses from data
     masses = masses_from_integ(integs[0], run_info)[0]
     signals = signals_from_integs(integs, run_info)
@@ -673,8 +676,12 @@ def read_laser_image(
         key=lambda d: int(d.stem),
     )
 
-    for i, acq_dir in enumerate(acqusitions):
-        _signals, _masses, _times, _pulses, _info = read_laser_acquisition(acq_dir)
+    for acq_dir in acqusitions:
+        try:
+            _signals, _masses, _times, _pulses, _info = read_laser_acquisition(acq_dir)
+        except ValueError:
+            logger.warning(f"could not read '{acq_dir}', skipping")
+            continue
         if masses is None:
             masses = _masses
         elif not np.all(masses == _masses):  # pragma: no cover
@@ -793,6 +800,7 @@ def sync_data_with_laser_info(
         zip(signal_list, time_list, pulse_list)
     ):
         idx = np.searchsorted(times, pulses)
+        idx = np.clip(idx, 0, signals.shape[0] - 1)
         means = np.add.reduceat(signals, idx, axis=0)[:-1]
         counts = np.diff(idx)
         means /= counts[:, None]
