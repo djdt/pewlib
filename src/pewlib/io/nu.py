@@ -720,7 +720,6 @@ def sync_data_with_laser_info(
         ``pewlib.io.nu.read_laser_image``, to produce the required arguments
     """
     acq_group_size = info["AcquisitionLineGroupSize"]
-    n_lines = len(info["LaserLineInfo"])
     first_line = info["LaserLineInfo"][0]
 
     # check info is consistent
@@ -768,17 +767,25 @@ def sync_data_with_laser_info(
     line_start_pos -= origin
     line_end_pos -= origin
 
+    unique_lines, line_idx = np.unique(
+        line_start_pos[:, 0 if line_dir >= 2 else 1], return_inverse=True
+    )
+
     # calcalate the start and end idx for pixels
     line_start_idx = (line_start_pos / spot_spacing).astype(int)
     line_end_idx = (line_end_pos / spot_spacing).astype(int)
 
-    # convert vertical lines to horizintal, they are rotated later
+    # convert vertical lines to horizontal, they are rotated later
     if line_dir >= 2:  # vertical:
         line_start_idx = np.roll(line_start_idx, 1, 1)
         line_end_idx = np.roll(line_end_idx, 1, 1)
 
     data = np.full(
-        (n_lines, np.amax((line_start_idx, line_end_idx)), signal_list[0].shape[1]),
+        (
+            len(unique_lines),
+            np.amax((line_start_idx, line_end_idx)),
+            signal_list[0].shape[1],
+        ),
         np.nan,
     )
 
@@ -807,7 +814,7 @@ def sync_data_with_laser_info(
                 pixels = pixels[::-1]
                 x0, x1 = x1, x0
 
-            data[line_no, x0 : x0 + pixels.shape[0], :] = pixels
+            data[line_idx[line_no], x0 : x0 + pixels.shape[0], :] = pixels
             pixel_pos += line["ns"]
 
     if apply_overlap:
