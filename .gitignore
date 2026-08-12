@@ -12,3 +12,4 @@ MANIFEST
 
 # mypy
 .mypy_cache/
+/build
