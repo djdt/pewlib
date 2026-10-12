@@ -703,7 +703,7 @@ def sync_data_with_laser_info(
     pulse_list: list[np.ndarray],
     info: dict,
     apply_overlap: bool = True,
-    trim_last_row: bool = True,
+    trim_last_rows: bool = True,
 ) -> tuple[np.ndarray, tuple[float, float]]:
     """Create a laser image using the pulse times and laser info file.
 
@@ -717,7 +717,7 @@ def sync_data_with_laser_info(
         pulse_list: list of pulses, per acq group
         info: laser info dict
         apply_overlap: merge overlapping ablation events to the spot size
-        trim_last_row: trims the last row as it often contains NaNs
+        trim_last_row: trims 'AcquisitionLineGroupSize' rows as they often contains NaNs
 
     Returns:
         image with shape (X, Y, masses)
@@ -799,13 +799,15 @@ def sync_data_with_laser_info(
     for i, (signals, times, pulses) in enumerate(
         zip(signal_list, time_list, pulse_list)
     ):
-        idx = np.searchsorted(times, pulses)
-        idx = np.clip(idx, 0, signals.shape[0] - 1)
-        means = np.add.reduceat(signals, idx, axis=0)[:-1]
-        counts = np.diff(idx)
-        np.divide(means, counts[:, None], where=counts[:, None] != 0.0)
+        csum = np.cumsum(signals, axis=0)
+        summed = np.stack(
+            [np.interp(pulses, times, csum[:, i]) for i in range(signals.shape[1])],
+            axis=1,
+        )
+        means = summed[1:] - summed[:-1]
 
         pixel_pos = 0
+        print(acq_group_size)
         for line_no in range(i * acq_group_size, (i + 1) * acq_group_size):
             if line_no >= len(info["LaserLineInfo"]):  # pragma: no cover
                 break
@@ -829,8 +831,8 @@ def sync_data_with_laser_info(
         idx = np.arange(0, data.shape[1], overlap)
         data = np.add.reduceat(data, idx, axis=1)
 
-    if trim_last_row:
-        data = data[:, :-1]
+    if trim_last_rows:
+        data = data[:, :-acq_group_size]
 
     if line_dir >= 2:  # vertical:
         data = np.rot90(data)
