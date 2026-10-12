@@ -2,8 +2,8 @@
 Nu Instruments data import.
 """
 
-import json
 import gzip
+import json
 import logging
 from pathlib import Path
 from typing import BinaryIO, Callable, Generator
@@ -803,7 +803,7 @@ def sync_data_with_laser_info(
         idx = np.clip(idx, 0, signals.shape[0] - 1)
         means = np.add.reduceat(signals, idx, axis=0)[:-1]
         counts = np.diff(idx)
-        means /= counts[:, None]
+        np.divide(means, counts[:, None], where=counts[:, None] != 0.0)
 
         pixel_pos = 0
         for line_no in range(i * acq_group_size, (i + 1) * acq_group_size):
